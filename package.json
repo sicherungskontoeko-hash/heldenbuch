@@ -1,0 +1,82 @@
+{
+  "name": "heldenbuch",
+  "version": "1.0.0",
+  "description": "Heldenbuch – deutsches D&D-Charakterbuch mit gemeinsamem Tisch (Handy und PC)",
+  "main": "electron/main.js",
+  "author": "Heldenbuch",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "android": "npx cap sync android && cd android && ./gradlew assembleDebug",
+    "desktop": "electron-builder --publish never",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.2",
+    "@capacitor/core": "^6.2.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.2",
+    "electron": "^31.7.7",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "ch.heldenbuch.app",
+    "productName": "Heldenbuch",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**",
+      "www/**",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Heldenbuch-Setup-${version}.exe"
+    },
+    "portable": {
+      "artifactName": "Heldenbuch-Portable-${version}.exe"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.games",
+      "artifactName": "Heldenbuch-${version}.dmg"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "build/icon.png",
+      "category": "Game",
+      "artifactName": "Heldenbuch-${version}.AppImage"
+    }
+  }
+}

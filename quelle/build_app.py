@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+"""Baut die eigenständige App-Version des Heldenbuchs (PWA + Einzeldatei)."""
+import base64, json, os, re, shutil, subprocess
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+FONTS = os.path.join(ROOT, 'app', 'fonts')
+OUT = os.path.join(ROOT, 'app', 'www')
+VERSION = '1.0.0'
+
+def rd(p):
+    with open(os.path.join(ROOT, p), encoding='utf-8') as f:
+        return f.read()
+
+def b64(path):
+    with open(path, 'rb') as f:
+        return base64.b64encode(f.read()).decode()
+
+faces = []
+for fam, folder, specs in [('Cinzel', 'cinzel', [(500, 'normal'), (600, 'normal'), (700, 'normal')]),
+                           ('Alegreya Sans', 'alegreya-sans', [(400, 'normal'), (400, 'italic'), (500, 'normal'), (700, 'normal')])]:
+    for w, st in specs:
+        fp = os.path.join(FONTS, folder, 'files', f'{folder}-latin-{w}-{st}.woff2')
+        faces.append("@font-face{font-family:'%s';font-style:%s;font-weight:%d;font-display:swap;src:url(data:font/woff2;base64,%s) format('woff2')}" % (fam, st, w, b64(fp)))
+font_css = '<style>' + ''.join(faces) + '</style>'
+
+shell = rd('shell.html')
+shell = re.sub(r'<link rel="preconnect"[^>]*>\n?', '', shell)
+shell = re.sub(r'<link rel="stylesheet" href="https://fonts.googleapis.com[^>]*>\n?', font_css + '\n', shell)
+shell = shell.replace('<meta name="claude:viewport-fit-sides" content="cover">\n', '')
+fav = 'data:image/png;base64,' + b64(os.path.join(ROOT, 'app/assets/favicon-32.png'))
+head_extra = ('<link rel="icon" href="%s">\n<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="mobile-web-app-capable" content="yes">\n'
+              '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n<meta name="apple-mobile-web-app-title" content="Heldenbuch">\n'
+              '<meta name="description" content="Deutsches D&amp;D-Heldenbuch: Charaktere erschaffen, Bogen, Würfel und gemeinsamer Tisch.">\n') % fav
+shell = shell.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n' + head_extra, 1)
+
+scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'calc.js', 'hbclasses.js', 'subs.js', 'extra.js', 'app.js']
+js = '\n'.join(rd(s) for s in scripts)
+js = js.replace("const APP_URL = 'https://claude.ai/artifact/TKockfJH2cR2kDJKqb1CCK';", "const APP_URL = '';")
+single = shell + '<script>\n' + js + '\n</script>\n'
+pwa = single.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">', 1)
+
+if os.path.exists(OUT):
+    shutil.rmtree(OUT)
+os.makedirs(os.path.join(OUT, 'icons'))
+with open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8') as f:
+    f.write(pwa)
+with open(os.path.join(ROOT, 'app', 'Heldenbuch.html'), 'w', encoding='utf-8') as f:
+    f.write(single)
+for n in ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'favicon-32.png']:
+    shutil.copy(os.path.join(ROOT, 'app/assets', n), os.path.join(OUT, 'icons', n))
+manifest = {
+    'name': 'Heldenbuch – D&D auf Deutsch', 'short_name': 'Heldenbuch', 'lang': 'de', 'start_url': './', 'scope': './',
+    'display': 'standalone', 'orientation': 'any', 'background_color': '#130E0A', 'theme_color': '#130E0A',
+    'description': 'Charaktere erschaffen, Charakterbogen, Würfel, Kampagnen-Tisch für Handy und PC.',
+    'icons': [{'src': 'icons/icon-192.png', 'sizes': '192x192', 'type': 'image/png'},
+              {'src': 'icons/icon-512.png', 'sizes': '512x512', 'type': 'image/png'},
+              {'src': 'icons/icon-maskable-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'}]}
+with open(os.path.join(OUT, 'manifest.webmanifest'), 'w', encoding='utf-8') as f:
+    json.dump(manifest, f, ensure_ascii=False, indent=2)
+sw = """/* Heldenbuch Service Worker – macht die App offline nutzbar */
+const CACHE = 'heldenbuch-%s';
+const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
+self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())); });
+self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
+self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
+  e.respondWith(fetch(e.request).then((r) => { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); return r; }).catch(() => caches.match(e.request).then((r) => r || caches.match('index.html'))));
+});
+""" % VERSION
+with open(os.path.join(OUT, 'sw.js'), 'w', encoding='utf-8') as f:
+    f.write(sw)
+with open('/tmp/claude-0/app_all.js', 'w', encoding='utf-8') as f:
+    f.write(js)
+subprocess.run(['node', '--check', '/tmp/claude-0/app_all.js'], check=True)
+print('App gebaut:', os.path.getsize(os.path.join(OUT, 'index.html')) // 1024, 'KB')

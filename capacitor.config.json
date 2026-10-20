@@ -1,0 +1,7 @@
+{
+  "appId": "ch.heldenbuch.app",
+  "appName": "Heldenbuch",
+  "webDir": "www",
+  "backgroundColor": "#130E0A",
+  "android": { "allowMixedContent": false, "backgroundColor": "#130E0A" }
+}
