@@ -8,6 +8,9 @@ Dieses Repository baut automatisch (siehe *Actions*):
 - **Windows** (Installer und portable EXE), **macOS** (DMG), **Linux** (AppImage)
 - **Web-App** auf GitHub Pages – für iPhone/iPad über „Zum Home-Bildschirm“
 
+**Web-App:** https://sicherungskontoeko-hash.github.io/heldenbuch/  
+**Downloads:** https://github.com/sicherungskontoeko-hash/heldenbuch/releases/latest
+
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
 
 Regeln nach dem System Reference Document 5.2 von Wizards of the Coast, lizenziert unter CC-BY-4.0. Kein offizielles Produkt von Wizards of the Coast.
