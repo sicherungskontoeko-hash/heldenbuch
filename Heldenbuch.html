@@ -2883,7 +2883,8 @@ function helpView() {
 
 /* ---------- App-Version: Raum erstellen/beitreten, Status, Übertragung ---------- */
 function isApp() { return typeof APP_MODE !== 'undefined' && APP_MODE === 'app'; }
-function appLink(code) { if (!/^https?:/.test(location.protocol)) return ''; const srv = hbLs.get('hb_server', 'hivemq'); return location.origin + location.pathname + '#raum=' + encodeURIComponent(code) + (srv !== 'hivemq' && srv !== 'custom' ? '&srv=' + srv : ''); }
+const WEB_APP = 'https://sicherungskontoeko-hash.github.io/heldenbuch/';
+function appLink(code) { if (!/^https?:/.test(location.protocol) || /^https?:\/\/localhost/.test(location.href)) return WEB_APP + '#raum=' + encodeURIComponent(code); const srv = hbLs.get('hb_server', 'hivemq'); return location.origin + location.pathname + '#raum=' + encodeURIComponent(code) + (srv !== 'hivemq' && srv !== 'custom' ? '&srv=' + srv : ''); }
 function appInviteText() { const code = S.camp || ''; const l = appLink(code); return 'Komm an unseren Tisch im Heldenbuch! ⚔\n' + (l ? l + '\n' : '') + 'Raumcode: ' + code + '\nÖffne das Heldenbuch, tippe unten auf „Tisch“ und gib den Code ein.'; }
 function newRoomCode(name) { const base = campSlug(name || '').slice(0, 20) || 'runde'; const abc = 'abcdefghjkmnpqrstuvwxyz23456789'; let r = ''; for (let i = 0; i < 5; i++) r += abc[Math.floor(Math.random() * abc.length)]; return base + '-' + r; }
 function appCampStatus() {
