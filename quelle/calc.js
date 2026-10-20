@@ -416,7 +416,7 @@ function rollExpr(expr) {
   let total = 0; const parts = []; const groups = [];
   const re = /([+-]?)(\d*)W(\d+)|([+-]?)(\d+)/g; let m;
   while ((m = re.exec(e))) {
-    if (m[3]) { const n = +(m[2] || 1), s = +m[3], sign = m[1] === '-' ? -1 : 1; const r = []; for (let i = 0; i < n; i++) r.push(1 + Math.floor(Math.random() * s)); total += sign * r.reduce((a, b) => a + b, 0); parts.push((sign < 0 ? '−' : '') + n + 'W' + s + '[' + r.join(',') + ']'); groups.push({ sides: s, rolls: r, sign }); }
+    if (m[3]) { const n = +(m[2] || 1), s = +m[3], sign = m[1] === '-' ? -1 : 1; const r = []; for (let i = 0; i < n; i++) r.push(1 + Math.floor(rnd() * s)); total += sign * r.reduce((a, b) => a + b, 0); parts.push((sign < 0 ? '−' : '') + n + 'W' + s + '[' + r.join(',') + ']'); groups.push({ sides: s, rolls: r, sign }); }
     else if (m[5]) { const v = (m[4] === '-' ? -1 : 1) * +m[5]; total += v; parts.push(sgn(v)); }
   }
   return { total, detail: parts.join(' '), groups };

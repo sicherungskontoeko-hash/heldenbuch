@@ -17,7 +17,10 @@ def b64(path):
 
 faces = []
 for fam, folder, specs in [('Cinzel', 'cinzel', [(500, 'normal'), (600, 'normal'), (700, 'normal')]),
-                           ('Alegreya Sans', 'alegreya-sans', [(400, 'normal'), (400, 'italic'), (500, 'normal'), (700, 'normal')])]:
+                           ('Alegreya Sans', 'alegreya-sans', [(400, 'normal'), (400, 'italic'), (500, 'normal'), (700, 'normal')]),
+                           ('Cinzel Decorative', 'cinzel-decorative', [(700, 'normal')]), ('IM Fell English SC', 'im-fell-english-sc', [(400, 'normal')]),
+                           ('Cormorant Garamond', 'cormorant-garamond', [(600, 'normal'), (700, 'normal')]), ('Fredoka', 'fredoka', [(600, 'normal')]),
+                           ('Pirata One', 'pirata-one', [(400, 'normal')]), ('Marcellus SC', 'marcellus-sc', [(400, 'normal')]), ('Almendra', 'almendra', [(700, 'normal')])]:
     for w, st in specs:
         fp = os.path.join(FONTS, folder, 'files', f'{folder}-latin-{w}-{st}.woff2')
         faces.append("@font-face{font-family:'%s';font-style:%s;font-weight:%d;font-display:swap;src:url(data:font/woff2;base64,%s) format('woff2')}" % (fam, st, w, b64(fp)))
@@ -33,7 +36,7 @@ head_extra = ('<link rel="icon" href="%s">\n<meta name="apple-mobile-web-app-cap
               '<meta name="description" content="Deutsches D&amp;D-Heldenbuch: Charaktere erschaffen, Bogen, Würfel und gemeinsamer Tisch.">\n') % fav
 shell = shell.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n' + head_extra, 1)
 
-scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'calc.js', 'hbclasses.js', 'subs.js', 'extra.js', 'app.js']
+scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'calc.js', 'hbclasses.js', 'subs.js', 'assets.js', 'crests.js', 'extra.js', 'theme.js', 'app.js']
 js = '\n'.join(rd(s) for s in scripts)
 js = js.replace("const APP_URL = 'https://claude.ai/artifact/TKockfJH2cR2kDJKqb1CCK';", "const APP_URL = '';")
 single = shell + '<script>\n' + js + '\n</script>\n'

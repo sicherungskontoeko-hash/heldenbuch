@@ -93,12 +93,12 @@ function d20(mod, label, opts = {}) {
   const st = rollState(opts.kind); const k = st.k, c = st.c;
   if (st.fail) { pushLog({ label, total: '✗', detail: 'Misslingt automatisch (' + st.fail + ')', fumble: true, share: true }); return null; }
   const ex = +(ch?.play?.exh || 0) * 2;
-  let r1 = 1 + Math.floor(Math.random() * 20), r2 = 1 + Math.floor(Math.random() * 20);
+  let r1 = 1 + Math.floor(rnd() * 20), r2 = 1 + Math.floor(rnd() * 20);
   const notes = [];
   if (ch && ch.species === 'halfling') {
     const keepIdx = st.mode === 'adv' ? (r1 >= r2 ? 1 : 2) : st.mode === 'dis' ? (r1 <= r2 ? 1 : 2) : 1;
-    if (keepIdx === 1 && r1 === 1) { r1 = 1 + Math.floor(Math.random() * 20); notes.push('Glück: die 1 neu gewürfelt → ' + r1); }
-    else if (keepIdx === 2 && r2 === 1) { r2 = 1 + Math.floor(Math.random() * 20); notes.push('Glück: die 1 neu gewürfelt → ' + r2); }
+    if (keepIdx === 1 && r1 === 1) { r1 = 1 + Math.floor(rnd() * 20); notes.push('Glück: die 1 neu gewürfelt → ' + r1); }
+    else if (keepIdx === 2 && r2 === 1) { r2 = 1 + Math.floor(rnd() * 20); notes.push('Glück: die 1 neu gewürfelt → ' + r2); }
   }
   let use = r1, how = '';
   if (st.mode === 'adv') { use = Math.max(r1, r2); how = 'Vorteil ' + r1 + '/' + r2; }
@@ -106,7 +106,7 @@ function d20(mod, label, opts = {}) {
   let eff = use;
   if (c && c.lv('rog') >= 7 && k.type === 'check' && k.prof && use < 10) { eff = 10; notes.push('Verlässliches Talent: ' + use + ' zählt als 10'); }
   let bonus = 0;
-  if (ch?.play?.fx?.bless && (k.type === 'attack' || k.type === 'save')) { const b = 1 + Math.floor(Math.random() * 4); bonus += b; notes.push('Segnen +1W4 [' + b + ']'); }
+  if (ch?.play?.fx?.bless && (k.type === 'attack' || k.type === 'save')) { const b = 1 + Math.floor(rnd() * 4); bonus += b; notes.push('Segnen +1W4 [' + b + ']'); }
   const ca = st.adv.filter((x) => x !== 'gewählt'), cd = st.dis.filter((x) => x !== 'gewählt');
   if (st.mode === 'adv' && ca.length) notes.push('Vorteil durch ' + ca.join(', '));
   if (st.mode === 'dis' && cd.length) notes.push('Nachteil durch ' + cd.join(', '));
@@ -123,9 +123,9 @@ function rollParts(parts, flat) {
   const groups = []; const det = []; let total = 0;
   for (const p of parts) {
     if (!p.n || !p.s) continue;
-    let r = Array.from({ length: p.n }, () => 1 + Math.floor(Math.random() * p.s));
+    let r = Array.from({ length: p.n }, () => 1 + Math.floor(rnd() * p.s));
     let note = '';
-    if (p.savage) { const r2 = Array.from({ length: p.n }, () => 1 + Math.floor(Math.random() * p.s)); const a = r.reduce((x, y) => x + y, 0), b = r2.reduce((x, y) => x + y, 0); note = ' (Wilder Angreifer: ' + a + ' oder ' + b + ')'; if (b > a) r = r2; }
+    if (p.savage) { const r2 = Array.from({ length: p.n }, () => 1 + Math.floor(rnd() * p.s)); const a = r.reduce((x, y) => x + y, 0), b = r2.reduce((x, y) => x + y, 0); note = ' (Wilder Angreifer: ' + a + ' oder ' + b + ')'; if (b > a) r = r2; }
     let eff = r;
     if (p.gwf) { eff = r.map((v) => (v <= 2 ? 3 : v)); if (eff.some((v, i) => v !== r[i])) note += ' (grosse Waffen: 1–2 zählen als 3)'; }
     total += eff.reduce((x, y) => x + y, 0);
@@ -234,11 +234,11 @@ function showMulti(e, flat) {
     const r = Math.floor(i / cols), col = i % cols;
     const jx = (Math.random() - 0.5) * cell * 0.18, jy = (Math.random() - 0.5) * cell * 0.18;
     const el = document.createElement('div'); el.className = 'tdie' + (reduce ? '' : ' fly');
-    const side = Math.floor(Math.random() * 4);
+    const side = Math.floor(rnd() * 4);
     const fx = side === 0 ? -W * 0.6 : side === 1 ? W * 0.6 : (Math.random() - 0.5) * W;
     const fy = side === 2 ? -H * 0.6 : side === 3 ? H * 0.6 : (Math.random() - 0.5) * H;
     el.style.cssText = 'left:' + (x0 + col * cell + (cell - size) / 2 + jx) + 'px;top:' + (y0 + r * cell + (cell - size) / 2 + jy) + 'px;width:' + size + 'px;height:' + size + 'px;--fx:' + fx + 'px;--fy:' + fy + 'px;--rot:' + ((Math.random() < 0.5 ? -1 : 1) * (360 + Math.random() * 540)) + 'deg;--fr:' + ((Math.random() - 0.5) * 30) + 'deg;animation-delay:' + (i * 28) + 'ms';
-    el.innerHTML = dieSvg(d.sides, reduce ? d.v : 1 + Math.floor(Math.random() * d.sides), 'rolling-x');
+    el.innerHTML = dieSvg(d.sides, reduce ? d.v : 1 + Math.floor(rnd() * d.sides), 'rolling-x');
     tray.appendChild(el); return el;
   });
   const head = '<div class="tl">' + esc(e.label) + ' · ' + flat.length + ' Würfel</div>';
@@ -256,7 +256,7 @@ function showMulti(e, flat) {
     showToast.tm = setTimeout(() => { t.hidden = true; }, 5000);
   };
   if (reduce) return land();
-  showMulti.iv = setInterval(() => els.forEach((el, i) => { const tx = el.querySelector('text'); if (tx) tx.textContent = 1 + Math.floor(Math.random() * list[i].sides); }), 80);
+  showMulti.iv = setInterval(() => els.forEach((el, i) => { const tx = el.querySelector('text'); if (tx) tx.textContent = 1 + Math.floor(rnd() * list[i].sides); }), 80);
   showMulti.st = setTimeout(land, 850 + n * 28);
 }
 
@@ -298,9 +298,9 @@ function showToast(e) {
   t.hidden = false; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
   if (!sides || reduce) return final();
-  const rnd = () => 1 + Math.floor(Math.random() * sides);
-  t.innerHTML = '<div class="trow"><div class="dice">' + vals.map((_, i) => dieSvg(sides, rnd(), 'rolling' + (i ? ' r2' : ''))).join('') + '</div><div class="tt">' + head + '<div class="tv dim">…</div></div></div>';
-  showToast.iv = setInterval(() => { t.querySelectorAll('.die text').forEach((x) => { x.textContent = rnd(); }); }, 70);
+  const flick = () => 1 + Math.floor(Math.random() * sides);
+  t.innerHTML = '<div class="trow"><div class="dice">' + vals.map((_, i) => dieSvg(sides, flick(), 'rolling' + (i ? ' r2' : ''))).join('') + '</div><div class="tt">' + head + '<div class="tv dim">…</div></div></div>';
+  showToast.iv = setInterval(() => { t.querySelectorAll('.die text').forEach((x) => { x.textContent = flick(); }); }, 70);
   showToast.st = setTimeout(final, e.pair ? 950 : 750);
 }
 const logHtml = () => S.log.length ? S.log.map((e) => '<li><span>' + esc(e.label) + '</span><b' + (e.crit ? ' class="crit"' : '') + '>' + e.total + '</b><small>' + esc(e.detail) + '</small></li>').join('') : '<li class="empty">Noch nichts gewürfelt. Tippe auf einen Wert.</li>';
@@ -329,16 +329,21 @@ const spellName = (id) => (getSpell(id, S.hb) || { name: id }).name;
 /* ---------- Kopfzeile ---------- */
 const HUE = { bar:'#C8553D', brd:'#C77DBA', cle:'#E8C66A', dru:'#7FA65A', fig:'#B8875A', mon:'#5FA8A0', pal:'#E2AE52', ran:'#6E9F6A', rog:'#8C8FA8', sor:'#D9603B', wlk:'#9A6BD1', wiz:'#5B8FD9' };
 function sigil(ch, extra) {
-  const ini = (ch.name || '?').replace(/^Beispiel:\s*/, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '?';
-  return '<span class="sigil" style="--h:' + (HUE[ch.cls] || '#E2AE52') + '"' + (extra || '') + ' aria-hidden="true">' + esc(ini) + '</span>';
+  const pt = ch.portrait || '';
+  if (pt === 'img' && ch.portraitImg) return '<span class="sigil art" style="background-image:url(' + ch.portraitImg + ')"' + (extra || '') + ' aria-hidden="true"></span>';
+  if (pt.startsWith('art:') && ART[pt.slice(4)]) return '<span class="sigil art" style="background-image:url(' + ART[pt.slice(4)] + ')"' + (extra || '') + ' aria-hidden="true"></span>';
+  if (pt === 'ini' || !CREST[ch.cls]) { const ini = (ch.name || '?').replace(/^Beispiel:\s*/, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '?';
+    return '<span class="sigil" style="--h:' + (HUE[ch.cls] || 'var(--gold)') + '"' + (extra || '') + ' aria-hidden="true">' + esc(ini) + '</span>'; }
+  return '<span class="sigil crest" style="--h:' + (HUE[ch.cls] || 'var(--gold)') + '"' + (extra || '') + ' aria-hidden="true">' + crestSvg(ch.cls) + '</span>';
 }
+const psig = (p) => sigil({ name: p.char, cls: p.cls, portrait: p.portrait, portraitImg: p.pimg });
 const LOGO = '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><polygon points="16,2.5 27.7,9.25 27.7,22.75 16,29.5 4.3,22.75 4.3,9.25"/><polygon points="16,9.5 22,20 10,20"/><path d="M16 9.5V2.5M22 20l5.7 2.75M10 20l-5.7 2.75M16 9.5 4.3 9.25M16 9.5l11.7-.25M22 20l-6 9.5M10 20l6 9.5M22 20l5.7-10.75M10 20 4.3 9.25" opacity=".7"/></svg>';
 function renderTop() {
   const ch = cur();
   const tabs = [['heroes', 'Helden'], ['sheet', 'Bogen'], ['build', 'Erschaffen'], ['camp', 'Tisch'], ['spells', 'Zauberbuch'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe']];
   $('#top').innerHTML = '<div class="wrap"><div class="bar"><button class="brand" data-act="view" data-arg="heroes">' + LOGO + 'Heldenbuch</button>' +
     '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '</nav>' +
-    (ch ? '<button class="curhero" data-act="view" data-arg="heroes" title="Helden wechseln">' + sigil(ch) + '<span>' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</span></button>' : '') +
+    '<button class="tbtn" data-act="themeOpen" title="Stimmung wählen" aria-label="Stimmung wählen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.2-1-1.6-1-2.6 0-1 .8-1.7 1.9-1.7H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z"/><circle cx="7.5" cy="11" r="1.3"/><circle cx="10.5" cy="7" r="1.3"/><circle cx="15" cy="7.5" r="1.3"/></svg></button>' + (ch ? '<button class="curhero" data-act="view" data-arg="heroes" title="Helden wechseln">' + sigil(ch) + '<span>' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</span></button>' : '') +
     '</div><span id="saveState" class="savest"></span></div><div id="turnbar"></div>';
   paintSave(); paintTurn();
   const bn = $('#bnav'); if (bn) bn.innerHTML = bnavHtml();
@@ -347,7 +352,7 @@ function renderTop() {
 /* ---------- Heldenauswahl ---------- */
 function renderHeroes() {
   const ids = Object.keys(S.chars).sort((a, b) => (S.chars[b].updated || 0) - (S.chars[a].updated || 0));
-  let h = '<div class="hero-intro"><h1>Deine Helden</h1><p>Wähle einen Helden zum Spielen, erschaffe einen neuen oder lade einen gesicherten Helden aus einer Datei.</p></div><div class="heroes">';
+  let h = '<div class="hero-intro banner" style="' + bannerStyle('paladin') + '"><h1>Deine Helden</h1><p>Wähle einen Helden zum Spielen, erschaffe einen neuen oder lade einen gesicherten Helden aus einer Datei.</p></div>' + themeBlock() + '<div class="heroes">';
   h += '<button class="newhero" data-act="newChar"><span class="plus">+</span><b>Neuen Helden erschaffen</b><span>Schritt für Schritt, alles wird für dich berechnet.</span></button>';
   for (const id of ids) {
     const ch = S.chars[id]; let c; try { c = derive(ch, S.hb); } catch (e) { continue; }
@@ -507,7 +512,7 @@ function renderBuild(c) {
     body += gearBlock(c, true);
   }
   if (st === 6) {
-    body += '<h2>Abschluss</h2><p class="hint">Gib deinem Helden einen Namen und eine Geschichte. Danach kannst du ihn sichern und losspielen.</p><div class="row">' + field('Name', txt('name', ch.name)) + field('Spieler', txt('player', ch.player)) + '</div><div class="row">' + field('Gesinnung', txt('alignment', ch.alignment, 'z. B. Neutral gut')) + field('Sprachen', txt('languages', ch.languages)) + '</div>' +
+    body += '<h2>Abschluss</h2><p class="hint">Gib deinem Helden einen Namen und eine Geschichte. Danach kannst du ihn sichern und losspielen.</p><div class="row">' + field('Name', txt('name', ch.name)) + field('Spieler', txt('player', ch.player)) + '</div><h3>Porträt</h3>' + portraitPicker(ch) + '<div class="row">' + field('Gesinnung', txt('alignment', ch.alignment, 'z. B. Neutral gut')) + field('Sprachen', txt('languages', ch.languages)) + '</div>' +
       field('Aussehen & Persönlichkeit', area('appearance', ch.appearance, 'Aussehen, Ideale, Bindungen, Makel …')) + field('Notizen', area('notes', ch.notes, 'Hintergrundgeschichte, Kampagnennotizen …', 6));
     body += '<div class="finish"><h3>' + (c.warn.length ? 'Fast geschafft' : 'Dein Held ist bereit') + '</h3><p class="hint" style="margin:0">' + (c.warn.length ? 'Es sind noch ' + c.warn.length + ' Auswahl(en) offen (rechts antippen). Du kannst trotzdem schon sichern.' : 'Sichere ihn als Datei, damit du ihn jederzeit wieder laden oder weitergeben kannst.') + '</p><div class="chips"><button class="btn big" data-act="exportOne" data-arg="' + ch.id + '">Helden exportieren</button><button class="btn big ghost" data-act="view" data-arg="sheet">Zum Charakterbogen</button></div></div>';
   }
@@ -810,7 +815,7 @@ function saveCampPref() { try { localStorage.setItem('heldenbuch_camp', JSON.str
 function myRolls() { return S.log.filter((e) => e.sides || e.share).slice(0, 30).map((e) => ({ label: e.label, total: e.total, detail: e.detail, crit: !!e.crit, fumble: !!e.fumble, t: e.t, secret: !!e.secret })); }
 function meDoc() {
   const ch = cur(); let c = null; try { c = derive(ch, S.hb); } catch (e) {}
-  return { char: ch.name.replace(/^Beispiel:\s*/, ''), cls: ch.cls, clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: ch.play.hp ?? (c ? c.hpMax : 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0,
+  return { char: ch.name.replace(/^Beispiel:\s*/, ''), cls: ch.cls, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: ch.play.hp ?? (c ? c.hpMax : 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0,
     cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, t: Date.now() };
 }
 function queueMe() { if (!S.camp || !DB) return; clearTimeout(meTimer); meTimer = setTimeout(writeMe, 250); }
@@ -846,19 +851,19 @@ function leaveCamp() {
 }
 function tableRolls() {
   const all = [];
-  for (const [uid, p] of Object.entries(S.table)) for (const r of p.rolls || []) if (!r.secret || uid === UID || isDM()) all.push(Object.assign({ uid, who: p.char + (r.secret ? ' (geheim)' : ''), cls: p.cls, me: uid === UID }, r));
+  for (const [uid, p] of Object.entries(S.table)) for (const r of p.rolls || []) if (!r.secret || uid === UID || isDM()) all.push(Object.assign({ uid, who: p.char + (r.secret ? ' (geheim)' : ''), cls: p.cls, portrait: p.portrait, pimg: p.pimg, me: uid === UID }, r));
   return all.sort((a, b) => b.t - a.t);
 }
 function ago(t) { const s = Math.max(0, Math.round((Date.now() - t) / 1000)); return s < 45 ? 'gerade eben' : s < 3600 ? 'vor ' + Math.max(1, Math.round(s / 60)) + ' Min.' : s < 86400 ? 'vor ' + Math.round(s / 3600) + ' Std.' : 'vor ' + Math.round(s / 86400) + ' Tg.'; }
 function tableLogHtml(n) {
   const r = tableRolls().slice(0, n || 40);
   if (!r.length) return '<li class="empty">Noch keine Würfe am Tisch. Sobald jemand würfelt, erscheint es hier.</li>';
-  return r.map((x) => '<li class="' + (x.me ? 'me' : '') + '">' + sigil({ name: x.who, cls: x.cls }) + '<div><span><b class="who">' + esc(x.who) + '</b> · ' + esc(x.label) + '</span><small>' + esc(x.detail) + ' · ' + ago(x.t) + '</small></div><b class="tot' + (x.crit ? ' crit' : x.fumble ? ' fum' : '') + '">' + esc(x.total) + '</b></li>').join('');
+  return r.map((x) => '<li class="' + (x.me ? 'me' : '') + '">' + sigil({ name: x.who, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg }) + '<div><span><b class="who">' + esc(x.who) + '</b> · ' + esc(x.label) + '</span><small>' + esc(x.detail) + ' · ' + ago(x.t) + '</small></div><b class="tot' + (x.crit ? ' crit' : x.fumble ? ' fum' : '') + '">' + esc(x.total) + '</b></li>').join('');
 }
 function miniToast(p, r) {
   const m = $('#mini'); if (!m) return;
   const el = document.createElement('div'); el.className = 'mt';
-  el.innerHTML = sigil({ name: p.char, cls: p.cls }) + '<div><small>' + esc(p.char) + ' · ' + esc(r.label) + '</small><b class="' + (r.crit ? 'crit' : r.fumble ? 'fum' : '') + '">' + esc(r.total) + '</b></div>';
+  el.innerHTML = psig(p) + '<div><small>' + esc(p.char) + ' · ' + esc(r.label) + '</small><b class="' + (r.crit ? 'crit' : r.fumble ? 'fum' : '') + '">' + esc(r.total) + '</b></div>';
   m.prepend(el); setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 4500);
   while (m.children.length > 3) m.lastChild.remove();
 }
@@ -873,7 +878,7 @@ function partyHtml() {
   const ps = Object.entries(S.table).sort((a, b) => (a[1].char || '').localeCompare(b[1].char || '', 'de'));
   if (!ps.length) return '<p class="empty">Noch niemand am Tisch.</p>';
   return '<div class="party">' + ps.map(([uid, p]) => { const pct = p.hpMax ? Math.max(0, Math.min(100, (p.hp / p.hpMax) * 100)) : 0;
-    return '<div class="pm' + (uid === UID ? ' me' : '') + '">' + sigil({ name: p.char, cls: p.cls }) + '<div class="pmb"><b>' + esc(p.char) + (uid === UID ? ' <small>(du)</small>' : '') + '</b><small>' + esc(p.clsName) + ' ' + esc(p.level) + ' · ' + esc(p.species) + '</small>' +
+    return '<div class="pm' + (uid === UID ? ' me' : '') + '">' + psig(p) + '<div class="pmb"><b>' + esc(p.char) + (uid === UID ? ' <small>(du)</small>' : '') + '</b><small>' + esc(p.clsName) + ' ' + esc(p.level) + ' · ' + esc(p.species) + '</small>' +
       '<div class="pmhp"><span>TP ' + esc(p.hp) + '/' + esc(p.hpMax) + (p.temp ? ' +' + esc(p.temp) : '') + '</span><span>RK ' + esc(p.ac) + '</span></div><div class="hpbar"><i style="width:' + pct + '%"></i></div>' +
       (p.cond && p.cond.length ? '<div class="pmc">' + p.cond.map((c) => '<span>' + esc(c) + '</span>').join('') + '</div>' : '') +
       (uid === S.meta.dm ? '<div class="pmc dm"><span>Spielleitung</span></div>' : '') +
@@ -882,7 +887,7 @@ function partyHtml() {
 function renderCamp() {
   if (!S.camp && isApp()) return appJoinHtml();
   if (!S.camp) {
-    return '<div class="campjoin"><div class="hero-intro"><h1>Gemeinsamer Tisch</h1><p>Alle, die derselben Kampagne beitreten, sehen die Würfe der anderen live – und eine Übersicht der Gruppe mit TP, RK und Zuständen.</p></div>' +
+    return '<div class="campjoin"><div class="hero-intro banner" style="' + bannerStyle('waldlaeufer') + '"><h1>Gemeinsamer Tisch</h1><p>Alle, die derselben Kampagne beitreten, sehen die Würfe der anderen live – und eine Übersicht der Gruppe mit TP, RK und Zuständen.</p></div>' +
       '<section class="panel"><h2>Kampagne beitreten</h2><p class="hint">Gib einen Namen ein, den alle in deiner Gruppe gleich schreiben, z. B. <b>schatten-von-valdris</b>. Wer zuerst beitritt, eröffnet den Tisch.</p><div class="row"><label class="fld"><span>Kampagnenname</span><input type="text" id="campCode" placeholder="z. B. schatten-von-valdris" autocomplete="off"></label></div><div class="chips"><button class="btn big" data-act="campJoin">Beitreten</button></div>' +
       '<h3>So holst du deine Mitspieler dazu</h3><ol class="steps2"><li>Öffne oben rechts im Heldenbuch das Menü <b>Teilen</b>.</li><li>Lade jeden Mitspieler per E-Mail als <b>Bearbeiter</b> ein. Nur dann dürfen ihre Würfe am Tisch erscheinen.</li><li>Alle öffnen das Heldenbuch, legen ihren Helden an und treten mit demselben Namen bei.</li></ol><p class="hint">Den Link und den Kampagnennamen kannst du danach per WhatsApp verschicken.</p><p class="hint">Jeder sieht nur seine eigenen Helden. Am Tisch geteilt werden nur Name, Klasse, TP, RK, Zustände und die Würfe.</p></section></div>';
   }
@@ -903,9 +908,10 @@ function tableBox(n) {
 }
 function rollItems(r) {
   if (!r.length) return '<li class="empty">Noch keine Würfe am Tisch. Sobald jemand würfelt, erscheint es hier.</li>';
-  return r.map((x) => '<li class="' + (x.me ? 'me' : '') + '">' + sigil({ name: x.who, cls: x.cls }) + '<div><span><b class="who">' + esc(x.who) + '</b> · ' + esc(x.label) + '</span><small>' + esc(x.detail) + ' · ' + ago(x.t) + '</small></div><b class="tot' + (x.crit ? ' crit' : x.fumble ? ' fum' : '') + '">' + esc(x.total) + '</b></li>').join('');
+  return r.map((x) => '<li class="' + (x.me ? 'me' : '') + '">' + sigil({ name: x.who, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg }) + '<div><span><b class="who">' + esc(x.who) + '</b> · ' + esc(x.label) + '</span><small>' + esc(x.detail) + ' · ' + ago(x.t) + '</small></div><b class="tot' + (x.crit ? ' crit' : x.fumble ? ' fum' : '') + '">' + esc(x.total) + '</b></li>').join('');
 }
 function paintCamp() {
+  applyTheme();
   const dmb = $('#dmBox'); if (dmb) dmb.innerHTML = dmHtml();
   const dmt = $('#dmTools'); if (dmt) { const ae = document.activeElement; if (!(ae && dmt.contains(ae) && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT'))) dmt.innerHTML = dmTools(); }
   checkMercy();
@@ -947,7 +953,7 @@ function checkMercy() {
   const m = $('#modal');
   if (q.length && (m.hidden || S.modal === 'mercy')) {
     const uid = q[0], p = S.table[uid]; S.modal = 'mercy';
-    m.innerHTML = '<div class="dlg mercy" role="alertdialog" aria-modal="true" aria-labelledby="mercyT">' + sigil({ name: p.char, cls: p.cls }) + '<h2 id="mercyT">Show mercy?</h2><p><b>' + esc(p.char) + '</b> (' + esc(p.clsName) + ' ' + esc(p.level) + ') hat den dritten Todesrettungswurf verfehlt und ist gefallen.</p><p class="hint">Zeigst du Gnade, kehrt der Held mit 1 TP zurück. Sonst bleibt sein Bogen gesperrt – du kannst ihn später in der Gruppenübersicht trotzdem noch zurückholen.</p><div class="chips"><button class="btn ghost" data-act="doom" data-arg="' + uid + '">Der Tod ist endgültig</button><button class="btn big" data-act="mercy" data-arg="' + uid + '">Gnade zeigen</button></div></div>';
+    m.innerHTML = '<div class="dlg mercy" role="alertdialog" aria-modal="true" aria-labelledby="mercyT">' + psig(p) + '<h2 id="mercyT">Show mercy?</h2><p><b>' + esc(p.char) + '</b> (' + esc(p.clsName) + ' ' + esc(p.level) + ') hat den dritten Todesrettungswurf verfehlt und ist gefallen.</p><p class="hint">Zeigst du Gnade, kehrt der Held mit 1 TP zurück. Sonst bleibt sein Bogen gesperrt – du kannst ihn später in der Gruppenübersicht trotzdem noch zurückholen.</p><div class="chips"><button class="btn ghost" data-act="doom" data-arg="' + uid + '">Der Tod ist endgültig</button><button class="btn big" data-act="mercy" data-arg="' + uid + '">Gnade zeigen</button></div></div>';
     m.hidden = false;
   } else if (!q.length && S.modal === 'mercy') { m.hidden = true; S.modal = null; }
 }
@@ -981,7 +987,7 @@ function setMyInit(v) { S.myInit = { v: +v, cid: S.combat.id }; queueMe(); setTi
 function order() {
   const c = S.combat; if (!c || !c.active) return [];
   const list = [];
-  for (const [uid, p] of Object.entries(S.table)) if (p.init && p.init.cid === c.id) list.push({ key: 'p:' + uid, name: p.char, cls: p.cls, v: +p.init.v, dex: +p.dex || 0, me: uid === UID, hp: p.hp, hpMax: p.hpMax });
+  for (const [uid, p] of Object.entries(S.table)) if (p.init && p.init.cid === c.id) list.push({ key: 'p:' + uid, name: p.char, cls: p.cls, portrait: p.portrait, pimg: p.pimg, v: +p.init.v, dex: +p.dex || 0, me: uid === UID, hp: p.hp, hpMax: p.hpMax });
   for (const n of c.npcs || []) list.push({ key: 'n:' + n.id, id: n.id, name: n.name, cls: 'npc', v: +n.v, dex: +n.dex || 0, npc: true, ally: !!n.ally, hp: n.hp, hpMax: n.hpMax, ac: n.ac, mid: n.mid });
   return list.sort((a, b) => b.v - a.v || b.dex - a.dex || a.name.localeCompare(b.name, 'de'));
 }
@@ -992,8 +998,9 @@ function nextTurn() {
   let i = o.findIndex((x) => x.key === c.turn); let round = c.round || 1;
   if (i < 0) i = -1;
   let ni = i + 1; if (ni >= o.length) { ni = 0; round++; }
-  saveCombat(Object.assign({}, c, { turn: o[ni].key, round, t: Date.now() }));
+  saveCombat(Object.assign({}, c, { turn: o[ni].key, round, t: Date.now(), log: clog(c, 'Runde ' + round + ': ' + o[ni].name + ' ist am Zug') }));
 }
+function clog(c, x) { return ((c && c.log) || []).concat([{ t: Date.now(), x }]).slice(-25); }
 function fightHtml() {
   const c = S.combat;
   const lead = !S.meta.dm || isDM();
@@ -1001,8 +1008,9 @@ function fightHtml() {
   const o = order(), w = waiting(), cur = curEntry(); const mine = cur && cur.key === 'p:' + UID;
   let h = '<div class="fhead"><div><h2>Kampf · Runde ' + (c.round || 1) + '</h2><p class="hint" style="margin:0">' + (c.turn ? (cur ? 'Am Zug: <b>' + esc(cur.name) + '</b>' : '') : 'Alle würfeln Initiative (auf dem Bogen oder hier). Dann „Ersten Zug starten“.') + '</p></div><div class="chips">' +
     (!c.turn ? (lead ? '<button class="btn" data-act="fightGo"' + (o.length ? '' : ' disabled') + '>Ersten Zug starten</button>' : '') : mine ? '<button class="btn big glowbtn" data-act="turnEnd">Zug beenden</button>' : lead ? '<button class="btn ghost sm" data-act="turnEnd" title="Für Gegner oder abwesende Spieler">Weiter zum Nächsten</button>' : '') +
-    (lead ? '<button class="btn ghost sm" data-act="fightEnd">Kampf beenden</button>' : '') + '</div></div>';
-  h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + x.v + '</span>' + (x.npc ? '<span class="sigil npc" aria-hidden="true">⚔</span>' : sigil({ name: x.name, cls: x.cls })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + (x.npc && lead ? '<button class="x" data-act="npcDel" data-arg="' + x.key.slice(2) + '" aria-label="Entfernen">×</button>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
+    (lead && c.turn ? '<button class="btn ghost sm" data-act="fightReset" title="Runde und Zug zurücksetzen – Teilnehmer und Initiative bleiben">Neue Begegnung</button>' : '') + (lead ? '<button class="btn ghost sm" data-act="fightEnd">Kampf beenden</button>' : '') + '</div></div>';
+  h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + x.v + '</span>' + (x.npc ? '<span class="sigil npc" aria-hidden="true">⚔</span>' : sigil({ name: x.name, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + (x.npc && lead ? '<button class="x" data-act="npcDel" data-arg="' + x.key.slice(2) + '" aria-label="Entfernen">×</button>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
+  if (c.log && c.log.length) h += '<details class="clog"><summary>Verlauf <small>' + c.log.length + '</small></summary><ul>' + c.log.slice().reverse().slice(0, 12).map((e) => '<li><span>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</span>' + esc(e.x) + '</li>').join('') + '</ul></details>';
   if (w.length) h += '<p class="hint">Würfelt noch: ' + w.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + '</p>';
   const ch = cur ? null : null; const meIn = !w.some((x) => x.me);
   h += '<div class="fctl"><div class="fgrp"><b>Deine Initiative</b><div class="chips"><button class="btn sm" data-act="initRoll">' + (meIn ? 'Neu würfeln' : 'Initiative würfeln') + '</button><input type="number" id="initMan" placeholder="Wert" aria-label="Eigene Initiative eintragen"><button class="btn ghost sm" data-act="initSet">Eintragen</button></div></div>' +
@@ -1062,6 +1070,7 @@ function goWarn(c, w) {
 let rendering = false;
 function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } }
 function render0() {
+  applyTheme();
   if (!cur()) { const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; }
   renderTop();
   const c = derive(cur(), S.hb);
@@ -1126,7 +1135,7 @@ document.addEventListener('click', (ev) => {
       if (arg === 'heal') { if (P.hp <= 0) { P.ds = [0, 0]; wakeUp(P); } P.hp = Math.min(c.hpMax, P.hp + n); }
       if (arg === 'temp') P.temp = Math.max(P.temp, n); commit(); },
     spendHd: () => { const c = derive(ch, S.hb); let used = ch.play.hdUsed, die = c.hd; for (const x of c.hdPool) { if (used < x.n) { die = x.d; break; } used -= x.n; } const r = rollExpr('1W' + die); const g = Math.max(0, r.total + c.mod.con); ch.play.hdUsed++; ch.play.hp = Math.min(c.hpMax, ch.play.hp + g); pushLog({ label: 'Trefferwürfel', total: g, detail: r.detail + ' ' + sgn(c.mod.con) + ' KON', sides: die, nat: r.total }); commit(); },
-    deathRoll: () => { const r = 1 + Math.floor(Math.random() * 20); const P = ch.play; let msg = '';
+    deathRoll: () => { const r = 1 + Math.floor(rnd() * 20); const P = ch.play; let msg = '';
       if (r === 20) { P.hp = 1; P.ds = [0, 0]; msg = 'Natürliche 20: Du kommst mit 1 TP zurück!'; } else if (r === 1) { P.ds[1] = Math.min(3, P.ds[1] + 2); msg = 'Natürliche 1: zwei Fehlschläge'; } else if (r >= 10) { P.ds[0] = Math.min(3, P.ds[0] + 1); msg = 'Erfolg'; } else { P.ds[1] = Math.min(3, P.ds[1] + 1); msg = 'Fehlschlag'; }
       if (P.ds[0] >= 3) msg += ' – stabil'; if (P.ds[1] >= 3) { msg += ' – gefallen'; fall(P); } pushLog({ label: 'Todesrettungswurf', total: r, detail: msg, sides: 20, nat: r, crit: r === 20, fumble: r === 1 }); commit(); },
     pip: () => { const P = ch.play; const v = +arg;
@@ -1142,13 +1151,14 @@ document.addEventListener('click', (ev) => {
     logOpen: () => { S.logOpen = !S.logOpen; paintCamp(); },
     logFilter: () => { S.logFilter = arg; paintCamp(); },
     fightStart: () => { S.myInit = null; saveCombat({ id: 'k' + Date.now().toString(36), active: true, round: 1, turn: null, npcs: [], t: Date.now() }); },
-    fightGo: () => { const o = order(); if (o.length) saveCombat(Object.assign({}, S.combat, { turn: o[0].key, round: 1, t: Date.now() })); },
+    fightGo: () => { const o = order(); if (o.length) saveCombat(Object.assign({}, S.combat, { turn: o[0].key, round: 1, t: Date.now(), log: clog(S.combat, 'Kampf beginnt – Runde 1: ' + o[0].name + ' ist am Zug') })); },
+    fightReset: () => { const c = S.combat; if (!c) return; saveCombat(Object.assign({}, c, { turn: null, round: 1, t: Date.now(), log: [{ t: Date.now(), x: 'Neue Begegnung – Runde und Zug zurückgesetzt' }] })); },
     fightEnd: () => { saveCombat({ id: '', active: false, t: Date.now() }); S.myInit = null; queueMe(); },
     turnEnd: () => nextTurn(),
     initRoll: () => { const c = derive(ch, S.hb); if (!S.combat || !S.combat.active) return; d20(c.init, 'Initiative', { kind: 'init' }); },
     initSet: () => { const v = $('#initMan').value; if (v === '' || !S.combat) { $('#initMan').focus(); return; } setMyInit(+v); pushLog({ label: 'Initiative (eingetragen)', total: +v, detail: 'von Hand', share: true }); },
-    npcAdd: () => { const n = ($('#npcName').value || '').trim() || 'Gegner'; const b = +$('#npcBonus').value || 0; const r = 1 + Math.floor(Math.random() * 20); const c = S.combat; if (!c) return;
-      saveCombat(Object.assign({}, c, { npcs: (c.npcs || []).concat([{ id: Math.random().toString(36).slice(2, 8), name: n, v: r + b, dex: b }]), t: Date.now() })); pushLog({ label: n + ': Initiative', total: r + b, detail: 'W20 ' + r + ' ' + sgn(b), sides: 20, nat: r }); },
+    npcAdd: () => { const n = ($('#npcName').value || '').trim() || 'Gegner'; const b = +$('#npcBonus').value || 0; const r = 1 + Math.floor(rnd() * 20); const c = S.combat; if (!c) return;
+      saveCombat(Object.assign({}, c, { npcs: (c.npcs || []).concat([{ id: Math.random().toString(36).slice(2, 8), name: n, v: r + b, dex: b }]), t: Date.now(), log: clog(c, n + ' tritt dem Kampf bei (Initiative ' + (r + b) + ')') })); pushLog({ label: n + ': Initiative', total: r + b, detail: 'W20 ' + r + ' ' + sgn(b), sides: 20, nat: r }); },
     npcDel: () => { const c = S.combat; saveCombat(Object.assign({}, c, { npcs: (c.npcs || []).filter((x) => x.id !== arg), turn: c.turn === 'n:' + arg ? null : c.turn })); },
     cond: () => { const P = ch.play; const had = (P.cond || []).includes('incapacitated'); P.cond = (P.cond || []).filter((k) => COND[k]); const i = P.cond.indexOf(arg); if (i >= 0) P.cond.splice(i, 1); else { P.cond.push(arg); (COND[arg].adds || []).forEach((x) => { if (!P.cond.includes(x)) P.cond.push(x); }); } if (!had && P.cond.includes('incapacitated') && P.conc) { pushLog({ label: 'Konzentration endet', total: '✗', detail: P.conc.name + ' endet, weil du kampfunfähig bist.' }); endConc(P); } commit(); },
     condClear: () => { ch.play.cond = []; commit(); },
@@ -1220,28 +1230,8 @@ document.addEventListener('change', (ev) => {
 document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.id === 'campCode') { e.preventDefault(); const v = e.target.value.trim(); if (v) joinCamp(v); } });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#modal').hidden) { $('#modal').hidden = true; S.modal = null; } });
 document.addEventListener('click', (e) => { if (e.target.id === 'modal') { e.target.hidden = true; S.modal = null; } });
-function embers() {
-  const cv = $('#embers'); if (!cv || !cv.getContext) return;
-  let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
-  if (reduce) return;
-  const ctx = cv.getContext('2d'); let W, H, dpr; const P = [];
-  const size = () => { dpr = Math.min(2, window.devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
-  size(); window.addEventListener('resize', size);
-  const N = Math.round(Math.min(46, (W * H) / 32000));
-  const spawn = (p, init) => { p.x = Math.random() * W; p.y = init ? Math.random() * H : H + 10; p.r = 0.6 + Math.random() * 1.8; p.vy = 0.15 + Math.random() * 0.45; p.vx = (Math.random() - 0.5) * 0.2; p.a = 0.15 + Math.random() * 0.5; p.t = Math.random() * 6.28; return p; };
-  for (let i = 0; i < N; i++) P.push(spawn({}, true));
-  const tick = () => {
-    if (!document.hidden) {
-      ctx.clearRect(0, 0, W, H);
-      for (const p of P) { p.t += 0.02; p.y -= p.vy; p.x += p.vx + Math.sin(p.t) * 0.15; if (p.y < -10) spawn(p);
-        const fl = p.a * (0.7 + 0.3 * Math.sin(p.t * 3)); const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
-        g.addColorStop(0, 'rgba(255,214,140,' + fl + ')'); g.addColorStop(0.4, 'rgba(226,130,60,' + fl * 0.5 + ')'); g.addColorStop(1, 'rgba(226,118,58,0)');
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 4, 0, 6.283); ctx.fill(); }
-    }
-    requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
-}
+function embers() { applyTheme(); if (!FX) startFx(); }
+
 /* ---------- Start ---------- */
 (function boot() {
   const l = lsGet();

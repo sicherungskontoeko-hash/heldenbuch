@@ -1,4 +1,7 @@
 /* ==== Regeldaten: basiert auf dem SRD 5.2 (CC-BY-4.0), deutsch in eigenen Worten zusammengefasst ==== */
+/* Würfelzufall: kryptografischer Zufall des Geräts (fairer als Math.random) */
+const NATIVE_RANDOM = Math.random;
+const rnd = (() => { const c = typeof crypto !== 'undefined' && crypto.getRandomValues ? crypto : null; const b = new Uint32Array(1); return () => { if (!c || Math.random !== NATIVE_RANDOM) return Math.random(); c.getRandomValues(b); return b[0] / 4294967296; }; })();
 const AB = ['str','dex','con','int','wis','cha'];
 const AB_DE = {str:'Stärke',dex:'Geschicklichkeit',con:'Konstitution',int:'Intelligenz',wis:'Weisheit',cha:'Charisma'};
 const AB_K = {str:'STÄ',dex:'GES',con:'KON',int:'INT',wis:'WEI',cha:'CHA'};
