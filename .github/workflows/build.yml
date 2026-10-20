@@ -52,7 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -100,11 +100,33 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.1.${{ github.run_number }}
-          name: Heldenbuch 1.0.${{ github.run_number }}
+          name: Heldenbuch 1.1.${{ github.run_number }}
           body: |
             **Android:** Heldenbuch.apk herunterladen und öffnen (Installation aus unbekannten Quellen erlauben).
             **Windows:** Heldenbuch-Setup-….exe (Installer) oder Heldenbuch-Portable-….exe (ohne Installation).
-            **Mac:** Heldenbuch-….dmg öffnen, App in „Programme“ ziehen, beim ersten Start Rechtsklick → Öffnen.
+            **Mac:** Heldenbuch-….dmg (wird nachgeliefert, sobald der Mac-Bau fertig ist) öffnen, App in „Programme“ ziehen, beim ersten Start Rechtsklick → Öffnen.
             **Linux:** Heldenbuch-….AppImage ausführbar machen und starten.
             **iPhone/iPad:** Web-App in Safari öffnen und „Zum Home-Bildschirm“ wählen (Link siehe Anleitung).
           files: dl/**/*
+
+  mac:
+    name: PC-App (macOS, nachgeliefert)
+    needs: [release]
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Abhängigkeiten
+        run: npm install --no-audit --no-fund
+      - name: App bauen
+        run: npx electron-builder --mac --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Zum Release hinzufügen
+        run: gh release upload "v1.1.${{ github.run_number }}" dist/*.dmg --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
