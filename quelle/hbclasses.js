@@ -88,21 +88,21 @@ const HB_CLASSES = {
    [20,'Meister der Runen','Jede aktive Rune kann zweimal pro kurzer Rast aktiviert werden.']
   ],
   subs:[
-   { id:'guard', name:'Tradition der Wächterrunen', feats:[
+   { id:'guard', name:'Tradition der Wächterrunen', grant:{3:['schutz']}, res:(l)=> l>=14?[{k:'rkboll',n:'Runenbollwerk',max:1,reset:'long'}]:[], feats:[
     [3,'Schildwacht','Du kennst die Schutzrune zusätzlich. Als Reaktion, wenn eine Kreatur in 1,5 m einen anderen als dich angreift, gibst du dem Angriff Nachteil.'],
     [6,'Geteilter Schutz','Die Aktivierung deiner Schutzrune darf auch den Schaden eines Verbündeten in 9 m verringern.'],
     [10,'Unverrückbar','Du und Verbündete in 3 m habt Vorteil auf Rettungswürfe gegen verängstigt und gegen Umwerfen oder Verschieben.'],
     [14,'Runenbollwerk','Aktion, 1× pro langer Rast: 1 Minute lang haben Verbündete in 3 m (auch du) Resistenz gegen allen Schaden ausser psychischem.'],
     [18,'Lebendige Festung','+1 RK, solange mindestens drei Runen aktiv sind. Die Schutzrune kannst du zweimal pro kurzer Rast aktivieren.']]},
-   { id:'war', name:'Tradition der Kriegsrunen', feats:[
-    [3,'Runenklinge','Du kennst die Glutrune zusätzlich. Einmal pro Zug verursacht ein Treffer mit einer gerunten Waffe +1 Runenwürfel Schaden (Feuer, Kälte, Blitz oder Schall nach Wahl).'],
+   { id:'war', name:'Tradition der Kriegsrunen', grant:{3:['glut']}, res:(l)=> l>=18?[{k:'rksturm',n:'Runensturm',max:1,reset:'long'}]:[], feats:[
+    [3,'Runenklinge','Du kennst die Glutrune zusätzlich. Einmal pro Zug verursacht ein Treffer mit einer runenbeschrifteten Waffe +1 Runenwürfel Schaden (Feuer, Kälte, Blitz oder Schall nach Wahl).'],
     [6,'Überladung','Aktivierst du eine Waffenrune, hast du Vorteil auf deinen nächsten Angriff gegen dasselbe Ziel in diesem Zug.'],
-    [10,'Elementarer Ausbruch','Bei einem kritischen Treffer mit einer gerunten Waffe machen Kreaturen deiner Wahl in 3 m um das Ziel einen GES-Rettungswurf – 2 Runenwürfel Schaden, bei Erfolg die Hälfte.'],
+    [10,'Elementarer Ausbruch','Bei einem kritischen Treffer mit einer runenbeschrifteten Waffe machen Kreaturen deiner Wahl in 3 m um das Ziel einen GES-Rettungswurf – 2 Runenwürfel Schaden, bei Erfolg die Hälfte.'],
     [14,'Zweite Ladung','Waffenrunen kannst du zweimal pro kurzer Rast aktivieren.'],
     [18,'Runensturm','Bonusaktion, 1× pro langer Rast: 1 Minute lang verursacht Runenklinge +2 Runenwürfel, und jeder Treffer setzt die Bewegungsrate des Ziels bis zu deinem nächsten Zug auf 0.']]},
-   { id:'shift', name:'Tradition der Wandelrunen', feats:[
+   { id:'shift', name:'Tradition der Wandelrunen', grant:{3:['sturm']}, res:(l,c)=>[l>=18?{k:'rkgleit',n:'Gleitschrift',max:Math.max(1,c.mod.int),reset:'short'}:{k:'rkgleit',n:'Gleitschrift',max:c.pb,reset:'long'}].concat(l>=14?[{k:'rkphase',n:'Phasenschritt',max:1,reset:'short'}]:[]), feats:[
     [3,'Gleitschrift','Du kennst die Sturmschrittrune zusätzlich. Bonusaktion: Teleport bis 3 m an einen sichtbaren Ort, ÜB-mal pro langer Rast.'],
-    [6,'Versetzen','Einmal pro Zug, wenn du mit einer gerunten Waffe triffst, darfst du das Ziel (höchstens gross) 3 m verschieben oder mit ihm die Plätze tauschen, wenn es in Reichweite ist.'],
+    [6,'Versetzen','Einmal pro Zug, wenn du mit einer runenbeschrifteten Waffe triffst, darfst du das Ziel (höchstens gross) 3 m verschieben oder mit ihm die Plätze tauschen, wenn es in Reichweite ist.'],
     [10,'Weite Klinge','Deine Nahkampfreichweite mit gerunten Waffen steigt um 1,5 m.'],
     [14,'Phasenschritt','Reaktion, wenn du angegriffen wirst, 1× pro kurzer Rast: Der Angriff hat Nachteil, danach teleportierst du dich bis zu 6 m.'],
     [18,'Wandelmeister','Gleitschrift reicht 9 m weit und kann INT-Mod-mal pro kurzer Rast genutzt werden.']]}
@@ -128,19 +128,19 @@ const HB_CLASSES = {
    [20,'Herr des roten Fadens','Roter Faden kann zwei Kreaturen gleichzeitig markieren. Würfelst du Initiative und hast weniger als 2 Blutladungen, erhältst du 2 zurück.']
   ],
   subs:[
-   { id:'battle', name:'Tradition des Schlachtbluts', feats:[
+   { id:'battle', name:'Tradition des Schlachtbluts', res:(l)=> l>=18?[{k:'bwundying',n:'Unsterbliches Blut',max:1,reset:'long'}]:[], feats:[
     [3,'Kriegsblut','Übung mit mittelschwerer Rüstung, Schilden und Kriegswaffen; du nutzt KON für Angriff und Schaden mit Waffen. Bei einem Waffentreffer kannst du 1 Blutladung ausgeben: +2 Blutwürfel nekrotischer Schaden.'],
     [6,'Zusätzlicher Angriff','Mit der Angriffsaktion greifst du zweimal an; einen der Angriffe darfst du durch einen Strahl der Blutlanze ersetzen.'],
     [10,'Blutrausch','Zahlst du Blutpreis, erhältst du temporäre TP in Höhe deiner Stufe.'],
     [14,'Rote Ernte','Bringst du eine Kreatur auf 0 TP, erhältst du 1 Blutladung zurück (einmal pro Zug).'],
     [18,'Unsterbliches Blut','Fällst du auf 0 TP, hast du stattdessen die Hälfte deiner maximalen TP. 1× pro langer Rast.']]},
-   { id:'vein', name:'Tradition der Aderkunde', feats:[
+   { id:'vein', name:'Tradition der Aderkunde', grant:{3:['ausbluten']}, res:(l)=>(l>=14?[{k:'bwmario',n:'Marionette',max:1,reset:'long'}]:[]).concat(l>=18?[{k:'bwherz',n:'Herz anhalten',max:1,reset:'long'}]:[]), feats:[
     [3,'Schwächender Faden','Die vom Roten Faden markierte Kreatur zieht 1W4 von Rettungswürfen gegen deine Blutfähigkeiten ab. Du lernst den Blutritus Ausbluten zusätzlich.'],
     [6,'Fluchgeflecht','Roter Faden und Aderbann reichen 36 m weit. Einmal pro Zug darfst du der markierten Kreatur Nachteil auf eine Probe geben (keine Aktion).'],
     [10,'Geteiltes Leid','Reaktion, wenn du Schaden nimmst, 1 Blutladung: Die Hälfte des Schadens erleidet stattdessen die markierte Kreatur.'],
     [14,'Marionette','Aktion, 2 Blutladungen, 1× pro langer Rast: Die markierte Kreatur macht einen KON-Rettungswurf; bei Misserfolg bewegst du sie bis zu 4,5 m, und sie nutzt ihre Reaktion für einen Angriff gegen ein Ziel deiner Wahl.'],
     [18,'Herz anhalten','Aktion, 1× pro langer Rast: Die markierte Kreatur macht einen KON-Rettungswurf – 10 Blutwürfel nekrotischer Schaden, bei Erfolg die Hälfte.']]},
-   { id:'life', name:'Tradition des Lebenswebers', feats:[
+   { id:'life', name:'Tradition des Lebenswebers', res:(l)=>(l>=14?[{k:'bwnetz',n:'Lebensnetz',max:1,reset:'long'}]:[]).concat(l>=18?[{k:'bwherz2',n:'Zweiter Herzschlag',max:1,reset:'long'}]:[]), feats:[
     [3,'Lebensfluss','Blutstillung reicht 9 m weit und heilt zusätzlich deinen KON-Mod. Bonusaktion: Du opferst bis zu deiner doppelten Stufe an TP; eine Kreatur in 9 m heilt genauso viel.'],
     [6,'Gemeinsamer Puls','Heilst du eine andere Kreatur, heilst du selbst die Hälfte davon (einmal pro Runde).'],
     [10,'Stabilisieren','Reaktion, wenn ein Verbündeter in 18 m auf 0 TP fällt, 1 Blutladung: Er hat stattdessen 1 TP + 1 Blutwürfel.'],
@@ -174,13 +174,13 @@ const HB_CLASSES = {
     [10,'Schattenhieb','Deine Reichweite mit der gebundenen Klinge steigt um 1,5 m.'],
     [14,'Seelendurst','Fällt dein markiertes Ziel auf 0 TP, heilst du Fluchklingen-Stufe + CHA-Mod TP.'],
     [18,'Meisterklinge','Gegen dein markiertes Ziel erzielst du bei 18–20 einen kritischen Treffer; bei einem kritischen Treffer löst du zusätzlich einen Fluch aus.']]},
-   { id:'judge', name:'Pfad des Bannrichters', feats:[
+   { id:'judge', name:'Pfad des Bannrichters', grant:{3:['schwaeche','schweigen']}, res:(l)=>(l>=10?[{k:'fkurteil',n:'Urteil',max:1,reset:'short'}]:[]).concat(l>=18?[{k:'fklast',n:'Letztes Urteil',max:1,reset:'long'}]:[]), feats:[
     [3,'Richterspruch','Du lernst Fluch der Schwäche und Fluch des Schweigens zusätzlich (sie zählen nicht gegen deine Anzahl). Dein Fluch-SG steigt um 1.'],
     [6,'Bannkreis','Dein markiertes Ziel kann sich nicht teleportieren oder die Ebene wechseln, ausser es schafft einen CHA-Rettungswurf.'],
     [10,'Urteil','Reaktion, wenn dein markiertes Ziel einen Zauber wirkt, 1× pro kurzer Rast: CHA-Rettungswurf, bei Misserfolg scheitert der Zauber.'],
     [14,'Bindendes Urteil','Rettungswürfe gegen deine Flüche haben Nachteil, wenn das Ziel in diesem Zug schon von dir getroffen wurde.'],
     [18,'Letztes Urteil','Aktion, 1× pro langer Rast: Hat dein markiertes Ziel höchstens 50 TP, macht es einen CHA-Rettungswurf oder fällt auf 0 TP; bei Erfolg 6 Fluchwürfel psychischer Schaden.']]},
-   { id:'shadow', name:'Pfad des Schattenjägers', feats:[
+   { id:'shadow', name:'Pfad des Schattenjägers', res:(l,c)=>[{k:'fkstep',n:'Schattenschritt',max:c.pb,reset:'long'}].concat(l>=14?[{k:'fkinvis',n:'Unsichtbarer Jäger',max:1,reset:'short'}]:[]), feats:[
     [3,'Schattenschritt','Dunkelsicht 18 m (oder +9 m). Bonusaktion, ÜB-mal pro langer Rast: Teleport bis 9 m an einen Ort im Dämmerlicht oder Dunkel.'],
     [6,'Fährte','Entfernt sich dein markiertes Ziel von dir, sinkt seine Bewegungsrate um 3 m. Du kannst Spurt als Bonusaktion nutzen, wenn du dich auf das markierte Ziel zubewegst.'],
     [10,'Aus dem Schatten','Dein erster Angriff in einem Zug, in dem du dich teleportiert hast, hat Vorteil.'],
@@ -191,7 +191,7 @@ const HB_CLASSES = {
   extraWeapons:['hcrossbow','hvcrossbow','pistol','musket'], asi:[4,8,12,16],
   options:{ key:'modules', label:'Gerätemodule', n: step(4,[[3,5],[5,6],[7,7],[9,8],[11,9],[13,10],[15,11],[17,12]]), list: MODULES },
   table:(l)=>[['Bekannte Module',step(4,[[3,5],[5,6],[7,7],[9,8],[11,9],[13,10],[15,11],[17,12]])(l)],['Aktive Module',step(2,[[3,3],[7,4],[11,5],[15,6]])(l)],['Energiezellen',step(2,[[3,3],[5,4],[7,5],[9,6],[11,7],[13,8],[15,9],[17,10]])(l)],['Modulstufen',l>=15?'Grund, verbessert, Meister':l>=5?'Grund, verbessert':'Grund']],
-  res:(l,c)=>[{k:'cells',n:'Energiezellen',max:step(2,[[3,3],[5,4],[7,5],[9,6],[11,7],[13,8],[15,9],[17,10]])(l),reset:'short'}].concat(l>=20?[{k:'genius',n:'Genie',max:1,reset:'long'}]:[]),
+  res:(l,c)=>[{k:'cells',n:'Energiezellen',max:step(2,[[3,3],[5,4],[7,5],[9,6],[11,7],[13,8],[15,9],[17,10]])(l),reset:'short'}].concat(l>=13?[{k:'maswap',n:'Schnellwechsel',max:1,reset:'long'}]:[]).concat(l>=20?[{k:'genius',n:'Genie',max:1,reset:'long'}]:[]),
   feats:[
    [1,'Präzisionsmechanik','Du bist geübt mit Handarmbrust, schwerer Armbrust, Pistole und Muskete und nutzt INT statt GES für Angriff und Schaden mit Armbrüsten und Feuerwaffen. Geräte-SG = 8 + ÜB + INT-Mod.'],
    [1,'Gerätemodule','Nach einer langen Rast bringst du so viele bekannte Module an deiner Ausrüstung an, wie die Tabelle als aktiv angibt. Viele Module kosten Energiezellen; diese kehren bei einer kurzen oder langen Rast zurück. Verbesserte Module ab Stufe 5, Meistermodule ab 15.'],
@@ -208,19 +208,19 @@ const HB_CLASSES = {
    [20,'Genie','Würfelst du Initiative, erhältst du alle Energiezellen zurück. 1× pro langer Rast.']
   ],
   subs:[
-   { id:'combat', name:'Kampfingenieur', feats:[
+   { id:'combat', name:'Kampfingenieur', res:(l)=> l>=14?[{k:'masuit',n:'Schlachtanzug',max:1,reset:'long'}]:[], feats:[
     [3,'Panzerschmied','Übung mit schwerer Rüstung und Kriegswaffen. Deine Rüstung gibt dir +1 RK, solange du sie selbst gewartet hast (eine kurze Rast).'],
     [6,'Waffenmodifikation','Eine Waffe verursacht einmal pro Zug zusätzlich 1W6 Blitz-, Feuer- oder Schallschaden.'],
     [10,'Reaktivpanzer','Dein Rückstossdämpfer verringert den Schaden zusätzlich um deine Maschinisten-Stufe.'],
     [14,'Schlachtanzug','Bonusaktion, 1× pro langer Rast: 1 Minute lang +2 RK und Resistenz gegen Wucht-, Stich- und Hiebschaden.'],
     [18,'Kriegsmaschine','Mit der Angriffsaktion greifst du dreimal an.']]},
-   { id:'field', name:'Feldtechniker', feats:[
+   { id:'field', name:'Feldtechniker', res:(l)=> l>=10?[{k:'maimp1',n:'Federfall (gratis)',max:1,reset:'long'},{k:'maimp2',n:'Spinnenklettern (gratis)',max:1,reset:'long'},{k:'maimp3',n:'Unsichtbares sehen (gratis)',max:1,reset:'long'}]:[], feats:[
     [3,'Fallenbauer','Aktion, 1 Zelle: Du legst eine Falle in 1,5 m (1,5-m-Würfel, bis zu einer Stunde). Wer sie betritt, macht einen GES-Rettungswurf gegen 2W10 Schaden und ist festgesetzt; bei Erfolg halber Schaden. Expertise in Nachforschungen.'],
     [6,'Fernzünder','Reichweiten deiner Fallen, Kapseln und Granaten verdoppeln sich; Fallen kannst du als Bonusaktion aus 18 m auslösen.'],
     [10,'Improvisation','Je 1× pro langer Rast wirkst du Federfall, Spinnenklettern und Unsichtbares sehen ohne Zauberplatz (INT als Zauberattribut).'],
     [14,'Barrikade','Aktion, 2 Zellen: Eine 6 m lange Wand in 9 m gibt 1 Minute lang Dreivierteldeckung.'],
     [18,'Meistertechniker','Ausserhalb des Kampfes kosten deine Module keine Energiezellen.']]},
-   { id:'alch', name:'Alchemistischer Konstrukteur', feats:[
+   { id:'alch', name:'Alchemistischer Konstrukteur', res:(l)=> l>=18?[{k:'mawerk',n:'Grosses Werk',max:1,reset:'long'}]:[], feats:[
     [3,'Phiolen','Bonusaktion, 1 Zelle: Du wirfst eine Phiole (18 m, Fernkampfangriff mit INT): 2W6 + INT-Mod Feuer- oder Säureschaden – oder eine Heilphiole: Eine Kreatur heilt 1W8 + INT-Mod TP.'],
     [6,'Reagenzienkunde','Resistenz gegen Säure- und Giftschaden; Übung mit Alchemistenzubehör.'],
     [10,'Konzentrat','Deine Schadensphiolen verursachen 3W6 + INT-Mod und treffen auch Kreaturen in 1,5 m um das Ziel (GES-Rettungswurf, halber Schaden).'],
@@ -228,7 +228,20 @@ const HB_CLASSES = {
     [18,'Grosses Werk','Aktion, 1× pro langer Rast: 6-m-Kugel in 45 m, GES-Rettungswurf gegen 8W6 Feuer- und 8W6 Säureschaden, bei Erfolg die Hälfte.']]}
   ]}
 };
-for (const C of Object.values(HB_CLASSES)) { C.sub = { id: C.subs[0].id, name: C.subs[0].name, lv:[3,6,10,14,18] }; C.subFeats = C.subs[0].feats; }
+const OPT_EXTRA_RES = { vergeltung: (c) => ({ k: 'fkverg', n: 'Fluch der Vergeltung', max: c.pb, reset: 'long' }), ewig: () => ({ k: 'rkewig', n: 'Ewigkeitsrune (0 TP verhindern)', max: 1, reset: 'long' }), kern: () => ({ k: 'makern', n: 'Überladungskern', max: 1, reset: 'long' }) };
+for (const [id, C] of Object.entries(HB_CLASSES)) {
+  C.sub = { id: C.subs[0].id, name: C.subs[0].name, lv:[3,6,10,14,18] }; C.subFeats = C.subs[0].feats;
+  const orig = C.res;
+  C.res = (l, c) => {
+    let r = orig ? orig(l, c) : [];
+    const e = (c.classes || []).find((x) => x.id === id);
+    if (e && l >= 3) { const sb = C.subs.find((x) => x.id === e.m.sub); if (sb && sb.res) r = r.concat(sb.res(l, c)); }
+    const os = e ? (e.m.opts || []) : [];
+    for (const [k, f] of Object.entries(OPT_EXTRA_RES)) if (os.includes(k) && C.options && C.options.list[k] && (C.options.list[k].length === 4 ? C.options.list[k][3] : C.options.list[k][2]) <= l) r.push(f(c));
+    if (e && e.subGrant) for (const ks of Object.values(e.subGrant)) ks.forEach((k) => { if (OPT_EXTRA_RES[k] && !os.includes(k)) r.push(OPT_EXTRA_RES[k](c)); });
+    return r;
+  };
+}
 Object.assign(CLASSES, HB_CLASSES);
 
 /* ---------- Völker ---------- */

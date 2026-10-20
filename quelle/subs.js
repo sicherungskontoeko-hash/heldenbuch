@@ -6,7 +6,7 @@ const NEW_SUBS = {
   [10,'Flammensprung','Bonusaktion im Kampfrausch: Du springst bis zu 6 m, ohne Gelegenheitsangriffe auszulösen. Kreaturen deiner Wahl in 1,5 m vom Landepunkt machen einen GES-Rettungswurf (SG 8 + ÜB + KON) gegen 2W6 Feuerschaden, bei Erfolg die Hälfte.'],
   [14,'Unlöschbar','Fällst du im Kampfrausch auf 0 TP, hast du stattdessen 1 TP, und jede Kreatur in 3 m erleidet 4W6 Feuerschaden. 1× pro langer Rast.']],
   res:(l)=> l>=14?[{k:'unl',n:'Unlöschbar',max:1,reset:'long'}]:[] },
- brd:{ id:'stars', name:'✦ Kolleg der Sternenlieder', feats:[
+ brd:{ id:'stars', name:'✦ Schule der Sternlieder', spells:{3:['starry-wisp']}, feats:[
   [3,'Leitstern','Gibst du Bardische Inspiration, darf das Ziel den Würfel auch als Reaktion zu seiner RK gegen einen Angriff addieren. Du lernst Sternenfunke als zusätzlichen Zaubertrick.'],
   [3,'Himmelskunde','Übung in Arkane Kunde und Naturkunde; nachts weisst du immer, wo Norden ist und wie spät es ist.'],
   [6,'Sternenmantel','Bonusaktion, 1 Bardische Inspiration: 1 Minute lang strahlt von dir in 6 m gedämpftes Sternenlicht. Verbündete darin addieren 1W4 zu Rettungswürfen gegen Zauber.'],
@@ -15,7 +15,8 @@ const NEW_SUBS = {
   [3,'Gezeitenschub','Göttliche Macht fokussieren: Kreaturen deiner Wahl in 9 m machen einen STÄ-Rettungswurf; bei Misserfolg erleiden sie 2W8 + Klerikerstufe Wuchtschaden und werden 3 m verschoben, bei Erfolg die Hälfte.'],
   [3,'Kind des Wassers','Du hast Schwimmbewegung gleich deiner Bewegungsrate und kannst 1 Stunde lang die Luft anhalten.'],
   [6,'Ebbe und Flut','Heilst du eine Kreatur mit einem Zauber, darfst du sie bis zu 3 m verschieben, ohne Gelegenheitsangriffe auszulösen; eine andere Kreatur in 3 m davon erleidet 1W8 Kälteschaden.'],
-  [17,'Herr der Gezeiten','Resistenz gegen Kälte- und Wuchtschaden. Einmal pro langer Rast kannst du Wasser kontrollieren ohne Zauberplatz und ohne Konzentration wirken.']] },
+  [17,'Herr der Gezeiten','Resistenz gegen Kälte- und Wuchtschaden. Einmal pro langer Rast kannst du Wasser kontrollieren ohne Zauberplatz und ohne Konzentration wirken.']],
+  res:(l)=> l>=17?[{k:'tide17',n:'Wasser kontrollieren (gratis)',max:1,reset:'long'}]:[] },
  dru:{ id:'storm', name:'✦ Zirkel des Sturmwalds', spells:{3:['fog-cloud','gust-of-wind','thunderwave','shatter'],5:['call-lightning','wind-wall'],7:['ice-storm','freedom-of-movement'],9:['tree-stride','insect-plague']}, feats:[
   [3,'Sturmgestalt','Statt Tiergestalt kannst du eine Nutzung ausgeben, um 1 Minute lang Sturm um dich zu tragen: Fliegen 3 m (Schweben), und einmal pro Zug verursacht ein Treffer oder Zauber +1W8 Blitz- oder Schallschaden.'],
   [6,'Blitzableiter','Resistenz gegen Blitz- und Schallschaden. Wirkt eine Kreatur in 18 m einen Blitzzauber, kannst du die Hälfte des Schadens auf ein anderes Ziel in 9 m umlenken (Reaktion).'],
@@ -59,13 +60,14 @@ const NEW_SUBS = {
   [6,'Silberschleier','Bonusaktion, 2 Zaubereipunkte: Du teleportierst dich bis zu 9 m und hinterlässt ein Trugbild, das Angreifern Nachteil gibt, bis zum Beginn deines nächsten Zuges.'],
   [14,'Mondfinsternis','Reaktion, wenn dich ein Angriff trifft, 3 Zaubereipunkte: Du wirst bis zum Ende deines nächsten Zuges unsichtbar und erleidest nur die Hälfte des Schadens.'],
   [18,'Avatar des Mondes','Bonusaktion, 5 Zaubereipunkte: 1 Minute lang Flugbewegung 12 m, und alle drei Phasen wirken gleichzeitig.']] },
- wlk:{ id:'shadowblade', name:'✦ Schutzherr der Schattenklinge', spells:{3:['shield','wrathful-smite','blur','magic-weapon'],5:['blink','elemental-weapon'],7:['phantasmal-killer','staggering-smite'],9:['banishing-smite','cone-of-cold']}, feats:[
-  [3,'Kampfgeweiht','Übung mit mittelschwerer Rüstung, Schilden und Kriegswaffen. Mit Waffen, die du führst, kannst du CHA statt STÄ oder GES für Angriff und Schaden nutzen.'],
-  [3,'Schattenfluch','Bonusaktion, 1× pro kurzer Rast: Verfluche eine Kreatur in 9 m für 1 Minute. Gegen sie erhältst du +ÜB auf Schadenswürfe, erzielst bei 19–20 kritische Treffer, und fällt sie auf 0 TP, heilst du Hexenmeisterstufe + CHA-Mod TP.'],
-  [6,'Schattendiener','Fällt eine humanoide Kreatur, die du verflucht hast, auf 0 TP, kannst du sie 1 Minute lang als Schatten an deiner Seite kämpfen lassen (Werte wie ein Schatten, dein Zug). 1× pro langer Rast.'],
-  [10,'Rüstung der Flüche','Greift dich die verfluchte Kreatur an, kannst du als Reaktion W6 würfeln: Bei 4+ verfehlt der Angriff.'],
-  [14,'Meister der Schattenklinge','Verfluchst du eine Kreatur, kannst du den Schattenfluch auf eine zweite übertragen, wenn die erste fällt; dein Fluch kehrt bei einer kurzen Rast zurück und hält bis zu deiner nächsten Rast.']],
-  res:(l)=>[{k:'sfluch',n:'Schattenfluch',max:1,reset:'short'}].concat(l>=6?[{k:'sdiener',n:'Schattendiener',max:1,reset:'long'}]:[]) },
+ wlk:{ id:'shadowblade', name:'✦ Schutzherr der Schattenklinge', desc:'Dein Schutzherr ist ein Wesen aus dem Raum zwischen Licht und Dunkel. Es leiht dir eine Klinge aus Schatten – und die Fähigkeit, selbst zum Schatten zu werden.', spells:{3:['wrathful-smite','fog-cloud','darkness','misty-step'],5:['blink','fear'],7:['greater-invisibility','phantasmal-killer'],9:['mislead','hold-monster']}, feats:[
+  [3,'Schattenzauber','Immer vorbereitet: Zorniger Niederschlag, Nebelwolke, Dunkelheit, Nebelschritt (ab 5: Blinzeln, Furcht; ab 7: Mächtige Unsichtbarkeit, Phantastischer Mörder; ab 9: Irreführen, Monster festhalten).'],
+  [3,'Schattenwaffe','Übung mit mittelschwerer Rüstung, Schilden und Kriegswaffen. Mit Nahkampfwaffen, die du führst, kannst du CHA statt STÄ oder GES für Angriff und Schaden nutzen.'],
+  [3,'Schattenmal','Bonusaktion, ÜB-mal pro langer Rast: Schatten heften sich 1 Minute an eine Kreatur in 18 m. Sie kann sich vor dir nicht verstecken, und einmal pro Zug verursacht dein Waffentreffer gegen sie +1W6 nekrotischen Schaden (1W8 ab Stufe 10). Nach dem Treffer darfst du dich bis 3 m in einen freien Bereich neben ihr teleportieren.'],
+  [6,'Schattenmantel','Reaktion, wenn dich ein Angriff trifft, 1 Nutzung Schattenmal: Du zerfliesst zu Schatten – der Schaden wird halbiert, und du teleportierst dich bis 6 m in gedämpftes Licht oder Dunkelheit.'],
+  [10,'Schattenhunger','Resistenz gegen nekrotischen Schaden. Fällt eine Kreatur mit deinem Schattenmal auf 0 TP, erhältst du 1 Nutzung zurück und darfst das Mal sofort ohne Aktion auf eine Kreatur in 9 m davon setzen.'],
+  [14,'Klinge der Nacht','Trifft dein Schattenmal-Schaden, macht das Ziel einen KON-Rettungswurf gegen deinen Zauber-SG oder ist bis zum Beginn deines nächsten Zuges blind. 1× pro langer Rast: Für 1 Minute kostet Schattenmantel keine Nutzung.']],
+  res:(l,c)=>[{k:'smal',n:'Schattenmal',max:c.pb,reset:'long'}].concat(l>=14?[{k:'snacht',n:'Klinge der Nacht (1 Minute)',max:1,reset:'long'}]:[]) },
  wiz:{ id:'chrono', name:'✦ Schule der Chronomantie', feats:[
   [3,'Zeitsprung','Reaktion, wenn eine Kreatur in 9 m einen W20-Wurf macht: Sie würfelt neu und muss das neue Ergebnis nehmen. INT-Mod-mal pro langer Rast.'],
   [3,'Chronomantische Studien','Zauber, die Zeit oder Geschwindigkeit beeinflussen (Hast, Verlangsamen, Zeitstopp, Rasender Rückzug), kostet dich halb so viel Gold und Zeit zu kopieren.'],
@@ -74,7 +76,7 @@ const NEW_SUBS = {
   [14,'Ewiger Moment','Aktion, 1× pro langer Rast: Eine Kreatur in 18 m macht einen WEI-Rettungswurf oder ist 1 Minute lang in der Zeit eingefroren (gelähmt, immun gegen Schaden; Wiederholung am Ende jedes Zuges).']],
   res:(l,c)=>[{k:'zeitsprung',n:'Zeitsprung',max:Math.max(1,c.mod.int),reset:'long'}].concat(l>=10?[{k:'schleife',n:'Zeitschleife',max:1,reset:'long'}]:[]).concat(l>=14?[{k:'moment',n:'Ewiger Moment',max:1,reset:'long'}]:[]) }
 };
-const SRD_SUB_RES = { mon:['wob'], wlk:['dol','hth'] };
+const SRD_SUB_RES = { mon:['wob'], wlk:['dol','hth'], bar:['ip'], dru:['nr','ns'], pal:['nimbus'], sor:['wings','dcomp'] };
 for (const [id, nsub] of Object.entries(NEW_SUBS)) {
   const C = CLASSES[id]; if (!C || C.subs) continue;
   C.subs = [{ id: C.sub.id, name: C.sub.name, feats: C.subFeats, spells: C.sub.spells }, nsub];

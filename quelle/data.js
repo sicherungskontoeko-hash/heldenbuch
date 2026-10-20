@@ -32,7 +32,7 @@ const CLASSES = {
   mastery: step(2,[[4,3],[10,4]]),
   asi:[4,8,12,16], sub:{ id:'berserker', name:'Pfad des Berserkers', lv:[3,6,10,14] },
   table:(l)=>[['Kampfrausch', step(2,[[3,3],[6,4],[12,5],[17,6]])(l)+'×'],['Rauschschaden','+'+step(2,[[9,3],[16,4]])(l)],['Waffenmeisterschaften',step(2,[[4,3],[10,4]])(l)]],
-  res:(l,c)=>[{k:'rage',n:'Kampfrausch',max:step(2,[[3,3],[6,4],[12,5],[17,6]])(l),reset:'long',note:'1 Nutzung zurück bei kurzer Rast'}],
+  res:(l,c)=>[{k:'rage',n:'Kampfrausch',max:step(2,[[3,3],[6,4],[12,5],[17,6]])(l),reset:'long',note:'1 Nutzung zurück bei kurzer Rast'}].concat(l>=14?[{k:'ip',n:'Einschüchternde Präsenz',max:1,reset:'long'}]:[]).concat(l>=15?[{k:'pr',n:'Beharrlicher Kampfrausch',max:1,reset:'long'}]:[]),
   feats:[
    [1,'Kampfrausch','Als Bonusaktion ohne schwere Rüstung: Resistenz gegen Wucht-, Stich- und Hiebschaden, Bonusschaden bei Angriffen mit Stärke, Vorteil auf Stärkewürfe und -rettungswürfe. Keine Zauber und keine Konzentration. Hält bis zum Ende deines nächsten Zuges und verlängert sich, wenn du angreifst, einen Rettungswurf erzwingst oder eine Bonusaktion nutzt (max. 10 Minuten). Kurze Rast: 1 Nutzung zurück, lange Rast: alle.'],
    [1,'Ungerüstete Verteidigung','Ohne Rüstung ist deine RK 10 + GES + KON. Ein Schild ist erlaubt.'],
@@ -85,7 +85,7 @@ const CLASSES = {
   caster:'full', ability:'wis', cantrips:step(3,[[4,4],[10,5]]), prepared:PREP_FULL, asi:[4,8,12,16],
   order:{ key:'divineOrder', label:'Göttliche Ordnung', opts:{ protector:['Beschützer','Übung mit Kriegswaffen und schwerer Rüstung.'], thaumaturge:['Thaumaturg','Ein zusätzlicher Zaubertrick; WEI-Mod (mind. +1) zusätzlich auf Arkane Kunde und Religion.'] } },
   sub:{ id:'life', name:'Domäne des Lebens', lv:[3,6,17],
-   spells:{3:['aid','bless','cure-wounds','lesser-restoration'],5:['mass-healing-word','revivify'],7:['death-ward','freedom-of-movement'],9:['greater-restoration','mass-cure-wounds']} },
+   spells:{3:['aid','bless','cure-wounds','lesser-restoration'],5:['mass-healing-word','revivify'],7:['aura-of-life','death-ward'],9:['greater-restoration','mass-cure-wounds']} },
   table:(l)=>[['Göttliche Macht fokussieren',step(2,[[6,3],[18,4]])(l)+'×'],['Göttlicher Funke',step(1,[[7,2],[13,3],[18,4]])(l)+'W8']],
   res:(l,c)=> l>=2?[{k:'cd',n:'Göttliche Macht fokussieren',max:step(2,[[6,3],[18,4]])(l),reset:'long',note:'1 Nutzung zurück bei kurzer Rast'}].concat(l>=10?[{k:'di',n:'Göttliches Eingreifen',max:1,reset:'long'}]:[]):[],
   feats:[
@@ -101,7 +101,7 @@ const CLASSES = {
   subFeats:[
    [3,'Jünger des Lebens','Heilt ein Zauber, für den du einen Zauberplatz verwendest, stellt er zusätzlich 2 + Zaubergrad TP wieder her.'],
    [3,'Bewahrung des Lebens','Göttliche Macht fokussieren: Verteile 5 × Klerikerstufe TP auf Kreaturen in 9 m (höchstens bis zur Hälfte ihres Maximums).'],
-   [3,'Domänenzauber','Diese Zauber sind immer vorbereitet: Beistand, Segnen, Wunden heilen, Schwache Genesung (ab 5: Massen-Heilendes Wort, Wiederbeleben; ab 7: Todesschutz, Bewegungsfreiheit; ab 9: Mächtige Genesung, Massen-Wunden heilen).'],
+   [3,'Domänenzauber','Diese Zauber sind immer vorbereitet: Beistand, Segnen, Wunden heilen, Schwache Genesung (ab 5: Massen-Heilendes Wort, Wiederbeleben; ab 7: Aura des Lebens, Todesschutz; ab 9: Mächtige Genesung, Massen-Wunden heilen).'],
    [6,'Gesegneter Heiler','Wenn du mit einem Zauberplatz andere heilst, erhältst du selbst 2 + Zaubergrad TP.'],
    [17,'Überragende Heilung','Bei Heilwürfeln nimmst du immer den Maximalwert.']
   ]},
@@ -110,7 +110,7 @@ const CLASSES = {
   order:{ key:'primalOrder', label:'Ursprüngliche Ordnung', opts:{ magician:['Magier','Ein zusätzlicher Zaubertrick; WEI-Mod (mind. +1) zusätzlich auf Arkane Kunde und Naturkunde.'], warden:['Wächter','Übung mit Kriegswaffen und mittelschwerer Rüstung.'] } },
   sub:{ id:'land', name:'Zirkel des Landes', lv:[3,6,10,14] },
   table:(l)=>[['Tiergestalt',(l>=2?step(2,[[6,3],[17,4]])(l)+'×':'—')],['Max. HG',l>=8?'1':l>=4?'1/2':l>=2?'1/4':'—']],
-  res:(l,c)=> l>=2?[{k:'ws',n:'Tiergestalt',max:step(2,[[6,3],[17,4]])(l),reset:'long',note:'1 Nutzung zurück bei kurzer Rast'}]:[],
+  res:(l,c)=> l>=2?[{k:'ws',n:'Tiergestalt',max:step(2,[[6,3],[17,4]])(l),reset:'long',note:'1 Nutzung zurück bei kurzer Rast'}].concat(l>=5?[{k:'wr',n:'Wildes Wiederaufleben (Tiergestalt → Platz)',max:1,reset:'long'}]:[]).concat(l>=6?[{k:'nr',n:'Natürliche Erholung',max:1,reset:'long'}]:[]).concat(l>=14?[{k:'ns',n:'Heiligtum der Natur',max:1,reset:'long'}]:[]):[],
   feats:[
    [1,'Zauberwirken','Weisheit ist dein Zauberattribut. Ein Druidenfokus dient als Fokus.'],
    [1,'Druidisch','Du kennst die Geheimsprache der Druiden. Mit Tieren sprechen ist immer vorbereitet.'],
@@ -199,7 +199,8 @@ const CLASSES = {
   res:(l,c)=>{ const r=[{k:'loh',n:'Handauflegen (Pool)',max:5*l,reset:'long',pool:true}];
     if(l>=2) r.push({k:'smite',n:'Freies Göttliches Niederstrecken',max:1,reset:'long'});
     if(l>=3) r.push({k:'pcd',n:'Göttliche Macht fokussieren (Paladin)',max:l>=11?3:2,reset:'long',note:'1 Nutzung zurück bei kurzer Rast'});
-    if(l>=5) r.push({k:'steed',n:'Freies Ross finden',max:1,reset:'long'}); return r; },
+    if(l>=5) r.push({k:'steed',n:'Freies Ross finden',max:1,reset:'long'});
+    if(l>=20) r.push({k:'nimbus',n:'Heiliger Nimbus',max:1,reset:'long'}); return r; },
   feats:[
    [1,'Handauflegen','Bonusaktion: Heile aus einem Pool von 5 × Paladinstufe TP. Für 5 Punkte kannst du stattdessen den Zustand vergiftet beenden.'],
    [1,'Zauberwirken','Charisma ist dein Zauberattribut. Ein heiliges Symbol dient als Fokus.'],
@@ -287,7 +288,7 @@ const CLASSES = {
   sub:{ id:'draconic', name:'Drachenblut-Zauberei', lv:[3,6,14,18],
    spells:{3:['alter-self','chromatic-orb','command','dragons-breath'],5:['fear','fly'],7:['arcane-eye','charm-monster'],9:['legend-lore','summon-dragon']} },
   table:(l)=>[['Zaubereipunkte',l>=2?l:'—'],['Metamagie',l>=2?step(2,[[10,4],[17,6]])(l):'—']],
-  res:(l,c)=>[{k:'is',n:'Angeborene Zauberei',max:2,reset:'long'}].concat(l>=2?[{k:'sp',n:'Zaubereipunkte',max:l,reset:'long'}]:[]),
+  res:(l,c)=>[{k:'is',n:'Angeborene Zauberei',max:2,reset:'long'}].concat(l>=2?[{k:'sp',n:'Zaubereipunkte',max:l,reset:'long'}]:[]).concat(l>=5?[{k:'sr',n:'Zauberische Erneuerung',max:1,reset:'long'}]:[]).concat(l>=14?[{k:'wings',n:'Drachenflügel',max:1,reset:'long'}]:[]).concat(l>=18?[{k:'dcomp',n:'Drachengefährte',max:1,reset:'long'}]:[]),
   feats:[
    [1,'Zauberwirken','Charisma ist dein Zauberattribut. Ein arkaner Fokus dient als Fokus.'],
    [1,'Angeborene Zauberei','Bonusaktion, 1 Minute: Zauber-SG +1 und Vorteil auf Zauberangriffe. 2× pro langer Rast.'],
@@ -453,7 +454,8 @@ const FEATS = {
  'boon-night':{ name:'Gabe des Nachtgeistes', cat:'epic', text:'+1 auf ein Attribut (max. 30). Im Dämmerlicht und Dunkel Bonusaktion unsichtbar; Resistenz gegen alle Schadensarten ausser psychisch und gleissend.', plus:AB, cap30:true },
  'boon-truesight':{ name:'Gabe der Wahrsicht', cat:'epic', text:'+1 auf ein Attribut (max. 30). Wahrsicht 18 m.', plus:AB, cap30:true }
 };
-delete FEATS.tough; /* nicht im SRD – als Hausregel anlegbar */
+/* Zäh: offizielles Herkunftstalent (PHB 2024), nicht im SRD 5.2 – Wirkung in eigenen Worten, als Quelle gekennzeichnet */
+FEATS.tough.src = 'phb'; delete FEATS.tough.home; FEATS.tough.text = 'Dein TP-Maximum steigt um 2 pro Charakterstufe – auch rückwirkend und bei jedem weiteren Stufenaufstieg. (Quelle: Spielerhandbuch 2024, nicht im SRD)';
 
 /* ---------- Rüstungen ---------- */
 const ARMOR = {

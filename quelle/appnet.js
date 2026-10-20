@@ -7,7 +7,33 @@ const HB_BROKERS = {
   emqx: ['EMQX (Ersatz)', 'wss://broker.emqx.io:8084/mqtt'],
   mosquitto: ['Mosquitto (Test)', 'wss://test.mosquitto.org:8081']
 };
-const HB_PREFIX = 'heldenbuch-v1/';
+const HB_PREFIX = 'heldenbuch-v2/';
+/* Ende-zu-Ende-Verschlüsselung: Der Raumcode bleibt auf den Geräten. Der Broker sieht nur einen Hash als Themenname
+   und AES-GCM-verschlüsselte Daten (Schlüssel per PBKDF2 aus dem Raumcode). Unverschlüsselte Fremdnachrichten werden verworfen. */
+const HB_ROOM = new Map();
+var HB_NOCRYPTO = !(typeof crypto !== 'undefined' && crypto.subtle && crypto.getRandomValues);
+const hbB64 = (u) => btoa(String.fromCharCode(...u)); const hbUb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+function hbRoomOf(path) { const m = /^(camp|transfer)\/([^/]+)(\/.*)?$/.exec(path); return m ? { kind: m[1], code: m[2], rest: m[3] || '' } : { kind: 'x', code: path, rest: '' }; }
+function hbRoomKey(code) {
+  if (HB_ROOM.has(code)) return HB_ROOM.get(code);
+  const p = (async () => {
+    const sub = typeof crypto !== 'undefined' && crypto.subtle; const enc = new TextEncoder();
+    if (!sub) throw new Error('nocrypto'); /* nie unverschlüsselt senden */
+    const h = await sub.digest('SHA-256', enc.encode('heldenbuch-raum:' + code));
+    const tb = [...new Uint8Array(h)].slice(0, 16).map((b) => b.toString(16).padStart(2, '0')).join('');
+    const base = await sub.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveKey']);
+    const key = await sub.deriveKey({ name: 'PBKDF2', salt: enc.encode('heldenbuch-e2e-v2'), iterations: 120000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+    return { tb, key };
+  })();
+  HB_ROOM.set(code, p); return p;
+}
+async function hbTopic(path) { const r = hbRoomOf(path); const k = await hbRoomKey(r.code); return { topic: HB_PREFIX + r.kind + '/' + k.tb + r.rest, key: k.key }; }
+async function hbSeal(key, obj) { const s = JSON.stringify(obj); if (!key) throw new Error('nocrypto'); const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(s)); return JSON.stringify({ e: 1, iv: hbB64(iv), ct: hbB64(new Uint8Array(ct)) }); }
+async function hbOpen(key, msg) {
+  if (!msg) return null; let o; try { o = JSON.parse(msg); } catch (e) { return null; }
+  if (o && o.e === 1 && o.iv && o.ct) { if (!key) return null; try { const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: hbUb64(o.iv) }, key, hbUb64(o.ct)); return JSON.parse(new TextDecoder().decode(pt)); } catch (e) { return null; } }
+  return null; /* unverschlüsselte Nachrichten werden nie angenommen */
+}
 const hbLs = { get: (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
 function hbUid() { let u = hbLs.get('hb_uid', ''); if (!u) { u = 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); hbLs.set('hb_uid', u); } return u; }
 function hbServer() { const k = hbLs.get('hb_server', 'hivemq'); if (k === 'custom') return hbLs.get('hb_server_url', HB_BROKERS.hivemq[1]); return (HB_BROKERS[k] || HB_BROKERS.hivemq)[1]; }
@@ -71,16 +97,16 @@ function hbDoc(path) {
     get: async () => { const v = hbLs.get('hbdb:' + path, null); return hbSnapDoc(path, v ? JSON.parse(v) : null); },
     onSnapshot: (fn) => { const v = hbLs.get('hbdb:' + path, null); setTimeout(() => fn(hbSnapDoc(path, v ? JSON.parse(v) : null)), 0); return () => {}; }
   };
-  const topic = HB_PREFIX + path;
   return {
     id: path.split('/').pop(), path,
-    set: async (d) => { HB_CACHE.set(path, d); HBNET.publish(topic, JSON.stringify(d), true); },
-    delete: async () => { HB_CACHE.delete(path); HBNET.publish(topic, '', true); },
+    set: async (d) => { HB_CACHE.set(path, d); const t = await hbTopic(path); HBNET.publish(t.topic, await hbSeal(t.key, d), true); },
+    delete: async () => { HB_CACHE.delete(path); const t = await hbTopic(path); HBNET.publish(t.topic, '', true); },
     get: async () => hbSnapDoc(path, HB_CACHE.get(path)),
     onSnapshot: (fn) => {
-      let first = true; const t0 = setTimeout(() => { if (first) { first = false; fn(hbSnapDoc(path, HB_CACHE.get(path))); } }, 1500);
-      const off = HBNET.subscribe(topic, (tp, msg) => { let v = null; try { v = msg ? JSON.parse(msg) : null; } catch (e) {} if (v == null) HB_CACHE.delete(path); else HB_CACHE.set(path, v); first = false; clearTimeout(t0); fn(hbSnapDoc(path, v)); });
-      return () => { clearTimeout(t0); off(); };
+      let first = true, off = null, dead = false, q = Promise.resolve();
+      const t0 = setTimeout(() => { if (first) { first = false; fn(hbSnapDoc(path, HB_CACHE.get(path))); } }, 1500);
+      hbTopic(path).then((t) => { if (dead) return; off = HBNET.subscribe(t.topic, (tp, msg) => { q = q.then(async () => { const v = await hbOpen(t.key, msg); if (msg && v == null) return; if (v == null) HB_CACHE.delete(path); else HB_CACHE.set(path, v); first = false; clearTimeout(t0); fn(hbSnapDoc(path, v)); }); }); });
+      return () => { dead = true; clearTimeout(t0); if (off) off(); };
     }
   };
 }
@@ -95,8 +121,9 @@ function hbCollection(path) {
       if (!remote) { setTimeout(async () => fn(await hbCollection(path).get()), 0); return () => {}; }
       const map = new Map(); let tm = null; const emit = () => { clearTimeout(tm); tm = setTimeout(() => fn({ docs: [...map.entries()].map(([k, v]) => hbSnapDoc(k, v)), empty: !map.size }), 60); };
       const t0 = setTimeout(emit, 1200);
-      const off = HBNET.subscribe(HB_PREFIX + path + '/+', (tp, msg) => { const k = tp.slice(HB_PREFIX.length); let v = null; try { v = msg ? JSON.parse(msg) : null; } catch (e) {} if (v == null) { map.delete(k); HB_CACHE.delete(k); } else { map.set(k, v); HB_CACHE.set(k, v); } emit(); });
-      return () => { clearTimeout(t0); clearTimeout(tm); off(); };
+      let off = null, dead = false, q = Promise.resolve();
+      hbTopic(path).then((t) => { if (dead) return; off = HBNET.subscribe(t.topic + '/+', (tp, msg) => { q = q.then(async () => { const k = path + '/' + tp.split('/').pop(); const v = await hbOpen(t.key, msg); if (msg && v == null) return; if (v == null) { map.delete(k); HB_CACHE.delete(k); } else { map.set(k, v); HB_CACHE.set(k, v); } emit(); }); }); });
+      return () => { dead = true; clearTimeout(t0); clearTimeout(tm); if (off) off(); };
     }
   };
 }

@@ -41,7 +41,7 @@ const MAGIC_ITEMS = {
  'ring-feather':{ name:'Ring des Federfalls', r:'selten', att:true, text:'Fällst du, sinkst du mit 18 m pro Runde und nimmst keinen Fallschaden.' },
  'ring-water':{ name:'Ring des Wasserwandelns', r:'ungewöhnlich', text:'Du kannst auf Flüssigkeiten gehen, als wären sie fester Boden.' },
  'ring-resist':{ name:'Ring der Resistenz', r:'selten', att:true, text:'Resistenz gegen eine Schadensart (beim Fund festgelegt).' },
- 'bag-holding':{ name:'Nimmervoller Beutel', r:'ungewöhnlich', kg:7, text:'Fasst bis zu 250 kg, wiegt immer 7 kg. Inhalt zählt nicht zu deiner Traglast.' },
+ 'bag-holding':{ name:'Nimmervoller Beutel', r:'ungewöhnlich', kg:2.5, text:'Fasst bis zu 250 kg, wiegt immer 2,5 kg. Inhalt zählt nicht zu deiner Traglast.' },
  'immovable-rod':{ name:'Unbewegliches Zepter', r:'ungewöhnlich', kg:1, text:'Knopfdruck: Das Zepter steht unbeweglich in der Luft und trägt bis zu 4000 kg.' },
  'goggles-night':{ name:'Nachtsichtbrille', r:'ungewöhnlich', text:'Dunkelsicht 18 m.' },
  'pearl-power':{ name:'Perle der Macht', r:'ungewöhnlich', att:true, use:{ n:1, reset:'long', name:'Perle der Macht' }, text:'1× pro langer Rast: Erhalte einen verbrauchten Zauberplatz bis Grad 3 zurück.' },
@@ -94,8 +94,8 @@ const COIN = [['pm', 'PM', 10], ['gm', 'GM', 1], ['em', 'EM', 0.5], ['sm', 'SM',
 function gearBlock(c, inBuilder) {
   const ch = c.char; const P = ch.play; const co = coinsOf(ch);
   const kg = itemWeight(ch); const over = kg > c.carry; const att = attuneCount(ch);
-  let h = '<div id="a-items"></div><h2>Magische Gegenstände <small>Einstimmung ' + att + ' / 3</small></h2>';
-  if (att > 3) h += '<p class="cstat bad">Du bist auf mehr als 3 Gegenstände eingestimmt – nur 3 wirken. Entferne eine Einstimmung.</p>';
+  const am = c.attuneMax || 3; let h = '<div id="a-items"></div><h2>Magische Gegenstände <small>Einstimmung ' + att + ' / ' + am + '</small></h2>';
+  if (att > am) h += '<p class="cstat bad">Du bist auf mehr als ' + am + ' Gegenstände eingestimmt – nur ' + am + ' wirken. Entferne eine Einstimmung.</p>';
   const its = itemList(ch);
   h += its.length ? '<div class="items">' + its.map((x) => {
     const d = itemDef(x); const active = itemActive(x);
@@ -137,8 +137,12 @@ const COMPANIONS = {
  'm-pony':{ name:'Pony', from:'Reittier', stat:() => ({ size:'mittelgross', ac:10, hpMax:11, speed:'12 m', ab:{ str:15, dex:10, con:13, int:2, wis:11, cha:6 }, atks:[['Hufe', 4, '1W4+2', 'Wucht']], traits:[] }) },
  'm-mule':{ name:'Maultier', from:'Reittier', stat:() => ({ size:'mittelgross', ac:10, hpMax:11, speed:'12 m', ab:{ str:14, dex:10, con:13, int:2, wis:10, cha:5 }, atks:[['Hufe', 4, '1W4+2', 'Wucht']], traits:[['Lasttier', 'Gilt beim Tragen als gross.'], ['Trittsicher', 'Vorteil gegen Umwerfen.']] }) },
  'm-mastiff':{ name:'Mastiff', from:'Tier', stat:() => ({ size:'mittelgross', ac:12, hpMax:5, speed:'12 m', ab:{ str:13, dex:14, con:12, int:3, wis:12, cha:7 }, atks:[['Biss', 3, '1W6+1', 'Stich']], traits:[['Umwerfen', 'Trifft der Biss ein höchstens grosses Ziel, liegt es.']] }) },
+ 'w-wolf':{ name:'Wildgefährte: Wolf', from:'✦ Wildbund-Hüter', stat:(c) => wildStat(c, 'mittelgross, Tier', '12 m', { str:12, dex:15, con:12, int:3, wis:12, cha:6 }, 'Biss', 'Stich', [['Rudeltaktik', 'Vorteil auf Angriffe, wenn ein Verbündeter in 1,5 m vom Ziel steht.']]) },
+ 'w-hawk':{ name:'Wildgefährte: Falke', from:'✦ Wildbund-Hüter', stat:(c) => wildStat(c, 'klein, Tier', '3 m, Fliegen 18 m', { str:6, dex:17, con:10, int:3, wis:14, cha:6 }, 'Krallen', 'Hieb', [['Vorbeifliegen', 'Löst keine Gelegenheitsangriffe aus, wenn es aus der Reichweite fliegt.']]) },
+ 'w-bear':{ name:'Wildgefährte: Bär', from:'✦ Wildbund-Hüter', stat:(c) => wildStat(c, 'gross, Tier', '12 m, Klettern 9 m', { str:17, dex:10, con:15, int:3, wis:12, cha:6 }, 'Pranke', 'Hieb', [['Bärenkraft', 'Vorteil auf Stärkewürfe und STÄ-Rettungswürfe.']]) },
  custom:{ name:'Eigener Begleiter', from:'eigen', stat:(c, x) => ({ size:x.size || '', ac:+x.ac || 10, hpMax:+x.hpMax || 10, speed:x.speed || '9 m', ab:null, atks:x.atkN ? [[x.atkN, +x.atkB || 0, x.atkD || '1W6', x.atkT || '']] : [], traits:x.notes ? [['Notizen', x.notes]] : [] }) }
 };
+function wildStat(c, size, speed, ab, an, at, tr) { const L = Math.max(3, c.lv('ran')); return { size, ac: 12 + c.pb, hpMax: 8 + 4 * L, speed, ab, atks: [[an, spellAtkFor(c), '1W6+' + c.pb, at]], traits: tr.concat([['Wildbund', 'Handelt in deinem Zug; ohne Befehl weicht es aus. Ab Stufe 7 addiert es deinen ÜB auf Rettungswürfe.']]) }; }
 function compStat(c, x) { const T = COMPANIONS[x.t] || COMPANIONS.custom; return Object.assign({ name: x.name || T.name, type: T.name, from: T.from }, T.stat(c, x)); }
 function compBlock(c) {
   const ch = c.char; const list = ch.comps || [];
@@ -215,6 +219,63 @@ const BESTIARY = {
  'black-wyrmling':['Schwarzer Drachennestling','2',17,33,'6W8+6','9 m, Fliegen 18 m',2,[['Biss',4,'1W10+2+1W4','Stich + Säure']],'Säureatem (Aufladung 5–6): 4,5-m-Linie, GES SG 11, 5W8 Säure.'],
  'red-wyrmling':['Roter Drachennestling','4',17,75,'10W8+30','9 m, Fliegen 18 m',0,[['Biss',6,'1W10+4+1W6','Stich + Feuer']],'Feueratem (Aufladung 5–6): 4,5-m-Kegel, GES SG 13, 7W6 Feuer.'],
  wyvern:['Wyvern','6',14,127,'15W10+45','6 m, Fliegen 24 m',0,[['Biss',7,'2W6+4','Stich'],['Stachel',7,'2W6+4+7W6','Stich + Gift']],'Mehrfachangriff: Biss und Stachel. Gift: KON SG 14, halber Giftschaden bei Erfolg.'],
+ commoner:['Gemeiner Bürger','0',10,4,'1W8','9 m',0,[['Knüppel',2,'1W4','Wucht']],''],
+ noble:['Adliger','1/8',15,9,'2W8','9 m',1,[['Rapier',3,'1W8+1','Stich']],'Parade (Reaktion): +2 RK gegen einen Nahkampfangriff.'],
+ acolyte:['Akolyth','1/4',10,11,'2W8+2','9 m',0,[['Streitkolben',2,'1W6','Wucht']],'Zauber (SG 12): Heilige Flamme, Segnen, Wunden heilen.'],
+ scout:['Kundschafter','1/2',13,16,'3W8+3','9 m',2,[['Kurzschwert',4,'1W6+2','Stich'],['Langbogen',4,'1W8+2','Stich']],'Mehrfachangriff: zwei Angriffe. Vorteil auf Wahrnehmung mit Sicht und Gehör.'],
+ spy:['Spion','1',12,27,'6W8','9 m',2,[['Kurzschwert',4,'1W6+2','Stich'],['Handarmbrust',4,'1W6+2','Stich']],'Mehrfachangriff: zwei Angriffe. Hinterhältiger Angriff +2W6 (1× pro Zug). Raffinierte Aktion.'],
+ berserker:['Berserker','2',13,67,'9W8+27','9 m',1,[['Zweihandaxt',5,'1W12+3','Hieb']],'Tollkühn: Vorteil auf Angriffe, Angriffe gegen ihn haben Vorteil.'],
+ druid:['Druide','2',11,44,'8W8+8','9 m',1,[['Kampfstab',4,'1W6+2','Wucht']],'Zauber (SG 12): Verstricken, Donnerwoge, Mondstrahl, Rindenhaut.'],
+ gladiator:['Gladiator','5',16,112,'15W8+45','9 m',2,[['Speer',7,'2W6+4','Stich'],['Schildstoss',7,'2W4+4','Wucht']],'Mehrfachangriff: drei Angriffe. Parade (Reaktion): +3 RK. Mutig.'],
+ 'black-bear':['Schwarzbär','1/2',11,19,'3W8+6','12 m, Klettern 9 m',0,[['Biss',4,'1W6+2','Stich'],['Klaue',4,'1W4+2','Hieb']],'Mehrfachangriff: Biss und Klaue.'],
+ crocodile:['Krokodil','1/2',12,13,'2W10+2','6 m, Schwimmen 9 m',0,[['Biss',4,'1W8+2','Stich']],'Treffer: gepackt (SG 12). Hält 15 Minuten die Luft an.'],
+ lion:['Löwe','1',12,22,'4W10','15 m',2,[['Biss',5,'1W8+3','Stich'],['Klaue',5,'1W6+3','Hieb']],'Rudeltaktik. Anspringen: nach 6 m Anlauf STÄ SG 13 oder liegend.'],
+ 'giant-eagle':['Rieseneadler','1',13,26,'4W10+4','3 m, Fliegen 24 m',3,[['Schnabel',5,'1W6+3','Stich'],['Krallen',5,'2W6+3','Hieb']],'Mehrfachangriff. Scharfe Sicht.'],
+ 'giant-scorpion':['Riesenskorpion','3',15,52,'7W10+14','12 m',1,[['Klaue',4,'1W8+2','Wucht'],['Stachel',4,'1W10+2+4W10','Stich + Gift']],'Mehrfachangriff: zwei Klauen und Stachel. Klaue packt (SG 12). Gift: KON SG 12, halb bei Erfolg.'],
+ mammoth:['Mammut','6',13,126,'11W12+55','12 m',-1,[['Stosszähne',10,'4W8+7','Stich'],['Stampfen',10,'4W10+7','Wucht']],'Sturmangriff: nach 6 m Anlauf STÄ SG 18 oder liegend; Stampfen gegen Liegende als Bonusaktion.'],
+ 'rust-monster':['Rostmonster','1/2',14,27,'5W8+5','12 m',1,[['Biss',3,'1W8+1','Stich']],'Rostfühler: Nichtmagisches Metall, das es berührt, korrodiert (Waffen −1, Rüstung −1 RK).'],
+ 'ochre-jelly':['Ockergallerte','2',8,52,'6W10+18','3 m, Klettern 3 m',-2,[['Pseudopodium',4,'3W6+2','Säure']],'Teilt sich bei Blitz- oder Hiebschaden. Spinnenklettern.'],
+ ankheg:['Ankheg','2',14,45,'6W10+12','9 m, Graben 3 m',0,[['Biss',5,'2W6+3+1W6','Hieb + Säure']],'Biss packt (SG 13). Säurespray (Aufladung 6): 9-m-Linie, GES SG 13, 3W6 Säure.'],
+ griffon:['Greif','2',12,59,'7W10+21','9 m, Fliegen 24 m',2,[['Schnabel',6,'1W8+4','Stich'],['Klauen',6,'2W6+4','Hieb']],'Mehrfachangriff: Schnabel und Klauen. Scharfe Sicht.'],
+ hippogriff:['Hippogreif','1',11,26,'4W10+4','12 m, Fliegen 18 m',1,[['Schnabel',5,'1W10+3','Stich'],['Klauen',5,'2W6+3','Hieb']],'Mehrfachangriff.'],
+ centaur:['Zentaur','2',12,45,'6W10+12','15 m',2,[['Pike',6,'1W10+4','Stich'],['Langbogen',4,'2W6+2','Stich']],'Mehrfachangriff: zwei Angriffe. Sturmangriff +3W6.'],
+ satyr:['Satyr','1/2',13,31,'7W8','12 m',3,[['Rammen',3,'2W4+1','Wucht'],['Kurzbogen',5,'1W6+3','Stich']],'Magieresistenz. Panflöte: bezaubernde, verängstigende oder einschläfernde Melodie (WEI SG 13).'],
+ dryad:['Dryade','1',11,22,'5W8','9 m',1,[['Ranke',2,'1W6+1','Wucht']],'Baumschritt. Feenbezauberung (WEI SG 14). Spricht mit Pflanzen und Tieren.'],
+ harpy:['Harpyie','1',11,38,'7W8+7','6 m, Fliegen 12 m',1,[['Klaue',3,'2W4+1','Hieb']],'Lockender Gesang: WEI SG 11 oder bezaubert und bewegt sich auf die Harpyie zu.'],
+ manticore:['Mantikor','3',14,68,'8W10+24','9 m, Fliegen 15 m',3,[['Biss',5,'1W8+3','Stich'],['Klaue',5,'1W6+3','Hieb'],['Schwanzstachel',5,'1W8+3','Stich']],'Mehrfachangriff: drei Angriffe. Stachelsalve (Fernkampf 30/60 m), 24 Stacheln.'],
+ hydra:['Hydra','8',15,184,'16W12+80','9 m, Schwimmen 9 m',1,[['Biss',8,'1W10+5','Stich']],'Mehrere Köpfe (5): ein Biss pro Kopf. Abgeschlagene Köpfe wachsen doppelt nach, ausser nach Feuerschaden. Kann die Luft anhalten.'],
+ chimera:['Chimäre','6',14,114,'12W10+48','9 m, Fliegen 18 m',0,[['Biss',7,'2W6+4','Stich'],['Hörner',7,'1W12+4','Wucht'],['Klauen',7,'2W6+4','Hieb']],'Mehrfachangriff: drei Angriffe. Feueratem (Aufladung 5–6): 4,5-m-Kegel, GES SG 15, 7W8 Feuer.'],
+ medusa:['Medusa','6',15,127,'17W8+51','9 m',2,[['Schlangenhaar',5,'1W4+2+4W6','Stich + Gift'],['Langbogen',5,'1W8+2+2W6','Stich + Gift']],'Mehrfachangriff. Versteinernder Blick: KON SG 14, erst festgesetzt, dann versteinert.'],
+ ettin:['Ettin','4',12,85,'10W10+30','12 m',-1,[['Streitaxt',7,'2W8+5','Hieb'],['Morgenstern',7,'2W8+5','Stich']],'Mehrfachangriff: Axt und Morgenstern. Zwei Köpfe: Vorteil auf Wahrnehmung, schwer zu überraschen.'],
+ otyugh:['Otyugh','5',14,104,'11W10+44','9 m',0,[['Biss',6,'2W8+3','Stich'],['Tentakel',6,'1W8+3','Wucht']],'Mehrfachangriff: Biss und zwei Tentakel. Biss überträgt Krankheit (KON SG 15). Telepathie.'],
+ banshee:['Todesfee','4',12,58,'13W8','0 m, Fliegen 12 m',2,[['Verderbende Berührung',4,'3W6+2','nekrotisch']],'Körperlos. Klagen (1× pro Tag): KON SG 13 oder 0 TP, bei Erfolg 3W6 psychisch.'],
+ specter:['Gespenst','1',12,22,'5W8','0 m, Fliegen 15 m',2,[['Lebensentzug',4,'3W6','nekrotisch']],'Körperlos. Getroffene: KON SG 10, sonst sinkt das TP-Maximum.'],
+ wraith:['Schreckgespenst','5',13,67,'9W8+27','0 m, Fliegen 18 m',3,[['Lebensentzug',6,'4W8+3','nekrotisch']],'Körperlos. Erschafft aus Getöteten ein Gespenst.'],
+ 'flesh-golem':['Fleischgolem','5',9,127,'15W8+60','9 m',-1,[['Schlag',7,'2W8+4','Wucht']],'Mehrfachangriff: zwei Schläge. Blitzabsorption, Magieresistenz, Abneigung gegen Feuer.'],
+ 'green-hag':['Grüne Vettel','3',17,82,'11W8+33','9 m',1,[['Klaue',6,'2W8+4','Hieb']],'Amphibisch. Illusionen, Unsichtbarkeit, ahmt Stimmen nach.'],
+ 'night-hag':['Nachtvettel','5',17,112,'15W8+45','9 m',2,[['Klaue',7,'2W8+4','Hieb']],'Magieresistenz. Gestaltwandel, Ätherisch, Albtraumheimsuchung.'],
+ 'will-o-wisp':['Irrlicht','2',19,27,'11W4','0 m, Fliegen 15 m',9,[['Schock',4,'2W8','Blitz']],'Unsichtbar nach Belieben. Verzehrt Leben von Sterbenden.'],
+ sahuagin:['Sahuagin','1/2',12,22,'4W8+4','9 m, Schwimmen 12 m',0,[['Biss',3,'1W4+1','Stich'],['Speer',3,'1W6+1','Stich']],'Mehrfachangriff. Blutrausch: Vorteil gegen Verletzte. Hai-Telepathie.'],
+ bugbear:['Grottenschrat-Krieger','1',14,33,'6W8+6','9 m',2,[['Packende Hand',4,'2W6+2','Wucht'],['Leichter Hammer',4,'3W4+2','Wucht']],'Hinterhältig: +2W6 gegen Überraschte. Lange Arme (Reichweite 3 m).'],
+ 'stone-giant':['Steinriese','7',17,126,'11W12+55','12 m',2,[['Keule',9,'3W8+6','Wucht'],['Felsbrocken',9,'4W10+6','Wucht']],'Mehrfachangriff: zwei Angriffe. Felsen fangen (Reaktion).'],
+ 'frost-giant':['Frostriese','8',15,149,'12W12+72','12 m',-1,[['Zweihandaxt',9,'3W12+6','Hieb'],['Felsbrocken',9,'4W10+6','Wucht']],'Mehrfachangriff: zwei Angriffe. Immun gegen Kälte.'],
+ 'fire-giant':['Feuerriese','9',18,162,'13W12+78','9 m',-1,[['Zweihandschwert',11,'6W6+7','Hieb'],['Felsbrocken',11,'4W10+7','Wucht']],'Mehrfachangriff: zwei Angriffe. Immun gegen Feuer.'],
+ vampire:['Vampir','13',16,144,'17W8+68','12 m, Klettern 12 m',4,[['Waffenloser Schlag',9,'1W8+4','Wucht'],['Biss',9,'1W6+4+3W6','Stich + nekrotisch']],'Legendär. Regeneration 20 (ausser gleissend/Wasser). Bezaubern (WEI SG 17), Gestaltwandel, Vampirschwächen.'],
+ 'adult-red':['Ausgewachsener roter Drache','17',19,256,'19W12+133','12 m, Fliegen 24 m',0,[['Biss',14,'2W10+8+2W6','Stich + Feuer'],['Klaue',14,'2W6+8','Hieb']],'Mehrfachangriff: Biss und zwei Klauen. Feueratem (Aufladung 5–6): 18-m-Kegel, GES SG 21, 18W6 Feuer. Legendäre Aktionen und Widerstände.'],
+ /* ---------- Eigene Kreaturen (✦ Heldenbuch-Erfindungen) ---------- */
+ 'x-schlund':['✦ Gedächtnisschlund','6',14,135,'18W10+36','6 m, Graben 6 m',0,[['Biss',7,'2W8+4','Stich']],'Ein Kopf pro verschlungenem Opfer (Start: 3 Köpfe, je ein Biss). Lied des Vergessens: Wer es hört, macht täglich einen WEI-Rettungswurf (SG 15), sonst nimmt er den Schlund nicht wahr und vergisst seine Opfer vollständig. Schriftliche Notizen wirken gegen das Vergessen.'],
+ 'x-aschewurm':['✦ Aschenwurm','2',13,45,'6W10+12','9 m, Graben 6 m',1,[['Biss',5,'2W6+3','Stich']],'Glutbauch: Wer ihn im Nahkampf trifft, erleidet 1W6 Feuerschaden. Aschewolke (Aufladung 5–6): 3-m-Kugel, KON SG 12 oder 1 Runde blind.'],
+ 'x-nebelspinne':['✦ Nebelweberin','3',14,52,'8W10+8','9 m, Klettern 9 m',3,[['Biss',5,'1W10+3+2W6','Stich + psychisch']],'Nebelnetz (Aufladung 5–6): 6-m-Würfel aus Nebel, darin festgesetzt bei GES SG 13 und stark verdeckt. Sieht durch Nebel.'],
+ 'x-glockenkraehe':['✦ Glockenkrähenschwarm','1',12,24,'7W8-7','3 m, Fliegen 15 m',2,[['Schnäbel',4,'2W6','Stich']],'Schwarm. Totenläuten: Läutet, wenn in 18 m jemand stirbt – Kreaturen in 9 m: WEI SG 11 oder verängstigt.'],
+ 'x-moosriese':['✦ Moosriese','5',15,110,'13W10+39','9 m',-1,[['Wurzelfaust',7,'2W10+4','Wucht']],'Mehrfachangriff: zwei Fäuste. Verwurzeln: Kreaturen in 3 m, STÄ SG 15 oder festgesetzt. Regeneration 10 bei Regen oder im Wald (ausser nach Feuer).'],
+ 'x-spiegelwicht':['✦ Spiegelwicht','2',15,33,'6W8+6','9 m',3,[['Splitterklinge',5,'1W8+3','Hieb']],'Spiegelbild: Nimmt das Aussehen der letzten Kreatur an, die es angesehen hat. Splittern (Reaktion): Halbiert Schaden, danach Splitterregen 2W6 in 1,5 m.'],
+ 'x-knochenharfner':['✦ Knochenharfner','4',13,75,'10W8+30','9 m',2,[['Saitenhieb',6,'2W8+3','Hieb']],'Untot. Klagelied (Aufladung 5–6): Kreaturen in 9 m, WEI SG 14 oder 3W8 psychisch und kampfunfähig bis zum Ende ihres nächsten Zuges.'],
+ 'x-sumpflaterne':['✦ Sumpflaterne','1/2',15,18,'4W6+4','0 m, Fliegen 9 m',3,[['Irrlichtfunken',5,'2W6','Blitz']],'Lockruf: Eine Kreatur in 18 m, WEI SG 12 oder sie bewegt sich in ihrem Zug auf die Laterne zu.'],
+ 'x-eisenmotte':['✦ Eisenmotte','1/4',13,9,'2W6+2','3 m, Fliegen 12 m',2,[['Rostflügel',4,'1W4+2','Hieb']],'Frisst Metall: Ein Treffer gegen nichtmagische Metallrüstung senkt deren RK dauerhaft um 1 (bis zur Reparatur).'],
+ 'x-schattenhund':['✦ Schattenhund','3',13,52,'8W8+16','15 m',3,[['Biss',5,'2W6+3','Stich + nekrotisch']],'Rudeltaktik. Schattensprung: Teleport 9 m von Schatten zu Schatten als Bonusaktion. Im Licht: Nachteil auf Angriffe.'],
+ 'x-kristallkrabbe':['✦ Kristallkrabbe','2',17,39,'6W8+12','6 m, Schwimmen 6 m',0,[['Schere',5,'2W6+3','Hieb']],'Treffer packt (SG 13). Prisma: Wird sie von einem Zauber mit Strahl getroffen, lenkt sie ihn auf eine Kreatur in 9 m um (1× pro Runde).'],
+ 'x-runenwaechter':['✦ Runenwächter','6',18,104,'11W10+44','9 m',-1,[['Steinfaust',8,'2W10+5','Wucht']],'Konstrukt. Mehrfachangriff: zwei Fäuste. Bannrune: Zauber Grad 3 oder niedriger, die ihn als Ziel haben, scheitern bei 1–3 auf W6. Erwacht, wenn jemand die Runen auf seiner Brust berührt.'],
+ 'x-aderfuerst':['✦ Aderfürst','7',16,127,'15W8+60','9 m, Fliegen 9 m',3,[['Blutklinge',8,'2W8+4+2W6','Hieb + nekrotisch']],'Mehrfachangriff: zwei Blutklingen. Blutband: heilt die Hälfte des nekrotischen Schadens. Roter Nebel (Aufladung 5–6): 6-m-Kugel, KON SG 15, 6W8 nekrotisch.'],
  'young-red':['Junger roter Drache','10',18,178,'17W10+85','12 m, Fliegen 24 m',0,[['Biss',10,'2W10+6+1W6','Stich + Feuer'],['Klaue',10,'2W6+6','Hieb']],'Mehrfachangriff: Biss und zwei Klauen. Feueratem (Aufladung 5–6): 9-m-Kegel, GES SG 17, 16W6 Feuer.']
 };
 function npcState(x) { if (!x.hpMax) return ''; if (x.hp <= 0) return 'besiegt'; const p = x.hp / x.hpMax; return p >= 1 ? 'unverletzt' : p > 0.5 ? 'leicht verletzt' : p > 0.25 ? 'schwer verletzt' : 'am Ende'; }
@@ -231,7 +292,7 @@ function bestiaryAdder() {
 function bestiaryView() {
   const q = (S.mq || '').toLowerCase();
   const list = Object.entries(BESTIARY).filter(([, m]) => !q || m[0].toLowerCase().includes(q)).sort((a, b) => a[1][0].localeCompare(b[1][0], 'de'));
-  return '<div class="hero-intro banner" style="' + bannerStyle('drache') + '"><h1>Bestiarium</h1><p>Kreaturen aus dem SRD 5.2 – tippe Angriff und Schaden an, um zu würfeln. Am Tisch fügt die Spielleitung sie direkt in die Initiative ein.</p></div><section class="blk"><h2>Bestiarium <small>' + Object.keys(BESTIARY).length + ' Kreaturen aus dem SRD 5.2</small></h2><div class="row"><label class="fld"><span>Suchen</span><input type="text" id="mq" value="' + esc(S.mq || '') + '" placeholder="z. B. Goblin"></label></div><div class="mobs">' + list.map(([k, m]) => '<details class="mob"><summary><b>' + esc(m[0]) + '</b><small>HG ' + m[1] + ' · RK ' + m[2] + ' · TP ' + m[3] + ' (' + m[4] + ') · ' + esc(m[5]) + '</small></summary><div class="atks">' + m[7].map((a) => '<div class="atk"><div class="an"><b>' + esc(a[0]) + '</b><small>' + esc(a[3]) + '</small></div><button class="rb" data-act="xroll" data-atk="1" data-mod="' + a[1] + '" data-label="' + esc(m[0]) + ': ' + esc(a[0]) + '">' + sgn(a[1]) + '</button><button class="rb dmgb" data-act="dmg" data-expr="' + esc(a[2]) + '" data-label="' + esc(m[0]) + ': ' + esc(a[0]) + ' Schaden">' + esc(a[2]) + '</button></div>').join('') + '</div>' + (m[8] ? '<p>' + esc(m[8]) + '</p>' : '') + '</details>').join('') + '</div></section>';
+  return '<div class="hero-intro banner" style="' + bannerStyle('drache') + '"><h1>Bestiarium</h1><p>Kreaturen aus dem SRD 5.2 – tippe Angriff und Schaden an, um zu würfeln. Am Tisch fügt die Spielleitung sie direkt in die Initiative ein.</p><button class="btn" data-act="encOpen">Begegnung planen</button></div><section class="blk"><h2>Bestiarium <small>' + Object.keys(BESTIARY).length + ' Kreaturen aus dem SRD 5.2</small></h2><div class="row"><label class="fld"><span>Suchen</span><input type="text" id="mq" value="' + esc(S.mq || '') + '" placeholder="z. B. Goblin"></label></div><div class="mobs">' + list.map(([k, m]) => '<details class="mob"><summary><b>' + esc(m[0]) + '</b><small>HG ' + m[1] + ' · RK ' + m[2] + ' · TP ' + m[3] + ' (' + m[4] + ') · ' + esc(m[5]) + '</small></summary><div class="atks">' + m[7].map((a) => '<div class="atk"><div class="an"><b>' + esc(a[0]) + '</b><small>' + esc(a[3]) + '</small></div><button class="rb" data-act="xroll" data-atk="1" data-mod="' + a[1] + '" data-label="' + esc(m[0]) + ': ' + esc(a[0]) + '">' + sgn(a[1]) + '</button><button class="rb dmgb" data-act="dmg" data-expr="' + esc(a[2]) + '" data-label="' + esc(m[0]) + ': ' + esc(a[0]) + ' Schaden">' + esc(a[2]) + '</button></div>').join('') + '</div>' + (m[8] ? '<p>' + esc(m[8]) + '</p>' : '') + '</details>').join('') + '</div></section>';
 }
 
 /* ---------- Spielleitung: Gruppenrast, Handouts, Beute & EP ---------- */
@@ -258,7 +319,7 @@ function applyMeta() {
   const ch = cur(); if (!ch || !S.camp) return; const P = ch.play; const M = S.meta;
   P.camps = P.camps || {}; if (!P.camps[S.camp]) { P.camps[S.camp] = Date.now(); P.restSeen = M.rest ? M.rest.id : ''; P.gifts = (M.gifts || []).map((g) => g.id); P.hoSeen = (M.handouts || []).length; commit(false); return; }
   let changed = false;
-  if (M.rest && M.rest.id !== P.restSeen) { P.restSeen = M.rest.id; if (!P.dead) { doRest(ch, M.rest.kind, true); bannerToast(M.rest.kind === 'long' ? 'Lange Rast' : 'Kurze Rast', 'Die Spielleitung hat für alle eine Rast eingelegt.'); } changed = true; }
+  if (M.rest && M.rest.id !== P.restSeen) { P.restSeen = M.rest.id; if (!P.dead) { if (M.rest.kind === 'short') shortRestOpen(ch); else doRest(ch, M.rest.kind, true); bannerToast(M.rest.kind === 'long' ? 'Lange Rast' : 'Kurze Rast', 'Die Spielleitung hat für alle eine Rast eingelegt.'); } changed = true; }
   P.gifts = P.gifts || [];
   for (const g of M.gifts || []) {
     if (P.gifts.includes(g.id)) continue; P.gifts.push(g.id); changed = true;
@@ -276,11 +337,12 @@ function applyMeta() {
 }
 
 /* ---------- Rast (gemeinsam für Knopf und Spielleitung) ---------- */
-function doRest(ch, kind, silent) {
+function doRest(ch, kind, silent, fromDialog) {
   const c = derive(ch, S.hb); const P = ch.play;
   if (P.dead) return;
-  if (kind === 'long') { P.hp = c.hpMax; P.temp = 0; P.hdUsed = 0; P.slots = {}; P.pact = 0; P.res = {}; P.ds = [0, 0]; P.exh = Math.max(0, (+P.exh || 0) - 1); P.raging = false; P.conc = null; P.fx = {}; if (ch.species === 'human') P.insp = true; (ch.comps || []).forEach((x) => { x.hp = compStat(c, x).hpMax; }); pushLog({ label: 'Lange Rast', total: '✓', detail: 'TP, Trefferwürfel, Zauberplätze und Ressourcen zurückgesetzt' }); }
-  else { P.pact = 0; c.res.forEach((r) => { if (r.reset === 'short') P.res[r.k] = 0; else if (r.note && P.res[r.k]) P.res[r.k] = Math.max(0, P.res[r.k] - 1); }); pushLog({ label: 'Kurze Rast', total: '✓', detail: 'Kurzrast-Ressourcen zurück. Trefferwürfel kannst du einzeln ausgeben.' }); }
+  if (!fromDialog && typeof restGate === 'function' && !restGate(ch, kind)) return;
+  if (kind === 'long') { P.hp = c.hpMax; P.temp = 0; P.hdUsed = 0; P.hdBy = {}; P.relRage = 0; P.stable = false; P.ws = null; P.fxDur = {}; P.fxSrc = {}; P.localFight = false; P.slots = {}; P.pact = 0; P.res = {}; P.ds = [0, 0]; P.exh = Math.max(0, (+P.exh || 0) - 1); P.raging = false; P.conc = null; P.fx = {}; if (ch.species === 'human') P.insp = true; (ch.comps || []).forEach((x) => { x.hp = compStat(c, x).hpMax; }); pushLog({ label: 'Lange Rast', total: '✓', detail: 'TP, Trefferwürfel, Zauberplätze und Ressourcen zurückgesetzt' }); }
+  else { P.pact = 0; P.relRage = 0; c.res.forEach((r) => { if (r.reset === 'short') P.res[r.k] = 0; else if (r.note && P.res[r.k]) P.res[r.k] = Math.max(0, P.res[r.k] - 1); }); const tired = c.lv('ran') >= 10 && (+P.exh || 0) > 0; if (tired) P.exh = P.exh - 1; pushLog({ label: 'Kurze Rast', total: '✓', detail: 'Ressourcen der kurzen Rast (und Paktplätze) sind zurück.' + (tired ? ' Unermüdlich: Erschöpfung −1.' : '') }); }
   commit();
 }
 
@@ -345,12 +407,12 @@ function optDice(key, text, c, lvl) {
   return out.slice(0, 2);
 }
 function optBlock(c) {
-  const sets = (c.optSets || []).filter((o) => o.chosen.length && OPT_RES.hasOwnProperty(o.key));
+  const sets = (c.optSets || []).filter((o) => (o.use || o.chosen).length && OPT_RES.hasOwnProperty(o.key));
   if (!sets.length) return '';
   const P = c.char.play;
   return '<section class="blk" id="optBlk" data-grp="faehig kampf"><h2>Klassenoptionen <small>antippen zum Einsetzen – verbraucht Ressourcen und würfelt</small></h2>' + sets.map((o) => {
     const rk = OPT_RES[o.key]; const r = rk && c.res.find((x) => x.k === rk); const left = r ? r.max - (+P.res[rk] || 0) : null;
-    return '<h3>' + o.label + (r ? ' <small>' + r.n + ': ' + left + ' / ' + r.max + '</small>' : '') + '</h3><div class="optuse">' + o.chosen.map((k) => { const it = o.items.find((x) => x.k === k); const cost = optCost(o.key, it.text); const dice = optDice(o.key, it.text, c, o.lvl);
+    return '<h3>' + o.label + (r ? ' <small>' + r.n + ': ' + left + ' / ' + r.max + '</small>' : '') + '</h3><div class="optuse">' + (o.use || o.chosen).map((k) => { const it = o.items.find((x) => x.k === k); const cost = optCost(o.key, it.text); const dice = optDice(o.key, it.text, c, o.lvl);
       return '<div class="ou"><div><b>' + esc(it.name) + '</b><small>' + esc(it.text) + '</small></div><div class="chips">' + (cost || dice.length ? '<button class="btn sm"' + (r && cost > left ? ' disabled' : '') + ' data-act="optUse" data-set="' + o.key + '" data-arg="' + k + '">' + (cost ? 'Einsetzen (' + cost + ')' : 'Würfeln') + '</button>' : '<span class="hint" style="margin:0">dauerhaft aktiv</span>') + '</div></div>'; }).join('') + '</div>';
   }).join('') + '</section>';
 }
@@ -376,7 +438,7 @@ function printSheet() { try { S.view = 'sheet'; render(); setTimeout(() => windo
 
 /* ---------- Zusatzaktionen ---------- */
 const XA = {
-  itAtt: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; if (!x.att && attuneCount(ch) >= 3) { pushLog({ label: 'Einstimmung', total: '✗', detail: 'Du bist schon auf 3 Gegenstände eingestimmt.' }); return; } x.att = !x.att; commit(); },
+  itAtt: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; if (!x.att && attuneCount(ch) >= (derive(ch, S.hb).attuneMax || 3)) { pushLog({ label: 'Einstimmung', total: '✗', detail: 'Du bist schon auf ' + attuneCount(ch) + ' Gegenstände eingestimmt (Maximum).' }); return; } x.att = !x.att; commit(); },
   itDel: (t, a, p, ch) => { ch.items = (ch.items || []).filter((i) => i.uid !== a); commit(); },
   itQty: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; x.qty = Math.max(0, (+x.qty || 1) + +t.dataset.d); if (!x.qty) ch.items = ch.items.filter((i) => i !== x); commit(); },
   itUse: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; pushLog({ label: itemDef(x).name, total: '✦', detail: itemDef(x).text, share: true }); XA.itQty({ dataset: { d: -1 } }, a, p, ch); },
@@ -394,7 +456,7 @@ const XA = {
     const same = (c.npcs || []).filter((x) => x.mid === id).length;
     for (let i = 0; i < n; i++) { const r = 1 + Math.floor(rnd() * 20); const hp = rollHp ? Math.max(1, rollExpr(M[4]).total) : M[3]; add.push({ id: uidX(), mid: id, name: M[0] + (n > 1 || same ? ' ' + (same + i + 1) : ''), v: r + M[6], dex: M[6], hp, hpMax: hp, ac: M[2] }); }
     saveCombat(Object.assign({}, c, { npcs: (c.npcs || []).concat(add), t: Date.now(), log: clog(c, n + '× ' + M[0] + ' tritt dem Kampf bei') })); pushLog({ label: n + '× ' + M[0], total: add.map((x) => x.v).join(', '), detail: 'Initiative gewürfelt' + (rollHp ? ' · TP gewürfelt' : '') }); },
-  grpRest: (t, a) => { const id = uidX(); cur().play.restSeen = id; saveMeta({ rest: { id, kind: a, t: Date.now() } }); doRest(cur(), a); },
+  grpRest: (t, a) => { if (typeof restGate === 'function' && !restGate(cur(), a)) return; const id = uidX(); cur().play.restSeen = id; saveMeta({ rest: { id, kind: a, t: Date.now() } }); doRest(cur(), a); },
   gift: () => { const to = $('#gTo').value; const g = { id: uidX(), to, from: UID, xp: +$('#gXp').value || 0, gm: +$('#gGm').value || 0, item: $('#gItem').value || '', text: ($('#gText').value || '').trim(), t: Date.now() }; if (!g.xp && !g.gm && !g.item && !g.text) { $('#gXp').focus(); return; } saveMeta({ gifts: (S.meta.gifts || []).concat([g]).slice(-30) }); pushLog({ label: 'Beute verteilt', total: '✦', detail: [g.xp && g.xp + ' EP', g.gm && g.gm + ' GM', g.item && MAGIC_ITEMS[g.item].name, g.text].filter(Boolean).join(', ') + ' an ' + (to === 'all' ? 'alle' : (S.table[to] || {}).char) }); },
   hoAdd: () => { const title = ($('#hoT').value || '').trim(); const text = ($('#hoX').value || '').trim(); if (!text) { $('#hoX').focus(); return; } saveMeta({ handouts: (S.meta.handouts || []).concat([{ id: uidX(), title, text, t: Date.now() }]).slice(-20) }); },
   hoDel: (t, a) => { saveMeta({ handouts: (S.meta.handouts || []).filter((x) => x.id !== a) }); },
@@ -423,10 +485,10 @@ const SHEET_GROUPS = [['kampf', 'Kampf'], ['werte', 'Werte'], ['zauber', 'Zauber
 function sheetNav(c) {
   const g = mgOf(c);
   const list = SHEET_GROUPS.filter(([k]) => k !== 'zauber' || c.spell.has || c.extraSpells.length);
-  return '<nav class="mnav" aria-label="Abschnitte">' + list.map(([k, l]) => '<button class="' + (g === k ? 'on' : '') + '" data-act="mg" data-arg="' + k + '">' + l + '</button>').join('') + '</nav>';
+  return '<nav class="mnav" aria-label="Seiten des Bogens">' + list.map(([k, l]) => '<button class="' + (g === k ? 'on' : '') + '" data-act="mg" data-arg="' + k + '">' + l + '</button>').join('') + '<button class="mexp' + (typeof explainOn === 'function' && explainOn() ? ' on' : '') + '" data-act="explain" title="Rechenweg aller Werte anzeigen">Rechenweg</button>' + '<button class="mall' + (g === 'alle' ? ' on' : '') + '" data-act="mg" data-arg="alle" title="Alles auf einer Seite">Alles</button>' + (typeof S !== 'undefined' ? '<button class="undobtn" data-act="undo" title="Letzte Änderung rückgängig (Strg+Z)"' + (S.undo && S.undo.some((u) => u.id === S.cur) ? '' : ' disabled') + '>↶ <span>Rückgängig</span> <b>' + ((S.undo || []).filter((u) => u.id === S.cur).length || '') + '</b></button>' : '') + '</nav>';
 }
 XA.mg = (t, a) => { S.mg = a; try { localStorage.setItem('heldenbuch_mg', a); } catch (e) {} render(); const n = document.querySelector('.mnav'); if (n) { const top = n.getBoundingClientRect().top + window.scrollY - 70; if (window.scrollY > top) window.scrollTo(0, top); } };
-function mgOf(c) { if (S.mg === undefined) { try { S.mg = localStorage.getItem('heldenbuch_mg') || 'kampf'; } catch (e) { S.mg = 'kampf'; } } return S.mg === 'zauber' && !(c.spell.has || c.extraSpells.length) ? 'kampf' : (S.mg || 'kampf'); }
+function mgOf(c) { if (S.mg === undefined) { try { S.mg = localStorage.getItem('heldenbuch_mg') || 'kampf'; } catch (e) { S.mg = 'kampf'; } } if (S.mg === 'alle' && window.innerWidth <= 820) return 'kampf'; return S.mg === 'zauber' && !(c.spell.has || c.extraSpells.length) ? 'kampf' : (S.mg || 'kampf'); }
 
 /* ---------- Untere Navigation (Handy) ---------- */
 const NAV_ICON = {
@@ -462,8 +524,9 @@ function isApp() { return typeof APP_MODE !== 'undefined' && APP_MODE === 'app';
 const WEB_APP = 'https://sicherungskontoeko-hash.github.io/heldenbuch/';
 function appLink(code) { if (!/^https?:/.test(location.protocol) || /^https?:\/\/localhost/.test(location.href)) return WEB_APP + '#raum=' + encodeURIComponent(code); const srv = hbLs.get('hb_server', 'hivemq'); return location.origin + location.pathname + '#raum=' + encodeURIComponent(code) + (srv !== 'hivemq' && srv !== 'custom' ? '&srv=' + srv : ''); }
 function appInviteText() { const code = S.camp || ''; const l = appLink(code); return 'Komm an unseren Tisch im Heldenbuch! ⚔\n' + (l ? l + '\n' : '') + 'Raumcode: ' + code + '\nÖffne das Heldenbuch, tippe unten auf „Tisch“ und gib den Code ein.'; }
-function newRoomCode(name) { const base = campSlug(name || '').slice(0, 20) || 'runde'; const abc = 'abcdefghjkmnpqrstuvwxyz23456789'; let r = ''; for (let i = 0; i < 5; i++) r += abc[Math.floor(rnd() * abc.length)]; return base + '-' + r; }
+function newRoomCode(name) { const base = campSlug(name || '').slice(0, 20) || 'runde'; const abc = 'abcdefghjkmnpqrstuvwxyz23456789'; let r = ''; for (let i = 0; i < 8; i++) r += abc[Math.floor(rnd() * abc.length)]; return base + '-' + r; }
 function appCampStatus() {
+  if (typeof HB_NOCRYPTO !== 'undefined' && HB_NOCRYPTO) return '<p class="cstat bad">Online-Tisch nicht verfügbar: Dieser Browser bietet keine sichere Verschlüsselung (WebCrypto). Öffne die App über https oder als installierte App – unverschlüsselt sendet das Heldenbuch nie.</p>';
   const st = HBNET.state; const name = (Object.entries(HB_BROKERS).find(([k]) => k === hbLs.get('hb_server', 'hivemq')) || [0, ['eigener Server']])[1][0];
   if (st === 'online') return '<p class="cstat ok">● Online' + (!S.share ? ' – du würfelst verdeckt' : S.secret ? ' – nur die Spielleitung sieht deine Würfe' : ' – deine Würfe werden geteilt') + ' <small>(' + esc(name) + ')</small></p>';
   if (st === 'verbinde') return '<p class="cstat">◌ Verbinde mit dem Tisch …</p>';
@@ -471,12 +534,12 @@ function appCampStatus() {
 }
 function serverPicker() {
   const cur = hbLs.get('hb_server', 'hivemq');
-  return '<details class="srv"><summary>Verbindung</summary><p class="hint">Alle am Tisch müssen denselben Server nutzen. Die Daten eines Raums sieht nur, wer den Raumcode kennt – teile ihn nur mit deiner Gruppe.</p><div class="chips">' + Object.entries(HB_BROKERS).map(([k, v]) => chip(cur === k, v[0], 'data-act="srv" data-arg="' + k + '"')).join('') + chip(cur === 'custom', 'Eigener Server', 'data-act="srv" data-arg="custom"') + '</div>' + (cur === 'custom' ? '<label class="fld"><span>WebSocket-Adresse (wss://…)</span><input type="text" id="srvUrl" value="' + esc(hbLs.get('hb_server_url', '')) + '" placeholder="wss://mein-server:8084/mqtt"></label><button class="btn sm ghost" data-act="srvSave">Speichern</button>' : '') + '</details>';
+  return '<details class="srv"><summary>Verbindung</summary><p class="hint">Alle am Tisch müssen denselben Server nutzen. Die Tischdaten laufen über diesen öffentlichen Server, sind aber Ende-zu-Ende verschlüsselt: Der Server sieht weder Raumcode noch Inhalte, und ohne Raumcode kann niemand mitlesen oder Daten einschleusen. Teile den Code nur mit deiner Gruppe und schreib nichts Vertrauliches in den Tisch.</p><div class="chips">' + Object.entries(HB_BROKERS).map(([k, v]) => chip(cur === k, v[0], 'data-act="srv" data-arg="' + k + '"')).join('') + chip(cur === 'custom', 'Eigener Server', 'data-act="srv" data-arg="custom"') + '</div>' + (cur === 'custom' ? '<label class="fld"><span>WebSocket-Adresse (wss://…)</span><input type="text" id="srvUrl" value="' + esc(hbLs.get('hb_server_url', '')) + '" placeholder="wss://mein-server:8084/mqtt"></label><button class="btn sm ghost" data-act="srvSave">Speichern</button>' : '') + '</details>';
 }
 function appJoinHtml() {
   return '<div class="campjoin"><div class="hero-intro banner" style="' + bannerStyle('waldlaeufer') + '"><h1>Gemeinsamer Tisch</h1><p>Handys und PCs spielen zusammen: Alle im selben Raum sehen Würfe, Initiative und die Gruppe live. Kein Konto nötig.</p></div>' +
     '<section class="panel"><h2>Als Spielleitung: Raum erstellen</h2><p class="hint">Gib deiner Runde einen Namen – die App hängt einen Zufallscode an, damit niemand Fremdes hineinfindet.</p><div class="row"><label class="fld"><span>Name der Runde</span><input type="text" id="roomName" placeholder="z. B. Schatten von Valdris" autocomplete="off"></label></div><div class="chips"><button class="btn big" data-act="roomNew">Raum erstellen</button></div></section>' +
-    '<section class="panel"><h2>Als Spieler: Raum beitreten</h2><p class="hint">Den Raumcode bekommst du von deiner Spielleitung, z. B. per WhatsApp.</p><div class="row"><label class="fld"><span>Raumcode</span><input type="text" id="campCode" placeholder="z. B. schatten-von-valdris-k7m2q" autocomplete="off" autocapitalize="none"></label></div><div class="chips"><button class="btn big" data-act="campJoin">Beitreten</button></div>' + serverPicker() + '</section></div>';
+    '<section class="panel"><h2>Als Spieler: Raum beitreten</h2><p class="hint">Den Raumcode bekommst du von deiner Spielleitung, z. B. per WhatsApp. Er ist gleichzeitig der Schlüssel für die Verschlüsselung.</p><div class="row"><label class="fld"><span>Raumcode</span><input type="text" id="campCode" placeholder="z. B. schatten-von-valdris-k7m2q" autocomplete="off" autocapitalize="none"></label></div><div class="chips"><button class="btn big" data-act="campJoin">Beitreten</button></div>' + serverPicker() + '</section></div>';
 }
 function transferHtml() {
   return '<section class="panel transfer"><h2>Helden zwischen Geräten übertragen</h2><p class="hint">Vom Handy auf den PC oder umgekehrt: Auf dem alten Gerät „Senden“ tippen, auf dem neuen Gerät den Code eingeben. Beide Geräte brauchen Internet.</p><div class="row"><button class="btn ghost" data-act="txSend">Aktiven Helden senden</button><label class="fld"><span>Code empfangen</span><input type="text" id="txCode" placeholder="z. B. 4K7M2Q" autocomplete="off" autocapitalize="characters"></label><button class="btn ghost" data-act="txRecv">Empfangen</button></div>' + (S.txCode ? '<p class="txcode">Code: <b>' + esc(S.txCode) + '</b> <small>– gültig, bis er empfangen wurde</small></p>' : '') + '</section>';
@@ -489,7 +552,8 @@ XA.txRecv = () => { const c = ($('#txCode').value || '').trim().toUpperCase(); i
 function appAutoJoin() { const m = /raum=([^&]+)/.exec(location.hash || ''); if (!m) return; const sv = /srv=([a-z]+)/.exec(location.hash); if (sv && HB_BROKERS[sv[1]]) hbLs.set('hb_server', sv[1]); try { history.replaceState(null, '', location.pathname); } catch (e) {} S.view = 'camp'; setTimeout(() => joinCamp(decodeURIComponent(m[1])), 300); }
 
 /* ---------- Banner und Porträts ---------- */
-function bannerStyle(k) { return ART[k] ? '--art:url(' + ART[k] + ')' : ''; }
+const BANNER_OF = { paladin: 'helden', waldlaeufer: 'tisch', drache: 'bestiarium', magier: 'hilfe' };
+function bannerStyle(k) { const b = BANNER[BANNER_OF[k] || k]; return b ? '--art:url(' + b + ')' : (ART[k] ? '--art:url(' + ART[k] + ')' : ''); }
 function portraitPicker(ch) {
   const cur = ch.portrait || '';
   const opt = (val, inner, label) => '<button class="ppk' + (cur === val ? ' on' : '') + '" data-act="portrait" data-arg="' + val + '" title="' + esc(label) + '">' + inner + '<small>' + esc(label) + '</small></button>';

@@ -2,9 +2,9 @@
 const mod = (s) => Math.floor((s - 10) / 2);
 const sgn = (n) => (n >= 0 ? '+' : '−') + Math.abs(n);
 const LAND = {
- arid:{name:'Trocken',dmg:'Feuer',sp:{3:['blur','burning-hands','fire-bolt'],5:['fireball']}},
- polar:{name:'Polar',dmg:'Kälte',sp:{3:['fog-cloud','hold-person','ray-of-frost'],7:['ice-storm'],9:['cone-of-cold']}},
- temperate:{name:'Gemässigt',dmg:'Blitz',sp:{3:['misty-step','shocking-grasp','sleep'],5:['lightning-bolt'],7:['freedom-of-movement']}},
+ arid:{name:'Trocken',dmg:'Feuer',sp:{3:['blur','burning-hands','fire-bolt'],5:['fireball'],7:['blight'],9:['wall-of-stone']}},
+ polar:{name:'Polar',dmg:'Kälte',sp:{3:['fog-cloud','hold-person','ray-of-frost'],5:['sleet-storm'],7:['ice-storm'],9:['cone-of-cold']}},
+ temperate:{name:'Gemässigt',dmg:'Blitz',sp:{3:['misty-step','shocking-grasp','sleep'],5:['lightning-bolt'],7:['freedom-of-movement'],9:['tree-stride']}},
  tropical:{name:'Tropisch',dmg:'Gift',sp:{3:['acid-splash','ray-of-sickness','web'],5:['stinking-cloud'],7:['polymorph'],9:['insect-plague']}}
 };
 const DIE_MAX = (d) => { const m = /W(\d+)/.exec(d); return m ? +m[1] : 1; };
@@ -12,14 +12,14 @@ const DIE_MAX = (d) => { const m = /W(\d+)/.exec(d); return m ? +m[1] : 1; };
 function newChar(over) {
   return Object.assign({
     id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    name: 'Neuer Held', player: '', level: 1, cls: 'fig', order: '', land: 'temperate',
+    v: 2, name: 'Neuer Held', player: '', level: 1, cls: 'fig', order: '', land: 'temperate',
     species: 'human', speciesChoice: '', speciesSkill: '', speciesSpellAbility: 'wis',
     bg: 'soldier', bgCustom: { name: 'Eigener Hintergrund', abil: ['str','dex','con'], skills: ['ath','prc'], feat: 'alert' },
     bgMode: '21', bgPlus: { str: 2, con: 1 },
     method: 'standard', base: { str: 15, dex: 13, con: 14, int: 8, wis: 12, cha: 10 },
     classSkills: [], extraSkills: [], expertise: [], humanFeat: 'skilled',
     asi: {}, styles: [], invocations: [], mi: {},
-    cantrips: [], spells: [], arcanum: {},
+    cantrips: [], spells: [], book: [], arcanum: {},
     armor: 'none', armorBonus: 0, shield: false, shieldBonus: 0, mageArmor: false,
     weapons: [], misc: { ac: 0, save: 0, dc: 0, atk: 0, speed: 0, hp: 0, init: 0 },
     hpMode: 'avg', hpRolls: {}, gold: 0, inventory: '', notes: '', appearance: '', alignment: '', languages: 'Gemeinsprache',
@@ -60,29 +60,33 @@ function derive(ch, hb) {
   const multi = (ch.multi || []).filter((m) => CLASSES[m.cls] && m.cls !== ch.cls && +m.level > 0);
   const levels = {}; levels[ch.cls] = Math.max(1, +ch.level || 1);
   multi.forEach((m) => { levels[m.cls] = (levels[m.cls] || 0) + (+m.level); });
-  const L = Math.max(1, Math.min(20, Object.values(levels).reduce((a, b) => a + b, 0)));
+  const warn0 = []; const capOn = typeof rule !== 'function' || rule('lvlcap');
+  if (capOn) { let over = Object.values(levels).reduce((a, b) => a + b, 0) - 20; if (over > 0) { warn0.push('Die Gesamtstufe darf höchstens 20 sein – überzählige Stufen werden ignoriert.'); for (const m of multi.slice().reverse()) { if (over <= 0) break; const cut = Math.min(over, levels[m.cls] - 0); levels[m.cls] -= cut; over -= cut; } if (over > 0) levels[ch.cls] = Math.max(1, levels[ch.cls] - over); } }
+  for (const k of Object.keys(levels)) if (levels[k] <= 0) delete levels[k];
+  const L = Math.max(1, Object.values(levels).reduce((a, b) => a + b, 0));
   const lv = (id) => levels[id] || 0;
   const mOf = (id) => (id === ch.cls ? ch : multi.find((m) => m.cls === id) || {});
   const ord = (id) => (lv(id) ? mOf(id).order || '' : '');
-  const classList = [{ id: ch.cls, C: cls, lvl: levels[ch.cls], primary: true, m: ch, idx: -1 }].concat(multi.map((m, i) => ({ id: m.cls, C: CLASSES[m.cls], lvl: +m.level, primary: false, m, idx: (ch.multi || []).indexOf(m) })));
-  for (const e of classList) { const C = e.C; const chosen = C.subs ? C.subs.find((s) => s.id === e.m.sub) : null; e.subChosen = !C.subs || !!chosen || !!C.subDefault; const sb = chosen || (C.subs ? C.subs[0] : { name: C.sub.name, feats: C.subFeats, id: C.sub.id }); e.subName = sb.name; e.subFeats = sb.feats; e.subId = sb.id; e.subSpells = chosen ? chosen.spells : C.subs ? C.subs[0].spells : C.sub.spells; }
+  const classList = [{ id: ch.cls, C: cls, lvl: levels[ch.cls], primary: true, m: ch, idx: -1 }].concat(multi.filter((m) => levels[m.cls] > 0).map((m, i) => ({ id: m.cls, C: CLASSES[m.cls], lvl: levels[m.cls], primary: false, m, idx: (ch.multi || []).indexOf(m) })));
+  for (const e of classList) { const C = e.C; const chosen = C.subs ? C.subs.find((s) => s.id === e.m.sub) : null; e.subChosen = !C.subs || !!chosen; const sb = chosen || (C.subs ? { name: '', feats: [], id: null } : { name: C.sub.name, feats: C.subFeats, id: C.sub.id }); if (C.subs && e.m.sub && !chosen) warn0.push('Unbekannte Unterklasse „' + e.m.sub + '“ bei ' + C.name + ' – bitte neu wählen.'); e.subName = sb.name; e.subFeats = sb.feats; e.subId = sb.id; e.subGrant = (chosen || !C.subs) ? sb.grant || null : null; e.subSpells = chosen ? chosen.spells : C.subs ? null : C.sub.spells; }
   const subOf = (id) => (classList.find((e) => e.id === id) || {}).subId;
   const sp = SPECIES[ch.species] || SPECIES.human;
   const bg = bgOf(ch);
   const pb = 2 + Math.floor((L - 1) / 4);
   const hasSub = lv(ch.cls) >= 3;
-  const warn = [];
+  const warn = warn0;
   const c = { char: ch, level: L, cls, sp, bg, pb, hasSub: lv(ch.cls) >= 3, warn, notes: [], lv, ord, classes: classList, multi: multi.length > 0, subName: classList[0].subName, subOf };
   c.classLabel = classList.map((e) => e.C.name + ' ' + e.lvl).join(' / ');
-  if (Object.values(levels).reduce((a, b) => a + b, 0) > 20) warn.push('Die Gesamtstufe darf höchstens 20 sein.');
   const homebrew = (ch.homebrew || []).map((id) => hb[id]).filter(Boolean).concat(typeof itemFx === 'function' ? itemFx(ch) : []);
-  if (typeof attuneCount === 'function' && attuneCount(ch) > 3) warn.push('Einstimmung: höchstens 3 Gegenstände – entferne eine Einstimmung.');
+  c.attuneMax = lv('rog') >= 13 && subOf('rog') === 'thief' ? 4 : 3;
+  if (typeof attuneCount === 'function' && attuneCount(ch) > c.attuneMax) warn.push('Einstimmung: höchstens ' + c.attuneMax + ' Gegenstände – entferne eine Einstimmung.');
 
   /* --- Talente sammeln --- */
   const feats = [];
   if (bg.feat) feats.push({ src: 'Hintergrund', id: bg.feat, f: featById(bg.feat, hb), slot: 'bg' });
   if (sp.bonusFeat) feats.push({ src: 'Spezies (Vielseitig)', id: ch.humanFeat, f: featById(ch.humanFeat, hb), slot: 'human' });
-  const styleN = classList.reduce((n, e) => n + (e.C.fightingStyle && e.lvl >= e.C.fightingStyle ? 1 : 0), 0) + (lv('fig') >= 7 ? 1 : 0);
+  if (lv('wlk') >= 2 && (ch.invocations || []).includes('lessons')) { if (ch.lessonsFeat) feats.push({ src: 'Lehren der Ersten', id: ch.lessonsFeat, f: featById(ch.lessonsFeat, hb), slot: 'lessons' }); else warn.push('Lehren der Ersten: Herkunftstalent wählen.'); }
+  const styleN = classList.reduce((n, e) => n + (e.C.fightingStyle && e.lvl >= e.C.fightingStyle ? 1 : 0), 0) + (lv('fig') >= 7 && subOf('fig') === 'champion' ? 1 : 0);
   c.styleN = styleN;
   (ch.styles || []).slice(0, styleN).forEach((id) => feats.push({ src: 'Kampfstil', id, f: featById(id, hb), slot: 'style' }));
   if (styleN && (ch.styles || []).filter(Boolean).length < styleN) warn.push('Kampfstil wählen (' + styleN + ').');
@@ -98,18 +102,19 @@ function derive(ch, hb) {
   }
   for (const x of feats) x.opt = x.slot === 'asi' ? (ch.asi[x.lv] || {}) : ((ch.featOpt || {})[x.slot === 'style' ? 'style' : x.slot] || {});
   c.feats = feats.filter((x) => x.f);
-  if (ch.invocations.includes('lessons') && ch.cls === 'wlk') {}
+
 
   /* --- Attribute --- */
   const abil = {}; const breakdown = {};
   for (const k of AB) { abil[k] = +ch.base[k] || 8; breakdown[k] = ['Basis ' + abil[k]]; }
+  if (ch.method === 'manual') { const badB = AB.filter((k) => abil[k] < 3 || abil[k] > 20); if (badB.length) warn.push('Basiswerte ausserhalb 3–20: ' + badB.map((k) => AB_K[k]).join(', ') + '.'); }
   const bgA = bg.abil || [];
   const plus = ch.bgPlus || {};
   let bgSum = 0;
   for (const k of AB) {
     const p = +plus[k] || 0;
     if (p && !bgA.includes(k)) continue;
-    if (p) { abil[k] += p; bgSum += p; breakdown[k].push('Hintergrund +' + p); }
+    if (p) { const capA = typeof rule !== 'function' || rule('abilcap') ? 20 : 30; const nv = Math.min(capA, abil[k] + p); if (nv < abil[k] + p) warn.push(AB_K[k] + ': Hintergrund-Bonus über 20 verfällt.'); abil[k] = nv; bgSum += p; breakdown[k].push('Hintergrund +' + p); }
   }
   const bgVals = AB.map((k) => (bgA.includes(k) ? +plus[k] || 0 : 0)).filter((x) => x);
   const okBg = (ch.bgMode === '21' && bgVals.sort().join() === '1,2') || (ch.bgMode === '111' && bgVals.length === 3 && bgVals.every((x) => x === 1));
@@ -125,13 +130,13 @@ function derive(ch, hb) {
     if (s !== '15,14,13,12,10,8') warn.push('Standardwerte: Jeder Wert (15, 14, 13, 12, 10, 8) genau einmal.');
   }
   for (const x of c.feats) {
-    const cap = x.f.cap30 ? 30 : 20;
+    const cap = x.f.cap30 || (typeof rule === 'function' && !rule('abilcap')) ? 30 : 20;
     if (x.f.asi) {
       const p = x.plus || {}; let sum = 0;
       for (const k of AB) { const v = +p[k] || 0; if (v) { sum += v; abil[k] = Math.min(cap, abil[k] + v); breakdown[k].push(x.src + ' +' + v); } }
       if (sum !== 2) warn.push(x.src + ': Attributswerterhöhung verteilen (+2 oder +1/+1).');
     } else if (x.f.plus) {
-      const p = x.plus || {}; const k = AB.find((k) => p[k]);
+      const p = x.plus || {}; const k = x.f.plus.length === 1 ? x.f.plus[0] : AB.find((k) => p[k]);
       if (k && x.f.plus.includes(k)) { abil[k] = Math.min(cap, abil[k] + 1); breakdown[k].push(x.src + ' +1'); }
       else if (x.slot === 'asi') warn.push(x.src + ': Attribut für +1 wählen (' + x.f.plus.map((k) => AB_K[k]).join('/') + ').');
     }
@@ -139,6 +144,9 @@ function derive(ch, hb) {
   if (lv('bar') >= 20) for (const k of ['str', 'con']) { abil[k] = Math.min(25, abil[k] + 4); breakdown[k].push('Urgewalt +4'); }
   if (lv('mon') >= 20) for (const k of ['dex', 'wis']) { abil[k] = Math.min(25, abil[k] + 4); breakdown[k].push('Körper und Geist +4'); }
   if (typeof itemSet === 'function') itemSet(ch, abil, breakdown);
+  const wsS = ch.play && ch.play.ws && typeof WS_STATS !== 'undefined' ? WS_STATS[ch.play.ws] : null;
+  c.conOrig = abil.con;
+  if (wsS) for (const k of ['str', 'dex', 'con']) { abil[k] = wsS[k]; breakdown[k] = ['Tiergestalt ' + wsS[k]]; }
   c.abil = abil; c.breakdown = breakdown;
   if (multi.length) for (const e of classList) { const req = MC_PREREQ[e.id] || []; const ok = req.every((grp) => grp.some((a) => abil[a] >= 13)); if (!ok) warn.push('Multiclassing ' + e.C.name + ': braucht ' + req.map((g) => g.map((a) => AB_K[a]).join(' oder ')).join(' und ') + ' von mindestens 13.'); }
   c.mod = {}; for (const k of AB) c.mod[k] = mod(abil[k]);
@@ -151,7 +159,7 @@ function derive(ch, hb) {
   const aura = lv('pal') >= 6 ? Math.max(1, c.mod.cha) : 0;
   const hbSave = homebrew.reduce((s, h) => s + (+h.save || 0), 0);
   c.saves = {};
-  for (const k of AB) c.saves[k] = { prof: saveProf.has(k), val: c.mod[k] + (saveProf.has(k) ? pb : 0) + aura + (+ch.misc.save || 0) + hbSave };
+  for (const k of AB) { const parts = [AB_K[k] + ' ' + sgn(c.mod[k])]; if (saveProf.has(k)) parts.push('Übung ' + sgn(pb)); if (aura) parts.push('Aura des Schutzes ' + sgn(aura)); if (+ch.misc.save) parts.push('Sonstiges ' + sgn(+ch.misc.save)); homebrew.forEach((h) => { if (+h.save) parts.push(h.name + ' ' + sgn(+h.save)); }); c.saves[k] = { prof: saveProf.has(k), val: c.mod[k] + (saveProf.has(k) ? pb : 0) + aura + (+ch.misc.save || 0) + hbSave, parts }; }
   if (aura) c.notes.push('Aura des Schutzes +' + aura + ' auf alle Rettungswürfe eingerechnet.');
 
   /* --- Fertigkeiten --- */
@@ -166,6 +174,10 @@ function derive(ch, hb) {
   c.feats.forEach((x) => { if (x.f.skills) { extraN += x.f.skills; extraSrc.push(x.f.name); } });
   if (lv('brd') >= 3 && subOf('brd') === 'lore') { extraN += 3; extraSrc.push('Schule des Wissens'); }
   if (lv('bar') >= 3) { extraN += 1; extraSrc.push('Urwissen'); }
+  if (lv('brd') >= 3 && subOf('brd') === 'stars') { addP('arc', 'Himmelskunde'); addP('nat', 'Himmelskunde'); }
+  if (lv('brd') >= 3 && subOf('brd') === 'masken') { addP('dec', 'Hofzunge'); addP('prf', 'Hofzunge'); }
+  if (lv('bar') >= 3 && subOf('bar') === 'ahnen') addP('his', 'Stimmen der Ahnen');
+  if (lv('mon') >= 3 && subOf('mon') === 'waage') addP('med', 'Ruhiger Atem');
   multi.forEach((m) => { if (MC_SKILL[m.cls]) { extraN += 1; extraSrc.push('Multiclassing ' + CLASSES[m.cls].name); } });
   c.extraN = extraN; c.extraSrc = extraSrc;
   (ch.extraSkills || []).slice(0, extraN).forEach((s) => addP(s, 'Zusatz'));
@@ -178,6 +190,8 @@ function derive(ch, hb) {
   c.expFrom = !featExp && onlyWiz ? CLASSES.wiz.expertiseFrom : null;
   const exp = (ch.expertise || []).filter((s) => prof[s] && (!c.expFrom || c.expFrom.includes(s))).slice(0, expN);
   exp.forEach((s) => { prof[s] = 2; });
+  const optsOf = (id) => (lv(id) ? mOf(id).opts || [] : []);
+  if (optsOf('bw').includes('zunge') && lv('bw') >= 2) { if (prof.itm) prof.itm = 2; else addP('itm', 'Rote Zunge'); }
   if (exp.length < expN) warn.push('Expertise: noch ' + (expN - exp.length) + ' wählen.');
   const jack = lv('brd') >= 2 ? Math.floor(pb / 2) : 0;
   const ordBonus = {};
@@ -186,19 +200,21 @@ function derive(ch, hb) {
   c.skills = {};
   for (const s of ALL_SKILLS) {
     const p = prof[s] || 0; const a = SKILLS[s][1];
-    c.skills[s] = { prof: p, val: c.mod[a] + (p ? p * pb : jack) + (ordBonus[s] || 0), src: src[s] || [] };
+    const parts = [AB_K[a] + ' ' + sgn(c.mod[a])]; if (p === 2) parts.push('Expertise ' + sgn(2 * pb)); else if (p) parts.push('Übung ' + sgn(pb)); else if (jack) parts.push('Alleskönner ' + sgn(jack)); if (ordBonus[s]) parts.push((ord('cle') === 'thaumaturge' ? 'Thaumaturg' : 'Magier-Ordnung') + ' ' + sgn(ordBonus[s]));
+    c.skills[s] = { prof: p, val: c.mod[a] + (p ? p * pb : jack) + (ordBonus[s] || 0), src: src[s] || [], parts };
   }
   c.passive = 10 + c.skills.prc.val + c.feats.reduce((s, x) => s + (x.f.passive || 0), 0);
   c.passiveIns = 10 + c.skills.ins.val;
 
-  /* --- Trefferpunkte --- */
-  const hd = cls.hd; let hp = hd + c.mod.con; const hpParts = ['Stufe 1: ' + hd + ' ' + sgn(c.mod.con)];
+  /* --- Trefferpunkte (in Tiergestalt mit der eigenen KON) --- */
+  const conM = mod(c.conOrig);
+  const hd = cls.hd; let hp = hd + conM; const hpParts = ['Stufe 1: ' + hd + ' ' + sgn(conM)];
   for (let l = 2; l <= lv(ch.cls); l++) {
     const roll = ch.hpMode === 'roll' && +ch.hpRolls[l] ? Math.min(hd, +ch.hpRolls[l]) : hd / 2 + 1;
-    hp += Math.max(1, roll + c.mod.con);
+    hp += Math.max(1, roll + conM);
   }
-  if (lv(ch.cls) > 1) hpParts.push(cls.name + ' 2–' + lv(ch.cls) + ': ' + (ch.hpMode === 'roll' ? 'gewürfelt' : 'Durchschnitt ' + (hd / 2 + 1)) + ' ' + sgn(c.mod.con) + ' je Stufe');
-  multi.forEach((m) => { const d = CLASSES[m.cls].hd; for (let l = 1; l <= +m.level; l++) { const roll = ch.hpMode === 'roll' && m.hpRolls && +m.hpRolls[l] ? Math.min(d, +m.hpRolls[l]) : d / 2 + 1; hp += Math.max(1, roll + c.mod.con); } hpParts.push(CLASSES[m.cls].name + ' ' + m.level + '× W' + d + ' (' + (ch.hpMode === 'roll' ? 'gewürfelt' : 'Durchschnitt ' + (d / 2 + 1)) + ' ' + sgn(c.mod.con) + ')'); });
+  if (lv(ch.cls) > 1) hpParts.push(cls.name + ' 2–' + lv(ch.cls) + ': ' + (ch.hpMode === 'roll' ? 'gewürfelt' : 'Durchschnitt ' + (hd / 2 + 1)) + ' ' + sgn(conM) + ' je Stufe');
+  multi.forEach((m) => { const d = CLASSES[m.cls].hd; for (let l = 1; l <= +m.level; l++) { const roll = ch.hpMode === 'roll' && m.hpRolls && +m.hpRolls[l] ? Math.min(d, +m.hpRolls[l]) : d / 2 + 1; hp += Math.max(1, roll + conM); } hpParts.push(CLASSES[m.cls].name + ' ' + m.level + '× W' + d + ' (' + (ch.hpMode === 'roll' ? 'gewürfelt' : 'Durchschnitt ' + (d / 2 + 1)) + ' ' + sgn(conM) + ')'); });
   c.hdPool = classList.map((e) => ({ d: e.C.hd, n: e.lvl })).sort((a, b) => b.d - a.d).reduce((acc, x) => { const f = acc.find((y) => y.d === x.d); if (f) f.n += x.n; else acc.push(x); return acc; }, []);
   if (sp.hpPerLevel) { hp += L; hpParts.push('Zwergische Zähigkeit +' + L); }
   if (lv('sor') >= 3 && subOf('sor') === 'draconic') { hp += lv('sor'); hpParts.push('Drachische Widerstandskraft +' + lv('sor')); }
@@ -216,6 +232,8 @@ function derive(ch, hb) {
   if (lv('ma') >= 3 && subOf('ma') === 'combat') profArmor.add('heavy');
   if (lv('wlk') >= 3 && subOf('wlk') === 'shadowblade') { profArmor.add('medium'); profArmor.add('shield'); }
   if (ord('dru') === 'warden') profArmor.add('medium');
+  if (lv('cle') >= 3 && subOf('cle') === 'esse') profArmor.add('heavy');
+  if (lv('brd') >= 3 && subOf('brd') === 'klingentakt') profArmor.add('medium');
   if (c.feats.some((x) => x.f.shieldProf)) profArmor.add('shield');
   const opts = [];
   if (ar.type === 'none') {
@@ -232,13 +250,15 @@ function derive(ch, hb) {
   }
   opts.sort((a, b) => b[0] - a[0]);
   let ac = opts[0][0]; const acParts = [opts[0][1]];
-  if (ch.shield) { ac += 2 + (+ch.shieldBonus || 0); acParts.push('Schild +' + (2 + (+ch.shieldBonus || 0))); if (!profArmor.has('shield')) warn.push('Keine Übung mit Schilden.'); }
+  if (ch.shield) { if (profArmor.has('shield')) { ac += 2 + (+ch.shieldBonus || 0); acParts.push('Schild +' + (2 + (+ch.shieldBonus || 0))); } else { acParts.push('Schild ohne Übung: kein RK-Bonus'); warn.push('Keine Übung mit Schilden: Der Schild gibt keinen RK-Bonus (D&D 2024).'); } }
   if (ar.type !== 'none' && c.feats.some((x) => x.f.defense)) { ac += 1; acParts.push('Kampfstil Verteidigung +1'); }
+  if (ar.type !== 'none' && lv('ma') >= 3 && subOf('ma') === 'combat') { ac += 1; acParts.push('Panzerschmied +1'); }
   c.feats.forEach((x) => { if (x.f.ac) { ac += x.f.ac; acParts.push(x.f.name + ' ' + sgn(x.f.ac)); } if (x.f.acShield && ch.shield) { ac += x.f.acShield; acParts.push(x.f.name + ' +' + x.f.acShield); } });
   homebrew.forEach((h) => { if (+h.ac) { ac += +h.ac; acParts.push(h.name + ' ' + sgn(+h.ac)); } });
   if (+ch.misc.ac) { ac += +ch.misc.ac; acParts.push('Sonstiges ' + sgn(+ch.misc.ac)); }
+  if (((ch.play || {}).fx || {}).shield) { ac += 5; acParts.push('Schild (Zauber) +5'); }
   c.ac = ac; c.acParts = acParts;
-  c.armorStealthDis = !!ar.stealth; c.armorNonProf = ar.type !== 'none' && !profArmor.has(ar.type);
+  c.armorStealthDis = !!ar.stealth; c.armorNonProf = ar.type !== 'none' && !profArmor.has(ar.type); c.heavyArmor = ar.type === 'heavy'; c.armorType = ar.type;
 
   /* --- Initiative, Bewegung, Sinne --- */
   let init = c.mod.dex + jack; const initParts = ['GES ' + sgn(c.mod.dex)];
@@ -267,7 +287,7 @@ function derive(ch, hb) {
 
   /* --- Übungen --- */
   const wp = { simple: 'Einfache Waffen', martial: 'Einfache und Kriegswaffen', monk: 'Einfache Waffen, leichte Kriegswaffen', rogue: 'Einfache Waffen, Kriegswaffen mit Finesse oder Leicht' }[cls.weapons];
-  const martialAny = cls.weapons === 'martial' || multi.some((m) => MC_MARTIAL.includes(m.cls)) || ord('cle') === 'protector' || ord('dru') === 'warden';
+  const martialAny = cls.weapons === 'martial' || multi.some((m) => MC_MARTIAL.includes(m.cls)) || ord('cle') === 'protector' || ord('dru') === 'warden' || (lv('cle') >= 3 && subOf('cle') === 'sturmkrone');
   const extraWp = martialAny && cls.weapons !== 'martial' ? ', Kriegswaffen' : '';
   const arDe = { light: 'leichte', medium: 'mittelschwere', heavy: 'schwere', shield: 'Schilde' };
   c.profText = { armor: [...profArmor].map((a) => arDe[a]).join(', ') || 'keine', weapons: wp + extraWp, tools: bg.tool || '—' };
@@ -281,10 +301,12 @@ function derive(ch, hb) {
     if (e.lvl >= 3) { if (!e.subChosen) warn.push('Unterklasse wählen (' + C.name + ').'); e.subFeats.filter((f) => f[0] <= e.lvl).forEach(([fl0, n, t]) => fl.push({ src: e.subName, n, t, lv: fl0 })); }
     if (C.options) {
       const O = C.options, n = O.n(e.lvl); const norm = (k) => { const v = O.list[k]; return v.length === 4 ? { name: v[0], text: v[1] + ': ' + v[2], min: v[3] } : { name: v[0], text: v[1], min: v[2] }; };
-      const chosen = (e.m.opts || []).filter((k) => O.list[k] && norm(k).min <= e.lvl).slice(0, n);
+      const granted = []; if (e.subGrant && e.lvl >= 3) for (const [gl, ks] of Object.entries(e.subGrant)) if (e.lvl >= +gl) ks.forEach((k) => { if (O.list[k] && !granted.includes(k)) granted.push(k); });
+      const chosen = (e.m.opts || []).filter((k) => O.list[k] && norm(k).min <= e.lvl && !granted.includes(k)).slice(0, n);
       chosen.forEach((k) => fl.push({ src: O.label, n: norm(k).name, t: norm(k).text, lv: 0 }));
+      granted.forEach((k) => fl.push({ src: O.label + ' (' + e.subName + ')', n: norm(k).name, t: norm(k).text, lv: 3 }));
       if (chosen.length < n) warn.push(O.label + ': noch ' + (n - chosen.length) + ' wählen.');
-      (c.optSets = c.optSets || []).push({ cls: e.id, label: O.label, key: O.key, n, chosen, path: e.primary ? 'opts' : 'multi.' + e.idx + '.opts', lvl: e.lvl, items: Object.keys(O.list).map((k) => Object.assign({ k }, norm(k))) });
+      (c.optSets = c.optSets || []).push({ cls: e.id, label: O.label, key: O.key, n, chosen, granted, use: chosen.concat(granted), path: e.primary ? 'opts' : 'multi.' + e.idx + '.opts', lvl: e.lvl, items: Object.keys(O.list).map((k) => Object.assign({ k }, norm(k))) });
     }
     const o = e.m.order;
     if (C.order && o && C.order.opts[o]) fl.push({ src: C.name, n: C.order.label + ': ' + C.order.opts[o][0], t: C.order.opts[o][1], lv: 1 });
@@ -320,6 +342,8 @@ function derive(ch, hb) {
     const info = { id: e.id, name: C.name, primary: e.primary, ability: a, mod: c.mod[a], path: e.primary ? '' : 'multi.' + e.idx + '.' };
     info.dc = 8 + pb + c.mod[a] + (+ch.misc.dc || 0) + homebrew.reduce((s, h) => s + (+h.dc || 0), 0);
     info.atk = pb + c.mod[a] + (+ch.misc.atk || 0) + homebrew.reduce((s, h) => s + (+h.atk || 0), 0);
+    info.dcParts = ['8', 'Übung ' + sgn(pb), AB_K[a] + ' ' + sgn(c.mod[a])].concat(+ch.misc.dc ? ['Sonstiges ' + sgn(+ch.misc.dc)] : []).concat(homebrew.filter((h) => +h.dc).map((h) => h.name + ' ' + sgn(+h.dc)));
+    info.atkParts = ['Übung ' + sgn(pb), AB_K[a] + ' ' + sgn(c.mod[a])].concat(+ch.misc.atk ? ['Sonstiges ' + sgn(+ch.misc.atk)] : []).concat(homebrew.filter((h) => +h.atk).map((h) => h.name + ' ' + sgn(+h.atk)));
     info.maxLvl = C.caster === 'pact' ? pactSlots(el).lvl : C.caster === 'half' ? FULL_SLOTS[Math.ceil(el / 2)].length : FULL_SLOTS[el].length;
     info.cantripN = (C.cantrips ? C.cantrips(el) : 0) + ((e.id === 'cle' && src.order === 'thaumaturge') || (e.id === 'dru' && src.order === 'magician') ? 1 : 0);
     info.prepN = C.prepared(el);
@@ -344,7 +368,7 @@ function derive(ch, hb) {
   /* Zusatzzauber aus Spezies und Magie-Eingeweihter */
   const extra = [];
   if (sp.spells) { const ab = ch.speciesSpellAbility || 'wis'; sp.spells(c).forEach((id) => { extra.push({ id, src: sp.name, ab }); const s = getSpell(id, hb); if (s && s.lvl > 0) res.push({ k: 'sp_' + id, n: s.name + ' (' + sp.name + ')', max: 1, reset: 'long', species: true }); }); }
-  c.feats.forEach((x) => { if (x.f.mi) { const m = ch.mi[x.slot === 'asi' ? 'asi' + x.lv : x.slot] || {}; const ab = m.ability || 'wis'; (m.cantrips || []).slice(0, x.f.miC || 2).forEach((id) => extra.push({ id, src: x.f.name, ab })); if (m.spell && x.f.miSpell !== false) { extra.push({ id: m.spell, src: x.f.name, ab }); res.push({ k: 'mi_' + x.slot, n: (getSpell(m.spell, hb) || {}).name + ' (gratis)', max: 1, reset: 'long' }); } if ((m.cantrips || []).length < (x.f.miC || 2) || (x.f.miSpell !== false && !m.spell)) warn.push(x.f.name + ': Zauber wählen.'); } });
+  c.feats.forEach((x) => { if (x.f.mi) { const m = ch.mi[x.slot === 'asi' ? 'asi' + x.lv : x.slot] || {}; const ab = m.ability || 'wis'; (m.cantrips || []).slice(0, x.f.miC || 2).forEach((id) => extra.push({ id, src: x.f.name, ab })); if (m.spell && x.f.miSpell !== false) { extra.push({ id: m.spell, src: x.f.name, ab }); res.push({ k: 'mi_' + (x.slot === 'asi' ? 'asi' + x.lv : x.slot), n: (getSpell(m.spell, hb) || {}).name + ' (gratis)', max: 1, reset: 'long' }); } if ((m.cantrips || []).length < (x.f.miC || 2) || (x.f.miSpell !== false && !m.spell)) warn.push(x.f.name + ': Zauber wählen.'); } });
   c.extraSpells = extra.map((e) => Object.assign(e, { dc: 8 + pb + c.mod[e.ab], atk: pb + c.mod[e.ab] }));
   sc.anything = sc.has || extra.length > 0;
   c.spell = sc;
@@ -357,10 +381,11 @@ function derive(ch, hb) {
   c.rageDmg = rageDmg;
   const atkMisc = (+ch.misc.atk || 0);
   const att = [];
-  const isMonk = !!lv('mon');
+  const isMonk = !!lv('mon') && ar.type === 'none' && !ch.shield; c.martialArts = isMonk;
   const unarmedAb = isMonk && c.mod.dex > c.mod.str ? 'dex' : 'str';
-  att.push({ name: 'Waffenloser Schlag', ab: unarmedAb, die: isMonk ? '1' + maDie : '', dmod: isMonk ? c.mod[unarmedAb] : Math.max(1, 1 + c.mod.str), gwf: false, light: false, finesse: false, ranged: false, atk: c.mod[unarmedAb] + pb, dmg: isMonk ? '1' + maDie + sgn(c.mod[unarmedAb]).replace('+0', '').replace('−0', '') : String(Math.max(1, 1 + c.mod.str)), dtype: 'Wucht', props: '', melee: true, prof: true });
+  att.push({ name: 'Waffenloser Schlag', ab: unarmedAb, die: isMonk ? '1' + maDie : '', atkParts: [AB_K[unarmedAb] + ' ' + sgn(c.mod[unarmedAb]), 'Übung ' + sgn(pb)].concat(+ch.misc.atk ? ['Sonstiges ' + sgn(+ch.misc.atk)] : []), dmgParts: isMonk ? ['1' + maDie, AB_K[unarmedAb] + ' ' + sgn(c.mod[unarmedAb])] : ['1 + STÄ (mind. 1)'], dmod: isMonk ? c.mod[unarmedAb] : Math.max(1, 1 + c.mod.str), gwf: false, light: false, finesse: false, ranged: false, atk: c.mod[unarmedAb] + pb + (+ch.misc.atk || 0), dmg: isMonk ? '1' + maDie + sgn(c.mod[unarmedAb]).replace('+0', '').replace('−0', '') : String(Math.max(1, 1 + c.mod.str)), dtype: 'Wucht', props: '', melee: true, prof: true });
   const masteryAny = classList.some((e) => e.C.mastery);
+  const thrownAtt = []; const shillOn = !!((ch.play || {}).fx || {}).shill; const shillAb = ((c.extraSpells || []).find((e) => e.id === 'shillelagh') || {}).ab || (lv('dru') ? 'wis' : lv('wlk') ? 'cha' : 'wis');
   (ch.weapons || []).forEach((w, i) => {
     const W = WEAPONS[w.w]; if (!W) return;
     const [n, cat, kind, die, dt, props, mas, range, vers] = W;
@@ -369,28 +394,93 @@ function derive(ch, hb) {
     let ab = ranged ? 'dex' : props.includes('finesse') || monkW ? (c.mod.dex > c.mod.str ? 'dex' : 'str') : 'str';
     if (lv('ma') && ['hcrossbow', 'hvcrossbow', 'lcrossbow', 'pistol', 'musket'].includes(w.w) && c.mod.int > c.mod[ab]) ab = 'int';
     if (lv('bw') >= 3 && subOf('bw') === 'battle' && c.mod.con > c.mod[ab]) ab = 'con';
-    if (lv('wlk') >= 3 && subOf('wlk') === 'shadowblade' && c.mod.cha > c.mod[ab]) ab = 'cha';
+    if (lv('wlk') >= 3 && subOf('wlk') === 'shadowblade' && !ranged && c.mod.cha > c.mod[ab]) ab = 'cha';
+    if (lv('fk') >= 3 && subOf('fk') === 'blade' && !ranged && c.mod.cha > c.mod[ab]) ab = 'cha';
+    if (lv('bw') >= 2 && optsOf('bw').includes('klinge') && cat === 's' && c.mod.con > c.mod[ab]) ab = 'con';
     if (w.ab && w.ab !== 'auto') ab = w.ab;
-    const martialOk = martialAny || (lv('wlk') >= 3 && subOf('wlk') === 'shadowblade') || (lv('bw') >= 3 && subOf('bw') === 'battle') || (lv('ma') >= 3 && subOf('ma') === 'combat') || classList.some((e) => (e.C.extraWeapons || []).includes(w.w));
+    const shill = shillOn && (w.w === 'club' || w.w === 'quarterstaff'); if (shill) ab = shillAb;
+    const martialOk = martialAny || (lv('wlk') >= 3 && subOf('wlk') === 'shadowblade') || (lv('brd') >= 3 && subOf('brd') === 'klingentakt' && w.w === 'scimitar') || (lv('bw') >= 3 && subOf('bw') === 'battle') || (lv('ma') >= 3 && subOf('ma') === 'combat') || classList.some((e) => (e.C.extraWeapons || []).includes(w.w));
     const p = cat === 's' || martialOk || (cls.weapons === 'monk' && props.includes('light')) || (cls.weapons === 'rogue' && (props.includes('finesse') || props.includes('light')));
     const bonus = Math.max(+w.bonus || 0, typeof itemWpn === 'function' ? itemWpn(ch, i) : 0);
-    const atk = c.mod[ab] + (p ? pb : 0) + bonus + (archery && ranged ? 2 : 0) + atkMisc;
+    const gun = lv('ma') >= 17 && ['hcrossbow', 'hvcrossbow', 'lcrossbow', 'pistol', 'musket'].includes(w.w) ? 1 : 0;
+    const ewB = ((ch.play || {}).fx || {}).ewpn ? (+(ch.play.fx.ewpn_L) >= 7 ? 3 : +(ch.play.fx.ewpn_L) >= 5 ? 2 : 1) : 0;
+    const atk = c.mod[ab] + (p ? pb : 0) + bonus + (archery && ranged ? 2 : 0) + atkMisc + gun + ewB;
     let d = die;
     if (monkW && DIE_MAX(die) < DIE_MAX('1' + maDie) && die.startsWith('1')) d = '1' + maDie;
+    if (shill) d = L >= 17 ? '2W6' : '1W' + (L >= 11 ? 12 : L >= 5 ? 10 : 8);
     const dm = c.mod[ab] + bonus;
     const ds = (x) => x + (dm ? sgn(dm) : '');
-    att.push({ name: n + (bonus ? ' +' + bonus : ''), idx: i, ab, atk, die: d, vers: vers || null, dmod: dm, gwf: !ranged && (props.includes('two') || props.includes('versatile')), twoOnly: props.includes('two'), light: props.includes('light'), finesse: props.includes('finesse'), ranged, dmg: ds(d), dmg2: vers ? ds(vers) : null, dtype: DT[dt], prof: p,
-      props: props.map((x) => PROP_DE[x]).join(', ') + (range ? ' (' + range + ' m)' : ''), mastery: masteryAny && w.mastery ? mas : null, melee: !ranged, rage: rageDmg && ab === 'str' && !ranged });
+    const atkParts = [AB_K[ab] + ' ' + sgn(c.mod[ab])].concat(ewB ? ['Elementarwaffe +' + ewB] : []).concat(p ? ['Übung ' + sgn(pb)] : ['keine Übung']).concat(bonus ? ['magisch ' + sgn(bonus)] : []).concat(archery && ranged ? ['Bogenschiessen +2'] : []).concat(atkMisc ? ['Sonstiges ' + sgn(atkMisc)] : []).concat(gun ? ['Perfektionierte Technik +1'] : []);
+    const dmgParts = [d].concat(dm ? [AB_K[ab] + (bonus ? ' + magisch' : '') + ' ' + sgn(dm)] : []);
+    const A = { atkParts, dmgParts, name: n + (bonus ? ' +' + bonus : '') + (shill ? ' (Shillelagh)' : ''), idx: i, ab, atk, die: d, vers: vers || null, dmod: dm, gwf: !ranged && (props.includes('two') || props.includes('versatile')), twoOnly: props.includes('two'), light: props.includes('light'), finesse: props.includes('finesse'), ranged, dmg: ds(d), dmg2: vers ? ds(vers) : null, dtype: DT[dt], prof: p,
+      props: props.map((x) => PROP_DE[x]).join(', ') + (range ? ' (' + range + ' m)' : ''), mastery: masteryAny && w.mastery ? mas : null, melee: !ranged, rage: rageDmg && ab === 'str' && !ranged && ar.type !== 'heavy', shill };
+    if (shill) { A.dtype = A.dtype + ' oder Energie'; A.vers = null; A.dmg2 = null; }
+    att.push(A);
+    if (!ranged && props.includes('thrown')) thrownAtt.push(Object.assign({}, A, { name: A.name + ' (geworfen)', ranged: true, melee: false, gwf: false, vers: null, dmg2: null, thrown: true, props: 'Wurfwaffe' + (range ? ' (' + range + ' m)' : ''), rage: rageDmg && ab === 'str' && ar.type !== 'heavy' }));
     if (!p) warn.push('Keine Übung mit ' + n + ' – kein Übungsbonus auf den Angriff.');
   });
+  thrownAtt.forEach((x) => att.push(x));
   if (masteryAny) { const mN = Math.max(...classList.filter((e) => e.C.mastery).map((e) => e.C.mastery(e.lvl))); c.masteryN = mN; const used = (ch.weapons || []).filter((w) => w.mastery).length; if (used > mN) warn.push('Zu viele Waffenmeisterschaften (' + used + '/' + mN + ').'); }
   c.attacks = att;
+  const wsF = ch.play && ch.play.ws && typeof BESTIARY !== 'undefined' ? BESTIARY[ch.play.ws] : null;
+  if (wsF) {
+    c.wsForm = wsF[0]; c.ac = wsF[2]; c.acParts = [wsF[0] + ' (Tiergestalt) ' + wsF[2]]; c.speed = parseFloat(String(wsF[5]).replace(',', '.')) || c.speed; c.speedText = wsF[5];
+    c.attacks = wsF[7].map(([n, b, dmg, t]) => { const m = /^(\d+W\d+)\s*([+−-]\s*\d+)?/.exec(String(dmg)); return { name: wsF[0] + ': ' + n, ab: 'str', atk: +b, die: m ? m[1] : '', dmod: m && m[2] ? +m[2].replace(/\s/g, '').replace('−', '-') : 0, dmg: String(dmg), dtype: t || '', melee: true, ranged: false, atkParts: [wsF[0] + ' ' + sgn(+b)], dmgParts: [String(dmg)], props: 'Tiergestalt', prof: true, ws: true }; });
+    c.notes.push('Tiergestalt ' + wsF[0] + ': RK, Bewegung, Angriffe sowie STÄ, GES und KON der Tierform; deine Übungen, TP, INT, WEI und CHA bleiben. Keine Zauber.' + (wsS ? ' Sinne/Merkmale: ' + wsS.senses + '.' : ''));
+  }
   c.sneak = lv('rog') ? Math.ceil(lv('rog') / 2) + 'W6' : null;
   c.attacksPer = Math.max(lv('fig') ? step(1, [[5, 2], [11, 3], [20, 4]])(lv('fig')) : 1, ['bar', 'mon', 'pal', 'ran', 'rk', 'fk', 'ma'].some((k) => lv(k) >= 5) || (lv('bw') >= 6 && subOf('bw') === 'battle') ? 2 : 1, lv('ma') >= 18 && subOf('ma') === 'combat' ? 3 : 1);
   c.classDC = []; const dcOf = (a) => 8 + pb + c.mod[a];
   if (lv('rk')) c.classDC.push(['Runen-SG', dcOf('int')]); if (lv('bw')) c.classDC.push(['Blut-SG', dcOf('con')], ['Blutangriff', sgn(pb + c.mod.con)]); if (lv('fk')) c.classDC.push(['Fluch-SG', dcOf('cha') + (lv('fk') >= 3 && subOf('fk') === 'judge' ? 1 : 0)]); if (lv('ma')) c.classDC.push(['Geräte-SG', dcOf('int') + (lv('ma') >= 17 ? 1 : 0)]);
   if (lv('bw')) { const n = step(1, [[5, 2], [11, 3], [17, 4]])(L); const add = (ch.opts || []).includes('stark') || ((multi.find((m) => m.cls === 'bw') || {}).opts || []).includes('stark') ? c.mod.con : 0; att.push({ name: 'Blutlanze' + (n > 1 ? ' (' + n + ' Strahlen)' : ''), ab: 'con', atk: pb + c.mod.con, die: '1W10', dmod: add, dmg: '1W10' + (add ? sgn(add) : ''), dtype: 'Nekrotisch', props: '18 m · Magieaktion', melee: false, ranged: true, prof: true }); }
   c.critRange = lv('fig') >= 3 && subOf('fig') === 'champion' ? (lv('fig') >= 15 ? 18 : 19) : 20;
+  const mk = Math.min(lv('fk') >= 18 && subOf('fk') === 'blade' ? 18 : lv('fk') >= 3 ? 19 : 20, lv('rog') >= 17 && subOf('rog') === 'duellant' ? 19 : 20, lv('pal') >= 20 && subOf('pal') === 'unnachgiebig' ? 18 : 20);
+  c.critMark = mk < c.critRange ? mk : null; c.critMarkLabel = lv('fk') >= 3 ? 'markiertes Ziel' : lv('rog') >= 17 ? 'herausgefordertes Ziel' : 'gezeichnetes Ziel';
+  /* Zusätzlicher Schaden (einmal pro Zug), im Trefferdialog wählbar */
+  const xd = []; const die = (l) => +RW_DIE(l).slice(1);
+  if (lv('fk')) xd.push({ k: 'fkmark', label: 'Fluchmarke', n: 1, s: die(lv('fk')), note: 'nekrotisch/psychisch' });
+  if (lv('fk') >= 18 && subOf('fk') === 'shadow') xd.push({ k: 'fkend', label: 'Jagdende (Ziel ≤ halbe TP)', n: 3, s: die(lv('fk')) });
+  if (lv('bw') >= 2) xd.push({ k: 'bwfaden', label: 'Roter Faden', n: 1, s: die(lv('bw')), note: 'nekrotisch' });
+  if (lv('bw') >= 3 && subOf('bw') === 'battle') xd.push({ k: 'bwkrieg', label: 'Kriegsblut (1 Blutladung)', n: 2, s: die(lv('bw')), res: 'blood', note: 'nekrotisch' });
+  if (lv('rk') >= 3 && subOf('rk') === 'war') xd.push({ k: 'rkklinge', label: 'Runenklinge', n: lv('rk') >= 18 ? 3 : 1, s: die(lv('rk')) });
+  if (lv('rk') >= 11) xd.push({ k: 'rkschlag', label: 'Runenschlag', n: 1, s: die(lv('rk')), note: 'Energie' });
+  if (lv('ma') >= 6 && subOf('ma') === 'combat') xd.push({ k: 'mamod', label: 'Waffenmodifikation', n: 1, s: 6 });
+  if (lv('wlk') >= 3 && subOf('wlk') === 'shadowblade') xd.push({ k: 'smal', label: 'Schattenmal', n: 1, s: lv('wlk') >= 10 ? 8 : 6, note: 'nekrotisch' });
+  /* weitere ✦-Unterklassen */
+  if (lv('brd') >= 3 && subOf('brd') === 'klingentakt') xd.push({ k: 'takt', label: 'Rhythmuswechsel (1 Taktpunkt)', n: 1, s: 6, res: 'takt' });
+  if (lv('fig') >= 3 && subOf('fig') === 'feldkunst') xd.push({ k: 'taktik', label: 'Schwachstelle (1 Taktikpunkt)', n: 1, s: 8, res: 'taktik' });
+  if (lv('fig') >= 3 && subOf('fig') === 'arkanklinge') xd.push({ k: 'arkan', label: 'Zeichen der Schneide', n: 1, s: 6, note: 'Energie' });
+  if (lv('pal') >= 3 && subOf('pal') === 'unnachgiebig') xd.push({ k: 'schuld', label: 'Schuldspruch', n: 0, s: 0, flat: pb });
+  if (lv('pal') >= 3 && subOf('pal') === 'hain') xd.push({ k: 'sommer', label: 'Sommer-Aura', n: 1, s: 4, note: 'Feuer' });
+  if (lv('ran') >= 11 && subOf('ran') === 'daemmer') xd.push({ k: 'zschatten', label: 'Zweiter Schatten (Ziel sah dich nicht)', n: 2, s: 8 });
+  if (lv('ran') >= 3 && subOf('ran') === 'wildbund') xd.push({ k: 'zusammen', label: 'Zusammenspiel', n: 1, s: 6 });
+  if (lv('cle') >= 3 && subOf('cle') === 'esse') xd.push({ k: 'glut', label: 'Glutsegen', n: 1, s: 4, note: 'Feuer' });
+  if (lv('rog') >= 17 && subOf('rog') === 'duellant') xd.push({ k: 'hafen', label: 'Klinge des Hafens (herausgefordert)', n: 3, s: 6 });
+  if (lv('rog') >= 17 && subOf('rog') === 'trugbild') xd.push({ k: 'trugm', label: 'Meister des Trugs', n: 4, s: 6 });
+  if (lv('ran') >= 3 && subOf('ran') === 'hunter') xd.push({ k: 'colossus', label: 'Kolossjäger (verletztes Ziel)', n: 1, s: 8 });
+  if (lv('ran') >= 3 && subOf('ran') === 'stormh') xd.push({ k: 'bolt', label: 'Blitzschuss', n: 1, s: lv('ran') >= 11 ? 8 : 6, note: 'Blitz' });
+  if (lv('cle') >= 7) xd.push({ k: 'dstrike', label: 'Göttlicher Schlag', n: lv('cle') >= 14 ? 2 : 1, s: 8, note: 'gleissend/nekrotisch' });
+  if (lv('dru') >= 7) xd.push({ k: 'pstrike', label: 'Urtümlicher Schlag', n: lv('dru') >= 15 ? 2 : 1, s: 8, note: 'elementar' });
+  if (lv('bar') >= 9) xd.push({ k: 'brutal', label: 'Brutaler Schlag (ohne Vorteil)', n: lv('bar') >= 17 ? 2 : 1, s: 10 });
+  if (lv('bar') >= 3 && subOf('bar') === 'berserker') xd.push({ k: 'frenzy', label: 'Raserei (Tollkühn im Kampfrausch)', n: rageDmg, s: 6 });
+  if (ch.species === 'goliath' && ch.speciesChoice === 'fire') xd.push({ k: 'gfire', label: 'Feuerriese', n: 1, s: 10, res: 'giant', note: 'Feuer' });
+  if (ch.species === 'goliath' && ch.speciesChoice === 'frost') xd.push({ k: 'gfrost', label: 'Frostriese', n: 1, s: 6, res: 'giant', note: 'Kälte' });
+  if ((ch.invocations || []).includes('lifedrinker') && lv('wlk') >= 9) xd.push({ k: 'lifedr', label: 'Lebenstrinker (Paktwaffe)', n: 1, s: 6 });
+  c.dmgExtras = xd;
+  /* Hinweise auf Regelkonflikte */
+  const hints = [];
+  if (lv('mon') && (ar.type !== 'none' || ch.shield)) hints.push('Mönch mit ' + (ar.type !== 'none' ? 'Rüstung' : 'Schild') + ': Ungerüstete Verteidigung, Ungerüstete Bewegung und Kampfkunst wirken nicht.');
+  if (lv('bar') && ar.type === 'heavy') hints.push('Barbar in schwerer Rüstung: Kampfrausch-Vorteile und Ungerüstete Verteidigung wirken nicht.');
+  if (lv('bar') && ch.play && ch.play.raging && ch.play.conc) hints.push('Im Kampfrausch kannst du dich nicht konzentrieren – ' + ch.play.conc.name + ' endet eigentlich.');
+  if (ar.type !== 'none' && lv('bar') && !lv('mon')) { const ud = 10 + c.mod.dex + c.mod.con; if (ud > c.ac - (ch.shield ? 2 + (+ch.shieldBonus || 0) : 0)) hints.push('Ohne Rüstung hättest du mit Ungerüsteter Verteidigung eine höhere RK (' + (ud + (ch.shield ? 2 + (+ch.shieldBonus || 0) : 0)) + ').'); }
+  if (ch.mageArmor && ar.type !== 'none') hints.push('Magierrüstung wirkt nur ohne Rüstung.');
+  if (c.armorNonProf) hints.push('Rüstung ohne Übung: Nachteil auf STÄ- und GES-Würfe sowie Angriffe, und du kannst keine Zauber wirken.');
+  if (heavy && ar.str && abil.str < ar.str) hints.push(ar.name + ' braucht Stärke ' + ar.str + ' – Bewegung −3 m.');
+  if (typeof itemList === 'function' && itemList(ch).some((x) => (MAGIC_ITEMS[x.id] || {}).acBare && x.att) && (ar.type !== 'none' || ch.shield)) hints.push('Armschienen der Verteidigung wirken nur ohne Rüstung und ohne Schild.');
+  if (c.feats.some((x) => x.id === 'fs-gwf') && !(ch.weapons || []).some((w) => WEAPONS[w.w] && (WEAPONS[w.w][5].includes('two') || WEAPONS[w.w][5].includes('versatile')))) hints.push('Kampf mit grossen Waffen nützt nur mit zweihändigen oder vielseitigen Nahkampfwaffen.');
+  if (c.feats.some((x) => x.id === 'fs-twf') && (ch.weapons || []).filter((w) => WEAPONS[w.w] && WEAPONS[w.w][5].includes('light')).length < 2) hints.push('Kampf mit zwei Waffen braucht zwei leichte Waffen.');
+  if (c.feats.some((x) => x.id === 'fs-defense') && ar.type === 'none') hints.push('Kampfstil Verteidigung wirkt nur mit Rüstung.');
+  c.hints = hints;
   return c;
 }
 

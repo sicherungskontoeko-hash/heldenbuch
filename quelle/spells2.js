@@ -1,5 +1,7 @@
 /* ---------- Weitere Zauber aus dem SRD 5.2 (eigene deutsche Kurzfassung) ---------- */
 const SPELL_RAW2 = {
+ 'aura-of-life':['Aura des Lebens','Aura of Life',4,'abj','cle pal','Aktion','Selbst','V','10 Minuten','9-m-Aura um dich: Du und Verbündete darin habt Resistenz gegen nekrotischen Schaden, euer TP-Maximum kann nicht gesenkt werden, und ein Verbündeter mit 0 TP erhält zu Beginn seines Zuges 1 TP zurück.','K'],
+ 'wall-of-stone':['Steinwand','Wall of Stone',5,'evo','dru sor wiz','Aktion','36 m','V, G, M','10 Minuten','Eine Wand aus bis zu zehn 3×3-m-Platten (15 cm dick) entsteht. Jede Platte hat RK 15 und 30 TP pro 2,5 cm Dicke. Hältst du die Konzentration die vollen 10 Minuten, bleibt die Wand dauerhaft.','K'],
  /* Zaubertricks */
  'blade-ward':['Klingenabwehr','Blade Ward',0,'abj','brd sor wlk wiz','Aktion','Selbst','V, G','1 Minute','Solange der Zauber wirkt, zieht jeder Angreifer 1W4 von seinem Angriffswurf gegen dich ab.','K'],
  'toll-the-dead':['Totenglocke','Toll the Dead',0,'nec','cle wlk wiz','Aktion','18 m','V, G','Sofort','WEI-Rettungswurf oder 1W8 nekrotischer Schaden (1W12, wenn das Ziel schon verletzt ist). Steigt auf 2 Würfel (5), 3 (11), 4 (17).'],
@@ -205,6 +207,7 @@ const SPELL_RAW2 = {
  'weird':['Grauen','Weird',9,'ill','wiz','Aktion','36 m','V, G','1 Minute','30-m-Kugel: WEI-Rettungswurf oder verängstigt und 10W10 psychischer Schaden pro Zug.','K']
 };
 const MAT2 = {
+ 'wall-of-stone':'ein kleiner Granitblock',
  'thorn-whip':'der Stiel einer Pflanze mit Dornen', 'word-of-radiance':'ein Sonnensymbol', 'armor-of-agathys':'ein Becher Wasser', 'bane':'ein Tropfen Blut',
  'color-spray':'eine Prise farbiger Sand', 'create-or-destroy-water':'ein Tropfen Wasser oder ein paar Sandkörner', 'detect-poison-and-disease':'ein Eibenblatt',
  'goodberry':'ein Mistelzweig', 'grease':'etwas Schweineschwarte oder Butter', 'hex':'das versteinerte Auge eines Molchs', 'ice-knife':'ein Tropfen Wasser oder ein Stück Eis',

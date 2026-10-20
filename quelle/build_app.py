@@ -5,7 +5,7 @@ import base64, json, os, re, shutil, subprocess
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FONTS = os.path.join(ROOT, 'app', 'fonts')
 OUT = os.path.join(ROOT, 'app', 'www')
-VERSION = '1.0.0'
+VERSION = '1.1.0'
 
 def rd(p):
     with open(os.path.join(ROOT, p), encoding='utf-8') as f:
@@ -36,7 +36,7 @@ head_extra = ('<link rel="icon" href="%s">\n<meta name="apple-mobile-web-app-cap
               '<meta name="description" content="Deutsches D&amp;D-Heldenbuch: Charaktere erschaffen, Bogen, Würfel und gemeinsamer Tisch.">\n') % fav
 shell = shell.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n' + head_extra, 1)
 
-scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'calc.js', 'hbclasses.js', 'subs.js', 'assets.js', 'crests.js', 'extra.js', 'theme.js', 'app.js']
+scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'spelldata.js', 'calc.js', 'hbclasses.js', 'subs.js', 'subs2.js', 'flavor.js', 'pics.js', 'assets.js', 'crests.js', 'extra.js', 'scenes.js', 'theme.js', 'theme-fx.js', 'turn.js', 'effects.js', 'rules.js', 'search.js', 'encounter.js', 'explain.js', 'ux.js', 'help.js', 'app.js']
 js = '\n'.join(rd(s) for s in scripts)
 js = js.replace("const APP_URL = 'https://claude.ai/artifact/TKockfJH2cR2kDJKqb1CCK';", "const APP_URL = '';")
 single = shell + '<script>\n' + js + '\n</script>\n'
@@ -72,7 +72,9 @@ self.addEventListener('fetch', (e) => {
 """ % VERSION
 with open(os.path.join(OUT, 'sw.js'), 'w', encoding='utf-8') as f:
     f.write(sw)
-with open('/tmp/claude-0/app_all.js', 'w', encoding='utf-8') as f:
+import tempfile
+_tmpjs = os.path.join(tempfile.mkdtemp(), 'app_all.js')
+with open(_tmpjs, 'w', encoding='utf-8') as f:
     f.write(js)
-subprocess.run(['node', '--check', '/tmp/claude-0/app_all.js'], check=True)
+subprocess.run(['node', '--check', _tmpjs], check=True)
 print('App gebaut:', os.path.getsize(os.path.join(OUT, 'index.html')) // 1024, 'KB')

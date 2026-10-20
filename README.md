@@ -13,4 +13,11 @@ Dieses Repository baut automatisch (siehe *Actions*):
 
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
 
+## Neu in Version 1.1
+- 16 Klassen und 64 Unterklassen (✦ = Eigenkreationen), Beschreibungen, Klassen- und Speziesbilder, Kontexthilfe
+- Regelkern nach D&D 2024: Aktionsökonomie im Kampf, 1 Zauberplatz pro Zug, einmal-pro-Zug-Schaden, Kampfrausch-Dauer, Waffenmeisterschaften, Tiergestalt, Zauberbuch für Rituale, Zielwahl mit Zuständen
+- Regeloptionen (Hausregeln), Rückgängig, Rechenweg, Begegnungsplaner, Effekt-Tracker, Regelsuche
+- Online-Tisch Ende-zu-Ende verschlüsselt; Spielstände mit Versionsmigration und automatischer Sicherung
+- Automatisierte Tests im Ordner `quelle/tests` (`bash tests/run-all.sh`)
+
 Regeln nach dem System Reference Document 5.2 von Wizards of the Coast, lizenziert unter CC-BY-4.0. Kein offizielles Produkt von Wizards of the Coast.

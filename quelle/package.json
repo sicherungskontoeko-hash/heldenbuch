@@ -1,0 +1,18 @@
+{
+  "name": "heldenbuch",
+  "version": "2.1.0",
+  "private": true,
+  "description": "Deutschsprachiger D&D-2024-Charakterbogen (SRD 5.2) – Build und Tests",
+  "scripts": {
+    "build": "bash build.sh",
+    "test": "bash tests/run-all.sh"
+  },
+  "devDependencies": {
+    "playwright": "1.56.0",
+    "aedes": "1.2.0",
+    "websocket-stream": "5.5.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
