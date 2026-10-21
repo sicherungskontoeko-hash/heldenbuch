@@ -1,6 +1,6 @@
 {
   "name": "heldenbuch",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "Heldenbuch – deutsches D&D-Charakterbuch mit gemeinsamem Tisch (Handy und PC)",
   "main": "electron/main.js",
   "author": "Heldenbuch",

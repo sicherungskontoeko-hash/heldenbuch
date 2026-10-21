@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-10-21T11:11:12+02:00
-- Revision (SHA-256 von index.html, gekürzt): 698fc0f65abb1bef
+- Zeitpunkt: 2026-10-21T17:38:28+02:00
+- Revision (SHA-256 von index.html, gekürzt): 9444fb7933550307
 - Node: v22.22.0 · Playwright: 1.56.0
 - Browser: Chromium 141.0.7390.37
 - System: Linux 6.18.44-fc-v139
@@ -13,6 +13,8 @@
 | Robustheit & Sonderfälle (cases.test.js) | 0 | ✔ HB-26 Fluchklinge: zweite Bonusaktion blockiert, keine Ressource verbraucht 23 / 23 bestanden  |
 | Kritischer Audit A01–A06 (audit2.test.js) | 0 | ✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/heldenbuch/index.html  |
 | Erklärkarten ⓘ (info.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 41 / 41 bestanden  |
+| Layout: ⚠ offene Punkte, Menüs (layout.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 26 / 26 bestanden  |
+| Würfel-Designs (dice.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 50 / 50 bestanden  |
 | Klicktest kurz (ui.test.js) | 0 | ✔ Desktop 1280 ✔ Handy 390 (Touch)  |
 | Abnahme-Klicktest (ui-full.test.js) | 0 | ✔ Chromium Desktop 1280: 165/165 Prüfungen ✔ Chromium Handy 390 (Touch): 165/165 Prüfungen  |
 | Kombinationen Klasse×Unterklasse×Stufe (combos.test.js) | 0 | checked 1280 bad 0  |
@@ -33,5 +35,6 @@
 | Zugleisten-Fuzz fk | 0 | ran 202 bad 0  |
 | Zugleisten-Fuzz ma | 0 | ran 276 bad 0  |
 | Online-Tisch (net.test.js) | 0 | ✔ Nach Verbindungsabbruch: Spieler verbindet neu, Würfe kommen an 7 / 7 bestanden  |
+| Selbst-Update Android-App (boot.test.js) | 0 | ✔ Im normalen Browser: keine Update-Logik 16 / 16 bestanden  |
 
 Gesamtergebnis: alle Suiten bestanden

@@ -13,6 +13,11 @@ Dieses Repository baut automatisch (siehe *Actions*):
 
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
 
+## Neu in Version 1.4
+- Würfel: räumliche Würfel (W4 bis W100) in 10 wählbaren Designs, jedes mit eigener Form und eigenem Auftritt bei der natürlichen 20; bei der 1 bebt der Bildschirm und reisst. Am Online-Tisch gehört jedes Set nur einem Helden, die anderen sehen deine Würfel in deinem Design. Effekte voll/ruhig/aus, Geräusche (optional).
+- Aufgeräumtes Layout: rotes ⚠ mit offenen Punkten zum Aufklappen und Hinspringen, kompakte Übersicht am Handy, „⋯“-Menü auf dem Bogen, „Mehr“-Menü am PC.
+- Name des Helden schon im ersten Schritt, auf dem Bogen antippbar.
+
 ## Neu in Version 1.3
 - Die Android-App aktualisiert sich selbst: Sie holt neue Versionen von der Web-App und nutzt sie ab dem nächsten Öffnen (oder sofort über „Jetzt“). Eine neue APK ist nur noch für grössere Änderungen an der App selbst nötig.
 - Helden bleiben dabei erhalten. Startet eine neue Version nicht sauber, nimmt die App automatisch wieder die eingebaute.

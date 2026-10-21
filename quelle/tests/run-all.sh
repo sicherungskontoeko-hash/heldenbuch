@@ -19,12 +19,14 @@ REV=$(sha256sum index.html | cut -c1-16)
   echo "|---|---|---|"
 } > $OUT
 fail=0
-run() { local name=$1; shift; local log; log=$("$@" 2>&1 | grep -v agent-proxy); local rc=${PIPESTATUS[0]}; local last; last=$(echo "$log" | grep -E "bestanden|Prüfungen|checked|ran [0-9]|✔|✘" | tail -2 | tr '\n' ' '); [ "$rc" = "0" ] || fail=1; echo "| $name | $rc | ${last:-siehe Konsole} |" >> $OUT; echo "== $name (Exit $rc)"; echo "$log" | tail -4; }
+run() { local name=$1; shift; local log; log=$("$@" 2>&1; echo "__RC=$?"); local rc; rc=$(echo "$log" | sed -n 's/^__RC=//p' | tail -1); log=$(echo "$log" | grep -v "agent-proxy\|^__RC="); [ -z "$rc" ] && rc=1; local last; last=$(echo "$log" | grep -E "bestanden|Prüfungen|checked|ran [0-9]|✔|✘" | tail -2 | tr '\n' ' '); [ "$rc" = "0" ] || fail=1; echo "| $name | $rc | ${last:-siehe Konsole} |" >> $OUT; echo "== $name (Exit $rc)"; echo "$log" | tail -4; }
 run "Regeltests (rules.test.js)" node tests/rules.test.js
 run "Regressionen HB-01–HB-11 (hb.test.js)" node tests/hb.test.js
 run "Robustheit & Sonderfälle (cases.test.js)" node tests/cases.test.js
 run "Kritischer Audit A01–A06 (audit2.test.js)" node tests/audit2.test.js
 run "Erklärkarten ⓘ (info.test.js)" node tests/info.test.js
+run "Layout: ⚠ offene Punkte, Menüs (layout.test.js)" node tests/layout.test.js
+run "Würfel-Designs (dice.test.js)" node tests/dice.test.js
 run "Klicktest kurz (ui.test.js)" node tests/ui.test.js
 run "Abnahme-Klicktest (ui-full.test.js)" node tests/ui-full.test.js
 run "Kombinationen Klasse×Unterklasse×Stufe (combos.test.js)" node tests/combos.test.js

@@ -2,7 +2,7 @@
 # Baut index.html aus den Quelldateien. Läuft aus jedem Verzeichnis (Pfade relativ zum Skript).
 set -euo pipefail
 cd "$(dirname "$0")"
-FILES=(data.js spells.js spells2.js spelldata.js calc.js hbclasses.js subs.js subs2.js flavor.js pics.js assets.js crests.js extra.js scenes.js theme.js theme-fx.js turn.js effects.js rules.js search.js encounter.js explain.js ux.js help.js spellflav.js info.js app.js)
+FILES=(data.js spells.js spells2.js spelldata.js calc.js hbclasses.js subs.js subs2.js flavor.js pics.js assets.js crests.js extra.js scenes.js theme.js theme-fx.js turn.js effects.js rules.js search.js encounter.js explain.js ux.js help.js spellflav.js info.js dice3d.js app.js)
 missing=0
 [ -f shell.html ] || { echo "FEHLT: shell.html" >&2; missing=1; }
 for f in "${FILES[@]}"; do [ -f "$f" ] || { echo "FEHLT: $f" >&2; missing=1; }; done

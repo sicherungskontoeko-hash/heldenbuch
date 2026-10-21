@@ -275,13 +275,16 @@ function saHit() {
   saNext();
 }
 function rollDmg(expr, label) { const r = rollExpr(expr); const m = /W(\d+)/.exec(String(expr)); const g = /\[([\d,]+)\]/.exec(r.detail); pushLog({ label, groups: r.groups, total: r.total, detail: r.detail, sides: m ? +m[1] : 0, nat: g ? g[1].split(',').reduce((a, b) => a + +b, 0) : r.total }); }
-function pushLog(e) { e.t = Date.now(); if (S.secret) e.secret = true; if (e.sides === 20 && (e.nat === 20 || e.crit || e.nat === 1) && typeof themeBurst === 'function') { const k = e.nat === 1 || e.fumble ? 'fumble' : 'crit'; setTimeout(() => themeBurst(k), 820); } S.log.unshift(e); S.log = S.log.slice(0, 30); showToast(e); const l = $('#log'); if (l) l.innerHTML = logHtml(); if (e.sides || e.share) shareRoll(e); }
+function pushLog(e) { e.t = Date.now(); if (S.secret) e.secret = true; if (e.sides && !e.dset && typeof d3setOf === 'function') e.dset = d3setOf(cur()); const d3on = typeof d3fx === 'function' && d3ok(e.sides) && d3fx() !== 'aus'; if (!d3on && e.sides === 20 && (e.nat === 20 || e.crit || e.nat === 1) && typeof themeBurst === 'function') { const k = e.nat === 1 || e.fumble ? 'fumble' : 'crit'; setTimeout(() => themeBurst(k), 820); } S.log.unshift(e); S.log = S.log.slice(0, 30); showToast(e); const l = $('#log'); if (l) l.innerHTML = logHtml(); if ((e.sides || e.share) && !e.preview) shareRoll(e); }
 /* ---------- Würfelschale: viele Würfel über den Bildschirm ---------- */
 function showMulti(e, flat) {
   const t = $('#toast'); const tray = $('#tray');
   clearTimeout(showMulti.fade); clearInterval(showMulti.iv); clearTimeout(showMulti.st);
   const extra = Math.max(0, flat.length - 30); const list = flat.slice(0, 30); const n = list.length;
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
+  const has3 = typeof d3ok === 'function'; const set = has3 ? (e.dset || d3setOf(cur())) : ''; const fxl = has3 ? d3fx() : 'voll'; if (has3 && fxl === 'aus') reduce = true;
+  const live3 = has3 && fxl === 'voll' && n <= 6;
+  const d3h = (d, v, cls) => '<span class="die d3 ' + cls + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(d.sides, v, set, { gold: / crit/.test(cls) && d.sides === 20, dead: / fum/.test(cls) && d.sides === 20, cracks: / fum/.test(cls) && d.sides === 20, thin: n > 6 }) + '</span>';
   const W = window.innerWidth, H = window.innerHeight;
   const areaW = W * 0.86, areaH = H * 0.52, top0 = H * 0.2;
   const cols = Math.max(1, Math.min(n, Math.ceil(Math.sqrt(n * areaW / areaH))));
@@ -298,15 +301,19 @@ function showMulti(e, flat) {
     const fx = side === 0 ? -W * 0.6 : side === 1 ? W * 0.6 : (Math.random() - 0.5) * W;
     const fy = side === 2 ? -H * 0.6 : side === 3 ? H * 0.6 : (Math.random() - 0.5) * H;
     el.style.cssText = 'left:' + (x0 + col * cell + (cell - size) / 2 + jx) + 'px;top:' + (y0 + r * cell + (cell - size) / 2 + jy) + 'px;width:' + size + 'px;height:' + size + 'px;--fx:' + fx + 'px;--fy:' + fy + 'px;--rot:' + ((Math.random() < 0.5 ? -1 : 1) * (360 + Math.random() * 540)) + 'deg;--fr:' + ((Math.random() - 0.5) * 30) + 'deg;animation-delay:' + (i * 28) + 'ms';
-    el.innerHTML = dieSvg(d.sides, reduce ? d.v : 1 + Math.floor(rnd() * d.sides), 'rolling-x');
+    if (has3 && d3ok(d.sides)) { el.dataset.d3 = '1'; if (live3 && !reduce) { el.innerHTML = '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>'; el._h = d3roll(el.firstChild, d.sides, d.v, set, { dur: 700 + i * 60 }); } else el.innerHTML = d3h(d, reduce ? d.v : 1 + Math.floor(rnd() * d.sides), 'rolling-x'); }
+    else el.innerHTML = dieSvg(d.sides, reduce ? d.v : 1 + Math.floor(rnd() * d.sides), 'rolling-x');
     tray.appendChild(el); return el;
   });
   const head = '<div class="tl">' + esc(e.label) + ' · ' + flat.length + ' Würfel</div>';
   t.hidden = false; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
   t.innerHTML = '<div class="tt">' + head + '<div class="tv dim">…</div></div>';
   const land = () => {
-    clearInterval(showMulti.iv);
-    els.forEach((el, i) => { const d = list[i]; const tx = el.querySelector('text'); if (tx) tx.textContent = d.v; const pair = (e.pairVals || []).includes(d.v); const cls = pair ? ' pair' : d.v === d.sides ? ' crit' : d.v === 1 ? ' fum' : ''; el.firstChild.className = 'die land' + cls + (d.neg ? ' neg' : ''); });
+    clearInterval(showMulti.iv); t.onclick = null;
+    els.forEach((el, i) => { const d = list[i]; const pair = (e.pairVals || []).includes(d.v); const cls = pair ? ' pair' : d.v === d.sides ? ' crit' : d.v === 1 ? ' fum' : '';
+      if (el.dataset.d3) { if (el._h) el._h.skip(); el.innerHTML = d3h(d, d.v, 'land' + cls + (d.neg ? ' neg' : '')); return; }
+      const tx = el.querySelector('text'); if (tx) tx.textContent = d.v; el.firstChild.className = 'die land' + cls + (d.neg ? ' neg' : ''); });
+    if (has3 && fxl !== 'aus') d3snd('land');
     if ((e.pairVals || []).length) { const pb = document.createElement('div'); pb.className = 'tpair'; pb.textContent = 'Pasch!'; tray.appendChild(pb); }
     const sum = list.reduce((a, d) => a + (d.neg ? -d.v : d.v), 0);
     t.innerHTML = '<div class="tt">' + head + '<div class="tv">' + esc(e.total) + '</div><div class="td">' + esc(e.detail) + (extra ? ' · ' + extra + ' weitere Würfel nicht gezeigt' : '') + '</div></div>';
@@ -316,7 +323,8 @@ function showMulti(e, flat) {
     showToast.tm = setTimeout(() => { t.hidden = true; }, 5000);
   };
   if (reduce) return land();
-  showMulti.iv = setInterval(() => els.forEach((el, i) => { const tx = el.querySelector('text'); if (tx) tx.textContent = 1 + Math.floor(rnd() * list[i].sides); }), 80);
+  if (has3) { d3snd('roll', n); t.onclick = () => { clearTimeout(showMulti.st); t.onclick = null; land(); }; }
+  showMulti.iv = setInterval(() => els.forEach((el, i) => { if (el.dataset.d3) return; const tx = el.querySelector('text'); if (tx) tx.textContent = 1 + Math.floor(rnd() * list[i].sides); }), 80);
   showMulti.st = setTimeout(land, 850 + n * 28);
 }
 
@@ -328,7 +336,7 @@ function renderDicePanel() {
     '<div class="chips">' + [4, 6, 8, 10, 12, 20, 100].map((s) => chip(d.d === s, 'W' + s, 'data-act="drDie" data-arg="' + s + '"')).join('') + '</div>' +
     '<div class="dprow"><span>Anzahl</span><div class="stepper"><button data-act="drN" data-arg="-1" aria-label="weniger">−</button><b>' + d.n + '</b><button data-act="drN" data-arg="1" aria-label="mehr">+</button></div><div class="chips">' + [2, 4, 6, 8, 10, 20, 30].map((v) => chip(d.n === v, String(v), 'data-act="drSet" data-arg="' + v + '"')).join('') + '</div></div>' +
     '<div class="dprow"><span>Bonus</span><div class="stepper"><button data-act="drM" data-arg="-1" aria-label="weniger">−</button><b>' + sgn(d.mod) + '</b><button data-act="drM" data-arg="1" aria-label="mehr">+</button></div></div>' +
-    '<button class="btn big" data-act="drRoll">' + esc(expr.replace('-', '−')) + ' würfeln</button>';
+    (typeof diceRow === 'function' ? diceRow(cur(), true) : '') + '<button class="btn big" data-act="drRoll">' + esc(expr.replace('-', '−')) + ' würfeln</button>';
 }
 
 function dieSvg(sides, n, cls) {
@@ -349,14 +357,25 @@ function showToast(e) {
   const vals = e.pair || (flat.length === 1 ? [flat[0].v] : sides ? [e.nat ?? e.total] : []);
   const keep = e.pair ? e.keep : 0;
   const hl = (e.crit ? ' crit' : e.fumble ? ' fum' : '');
+  const use3 = typeof d3ok === 'function' && d3ok(sides); const set = use3 ? (e.dset || d3setOf(cur())) : ''; const fxl = use3 ? d3fx() : 'aus';
+  const dieH = (v, cls) => use3 ? '<span class="die d3 ' + cls + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(sides, v, set, { gold: / crit/.test(cls) && sides === 20, dead: / fum/.test(cls) && sides === 20, cracks: / fum/.test(cls) && sides === 20 }) + '</span>' : dieSvg(sides, v, cls);
   const final = () => {
-    clearInterval(showToast.iv);
-    const dice = vals.map((v, i) => dieSvg(sides, v, 'land' + (i === keep ? hl : ' drop'))).join('');
+    clearInterval(showToast.iv); t.onclick = null;
+    const dice = vals.map((v, i) => dieH(v, 'land' + (i === keep ? hl : ' drop'))).join('');
     t.innerHTML = '<div class="trow"><div class="dice">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer!' : '') + '</div></div></div>';
+    if (use3) { if (fxl !== 'aus') d3snd('land'); if (sides === 20 && (e.crit || e.fumble)) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, e.crit ? 'n20' : 'n1', fxl); d3snd(e.crit ? 'n20' : 'n1'); } }
     showToast.tm = setTimeout(() => { t.hidden = true; }, 4500);
   };
   t.hidden = false; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
+  if (use3) {
+    if (fxl !== 'voll') return final();
+    t.innerHTML = '<div class="trow"><div class="dice">' + vals.map(() => '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>').join('') + '</div><div class="tt">' + head + '<div class="tv dim">…</div></div></div>';
+    d3snd('roll', vals.length); let left = vals.length; const hs = [];
+    t.querySelectorAll('.die').forEach((el, i) => hs.push(d3roll(el, sides, vals[i], set, { dur: 760 + i * 140, onDone: () => { if (--left === 0) final(); } })));
+    t.onclick = () => { hs.forEach((h) => h.skip()); };
+    return;
+  }
   if (!sides || reduce) return final();
   const flick = () => 1 + Math.floor(Math.random() * sides);
   t.innerHTML = '<div class="trow"><div class="dice">' + vals.map((_, i) => dieSvg(sides, flick(), 'rolling' + (i ? ' r2' : ''))).join('') + '</div><div class="tt">' + head + '<div class="tv dim">…</div></div></div>';
@@ -400,9 +419,11 @@ const psig = (p) => sigil({ name: p.char, cls: p.cls, portrait: p.portrait, port
 const LOGO = '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><polygon points="16,2.5 27.7,9.25 27.7,22.75 16,29.5 4.3,22.75 4.3,9.25"/><polygon points="16,9.5 22,20 10,20"/><path d="M16 9.5V2.5M22 20l5.7 2.75M10 20l-5.7 2.75M16 9.5 4.3 9.25M16 9.5l11.7-.25M22 20l-6 9.5M10 20l6 9.5M22 20l5.7-10.75M10 20 4.3 9.25" opacity=".7"/></svg>';
 function renderTop() {
   const ch = cur();
-  const tabs = [['heroes', 'Helden'], ['sheet', 'Bogen'], ['build', 'Erschaffen'], ['camp', 'Tisch'], ['spells', 'Zauberbuch'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe']];
+  const tabs = [['heroes', 'Helden'], ['sheet', 'Bogen'], ['build', 'Erschaffen'], ['camp', 'Tisch'], ['spells', 'Zauberbuch']];
+  const more = [['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe']]; const moreOn = more.some(([k]) => S.view === k);
   $('#top').innerHTML = '<div class="wrap"><div class="bar"><button class="brand" data-act="view" data-arg="heroes">' + LOGO + 'Heldenbuch</button>' +
-    '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '</nav>' +
+    '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') +
+      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '</div></details></nav>' +
     '<button class="tbtn tsearch" data-act="search" title="Suchen (Strg+K oder /)" aria-label="Suchen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>' +
     '<button class="tbtn" data-act="themeOpen" title="Stimmung wählen" aria-label="Stimmung wählen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.2-1-1.6-1-2.6 0-1 .8-1.7 1.9-1.7H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z"/><circle cx="7.5" cy="11" r="1.3"/><circle cx="10.5" cy="7" r="1.3"/><circle cx="15" cy="7.5" r="1.3"/></svg></button>' + (ch ? '<button class="curhero" data-act="view" data-arg="heroes" title="Helden wechseln">' + sigil(ch) + '<span>' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</span></button>' : '') +
     '</div><span id="saveState" class="savest"></span></div><div id="turnbar"></div>';
@@ -419,7 +440,7 @@ function renderHeroes() {
     const ch = S.chars[id]; let c; try { c = derive(ch, S.hb); } catch (e) { continue; }
     const conf = S.confirm === 'del:' + id;
     h += '<article class="hero' + (id === S.cur ? ' cur' : '') + '">' + (id === S.cur ? '<span class="curlbl">Aktiv</span>' : '') + sigil(ch) +
-      '<div><h3>' + esc(ch.name) + '</h3><p>' + c.classLabel + (c.hasSub && !c.multi ? ' · ' + c.subName : '') + '<br>' + c.sp.name + ' · ' + esc(c.bg.name) + '</p></div>' +
+      '<div><h3>' + esc(ch.name) + '</h3><p>' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' · ' + c.subName : '') + '<br>' + c.sp.name + ' · ' + esc(c.bg.name) + '</p></div>' +
       '<div class="mini"><span><b>' + c.ac + '</b>RK</span><span><b>' + c.hpMax + '</b>TP</span><span><b>' + sgn(c.init) + '</b>Init</span></div>' +
       (c.warn.length ? '<p class="warnline">' + c.warn.length + ' Auswahl(en) offen</p>' : '') +
       '<div class="acts"><button class="btn" data-act="play" data-arg="' + id + '">Spielen</button><button class="btn ghost" data-act="edit" data-arg="' + id + '">Bearbeiten</button></div>' +
@@ -474,6 +495,7 @@ function renderBuild(c) {
   let body = '';
   const st = S.step;
   if (st === 0) {
+    body += '<div class="row hname">' + field('Name deines Helden', txt('name', ch.name === 'Neuer Held' ? '' : ch.name, 'z. B. Brakk Eisenfaust', 'autocomplete="off"')) + '</div>';
     body += '<h2>Klasse wählen</h2><div class="cards pics">' + Object.entries(CLASSES).map(([k, C]) =>
       '<button class="card haspic' + (ch.cls === k ? ' on' : '') + '" data-act="setCls" data-arg="' + k + '">' + picOf('cls', k) + '<b>' + C.name + '</b><small>W' + C.hd + ' · ' + C.prim.map((a) => AB_K[a]).join('/') + (C.caster ? ' · Zauber' : '') + '</small><small class="sub">' + (C.subs ? C.subs.length + ' Unterklassen' : C.sub.name) + (C.home ? ' · ✦ Heldenbuch' : '') + '</small>' + ii('cls', k, C.name) + '</button>').join('') + '</div>' + flavBox(c.cls.name, c.cls.flavor, 'cls', ch.cls);
     body += '<div class="row">' + field('Stufe', '<div class="stepper"><button data-act="lvl" data-arg="-1" aria-label="Stufe senken">−</button><b>' + ch.level + '</b><button data-act="lvl" data-arg="1" aria-label="Stufe erhöhen">+</button></div>', 'Übungsbonus ' + sgn(c.pb)) +
@@ -589,7 +611,7 @@ function renderBuild(c) {
     body += gearBlock(c, true);
   }
   if (st === 6) {
-    body += '<h2>Abschluss</h2><p class="hint">Gib deinem Helden einen Namen und eine Geschichte. Danach kannst du ihn sichern und losspielen.</p><div class="row">' + field('Name', txt('name', ch.name)) + field('Spieler', txt('player', ch.player)) + '</div><h3>Porträt</h3>' + portraitPicker(ch) + '<div class="row">' + field('Gesinnung', txt('alignment', ch.alignment, 'z. B. Neutral gut')) + field('Sprachen', txt('languages', ch.languages)) + '</div>' +
+    body += '<h2>Abschluss</h2><p class="hint">Gib deinem Helden einen Namen und eine Geschichte. Danach kannst du ihn sichern und losspielen.</p><div class="row">' + field('Name', txt('name', ch.name === 'Neuer Held' ? '' : ch.name, 'z. B. Brakk Eisenfaust', 'autocomplete="off"')) + field('Spieler', txt('player', ch.player)) + '</div><h3>Porträt</h3>' + portraitPicker(ch) + (typeof diceRow === 'function' ? '<h3>Würfel-Set</h3>' + diceRow(ch) : '') + '<div class="row">' + field('Gesinnung', txt('alignment', ch.alignment, 'z. B. Neutral gut')) + field('Sprachen', txt('languages', ch.languages)) + '</div>' +
       field('Aussehen & Persönlichkeit', area('appearance', ch.appearance, 'Aussehen, Ideale, Bindungen, Makel …')) + field('Notizen', area('notes', ch.notes, 'Hintergrundgeschichte, Kampagnennotizen …', 6));
     body += '<div class="finish"><h3>' + (c.warn.length ? 'Fast geschafft' : 'Dein Held ist bereit') + '</h3><p class="hint" style="margin:0">' + (c.warn.length ? 'Es sind noch ' + c.warn.length + ' Auswahl(en) offen (rechts antippen). Du kannst trotzdem schon sichern.' : 'Sichere ihn als Datei, damit du ihn jederzeit wieder laden oder weitergeben kannst.') + '</p><div class="chips"><button class="btn big" data-act="exportOne" data-arg="' + ch.id + '">Helden exportieren</button><button class="btn big ghost" data-act="view" data-arg="sheet">Zum Charakterbogen</button></div></div>';
   }
@@ -613,10 +635,11 @@ function featList(fl) {
   return '<div class="feats">' + fl.map((f) => '<details><summary><b>' + esc(f.n) + '</b><small>' + (f.lv ? 'Stufe ' + f.lv + ' · ' : '') + esc(f.src) + '</small></summary><p>' + esc(f.t) + '</p></details>').join('') + '</div>';
 }
 function summary(c) {
-  return '<aside class="summary" aria-label="Live-Werte"><div class="shd">' + sigil(c.char) + '<div><h3>' + esc(c.char.name) + '</h3><p class="sub">' + c.classLabel + (c.hasSub && !c.multi ? ' · ' + c.subName : '') + '<br>' + c.sp.name + ' · ' + esc(c.bg.name) + '</p></div></div>' +
+  return '<aside class="summary' + (S.sumOpen ? ' open' : '') + '" aria-label="Live-Werte"><div class="shd">' + sigil(c.char) + '<div><h3>' + esc(c.char.name) + '</h3><p class="sub">' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' · ' + c.subName : '') + '<br>' + c.sp.name + ' · ' + esc(c.bg.name) + '</p></div><button type="button" class="sumtg" data-act="sumToggle" aria-expanded="' + !!S.sumOpen + '" aria-label="Alle Werte ein- oder ausblenden">▾</button></div>' +
+    '<p class="smini">RK <b>' + c.ac + '</b> · TP <b>' + c.hpMax + '</b> · Init <b>' + sgn(c.init) + '</b>' + (c.spell.has ? ' · SG <b>' + c.spell.dc + '</b>' : '') + '</p>' +
     '<div class="sgrid"><div><span>RK</span><b>' + c.ac + '</b></div><div><span>TP</span><b>' + c.hpMax + '</b></div><div><span>Initiative</span><b>' + sgn(c.init) + '</b></div><div><span>Bewegung</span><b>' + fmtM(c.speed) + '</b></div><div><span>Übungsbonus</span><b>' + sgn(c.pb) + '</b></div>' + (c.spell.has ? '<div><span>Zauber-SG</span><b>' + c.spell.dc + '</b></div>' : '<div><span>Passive Wahrn.</span><b>' + c.passive + '</b></div>') + '</div>' +
     '<div class="abmini">' + AB.map((a) => '<div><span>' + AB_K[a] + '</span><b>' + c.abil[a] + '</b><small>' + sgn(c.mod[a]) + '</small></div>').join('') + '</div>' +
-    (c.warn.length ? '<h4>Noch offen <small>– antippen zum Hinspringen</small></h4><ul class="warn">' + c.warn.map((w, i) => '<li><button data-act="gowarn" data-arg="' + i + '">' + esc(w) + ' →</button></li>').join('') + '</ul>' : '<p class="ok">✓ Alles ausgewählt.</p>') + '</aside>';
+    (c.warn.length ? '<button type="button" class="swarn" data-act="warnOpen">⚠ ' + c.warn.length + ' noch offen <span>anzeigen</span></button>' : '<p class="ok">✓ Alles ausgewählt.</p>') + '</aside>';
 }
 
 function mcSection(c) {
@@ -643,10 +666,9 @@ function renderSheet(c) {
   if (P.hp == null || P.hp > c.hpMax) P.hp = Math.min(P.hp ?? c.hpMax, c.hpMax);
   const hpPct = Math.max(0, Math.min(100, (P.hp / c.hpMax) * 100));
   let h = P.dead ? fallenHtml(ch, c) + '<div class="sheet fallen" aria-hidden="true" inert>' : (mgOf(c) === 'alle' ? '<div class="sheet' + (explainOn() ? ' explain' : '') + '">' : '<div class="sheet' + (explainOn() ? ' explain' : '') + '" data-mg="' + mgOf(c) + '">');
-  h += '<header class="shead"><div class="who">' + sigil(ch) + '<div><h1>' + esc(ch.name) + '</h1><p>' + c.classLabel + (c.hasSub && !c.multi ? ' (' + c.subName + ')' : '') + ' · ' + c.sp.name + ' · ' + esc(c.bg.name) + (ch.alignment ? ' · ' + esc(ch.alignment) : '') + '</p></div></div>' +
+  h += '<header class="shead"><div class="who">' + sigil(ch) + '<div><h1><button type="button" class="hrn" data-act="renameHero" title="Namen ändern">' + esc(ch.name) + '<span aria-hidden="true">✎</span></button></h1><p>' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' (' + c.subName + ')' : '') + ' · ' + c.sp.name + ' · ' + esc(c.bg.name) + (ch.alignment ? ' · ' + esc(ch.alignment) : '') + '</p></div></div>' +
     '<div class="sctl"><div class="seg" role="group" aria-label="Würfelmodus">' + [['dis', 'Nachteil'], ['normal', 'Normal'], ['adv', 'Vorteil']].map(([k, l]) => '<button class="' + (S.mode === k ? 'on' : '') + '" data-act="mode" data-arg="' + k + '">' + l + '</button>').join('') + '</div>' +
-    '<button class="btn ghost" data-act="rest" data-arg="short">Kurze Rast</button><button class="btn ghost" data-act="rest" data-arg="long" data-confirm="Lange Rast: TP, Trefferwürfel, Zauberplätze und alle Ressourcen werden zurückgesetzt.">Lange Rast</button><button class="btn ghost" data-act="exportOne" data-arg="' + ch.id + '">Exportieren</button><button class="btn ghost" data-act="print">Drucken</button></div></header>';
-  if (c.warn.length) h += '<div class="notice"><b>' + c.warn.length + ' Auswahl(en) noch offen:</b><ul class="warn">' + c.warn.map((w, i) => '<li><button data-act="gowarn" data-arg="' + i + '">' + esc(w) + ' →</button></li>').join('') + '</ul></div>';
+    '<button class="btn ghost" data-act="rest" data-arg="short">Kurze Rast</button><button class="btn ghost" data-act="rest" data-arg="long" data-confirm="Lange Rast: TP, Trefferwürfel, Zauberplätze und alle Ressourcen werden zurückgesetzt.">Lange Rast</button><details class="mnu smore"><summary class="btn ghost" aria-label="Weitere Aktionen" title="Weitere Aktionen">⋯</summary><div class="mnul"><button data-act="exportOne" data-arg="' + ch.id + '">Exportieren</button><button data-act="print">Drucken</button><button data-act="renameHero">Namen ändern</button><button data-act="diceOpen">Würfel-Set</button></div></details></div></header>';
   h += sheetNav(c);
   if (typeof hintBlock === 'function') h += hintBlock(c);
   h += '<div class="vitals">' +
@@ -938,11 +960,11 @@ function renderHB() {
 let campUnsub = null, meTimer = null, meBusy = false, meDirty = false, campJoinedAt = 0; const seen = new Set();
 const campSlug = (v) => String(v).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
 function saveCampPref() { try { localStorage.setItem('heldenbuch_camp', JSON.stringify({ code: S.camp, share: S.share, secret: !!S.secret })); } catch (e) {} }
-function myRolls() { return S.log.filter((e) => e.sides || e.share).slice(0, 30).map((e) => ({ label: e.label, total: e.total, detail: e.detail, crit: !!e.crit, fumble: !!e.fumble, t: e.t, secret: !!e.secret })); }
+function myRolls() { return S.log.filter((e) => (e.sides || e.share) && !e.preview).slice(0, 30).map((e) => ({ label: e.label, total: e.total, detail: e.detail, crit: !!e.crit, fumble: !!e.fumble, t: e.t, secret: !!e.secret, sides: e.sides || 0, nat: e.nat || 0, dset: e.dset || '' })); }
 function meDoc() {
   const ch = cur(); let c = null; try { c = derive(ch, S.hb); } catch (e) {}
   return { char: ch.name.replace(/^Beispiel:\s*/, ''), cls: ch.cls, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: ch.play.hp ?? (c ? c.hpMax : 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0,
-    cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, t: Date.now() };
+    cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, dice: ch.dice || '', diceAt: ch.diceAt || 0, t: Date.now() };
 }
 function queueMe() { if (!S.camp || !DB) return; clearTimeout(meTimer); meTimer = setTimeout(writeMe, 250); }
 async function writeMe() {
@@ -963,6 +985,7 @@ function joinCamp(v, silent) {
   campUnsub = DB.collection('camp/' + code + '/players').onSnapshot((snap) => {
     const table = {};
     snap.docs.forEach((d) => { const v = d.data(); if (v) table[d.id] = v; });
+    setTimeout(() => { if (typeof d3conflict === 'function') try { d3conflict(); } catch (e) {} }, 0);
     for (const [uid, p] of Object.entries(table)) for (const r of p.rolls || []) { const k = uid + ':' + r.t; if (!seen.has(k)) { seen.add(k); if (uid !== UID && r.t > campJoinedAt && (!r.secret || isDM())) miniToast(p, r); } }
     S.table = table; paintCamp();
   }, (e) => { S.campErr = 'fail'; paintCamp(); });
@@ -990,7 +1013,8 @@ function tableLogHtml(n) {
 function miniToast(p, r) {
   const m = $('#mini'); if (!m) return;
   const el = document.createElement('div'); el.className = 'mt';
-  el.innerHTML = psig(p) + '<div><small>' + esc(p.char) + ' · ' + esc(r.label) + '</small><b class="' + (r.crit ? 'crit' : r.fumble ? 'fum' : '') + '">' + esc(r.total) + '</b></div>';
+  const md = r.sides && typeof d3ok === 'function' && d3ok(r.sides) && d3fx() !== 'aus' ? '<span class="mdie" style="--dg:' + (D3_SETS[r.dset] || D3_SETS.klassik).glow + '">' + d3svg(r.sides, r.nat || (typeof r.total === 'number' ? r.total : 1), r.dset || 'klassik', { gold: r.crit && r.sides === 20, cracks: r.fumble && r.sides === 20, dead: r.fumble && r.sides === 20, thin: true }) + '</span>' : '';
+  el.innerHTML = psig(p) + '<div><small>' + esc(p.char) + ' · ' + esc(r.label) + '</small><b class="' + (r.crit ? 'crit' : r.fumble ? 'fum' : '') + '">' + esc(r.total) + '</b></div>' + md;
   m.prepend(el); setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 4500);
   while (m.children.length > 3) m.lastChild.remove();
 }
@@ -1208,7 +1232,7 @@ function goWarn(c, w) {
 
 /* ---------- Render ---------- */
 let rendering = false;
-function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } }
+function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } }
 function render0() {
   applyTheme();
   if (!cur()) { const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; }
@@ -1227,7 +1251,7 @@ document.addEventListener('click', (ev) => {
   const A = {
     view: () => { S.view = arg; S.confirm = null; S.more = false; render(); window.scrollTo(0, 0); },
     step: () => { S.step = +arg; render(); window.scrollTo(0, 0); },
-    gowarn: () => { const c = derive(ch, S.hb); goWarn(c, c.warn[+arg]); },
+    gowarn: () => { const c = derive(ch, S.hb); if (window.innerWidth < 1100) S.warnOpen = false; goWarn(c, c.warn[+arg]); },
     gostep: () => { S.view = 'build'; S.step = +arg; render(); window.scrollTo(0, 0); },
     newChar: () => { const n = newChar({ name: 'Neuer Held' }); S.chars[n.id] = n; S.cur = n.id; S.view = 'build'; S.step = 0; S.confirm = null; persist('c', n.id); render(); window.scrollTo(0, 0); },
     dupChar: () => { const src = S.chars[arg] || ch; const n = JSON.parse(JSON.stringify(src)); n.id = newChar().id; n.name = n.name.replace(/^Beispiel:\s*/, '') + ' (Kopie)'; n.updated = Date.now(); S.chars[n.id] = n; persist('c', n.id); render(); },
@@ -1357,6 +1381,8 @@ function onBind(ev) {
   const p = t.dataset.bind;
   if (p.startsWith('hbe.')) { S.hbEdit[p.slice(4)] = v; if (ev.type === 'change' && t.tagName === 'SELECT') render(); return; }
   const ch = cur(); setP(ch, p, v);
+  if (p === 'name' && !String(v).trim()) ch.name = 'Neuer Held';
+  if (p === 'name') document.querySelectorAll('.summary h3').forEach((h) => { h.textContent = ch.name; });
   const fm = /^asi\.(\d+)\.feat$/.exec(p); if (fm) { ch.asi[fm[1]].plus = {}; delete ch.asi[fm[1]].save; }
   if (p === 'play.exh') { v = +v; if (v >= 6 && !ch.play.dead) { pushLog({ label: 'Erschöpfung Stufe 6', total: '†', detail: 'Auf der sechsten Erschöpfungsstufe stirbt ein Held.' }); fall(ch.play); } }
   const norender = t.hasAttribute('data-norender') || (ev.type === 'input');

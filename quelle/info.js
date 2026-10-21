@@ -128,3 +128,40 @@ document.addEventListener('click', (ev) => {
   const t = ev.target.closest('[data-ipick]'); if (t && S.modal === 'info') { S.modal = null; m.hidden = true; }
 }, true);
 document.addEventListener('keydown', (ev) => { const t = ev.target; if (t && t.classList && t.classList.contains('ii') && t.tagName === 'SPAN' && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); ev.stopPropagation(); t.click(); } }, true);
+
+/* Namen auf dem Bogen antippen → kleines Fenster zum Umbenennen */
+XA.renameHero = () => {
+  const ch = cur(); if (!ch) return; const m = $('#modal'); S.modal = 'rename';
+  m.innerHTML = '<div class="dlg" role="dialog" aria-modal="true" aria-label="Namen ändern"><h2>Namen ändern</h2>' + field('Name deines Helden', txt('name', ch.name === 'Neuer Held' ? '' : ch.name, 'z. B. Brakk Eisenfaust', 'autocomplete="off" id="rnIn"')) + '<div class="chips end"><button class="btn" data-act="renameDone">Fertig</button></div></div>';
+  m.hidden = false; const i = $('#rnIn'); if (i) { i.focus(); i.select(); }
+};
+XA.renameDone = () => { S.modal = null; $('#modal').hidden = true; render(); };
+document.addEventListener('keydown', (ev) => { if (S.modal !== 'rename') return; if (ev.key === 'Enter' && ev.target && ev.target.id === 'rnIn') { ev.preventDefault(); XA.renameDone(); } if (ev.key === 'Escape') setTimeout(render, 0); });
+
+/* ==== Offene Punkte: ⚠ rechts am Rand, aufklappbar, Sprung zum Punkt ==== */
+let warnLastN = -1;
+function paintWarn() {
+  let el = document.getElementById('warnfab'); document.body.dataset.view = S.view || '';
+  const ch = cur(); const show = ch && (S.view === 'build' || S.view === 'sheet') && !(ch.play && ch.play.dead);
+  const c = show ? derive(ch, S.hb) : null; const n = c ? c.warn.length : 0;
+  if (!el) { el = document.createElement('div'); el.id = 'warnfab'; document.body.appendChild(el); }
+  if (!show || (!n && warnLastN <= 0)) { el.innerHTML = ''; el.className = ''; warnLastN = show ? n : -1; S.warnOpen = false; return; }
+  if (!n) { /* gerade alles erledigt: kurz grünes ✓ */
+    el.className = 'wdone'; el.innerHTML = '<span class="wfb ok" role="status">✓ Alles ausgewählt</span>'; warnLastN = 0; S.warnOpen = false;
+    setTimeout(() => { if (warnLastN === 0) { el.innerHTML = ''; el.className = ''; } }, 1800); return;
+  }
+  warnLastN = n;
+  el.className = S.warnOpen ? 'open' : '';
+  el.innerHTML = (S.warnOpen ? '<div class="wpan" role="dialog" aria-label="Noch offen"><div class="wph"><b>Noch offen</b><small>antippen zum Hinspringen</small><button class="x" data-act="warnClose" aria-label="Schliessen">×</button></div><ul>' +
+      c.warn.map((w, i) => '<li><button data-act="gowarn" data-arg="' + i + '">' + esc(w) + '<span aria-hidden="true">→</span></button></li>').join('') + '</ul></div>' : '') +
+    '<button type="button" class="wfb" data-act="' + (S.warnOpen ? 'warnClose' : 'warnOpen') + '" aria-expanded="' + !!S.warnOpen + '" aria-label="' + n + ' Auswahl(en) noch offen" title="Noch offen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg><b>' + n + '</b></button>';
+}
+XA.warnOpen = () => { S.warnOpen = true; paintWarn(); const f = document.querySelector('#warnfab .wpan button'); if (f) f.focus({ preventScroll: true }); };
+XA.warnClose = () => { S.warnOpen = false; paintWarn(); };
+XA.sumToggle = () => { S.sumOpen = !S.sumOpen; render(); };
+/* Aufklappmenüs (<details class="mnu">): Klick daneben oder Auswahl schliesst */
+document.addEventListener('click', (ev) => {
+  document.querySelectorAll('details.mnu[open]').forEach((d) => { if (!d.contains(ev.target) || (ev.target.closest('.mnul button'))) d.removeAttribute('open'); });
+  if (S.warnOpen && !ev.target.closest('#warnfab') && !ev.target.closest('[data-act="warnOpen"]') && window.innerWidth < 1100) { S.warnOpen = false; paintWarn(); }
+}, true);
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { document.querySelectorAll('details.mnu[open]').forEach((d) => d.removeAttribute('open')); if (S.warnOpen) { S.warnOpen = false; paintWarn(); } } });
