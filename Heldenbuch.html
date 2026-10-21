@@ -638,6 +638,44 @@ i.kb{background:var(--arcane)}i.kr{background:var(--ember)}i.kf{background:var(-
 .srrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}.srrow small{display:block;opacity:.7}
 .slb{display:inline-block;font-size:.72em;font-style:normal;font-weight:600;padding:1px 7px;margin-left:4px;border-radius:9px;border:1px solid rgba(var(--arcane-rgb),.6);color:var(--arcane);vertical-align:middle;white-space:nowrap}
 .backupline{margin:10px 0;font-size:.9em;opacity:.85}.backupline.warn{color:var(--ember)}.themefold{margin:18px 0}.themefold>summary{cursor:pointer;font-weight:600;padding:8px 0}
+
+/* ---- Erklärkarten (ⓘ) ---- */
+.ii{display:inline-grid;place-items:center;width:18px;height:18px;min-height:0;padding:0;border-radius:50%;border:1px solid var(--line2);background:transparent;color:var(--faint);font:italic 600 11px/1 Georgia,'Times New Roman',serif;cursor:pointer;flex:none;position:relative;opacity:.75;transition:opacity .15s,color .15s,border-color .15s;vertical-align:middle;margin-left:6px}
+.ii::after{content:'';position:absolute;inset:-9px}
+.ii:hover,.ii:focus-visible{opacity:1;color:var(--gold);border-color:rgba(var(--gold-rgb),.6)}
+.card,.opt{position:relative}
+.card>.ii,.opt>.ii{position:absolute;top:8px;right:8px;margin:0}
+.opt:has(>.ii){padding-right:34px}.card:has(>.ii):not(.haspic){padding-right:30px}
+.card.haspic>.ii{background:rgba(var(--deep-rgb),.55);border-color:rgba(255,255,255,.25);color:rgba(255,255,255,.8)}
+.chipw{position:relative;display:inline-flex}
+.chip.wi{padding-right:28px}
+.chipw>.ii{position:absolute;right:5px;top:50%;margin:-9px 0 0}
+.chip.on+.ii{color:var(--gold-ink);border-color:rgba(0,0,0,.3);opacity:.6}
+.chip:disabled+.ii{opacity:.75}
+.tag.wi .ii{width:16px;height:16px;font-size:10px;margin-left:5px}
+.infodlg{padding:0;gap:0;max-height:min(82vh,720px);grid-template-rows:auto 1fr auto;overflow:hidden}
+.infodlg .ihd{display:flex;align-items:flex-start;gap:10px;padding:18px 20px 10px}.infodlg .ihd>div{flex:1;min-width:0}
+.infodlg .ihd b{display:block;font-family:var(--f-display);font-size:1.25rem;color:var(--ink);font-weight:600}
+.infodlg .ihd small{display:block;color:var(--muted);font-size:.84rem;margin-top:2px}
+.infodlg .ihd small i{font-style:normal;font-size:.72rem;border:1px solid var(--line2);border-radius:4px;padding:0 4px;margin-left:6px;color:var(--muted)}
+.infodlg .ibody{overflow:auto;padding:0 20px 16px;display:grid;gap:12px;align-content:start;overscroll-behavior:contain}
+.iflav{margin:0;font-style:italic;color:var(--ink);line-height:1.55;opacity:.92}
+.idl{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.idl div{min-width:0}.idl dt{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}.idl dd{margin:1px 0 0;color:var(--ink);font-size:.92rem;line-height:1.4}.idl small{color:var(--muted)}
+.infodlg h4{margin:2px 0 -4px;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.itx{margin:0;line-height:1.55;color:var(--ink)}
+.iul{margin:0;padding-left:1.1em;display:grid;gap:4px;line-height:1.45}
+.ifor{margin:0;padding:9px 12px;border-radius:10px;background:rgba(var(--gold-rgb),.08);border:1px solid rgba(var(--gold-rgb),.22);color:var(--ink);font-size:.92rem}
+.ifeats{display:grid;gap:4px}.ifeats details{border:1px solid var(--line);border-radius:10px;padding:7px 11px;background:var(--bg2)}.ifeats summary{cursor:pointer;display:flex;justify-content:space-between;gap:8px}.ifeats summary small{color:var(--faint);white-space:nowrap}.ifeats p{margin:6px 0 2px;line-height:1.5;color:var(--muted)}
+.infodlg .ift{padding:12px 20px 18px;border-top:1px solid var(--line)}
+.infodlg .ipick{width:100%}
+.ihint{margin:0;color:var(--muted);font-size:.9rem;text-align:center}.ihint.ok{color:var(--gold)}
+.spell .sflav{font-style:italic;color:var(--muted);margin:0 0 6px;line-height:1.5}
+@media (max-width:640px){
+ #modal:has(.infodlg){place-items:end center;padding:0}
+ .infodlg{width:100%;max-height:86vh;border-radius:18px 18px 0 0;border-bottom:0;padding-bottom:env(safe-area-inset-bottom,0px)}
+ .idl{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+}
 </style>
 <div id="scene" aria-hidden="true"></div>
 <canvas id="embers" aria-hidden="true"></canvas>
@@ -5327,6 +5365,516 @@ function addHelp() {
   const bb = document.querySelector('#boostBar .bbh'); if (bb && !bb.querySelector('.hlp')) bb.querySelector('.x').insertAdjacentHTML('beforebegin', helpBtn('boost'));
 }
 
+/* ==== Zauberbilder: wie man sich das Wirken vorstellt (eigene Texte, keine Regelwirkung) ==== */
+const SPELL_FLAV = {
+ /* Zaubertricks */
+ 'acid-splash':'Du schleuderst eine Handvoll zischender, grünlicher Tropfen, die beim Aufprall zerplatzen und beissenden Dampf aufsteigen lassen.',
+ 'chill-touch':'Deine Hand wird fahl wie die einer Leiche. Wo du triffst, kriecht Grabeskälte unter die Haut, und die Wunde will sich nicht schliessen.',
+ 'dancing-lights':'Kleine Lichtkugeln lösen sich von deinen Fingerspitzen und tanzen wie Glühwürmchen durch die Luft, bis du ihnen einen Platz zuweist.',
+ 'druidcraft':'Du flüsterst der Welt etwas zu, und sie antwortet: Eine Knospe öffnet sich, ein Windhauch dreht, eine Kerze erlischt mit einem leisen Seufzer.',
+ 'eldritch-blast':'Ein knisternder Strahl aus violettem Licht bricht aus deiner Hand, eine Kraft von jenseits der Sterne, die nicht ganz von dieser Welt ist.',
+ 'fire-bolt':'Ein glühender Funke springt aus deiner Hand und schiesst wie ein Komet aufs Ziel. Dort zerbirst er in einem Schwall aus Flammen.',
+ 'guidance':'Du legst einer Person die Hand auf die Schulter, und für einen Moment fühlt sie sich, als würde ihr jemand die richtige Antwort ins Ohr flüstern.',
+ 'light':'Du berührst einen Gegenstand, und er beginnt in einer Farbe deiner Wahl zu leuchten, ruhig und warm wie eine Laterne.',
+ 'mage-hand':'Eine schimmernde, halb durchsichtige Hand erscheint in der Luft und gehorcht deinen Gesten, als wäre sie deine eigene.',
+ 'mending':'Du fährst mit dem Finger über den Riss, und die Fasern finden zueinander zurück, als wäre nie etwas gewesen.',
+ 'message':'Du zeigst auf jemanden und flüsterst. Deine Worte gleiten unsichtbar durch den Raum und klingen nur in seinem Ohr.',
+ 'minor-illusion':'Mit einer schnellen Geste malst du ein Bild in die Luft oder lässt ein Geräusch erklingen, eine Täuschung, die nur bei genauem Hinsehen bröckelt.',
+ 'poison-spray':'Du streckst die Hand aus, und ein Strahl aus übelriechendem, grünem Gift schiesst hervor.',
+ 'prestidigitation':'Ein Fingerschnippen: Funken stieben, Staub verschwindet, der kalte Eintopf dampft wieder. Kleine Magie für den Alltag.',
+ 'produce-flame':'In deiner offenen Hand flackert eine Flamme auf, die dich nicht verbrennt. Sie leuchtet dir den Weg oder fliegt auf Wunsch ins Ziel.',
+ 'ray-of-frost':'Ein bläulich-weisser Strahl eisiger Luft schiesst aufs Ziel. Raureif kriecht über seine Glieder und macht sie schwer und steif.',
+ 'resistance':'Du zeichnest ein schützendes Zeichen auf eine Person. Ein schwacher Schimmer legt sich um sie und dämpft einen Teil des nächsten Schlags.',
+ 'sacred-flame':'Ein Pfeiler aus strahlendem Licht fährt vom Himmel auf dein Ziel herab, und keine Mauer und kein Schild hält ihn ab.',
+ 'shillelagh':'Dein Knüppel oder Stab erwacht unter deiner Hand. Die Maserung leuchtet grün, das Holz wird schwer und hart wie Eisen.',
+ 'shocking-grasp':'Blitze knistern um deine Hand. Bei der Berührung zuckt ein Schlag durch dein Ziel, der es für einen Moment lähmt.',
+ 'spare-the-dying':'Du legst einer sterbenden Person die Hand aufs Herz, und ein schwaches Licht hält ihren flackernden Lebensfunken fest.',
+ 'thaumaturgy':'Deine Stimme dröhnt wie Donner, Flammen flackern auf, der Boden bebt leise: kleine Zeichen, dass eine höhere Macht hinter dir steht.',
+ 'true-strike':'Für einen Herzschlag siehst du die Lücke in der Deckung deines Gegners wie ein leuchtendes Ziel, und deine Waffe folgt deinem Blick.',
+ 'vicious-mockery':'Du schleuderst deinem Gegner Worte entgegen, die mit Magie getränkt sind und so tief treffen, dass sie wirklich wehtun.',
+ /* Grad 1 */
+ 'alarm':'Du ziehst unsichtbare Fäden über eine Tür oder einen Platz. Wer sie berührt, löst ein Glöckchen aus, das nur du hörst, oder ein lautes Läuten.',
+ 'animal-friendship':'Du gehst langsam in die Hocke, sprichst leise und streckst die Hand aus. Das Tier spürt deine Absicht und verliert seine Scheu.',
+ 'bless':'Du hebst dein heiliges Symbol, und ein sanftes, goldenes Licht legt sich auf deine Verbündeten. Ihre Hände werden ruhiger, ihr Mut fester.',
+ 'burning-hands':'Du legst die Daumen aneinander und spreizt die Finger. Ein brüllender Fächer aus Flammen schiesst aus deinen Händen.',
+ 'charm-person':'Du lächelst, und plötzlich wirkst du auf dein Gegenüber wie ein alter, vertrauter Freund, dem man gern einen Gefallen tut.',
+ 'chromatic-orb':'Zwischen deinen Händen wächst eine schillernde Kugel, die ständig die Farbe wechselt, bis du dich für ein Element entscheidest und sie schleuderst.',
+ 'command':'Du sprichst ein einziges Wort mit solcher Macht, dass dein Gegenüber gehorcht, bevor es überhaupt darüber nachdenken kann.',
+ 'comprehend-languages':'Fremde Wörter verlieren ihre Fremdheit. Die Schriftzeichen auf dem Pergament scheinen sich vor deinen Augen in Bedeutung zu verwandeln.',
+ 'cure-wounds':'Du legst die Hand auf eine Wunde. Warmes Licht fliesst hinein, das Blut stockt, und das Fleisch beginnt sich zu schliessen.',
+ 'detect-magic':'Du schliesst kurz die Augen. Als du sie öffnest, schimmert alles Magische um dich herum in feinen, farbigen Auren.',
+ 'disguise-self':'Ein Schleier aus Illusion legt sich über dich. Im Spiegel blickt dir ein anderes Gesicht entgegen, in anderer Kleidung.',
+ 'divine-favor':'Du sprichst ein kurzes Gebet, und deine Waffe beginnt in heiligem Licht zu glimmen, das bei jedem Treffer aufblitzt.',
+ 'divine-smite':'Im Moment des Treffers entlädt sich göttliche Macht durch deine Waffe, ein gleissender Lichtschlag, der Dunkles besonders hart trifft.',
+ 'entangle':'Der Boden bricht auf, und Ranken, Wurzeln und Gras schiessen hervor, die nach Beinen und Füssen greifen und sich festziehen.',
+ 'faerie-fire':'Ein Schimmer aus blauen, grünen oder violetten Funken legt sich wie Feenstaub auf deine Feinde und lässt sie in der Dunkelheit leuchten.',
+ 'false-life':'Du saugst einen Hauch nekromantischer Kraft in dich auf. Dein Herz schlägt kräftiger, eine fremde, kalte Lebenskraft schützt dich.',
+ 'feather-fall':'Du rufst ein Wort, und die Fallenden schweben plötzlich langsam wie Federn zu Boden.',
+ 'find-familiar':'Im Rauch von Kräutern und Weihrauch formt sich ein kleines Tier, ein Geist, der dir als treuer Begleiter folgt.',
+ 'fog-cloud':'Dichte, kalte Nebelschwaden quellen aus dem Boden und verschlucken alles Licht und jede Sicht.',
+ 'guiding-bolt':'Ein Lichtblitz schiesst aus deiner Hand. Nach dem Treffer schimmert das Ziel noch einen Moment und ist leicht zu treffen.',
+ 'healing-word':'Du rufst ein einziges Wort der Heilung, und über die Distanz schliesst sich bei deinem Verbündeten eine Wunde.',
+ 'hellish-rebuke':'Wer dich verletzt, sieht dich nur mit dem Finger zeigen, und schon hüllen ihn höllische Flammen ein.',
+ 'heroism':'Du legst einem Gefährten die Hand auf die Brust. Mut durchflutet ihn wie ein warmer Strom, und keine Angst kann ihn mehr packen.',
+ 'hunters-mark':'Du fixierst deine Beute, und ein unsichtbares Mal brennt sich auf sie. Du spürst jede ihrer Bewegungen, und deine Treffer werden schärfer.',
+ 'identify':'Du hältst den Gegenstand in der Hand und lauschst. Langsam gibt er seine Geheimnisse preis: Wer ihn schuf, was er kann, was er verlangt.',
+ 'inflict-wounds':'Deine Hand ist umhüllt von fauligem, dunklem Schimmer. Bei der Berührung welkt das Fleisch, als hätte es jahrelang Krankheit erduldet.',
+ 'jump':'Du berührst eine Person, und ihre Beine fühlen sich an wie gespannte Federn, bereit für einen gewaltigen Satz.',
+ 'longstrider':'Du berührst eine Person, und ihre Schritte werden leicht und weit, als würde der Weg unter ihren Füssen schrumpfen.',
+ 'mage-armor':'Ein unsichtbares Kraftfeld legt sich wie eine zweite Haut um dich. Schläge prallen ab, als würdest du eine Rüstung tragen.',
+ 'magic-missile':'Drei leuchtende Pfeile aus reiner Magie lösen sich von deinen Fingern, ziehen bläuliche Spuren durch die Luft und finden ihr Ziel unfehlbar.',
+ 'protection-from-evil-and-good':'Ein schimmernder Schutzkreis legt sich um dein Ziel. Unheimliche Wesen aus anderen Welten zögern und finden keinen Halt.',
+ 'sanctuary':'Ein sanftes, heiliges Licht umgibt die Person. Wer sie angreifen will, spürt plötzlich Zweifel, Scham oder Furcht.',
+ 'shield':'Im letzten Moment reisst du die Hand hoch, und eine schimmernde Wand aus Kraft fängt den Schlag ab.',
+ 'shield-of-faith':'Ein schimmerndes Feld aus göttlicher Kraft umgibt dein Ziel und lenkt Schläge ab wie ein unsichtbarer Schild.',
+ 'sleep':'Ein Hauch von Müdigkeit weht über deine Gegner. Ihre Lider werden schwer, die Waffen sinken, und einer nach dem anderen sackt in sich zusammen.',
+ 'speak-with-animals':'Das Zwitschern, Bellen und Zischen um dich herum ergibt plötzlich Sinn, und die Tiere verstehen auch dich.',
+ 'thunderwave':'Mit einem gewaltigen Donnerschlag bricht eine Welle aus Kraft aus dir hervor und schleudert alles in deiner Nähe zurück.',
+ 'unseen-servant':'Eine unsichtbare, gestaltlose Kraft trägt Lasten, wischt Staub, öffnet Türen und erledigt geduldig deine Aufträge.',
+ 'ray-of-sickness':'Ein kränklich grüner Strahl schiesst auf dein Ziel. Übelkeit überfällt es, der Magen dreht sich, die Knie werden weich.',
+ /* Grad 2 */
+ 'aid':'Du sprichst einen Segen über deine Verbündeten. Ihre Erschöpfung weicht, und sie fühlen sich stärker und zäher als zuvor.',
+ 'alter-self':'Deine Gestalt verändert sich nach deinem Willen: Kiemen wachsen dir, dein Gesicht wird ein anderes, oder deine Hände werden zu Klauen.',
+ 'augury':'Du wirfst Stäbchen, Knochen oder Karten und deutest das Muster. Ein Gefühl des Wohls oder des Wehs steigt in dir auf.',
+ 'barkskin':'Die Haut deines Ziels wird rau und hart wie die Rinde einer alten Eiche.',
+ 'blindness-deafness':'Ein dunkler Schleier legt sich über die Augen deines Ziels, oder es hört plötzlich nur noch Stille.',
+ 'blur':'Deine Gestalt flimmert und verschwimmt wie ein Bild im Hitzeflirren. Feinde wissen nie genau, wohin sie zielen sollen.',
+ 'darkness':'Eine Finsternis quillt hervor, so tief, dass nicht einmal Dunkelsicht sie durchdringt und Fackeln darin ihr Licht verlieren.',
+ 'darkvision':'Du berührst die Augen deines Ziels. Die Dunkelheit wird grau und klar, und Formen tauchen aus der Schwärze auf.',
+ 'dragons-breath':'Ein Funke Drachenmacht entzündet sich in der Brust deines Ziels. Es atmet tief ein und speit einen Strom aus Feuer, Eis oder Säure.',
+ 'enhance-ability':'Du verleihst einer Person die Kraft eines Bären, die Anmut einer Katze, die Weisheit einer Eule oder die Ausstrahlung eines Adlers.',
+ 'find-steed':'Ein edles Ross aus einer anderen Welt tritt aus dem Licht. Es ist treu, klug und mit dir durch eine geheimnisvolle Verbindung verbunden.',
+ 'flaming-sphere':'Eine lodernde Feuerkugel rollt auf deinen Befehl über den Boden und versengt alles, was ihr in den Weg kommt.',
+ 'heat-metal':'Ein Schwert, eine Rüstung oder ein Helm beginnt rot zu glühen. Wer ihn hält oder trägt, verbrennt sich daran.',
+ 'hold-person':'Du streckst die Hand aus, und dein Gegner erstarrt mitten in der Bewegung, wie von unsichtbaren Fesseln gehalten.',
+ 'invisibility':'Du berührst eine Person, und sie verblasst langsam, bis nur noch leere Luft und vielleicht ein leiser Atemzug übrig sind.',
+ 'lesser-restoration':'Du legst die Hand auf und vertreibst Gift, Blindheit oder Lähmung wie einen Schatten, der dem Licht weichen muss.',
+ 'magic-weapon':'Du fährst mit der Hand über eine gewöhnliche Waffe, und sie beginnt zu summen, schärfer und leichter als zuvor.',
+ 'mirror-image':'Drei Abbilder von dir lösen sich aus deiner Gestalt und bewegen sich mit dir. Kein Feind weiss, welches das echte ist.',
+ 'misty-step':'Silberner Nebel hüllt dich ein, und im nächsten Augenblick trittst du ein paar Schritte weiter wieder aus ihm hervor.',
+ 'moonbeam':'Ein Strahl aus kaltem, silbernem Mondlicht fällt vom Himmel und brennt schmerzhaft auf allem, was darin steht.',
+ 'pass-without-trace':'Ein Schleier aus Schatten und Stille legt sich um dich und deine Gefährten. Eure Schritte verklingen, eure Spuren verwehen.',
+ 'prayer-of-healing':'Du sprichst ein langes Gebet, während deine Gefährten ruhen. Wunden schliessen sich, und neue Kraft kehrt in sie zurück.',
+ 'ray-of-enfeeblement':'Ein schwarzer Strahl trifft dein Ziel. Die Kraft fliesst aus seinen Muskeln, seine Schläge werden matt und schwach.',
+ 'scorching-ray':'Mehrere glühende Feuerstrahlen schiessen aus deinen Fingern, jeder auf ein eigenes Ziel.',
+ 'see-invisibility':'Deine Augen schimmern kurz, und Unsichtbares wird zu blassen, durchscheinenden Gestalten.',
+ 'shatter':'Ein schriller, ohrenbetäubender Ton schwillt an und bricht in einer Welle aus Klang auseinander, die Glas und Knochen zerspringen lässt.',
+ 'silence':'Plötzlich wird alles still. Kein Ton dringt in die Kugel hinein oder heraus, nicht einmal deine eigene Stimme.',
+ 'spider-climb':'Deine Finger und Sohlen haften an jedem Stein. Du läufst die Wand hinauf und über die Decke, als wäre sie der Boden.',
+ 'spiritual-weapon':'Eine schwebende Waffe aus geisterhaftem Licht erscheint, oft in der Form, die deiner Gottheit heilig ist, und schlägt auf deinen Befehl zu.',
+ 'suggestion':'Deine Worte klingen so vernünftig und sanft, dass dein Gegenüber gar nicht anders kann, als deinem Rat zu folgen.',
+ 'web':'Dicke, klebrige Spinnweben schiessen hervor und spannen sich zwischen Wänden und Bäumen. Wer hineingerät, bleibt hängen.',
+ 'zone-of-truth':'Ein schwaches Leuchten erfüllt den Raum. Wer darin lügen will, spürt, wie ihm die Worte im Hals stecken bleiben.',
+ /* Grad 3 */
+ 'aura-of-vitality':'Ein warmes, grünlich-goldenes Leuchten strahlt von dir aus. Mit einer Geste lenkst du heilende Kraft zu deinen Gefährten.',
+ 'beacon-of-hope':'Ein helles Licht der Zuversicht durchströmt deine Gefährten. Verzweiflung weicht, und jede Heilung wirkt mit voller Kraft.',
+ 'call-lightning':'Über dir ballt sich eine dunkle Gewitterwolke. Mit einer Handbewegung lässt du krachende Blitze auf deine Feinde niederfahren.',
+ 'counterspell':'Du erkennst die Gesten eines feindlichen Zauberwirkers und zerreisst die Magie, bevor sie Gestalt annimmt. Sie verpufft in einem Knistern.',
+ 'crusaders-mantle':'Eine Aura heiliger Macht weht wie ein unsichtbarer Mantel von dir aus. Die Waffen deiner Verbündeten blitzen bei jedem Treffer auf.',
+ 'daylight':'Ein Gegenstand oder ein Ort erstrahlt in echtem Sonnenlicht, so hell wie ein Sommermittag, mitten in der dunkelsten Höhle.',
+ 'dispel-magic':'Du greifst nach dem Gewebe eines Zaubers und ziehst daran, bis er sich auflöst wie ein Knoten, der aufgeht.',
+ 'elemental-weapon':'Deine Waffe beginnt zu lodern, zu vereisen, zu knistern oder vor Säure zu dampfen, je nachdem, welches Element du rufst.',
+ 'fear':'Du zeigst deinen Feinden ihre schlimmsten Albträume. Sie lassen die Waffen fallen und fliehen schreiend.',
+ 'fireball':'Ein glühender Funke zischt von deinem Finger zum Ziel und platzt dort zu einem tosenden Flammenball, der alles Brennbare entzündet.',
+ 'fly':'Du berührst eine Person, und die Schwere fällt von ihr ab. Sie erhebt sich vom Boden und gleitet frei durch die Luft.',
+ 'haste':'Die Welt um dein Ziel scheint langsamer zu werden. Es bewegt sich blitzschnell, weicht aus und schlägt zu, bevor andere reagieren.',
+ 'hypnotic-pattern':'Ein wirbelndes Muster aus schillernden Farben erscheint in der Luft. Wer hinsieht, starrt wie gebannt und vergisst alles andere.',
+ 'lightning-bolt':'Ein Blitz bricht aus deiner Hand und fährt in einer geraden Linie durch alles hindurch, begleitet von einem ohrenbetäubenden Knall.',
+ 'mass-healing-word':'Du rufst ein Wort der Heilung über das Schlachtfeld, und überall richten sich deine Verbündeten wieder auf.',
+ 'remove-curse':'Du legst die Hand auf, und der Fluch löst sich wie ein schwarzer Rauch, der aus dem Körper oder Gegenstand entweicht.',
+ 'revivify':'Du drückst einen Diamanten auf die Brust des Toten. Er zerfällt zu Staub, und ein keuchender Atemzug bringt das Leben zurück.',
+ 'speak-with-dead':'Die Lippen des Leichnams bewegen sich, und eine hohle Stimme antwortet auf deine Fragen, mit dem Wissen, das er im Leben hatte.',
+ 'spirit-guardians':'Geisterhafte Wächter umkreisen dich, Engel, Ahnen oder dunkle Schatten, je nach deinem Glauben, und fallen über Feinde in deiner Nähe her.',
+ 'stinking-cloud':'Eine gelbliche, ekelhaft stinkende Wolke quillt auf. Wer sie einatmet, würgt und krümmt sich.',
+ 'tongues':'Du berührst eine Person, und fremde Sprachen fliessen ihr plötzlich ganz selbstverständlich über die Lippen.',
+ 'vampiric-touch':'Deine Hand wird schattig und kalt. Bei jeder Berührung saugst du Lebenskraft aus deinem Opfer und spürst sie in dich strömen.',
+ 'water-breathing':'Du berührst deine Gefährten, und unter Wasser füllen sich ihre Lungen mit Luft, als stünden sie an Land.',
+ /* Grad 4 */
+ 'arcane-eye':'Ein unsichtbares Auge schwebt aus deiner Stirn und fliegt voraus. Du siehst durch es, als wärst du selbst dort.',
+ 'banishment':'Du sprichst eine Formel der Verbannung, und dein Ziel verschwindet in einem Riss zwischen den Welten.',
+ 'charm-monster':'Du sprichst sanft und bestimmt. Selbst ein wildes Ungeheuer sieht in dir plötzlich einen Freund.',
+ 'death-ward':'Du legst ein Schutzzeichen auf eine Person. Wenn der Tod nach ihr greift, hält sie das Zeichen ein einziges Mal zurück.',
+ 'dimension-door':'Du öffnest eine Tür in die Luft, trittst hindurch und kommst an einem Ort heraus, der bis zu 150 m entfernt liegt.',
+ 'fire-shield':'Flammen oder eisige Kälte hüllen dich ein. Wer dich angreift, verbrennt sich an dir oder erfriert.',
+ 'freedom-of-movement':'Du berührst eine Person, und nichts kann sie mehr festhalten. Fesseln gleiten ab, Schlamm und Wasser bremsen sie nicht mehr.',
+ 'greater-invisibility':'Dein Ziel verschwindet vollständig und bleibt unsichtbar, auch während es kämpft und zaubert.',
+ 'guardian-of-faith':'Eine riesige, geisterhafte Gestalt mit einem Schwert erscheint und hält Wache. Feinde, die sich nähern, schlägt sie nieder.',
+ 'ice-storm':'Faustgrosse Hagelkörner prasseln vom Himmel, und eisiger Wind fegt über den Boden.',
+ 'polymorph':'Das Ziel schrumpft, wächst und verformt sich, bis ein Tier vor dir steht, mit dessen Körper und Instinkten.',
+ 'stoneskin':'Die Haut deines Ziels wird grau und hart wie Granit. Klingen und Pfeile prallen fast wirkungslos ab.',
+ 'wall-of-fire':'Eine Mauer aus Flammen schiesst aus dem Boden empor, brüllend und knisternd, und versperrt den Weg.',
+ /* Grad 5 */
+ 'commune':'Du versinkst in Gebet und stellst deiner Gottheit Fragen. Die Antworten hallen in deinem Geist wider.',
+ 'cone-of-cold':'Ein Kegel eisiger Luft bricht aus deinen Händen. Alles darin wird mit Frost überzogen und erstarrt.',
+ 'flame-strike':'Eine Säule aus göttlichem Feuer fährt vom Himmel herab und verbrennt alles, was darin steht.',
+ 'geas':'Du erteilst einen magischen Befehl, der sich in den Geist deines Ziels einbrennt. Wer ihn bricht, spürt quälenden Schmerz.',
+ 'greater-restoration':'Du legst die Hand auf, und eine tiefe, reinigende Kraft spült Flüche, Versteinerung und Schwächung fort.',
+ 'hold-monster':'Du streckst die Hand aus, und selbst ein mächtiges Ungeheuer erstarrt mitten in der Bewegung.',
+ 'insect-plague':'Ein summender Schwarm aus Heuschrecken, Wespen und Fliegen erfüllt die Luft und sticht auf alles ein.',
+ 'legend-lore':'Du entzündest Weihrauch und versenkst dich in Gedanken. Bruchstücke alter Geschichten und Legenden steigen in dir auf.',
+ 'mass-cure-wounds':'Eine Welle heilenden Lichts breitet sich von dir aus, und deine Gefährten spüren, wie ihre Wunden sich schliessen.',
+ 'raise-dead':'Du betest an der Seite des Toten. Langsam kehrt Farbe in sein Gesicht zurück, und er öffnet die Augen.',
+ 'scrying':'Du blickst in einen Spiegel, eine Kristallkugel oder eine Schale Wasser, und siehst eine ferne Person, als stündest du neben ihr.',
+ 'summon-dragon':'Ein schimmernder Drachengeist steigt aus dem Nichts empor, mit gewaltigen Schwingen und glühenden Augen.',
+ 'teleportation-circle':'Du zeichnest einen Kreis aus Runen auf den Boden. Er leuchtet auf und öffnet ein Portal zu einem fernen Ort.',
+ 'wall-of-force':'Eine unsichtbare, unzerstörbare Wand entsteht. Man spürt sie nur, wenn man dagegen prallt.',
+ /* Grad 6 */
+ 'chain-lightning':'Ein Blitz schiesst aus deiner Hand, trifft dein Ziel und springt von dort auf weitere Feinde über.',
+ 'disintegrate':'Ein dünner, grüner Strahl schiesst aus deinem Finger. Was er zerstört, zerfällt zu feinem, grauem Staub.',
+ 'heal':'Eine Flut aus positiver Energie durchströmt dein Ziel. Wunden schliessen sich, und Gift und Blindheit weichen.',
+ 'true-seeing':'Deine Augen sehen alles, wie es wirklich ist: Illusionen verblassen, Verwandelte zeigen ihre wahre Gestalt.',
+ /* Grad 7 */
+ 'etherealness':'Du trittst aus der Welt hinaus in einen grauen, nebligen Zwischenraum, in dem du durch Wände gehen kannst.',
+ 'fire-storm':'Ein tosender Sturm aus Flammen bricht los und füllt ein ganzes Gebiet mit brüllendem Feuer.',
+ 'resurrection':'Du berührst den Toten mit einem kostbaren Diamanten, und selbst nach Jahrzehnten kehrt seine Seele zurück.',
+ 'teleport':'Du und deine Gefährten verschwinden in einem Lichtblitz und tauchen an einem fernen Ort wieder auf.',
+ /* Grad 8 */
+ 'power-word-stun':'Du sprichst ein Wort der Macht, und dein Ziel steht wie vom Donner gerührt da, unfähig zu handeln.',
+ 'sunburst':'Gleissendes Sonnenlicht explodiert von einem Punkt aus und blendet und verbrennt alle in der Umgebung.',
+ /* Grad 9 */
+ 'mass-heal':'Eine gewaltige Welle aus heilender Energie bricht von dir hervor und richtet ganze Gruppen von Verwundeten wieder auf.',
+ 'meteor-swarm':'Vier glühende Meteoriten stürzen vom Himmel und schlagen in flammenden Explosionen ein.',
+ 'power-word-heal':'Du sprichst ein Wort der Macht, und eine Person wird vollständig geheilt, frei von Furcht, Gift und Lähmung.',
+ 'power-word-kill':'Du sprichst ein einziges Wort der Macht, und das Leben deines Ziels erlischt.',
+ 'true-resurrection':'Du rufst eine Seele zurück, selbst wenn ihr Körper längst zerfallen ist. Er formt sich neu aus Licht und Staub.',
+ 'wish':'Du sprichst deinen Wunsch aus, und die Wirklichkeit selbst beugt sich deinem Willen, oder rächt sich dafür.',
+ 'aura-of-life':'Eine Aura aus leuchtender Lebenskraft strahlt von dir aus und hält den Tod von deinen Verbündeten fern.',
+ 'wall-of-stone':'Eine Mauer aus massivem Stein wächst aus dem Boden empor, Platte um Platte.',
+ /* weitere Zaubertricks */
+ 'blade-ward':'Du ziehst mit dem Finger ein Schutzzeichen in die Luft. Ein schwaches Flimmern umgibt dich und lenkt Klingen ein wenig ab.',
+ 'toll-the-dead':'Du zeigst auf dein Ziel, und der dumpfe Klang einer Totenglocke ertönt. Wer schon verwundet ist, spürt den Schlag besonders tief.',
+ 'sorcerous-burst':'Rohe Magie bricht aus dir hervor, ein wilder Strahl, der mit jedem Wirken ein wenig unberechenbarer wird.',
+ 'starry-wisp':'Ein Funke aus Sternenlicht schiesst auf dein Ziel und lässt es in kaltem Glanz leuchten, sodass es sich nicht mehr verstecken kann.',
+ 'elementalism':'Du rufst die Elemente im Kleinen: Ein Windhauch dreht sich, Erde formt sich, eine Flamme flackert auf, Wasser bewegt sich.',
+ 'thorn-whip':'Eine dornige Ranke peitscht aus deiner Hand, schlingt sich um dein Ziel und zieht es zu dir.',
+ 'word-of-radiance':'Du sprichst ein heiliges Wort, und gleissendes Licht bricht aus dir hervor und brennt die Feinde in deiner Nähe.',
+ /* weitere Grad 1 */
+ 'armor-of-agathys':'Eisige Kälte legt sich wie eine glitzernde Frostrüstung um dich. Wer dich schlägt, erfriert an dir.',
+ 'arms-of-hadar':'Schattenhafte Tentakel aus dem Nichts zwischen den Sternen brechen aus dir hervor und greifen nach allen in deiner Nähe.',
+ 'bane':'Du sprichst einen bösen Fluch. Deine Feinde spüren ein dunkles Gewicht auf sich, und ihre Hände zittern.',
+ 'color-spray':'Ein greller Fächer aus schillernden Farben bricht aus deiner Hand und blendet alle, die hineinsehen.',
+ 'create-or-destroy-water':'Wasser sprudelt aus dem Nichts oder fällt als Regen, oder es verdunstet spurlos vor deinen Augen.',
+ 'detect-evil-and-good':'Du öffnest deine Sinne und spürst die Gegenwart von Himmlischen, Unholden, Untoten und anderen Wesen aus fremden Welten.',
+ 'detect-poison-and-disease':'Du riechst und spürst Gift und Krankheit, als würden sie dir in fahlem Licht erscheinen.',
+ 'expeditious-retreat':'Deine Füsse werden leicht, und du rennst schneller, als du es je für möglich gehalten hättest.',
+ 'goodberry':'Zehn kleine Beeren erscheinen in deiner Hand, saftig und voller Lebenskraft.',
+ 'grease':'Eine schmierige, glänzende Schicht breitet sich auf dem Boden aus. Wer darüber geht, rutscht aus.',
+ 'hex':'Du deutest auf dein Opfer und sprichst einen dunklen Fluch. Ein unsichtbares Mal haftet an ihm, und deine Angriffe finden es mit fiebriger Bosheit.',
+ 'ice-knife':'Ein spitzer Eissplitter schiesst aus deiner Hand, bohrt sich ins Ziel und zerspringt in einer Wolke aus scharfen, eisigen Scherben.',
+ 'illusory-script':'Du schreibst mit magischer Tinte. Die Eingeweihten lesen deine Botschaft, alle anderen sehen nur Unsinn oder einen harmlosen Text.',
+ 'purify-food-and-drink':'Du fährst mit der Hand über Speisen und Getränke. Fäulnis und Gift verschwinden mit einem kaum sichtbaren Schimmer.',
+ 'searing-smite':'Deine Waffe flammt beim Treffer weissglühend auf. Das Ziel fängt Feuer und brennt weiter, bis es die Flammen erstickt.',
+ 'silent-image':'Du formst mit den Händen ein Bild in der Luft, das täuschend echt aussieht, nur ohne einen einzigen Laut.',
+ 'hideous-laughter':'Dein Ziel findet plötzlich alles unglaublich komisch. Es bricht in ein so heftiges Gelächter aus, dass es zu Boden sinkt.',
+ 'floating-disk':'Eine flache, schimmernde Scheibe aus Kraft erscheint auf Hüfthöhe und folgt dir geduldig mit deinem Gepäck.',
+ 'thunderous-smite':'Beim Treffer donnert deine Waffe wie ein Gewitter. Der Schlag hallt weit und schleudert das Ziel zu Boden.',
+ 'witch-bolt':'Ein knisternder, blauer Blitzbogen springt von dir zu deinem Ziel und bleibt an ihm hängen wie eine glühende Kette.',
+ 'wrathful-smite':'Dein Treffer trägt deinen ganzen Zorn in sich. Das Ziel sieht in dir plötzlich etwas Furchterregendes und weicht zitternd zurück.',
+ 'dissonant-whispers':'Du flüsterst eine Melodie, die nur dein Ziel hört, schief, schmerzend, unerträglich. Es will nur noch fort von dir.',
+ 'ensnaring-strike':'Beim Treffer schiessen dornige Ranken aus deiner Waffe oder deinem Geschoss und schlingen sich um dein Ziel.',
+ 'hail-of-thorns':'Dein Pfeil zersplittert beim Treffer in einen Hagel aus Dornen, der auf alle in der Nähe niederprasselt.',
+ 'compelled-duel':'Du forderst deinen Gegner heraus, und eine magische Kraft bindet ihn an dich. Er kann sich kaum von dir abwenden.',
+ /* weitere Grad 2 */
+ 'acid-arrow':'Ein grünlicher Pfeil aus Säure zischt auf dein Ziel zu und frisst sich zischend in Haut und Rüstung.',
+ 'arcane-lock':'Du legst die Hand auf eine Tür oder einen Deckel. Ein schwaches Glimmen läuft über das Schloss, und es lässt sich nicht mehr öffnen.',
+ 'calm-emotions':'Eine Welle aus Ruhe breitet sich aus. Wut verraucht, Angst weicht, und die Hände senken sich.',
+ 'continual-flame':'Eine Flamme ohne Hitze entzündet sich auf dem Gegenstand und brennt still und gleichmässig, Jahr um Jahr.',
+ 'detect-thoughts':'Du lauschst in den Geist deines Gegenübers und hörst seine Gedanken wie ein leises Murmeln.',
+ 'enlarge-reduce':'Dein Ziel wächst mit einem Ruck zur doppelten Grösse, oder es schrumpft, bis es dir nur noch bis zur Hüfte reicht.',
+ 'find-traps':'Du schliesst kurz die Augen. Ein Gefühl der Gefahr sagt dir, ob in der Nähe eine Falle lauert.',
+ 'gentle-repose':'Du legst einen Schutz über den Leichnam. Er bleibt unversehrt, als würde die Zeit für ihn stillstehen.',
+ 'gust-of-wind':'Ein heulender Windstoss bricht aus deiner Hand, löscht Fackeln und schiebt alle zurück, die sich ihm entgegenstemmen.',
+ 'knock':'Ein lautes, dumpfes Klopfen hallt durch den Raum, und das verschlossene Schloss springt auf.',
+ 'levitate':'Dein Ziel löst sich langsam vom Boden und schwebt in der Luft, wie von unsichtbaren Fäden gehalten.',
+ 'locate-animals-or-plants':'Du flüsterst den Namen eines Tiers oder einer Pflanze, und eine innere Stimme zeigt dir die Richtung.',
+ 'locate-object':'Du denkst an einen Gegenstand, und ein feines Ziehen in deiner Brust zeigt dir, wo er liegt.',
+ 'magic-mouth':'Ein Mund erscheint auf einem Gegenstand und spricht deine Botschaft aus, sobald eine bestimmte Bedingung eintritt.',
+ 'arcanists-magic-aura':'Du webst einen falschen Schimmer um einen Gegenstand oder eine Person und täuschst so jeden, der mit Magie nachforscht.',
+ 'phantasmal-force':'Du pflanzt ein Trugbild direkt in den Geist deines Ziels. Für es ist das Bild echt, und es kann ihm wehtun.',
+ 'protection-from-poison':'Du berührst eine Person, und das Gift in ihrem Körper weicht. Neue Gifte greifen kaum noch.',
+ 'rope-trick':'Ein Seil richtet sich auf und hängt in der Luft. Oben öffnet sich ein Durchgang in einen versteckten Raum.',
+ 'shining-smite':'Deine Waffe leuchtet beim Treffer hell auf, und das Ziel glüht danach wie ein Leuchtfeuer.',
+ 'warding-bond':'Ihr tragt beide einen Ring aus Platin, und ein unsichtbares Band verbindet euch. Du teilst jeden Schmerz deines Schützlings.',
+ 'summon-beast':'Ein Tiergeist erscheint, halb Wolf, halb Nebel, ein Raubvogel aus Licht oder ein Wesen aus der Tiefe, und kämpft an deiner Seite.',
+ 'animal-messenger':'Du flüsterst einem kleinen Tier deine Botschaft zu, und es eilt davon, um sie zu überbringen.',
+ /* weitere Grad 3 */
+ 'animate-dead':'Du sprichst finstere Worte über Knochen oder einen Leichnam. Mit einem Knacken erhebt sich ein Untoter und wartet auf deine Befehle.',
+ 'bestow-curse':'Deine Berührung hinterlässt einen schwarzen Fleck auf der Seele deines Opfers. Pech und Schwäche haften fortan an ihm.',
+ 'blink':'Du flackerst zwischen den Welten hin und her. Manchmal bist du da, manchmal verschwindest du für einen Augenblick.',
+ 'clairvoyance':'Ein unsichtbares Auge oder Ohr erscheint an einem fernen Ort, und du siehst oder hörst, was dort geschieht.',
+ 'conjure-animals':'Ein Rudel geisterhafter Wölfe, Raben oder Raubkatzen erscheint um dich und reisst an allen, die ihnen zu nahe kommen.',
+ 'create-food-and-water':'Ein schlichtes, aber sättigendes Mahl erscheint vor dir, dazu klares, frisches Wasser.',
+ 'feign-death':'Dein Ziel sinkt in einen todesähnlichen Schlaf. Kein Atem, kein Herzschlag, und doch lebt es.',
+ 'gaseous-form':'Dein Ziel löst sich in einen silbrigen Nebel auf, der durch Ritzen und Schlüssellöcher schwebt.',
+ 'glyph-of-warding':'Du zeichnest eine unsichtbare Glyphe auf eine Fläche. Wer sie auslöst, wird von der gespeicherten Magie getroffen.',
+ 'tiny-hut':'Eine schimmernde Kuppel aus Kraft wölbt sich über euch. Regen, Wind und Feinde bleiben draussen.',
+ 'magic-circle':'Du ziehst einen Kreis aus Runen. Wesen aus anderen Welten können ihn nicht durchschreiten.',
+ 'major-image':'Ein Trugbild entsteht, so echt, dass man es riechen, hören und sogar seine Wärme spüren kann.',
+ 'meld-into-stone':'Du trittst in den Fels hinein, als wäre er Wasser, und verschwindest darin.',
+ 'nondetection':'Ein Schleier legt sich über dein Ziel, und keine Erkenntnismagie kann es mehr finden.',
+ 'phantom-steed':'Ein schattenhaftes Pferd mit glühenden Augen erscheint, schnell wie der Wind und lautlos wie ein Traum.',
+ 'plant-growth':'Gras, Ranken und Büsche wuchern in rasender Geschwindigkeit, bis sie ein undurchdringliches Dickicht bilden.',
+ 'protection-from-energy':'Ein schwacher Schimmer umgibt dein Ziel und schützt es vor Feuer, Kälte, Blitz, Säure oder Donner.',
+ 'sending':'Du sprichst eine kurze Botschaft, und sie erreicht ihr Ziel, egal wie weit entfernt es ist. Die Antwort hallt zurück.',
+ 'sleet-storm':'Eisiger Schneeregen prasselt vom Himmel, Flammen erlöschen, und der Boden wird glatt wie ein gefrorener See.',
+ 'slow':'Die Zeit dehnt sich für deine Gegner. Ihre Bewegungen werden zäh und schwer, als liefen sie durch Honig.',
+ 'water-walk':'Deine Gefährten treten aufs Wasser, und es trägt sie, als wäre es fester Boden.',
+ 'wind-wall':'Eine Wand aus heulendem Wind erhebt sich und lenkt Pfeile und Geschosse ab.',
+ 'blinding-smite':'Beim Treffer blitzt deine Waffe so grell auf, dass dein Ziel geblendet wird.',
+ 'summon-fey':'Ein Feengeist erscheint in einem Wirbel aus Blüten, verspielt, wild oder unheimlich, und kämpft für dich.',
+ 'summon-undead':'Ein untoter Geist steigt aus dem Boden, ein Skelett, eine fahle Gestalt oder ein Haufen Moder, und gehorcht dir.',
+ /* weitere Grad 4 */
+ 'blight':'Du saugst die Lebenskraft aus deinem Ziel. Haut und Blätter werden grau und welk, wie nach einer langen Dürre.',
+ 'compulsion':'Du lenkst den Willen deiner Gegner. Sie gehen, wohin du willst, ob sie wollen oder nicht.',
+ 'confusion':'Ein Wirbel aus Verwirrung erfasst deine Gegner. Sie wissen nicht mehr, wer Freund oder Feind ist.',
+ 'conjure-minor-elementals':'Kleine Elementargeister aus Flammen, Wasser, Erde oder Luft umkreisen dich und verstärken jeden deiner Schläge.',
+ 'conjure-woodland-beings':'Feen, Dryaden und Waldgeister tanzen um dich und schlagen nach allen, die dir zu nahe kommen.',
+ 'control-water':'Das Wasser gehorcht dir: Es teilt sich, steigt, fällt oder wirbelt in einem gewaltigen Strudel.',
+ 'divination':'Du stellst eine Frage über die nahe Zukunft, und eine wahre, wenn auch oft rätselhafte Antwort erreicht dich.',
+ 'dominate-beast':'Du greifst in den Geist eines Tiers und nimmst es unter deine Kontrolle.',
+ 'fabricate':'Rohes Holz, Stein oder Metall formt sich vor deinen Augen zu einem fertigen Gegenstand.',
+ 'giant-insect':'Ein riesiges Insekt erscheint, eine Spinne, eine Wespe oder ein Hundertfüsser, und kämpft für dich.',
+ 'hallucinatory-terrain':'Die Landschaft verändert sich vor den Augen aller: Ein Weg wird zum Sumpf, ein Abgrund zur Wiese.',
+ 'locate-creature':'Du denkst an eine Kreatur, und eine innere Stimme zeigt dir den Weg zu ihr.',
+ 'phantasmal-killer':'Du pflanzt das schlimmste Grauen in den Geist deines Ziels. Es sieht seinen Albtraum leibhaftig vor sich.',
+ 'resilient-sphere':'Eine schimmernde Kugel umschliesst dein Ziel. Nichts gelangt hinein, nichts heraus.',
+ 'secret-chest':'Du versteckst eine Truhe in einer anderen Welt. Mit einer kleinen Nachbildung rufst du sie zurück.',
+ 'black-tentacles':'Schwarze, glitschige Tentakel schiessen aus dem Boden und packen alle, die in ihre Nähe kommen.',
+ 'faithful-hound':'Ein unsichtbarer Wachhund erscheint und hält Wache. Er bellt laut, wenn sich ein Fremder nähert, und beisst zu.',
+ 'private-sanctum':'Du schützt einen Raum vor allen neugierigen Augen und Ohren. Keine Magie dringt hinein.',
+ 'staggering-smite':'Dein Treffer erschüttert den Geist deines Ziels, und es taumelt benommen zurück.',
+ 'stone-shape':'Du formst den Stein wie Ton. Eine Tür, eine Treppe oder eine Waffe entsteht unter deinen Händen.',
+ 'summon-aberration':'Ein fremdartiges Wesen aus einer fernen Welt erscheint, mit Augen, Tentakeln oder schimmernder Haut, und kämpft für dich.',
+ 'summon-construct':'Ein Konstrukt aus Stein, Metall oder Holz erhebt sich und kämpft für dich mit mechanischer Präzision.',
+ 'summon-elemental':'Ein Elementargeist aus Feuer, Wasser, Erde oder Luft erscheint und kämpft an deiner Seite.',
+ /* weitere Grad 5 */
+ 'animate-objects':'Stühle, Waffen und Steine erwachen zum Leben und greifen auf deinen Befehl an.',
+ 'antilife-shell':'Eine schimmernde Barriere wölbt sich um dich und hält alle Lebewesen fern.',
+ 'awaken':'Du berührst ein Tier oder einen Baum, und es erwacht zu Bewusstsein, mit eigenen Gedanken und einer Stimme.',
+ 'cloudkill':'Eine giftgrüne Wolke wälzt sich über den Boden und tötet alles, was sie einatmet.',
+ 'conjure-elemental':'Ein tosender Strudel aus Feuer, Wasser, Erde oder Luft entsteht und reisst alle in sich hinein.',
+ 'contact-other-plane':'Dein Geist reisst sich los und streckt sich ins Unbekannte aus, bis ein uraltes, fremdes Bewusstsein antwortet. Das Wissen ist gewaltig, und gefährlich für den Verstand.',
+ 'contagion':'Deine Berührung trägt eine schleichende Krankheit. Fieber, Schwäche und Fäulnis breiten sich im Körper deines Ziels aus.',
+ 'creation':'Aus Schatten und Licht formt sich ein Gegenstand, Holz, Stoff, Stein oder Metall, so echt, als wäre er immer da gewesen.',
+ 'dispel-evil-and-good':'Ein schimmerndes Licht umgibt dich. Wesen aus anderen Welten weichen zurück, und mit einer Berührung schickst du sie heim.',
+ 'dominate-person':'Du greifst nach dem Geist deines Gegenübers. Sein Blick wird leer, und er tut, was du ihm befiehlst.',
+ 'dream':'Du betrittst die Träume eines Schlafenden, als freundliche Erscheinung oder als Albtraum, der ihn keine Ruhe finden lässt.',
+ 'hallow':'Du weihst einen Ort mit Gebeten und heiligem Öl. Fortan liegt eine spürbare Kraft über ihm, schützend oder bedrohlich.',
+ 'mislead':'Du verschwindest, und an deiner Stelle steht ein täuschend echtes Abbild von dir, das du nach Belieben bewegst.',
+ 'modify-memory':'Du greifst in die Erinnerungen deines Gegenübers und formst sie neu, wie Ton in deinen Händen.',
+ 'passwall':'Du legst die Hand an die Wand, und ein Durchgang öffnet sich, als wäre der Stein nie dagewesen.',
+ 'planar-binding':'Du bannst ein Wesen aus einer anderen Welt mit einem Kreis aus Runen und zwingst es in deinen Dienst.',
+ 'telepathic-bond':'Ein unsichtbares Band verbindet die Gedanken deiner Gefährten. Sie sprechen miteinander ohne ein Wort.',
+ 'reincarnate':'Der Tote erwacht in einem neuen Körper, vielleicht als Elf, Zwerg oder etwas ganz anderes.',
+ 'seeming':'Ein Schleier aus Illusion legt sich über eine ganze Gruppe, und jeder sieht plötzlich aus wie ein anderer.',
+ 'telekinesis':'Mit reiner Willenskraft hebst du Steine, Möbel oder sogar Kreaturen in die Luft und bewegst sie, wohin du willst.',
+ 'tree-stride':'Du trittst in einen Baum hinein und kommst aus einem anderen, weit entfernten Baum wieder heraus.',
+ 'banishing-smite':'Beim Treffer bricht eine Kraft aus deiner Waffe, die dein Ziel aus dieser Welt zu reissen droht.',
+ 'circle-of-power':'Eine Aura aus göttlicher Kraft umgibt dich und schützt deine Gefährten vor feindlicher Magie.',
+ 'summon-celestial':'Ein himmlisches Wesen mit leuchtenden Flügeln steigt herab, bereit zu heilen oder zu kämpfen.',
+ 'arcane-hand':'Eine riesige, schimmernde Hand erscheint und packt, schlägt oder schützt nach deinem Befehl.',
+ /* Grad 6 */
+ 'blade-barrier':'Eine wirbelnde Wand aus unzähligen, rasiermesserscharfen Klingen entsteht und zerschneidet alle, die sie durchschreiten.',
+ 'contingency':'Du speicherst einen Zauber in dir, der wie eine gespannte Feder wartet, bis die richtige Bedingung eintritt.',
+ 'create-undead':'Finstere Worte hallen über einem Friedhof, und hungrige Ghule kriechen aus der Erde, bereit, dir zu dienen.',
+ 'eyebite':'Deine Augen werden schwarz wie Tinte. Wer deinem Blick begegnet, schläft ein, flieht oder wird krank.',
+ 'find-the-path':'Du weisst plötzlich genau, welchen Weg du nehmen musst, als würde eine innere Stimme dich führen.',
+ 'flesh-to-stone':'Die Haut deines Ziels wird grau und steif. Langsam erstarrt es zu einer Statue.',
+ 'forbiddance':'Du versiegelst einen Ort mit heiliger oder unheiliger Macht. Bestimmte Wesen verbrennen, wenn sie ihn betreten.',
+ 'globe-of-invulnerability':'Eine schimmernde Kugel umgibt dich, an der schwächere Zauber einfach abprallen.',
+ 'guards-and-wards':'Nebel, Netze und verschlossene Türen verwandeln ein Gebäude in ein schützendes Labyrinth.',
+ 'harm':'Eine schreckliche Krankheit befällt dein Ziel. Seine Kraft schwindet, und seine Wunden heilen nicht mehr richtig.',
+ 'heroes-feast':'Ein prächtiges Festmahl erscheint auf einer Tafel. Wer davon isst, fühlt sich danach unbesiegbar.',
+ 'magic-jar':'Deine Seele verlässt deinen Körper und wartet in einem Gefäss, bereit, in einen fremden Körper zu fahren.',
+ 'mass-suggestion':'Du sprichst zu einer ganzen Gruppe, und alle folgen deinem Vorschlag, als wäre es ihr eigener Gedanke.',
+ 'move-earth':'Hügel heben sich, Gräben öffnen sich, und die Erde fliesst nach deinem Willen wie zähes Wasser.',
+ 'freezing-sphere':'Eine Kugel aus eisiger Kälte fliegt durch die Luft und explodiert in einem Sturm aus Frost.',
+ 'irresistible-dance':'Dein Ziel beginnt wild zu tanzen, ob es will oder nicht, und kann nicht mehr aufhören.',
+ 'planar-ally':'Ein Wesen aus der Welt deiner Gottheit erscheint und bietet dir seine Hilfe an, gegen einen Preis.',
+ 'programmed-illusion':'Du erschaffst eine Illusion, die wartet, bis jemand eine bestimmte Bedingung erfüllt, und dann abspielt.',
+ 'sunbeam':'Ein Strahl aus reinem Sonnenlicht bricht aus deiner Hand und brennt alles, was er trifft.',
+ 'transport-via-plants':'Du trittst in einen Baum oder eine grosse Pflanze und kommst an einem anderen Ort der Welt heraus.',
+ 'wall-of-ice':'Eine Wand aus klarem, eisigem Eis wächst aus dem Boden empor.',
+ 'wall-of-thorns':'Eine Wand aus dichten, dornigen Ranken wuchert empor und versperrt jeden Weg.',
+ 'wind-walk':'Du und deine Gefährten werdet zu Wolken und fliegt mit dem Wind über das Land.',
+ 'word-of-recall':'Du sprichst ein heiliges Wort, und im nächsten Augenblick stehst du mit deinen Gefährten in deinem Heiligtum.',
+ 'summon-fiend':'Aus einem Riss voller Rauch und Schwefelgeruch tritt ein Unhold hervor und kämpft auf deiner Seite.',
+ 'arcane-gate':'Zwei schimmernde Portale öffnen sich, und wer durch das eine tritt, kommt aus dem anderen heraus.',
+ /* Grad 7 */
+ 'conjure-celestial':'Eine Säule aus himmlischem Licht fällt herab, heilt deine Verbündeten und verbrennt deine Feinde.',
+ 'delayed-blast-fireball':'Ein glühender Punkt schwebt in der Luft, wird mit jedem Augenblick heller und explodiert, wann du willst.',
+ 'divine-word':'Du sprichst ein Wort, das die Schöpfung selbst erschüttert. Wer zu schwach ist, wird geblendet, taub oder vernichtet.',
+ 'finger-of-death':'Du zeigst auf dein Ziel, und eine Welle negativer Energie durchfährt es. Wer stirbt, erhebt sich als Zombie.',
+ 'forcecage':'Ein unsichtbarer Käfig aus reiner Kraft umschliesst dein Ziel.',
+ 'mirage-arcane':'Eine ganze Landschaft verändert sich nach deinem Willen, so echt, dass man sie berühren kann.',
+ 'magnificent-mansion':'Eine schimmernde Tür öffnet sich in ein prächtiges Herrenhaus mit Dienerschaft und Festmahl.',
+ 'plane-shift':'Du und deine Gefährten verschwinden aus dieser Welt und tauchen in einer ganz anderen wieder auf.',
+ 'prismatic-spray':'Acht schillernde Strahlen in allen Farben des Regenbogens brechen aus deinen Händen hervor.',
+ 'project-image':'Ein Abbild von dir erscheint an einem fernen Ort, und du siehst und hörst durch seine Augen und Ohren.',
+ 'regenerate':'Dein Ziel heilt, und verlorene Gliedmassen wachsen langsam nach.',
+ 'reverse-gravity':'Plötzlich fällt alles nach oben, Kreaturen, Steine und Möbel, und schwebt unter der Decke.',
+ 'sequester':'Du versteckst eine Person oder einen Gegenstand so gut, dass niemand ihn finden kann.',
+ 'simulacrum':'Aus Schnee und Eis formt sich ein Abbild einer Kreatur, das dir treu dient.',
+ 'symbol':'Du zeichnest eine Glyphe der Macht. Wer sie auslöst, wird von Furcht, Schmerz oder Schlaf erfasst.',
+ 'arcane-sword':'Ein schwebendes Schwert aus schimmernder Kraft erscheint und kämpft auf deinen Befehl.',
+ /* Grad 8 */
+ 'animal-shapes':'Deine Gefährten verwandeln sich in Tiere, Wölfe, Bären oder Adler, nach deiner Wahl.',
+ 'antimagic-field':'Um dich herum erlischt jede Magie, als hätte jemand eine Kerze ausgeblasen.',
+ 'antipathy-sympathy':'Ein Ort oder Gegenstand zieht bestimmte Wesen unwiderstehlich an oder stösst sie ab.',
+ 'clone':'In einem Gefäss wächst langsam ein Ebenbild von dir heran, das auf den Tag wartet, an dem du stirbst.',
+ 'control-weather':'Du hebst die Arme, und der Himmel gehorcht dir: Wolken ziehen auf, der Wind dreht, Regen fällt.',
+ 'demiplane':'Eine schattenhafte Tür öffnet sich in einen leeren Raum, der nur dir gehört.',
+ 'dominate-monster':'Du greifst nach dem Geist eines mächtigen Wesens und nimmst es unter deine Kontrolle.',
+ 'earthquake':'Der Boden bebt und reisst auf. Gebäude stürzen ein, und Spalten öffnen sich.',
+ 'befuddlement':'Ein Sturm aus Verwirrung tobt im Geist deines Ziels. Es vergisst seine Zauber und kann kaum noch klar denken.',
+ 'glibness':'Deine Worte fliessen wie Honig. Jeder glaubt dir, selbst wenn du lügst.',
+ 'holy-aura':'Ein strahlendes, göttliches Licht umgibt dich und deine Gefährten und schützt sie vor allem Bösen.',
+ 'incendiary-cloud':'Eine Wolke aus glühender Asche und Funken wälzt sich langsam über das Schlachtfeld.',
+ 'maze':'Dein Ziel verschwindet in einem endlosen, verwinkelten Labyrinth zwischen den Welten.',
+ 'mind-blank':'Dein Geist wird zu einem verschlossenen Tresor. Keine Magie kann deine Gedanken lesen oder beeinflussen.',
+ /* Grad 9 */
+ 'astral-projection':'Deine Seele löst sich von deinem Körper und reist mit deinen Gefährten durch das silbrige Astralmeer.',
+ 'foresight':'Du siehst einen Herzschlag in die Zukunft und weisst immer, was als Nächstes geschieht.',
+ 'gate':'Ein schimmerndes Portal öffnet sich in eine andere Welt, und du kannst sogar ein bestimmtes Wesen hindurchrufen.',
+ 'imprisonment':'Du kerkerst dein Ziel auf ewig ein, in Ketten, in einem Edelstein oder in einem endlosen Schlaf.',
+ 'prismatic-wall':'Eine schillernde Wand aus sieben Farben erhebt sich, und jede Schicht birgt eine eigene, tödliche Magie.',
+ 'shapechange':'Du nimmst die Gestalt eines anderen Wesens an, eines Drachen, Riesen oder Elementars, und wechselst sie nach Belieben.',
+ 'storm-of-vengeance':'Ein gewaltiger Sturm zieht auf. Donner, Säureregen, Blitze und Hagel prasseln auf deine Feinde nieder.',
+ 'time-stop':'Die Welt erstarrt um dich herum. Nur du bewegst dich noch, für ein paar kostbare Augenblicke.',
+ 'weird':'Du weckst die schlimmsten Ängste deiner Gegner, und sie sehen ihre Albträume leibhaftig vor sich.'
+};
+
+/* ==== Erklärkarten im Heldenbau: kleines ⓘ rechts an Auswahlen, Karte mit Text und „Wählen“ ==== */
+const SKILL_DESC = {
+  acr: 'Auf den Beinen bleiben, wo es schwierig wird: auf Glatteis, einem schwankenden Deck oder einem Seil balancieren, Saltos, Abrollen, dich aus einem Griff winden.',
+  arc: 'Wissen über Magie: Zauber, magische Gegenstände, Runen, die Ebenen und ihre Bewohner erkennen und einordnen.',
+  ath: 'Körperkraft im Einsatz: klettern, springen, schwimmen, jemanden packen oder dich gegen einen Stoss stemmen.',
+  prf: 'Menschen mit Musik, Tanz, Schauspiel oder einer Rede fesseln und unterhalten.',
+  itm: 'Mit Drohungen, Auftreten oder Gewalt beeindrucken: jemanden zum Reden bringen oder zum Zurückweichen.',
+  slt: 'Geschickte Finger: Taschendiebstahl, etwas unbemerkt verstecken oder vertauschen, Taschenspielertricks.',
+  his: 'Wissen über Vergangenes: Reiche, Kriege, Herrscherhäuser, Legenden und alte Bauwerke.',
+  med: 'Verletzte versorgen und Sterbende stabilisieren, Krankheiten und Todesursachen erkennen.',
+  ste: 'Unbemerkt bleiben: schleichen, dich verstecken, an Wachen vorbeischlüpfen.',
+  ani: 'Mit Tieren umgehen: ein Tier beruhigen, ein Reittier lenken, die Stimmung eines Tiers einschätzen.',
+  ins: 'Durchschauen, was jemand wirklich meint oder vorhat: Lügen bemerken, Nervosität erkennen.',
+  inv: 'Gezielt suchen und kombinieren: Hinweise auswerten, eine Falle untersuchen, Schriften durchsehen.',
+  nat: 'Wissen über Gelände, Pflanzen, Tiere und Wetter.',
+  rel: 'Wissen über Götter, Riten, heilige Symbole, Kulte und Untote.',
+  dec: 'Andere hinters Licht führen: lügen, dich verkleiden, falsche Fährten legen.',
+  sur: 'In der Wildnis bestehen: Spuren lesen, jagen, den Weg finden, Gefahren der Natur vorhersehen.',
+  per: 'Andere mit Argumenten und Charme gewinnen: verhandeln, bitten, beruhigen.',
+  prc: 'Bemerken, was um dich herum geschieht: ein Geräusch, einen Hinterhalt, eine versteckte Tür.'
+};
+const PROP_DESC = {
+  light: 'Leicht: geeignet für den Kampf mit zwei Waffen.',
+  finesse: 'Finesse: Angriff und Schaden wahlweise mit STÄ oder GES.',
+  thrown: 'Wurfwaffe: kann für einen Fernkampfangriff geworfen werden.',
+  two: 'Zweihändig: braucht beide Hände.',
+  versatile: 'Vielseitig: mit zwei Händen geführt höherer Schaden.',
+  heavy: 'Schwer: Nachteil auf Angriffe, wenn STÄ (Nahkampf) bzw. GES (Fernkampf) unter 13 liegt.',
+  reach: 'Reichweite: trifft Ziele bis 3 m statt 1,5 m.',
+  ammo: 'Munition: braucht Pfeile oder Bolzen; nach dem Kampf lässt sich die Hälfte wieder einsammeln.',
+  loading: 'Laden: pro Aktion, Bonusaktion oder Reaktion nur ein Schuss.'
+};
+const ARMOR_DE = { light: 'leichte', medium: 'mittelschwere', heavy: 'schwere', shield: 'Schilde' };
+const WPN_DE = { simple: 'einfache Waffen', martial: 'einfache und Kriegswaffen', monk: 'einfache Waffen und leichte Kriegswaffen', rogue: 'einfache Waffen und Kriegswaffen mit Finesse oder Leicht' };
+
+/* ⓘ als Teil einer Karte/Option (nie deaktiviert) */
+function ii(kind, key, name) { return '<span class="ii" role="button" tabindex="0" data-act="info" data-arg="' + kind + ':' + key + '" aria-label="Erklärung' + (name ? ' zu ' + esc(name) : '') + '" title="Erklärung">i</span>'; }
+/* Chip mit ⓘ daneben – das ⓘ bleibt auch nutzbar, wenn der Chip gesperrt ist */
+function chipI(on, label, attrs, dis, kind, key, name) { return '<span class="chipw">' + chip(on, label, attrs, dis).replace('class="chip', 'class="chip wi') + '<button type="button" class="ii" data-act="info" data-arg="' + kind + ':' + key + '" aria-label="Erklärung' + (name ? ' zu ' + esc(name) : '') + '" title="Erklärung">i</button></span>'; }
+
+const infoRow = (l, v) => (v || v === 0 ? '<div><dt>' + l + '</dt><dd>' + v + '</dd></div>' : '');
+const infoFeats = (fl) => fl.length ? '<div class="ifeats">' + fl.map(([lv, n, t]) => '<details><summary><b>' + esc(n) + '</b>' + (lv ? '<small>Stufe ' + lv + '</small>' : '') + '</summary><p>' + esc(t) + '</p></details>').join('') + '</div>' : '';
+function infoContent(kind, key) {
+  const ch = cur(); const c = ch ? derive(ch, S.hb) : null;
+  if (kind === 'cls') {
+    const C = CLASSES[key]; if (!C) return null;
+    const feats = (C.feats || []).filter((f) => f[0] <= 3);
+    return { t: C.name, sub: (C.home ? '✦ Heldenbuch-Klasse' : 'Klasse'), flav: (C.flavor || '').replace(/^✦ /, ''),
+      dl: infoRow('Trefferwürfel', 'W' + C.hd) + infoRow('Hauptattribut', C.prim.map((a) => AB_DE[a]).join(' oder ')) + infoRow('Rettungswürfe', C.saves.map((a) => AB_DE[a]).join(', ')) +
+        infoRow('Rüstung', (C.armor || []).length ? C.armor.map((a) => ARMOR_DE[a] || a).join(', ') : 'keine') + infoRow('Waffen', WPN_DE[C.weapons] || '') +
+        infoRow('Fertigkeiten', 'wähle ' + C.skillN + ': ' + C.skills.map((s) => SKILLS[s][0]).join(', ')) + infoRow('Zauber', C.caster ? { full: 'ja, voller Zauberwirker', half: 'ja, ab Stufe 1–2 (halber Zauberwirker)', pact: 'ja, Paktmagie' }[C.caster] || 'ja' : 'nein') +
+        infoRow('Unterklasse', 'ab Stufe 3' + (C.subs ? ': ' + C.subs.length + ' zur Wahl' : '')),
+      more: feats.length ? '<h4>Merkmale bis Stufe 3</h4>' + infoFeats(feats) : '' };
+  }
+  if (kind === 'sp') {
+    const sp = SPECIES[key]; if (!sp) return null;
+    let tr = []; try { const tmp = JSON.parse(JSON.stringify(ch || newChar({}))); tmp.species = key; tmp.speciesChoice = sp.choice ? (key === (ch || {}).species ? ch.speciesChoice : Object.keys(sp.choice.opts)[0]) : ''; const tc = derive(normChar(tmp), S.hb); tr = typeof sp.traits === 'function' ? sp.traits(tc) : (sp.traits || []); } catch (e) { tr = []; }
+    return { t: sp.name, sub: sp.home ? '✦ Heldenbuch-Spezies' : 'Spezies', flav: (sp.flavor || '').replace(/^✦ /, ''),
+      dl: infoRow('Grösse', sp.size) + infoRow('Bewegung', fmtM(sp.speed)) + infoRow('Dunkelsicht', sp.dv ? fmtM(sp.dv) : 'nein') + (sp.choice ? infoRow(sp.choice.label, Object.values(sp.choice.opts).join(', ')) : ''),
+      more: tr.length ? '<h4>Merkmale</h4>' + infoFeats(tr.map(([n, t]) => [0, n, t])) : '' };
+  }
+  if (kind === 'bg') {
+    const b = BACKGROUNDS[key]; if (!b) return null;
+    const f = b.feat && FEATS[b.feat];
+    if (key === 'custom') return { t: b.name, sub: 'Hintergrund', flav: (b.flavor || '').replace(/^✦ /, ''), dl: infoRow('Du wählst', 'drei Attribute, ein Herkunftstalent und zwei Fertigkeiten selbst') };
+    return { t: b.name, sub: 'Hintergrund', flav: (b.flavor || '').replace(/^✦ /, ''),
+      dl: infoRow('Attribute', b.abil.map((a) => AB_DE[a]).join(', ') + ' <small>(+2/+1 oder +1/+1/+1)</small>') + infoRow('Talent', f ? f.name : '') + infoRow('Fertigkeiten', (b.skills || []).map((s) => SKILLS[s][0]).join(', ')) + infoRow('Werkzeug', b.tool) + infoRow('Ausrüstung', b.equip),
+      more: f ? '<h4>' + esc(f.name) + '</h4><p class="itx">' + esc(f.text) + '</p>' : '' };
+  }
+  if (kind === 'sub') {
+    const [ck, sid] = key.split('/'); const C = CLASSES[ck]; const sb = C && (C.subs || []).find((x) => x.id === sid); if (!sb) return null;
+    return { t: sb.name, sub: 'Unterklasse · ' + C.name, flav: (sb.desc || '').replace(/^✦ /, ''), dl: '', more: '<h4>Merkmale</h4>' + infoFeats(sb.feats || []) };
+  }
+  if (kind === 'sk') {
+    const s = SKILLS[key]; if (!s) return null; const v = c && c.skills[key];
+    return { t: s[0], sub: 'Fertigkeit · ' + AB_DE[s[1]], flav: '', dl: '', more: '<p class="itx">' + esc(SKILL_DESC[key] || '') + '</p>' + (v ? '<p class="ifor">Für dich: <b>' + sgn(v.val) + '</b>' + (v.prof ? (v.prof === 2 ? ' · Expertise' : ' · geübt') : ' · nicht geübt') + '</p>' : '') };
+  }
+  if (kind === 'sp1') {
+    const s = getSpell(key, S.hb); if (!s) return null;
+    const d = (typeof SPELL_DATA !== 'undefined' && SPELL_DATA[key]) || {};
+    let mine = '';
+    if (c && c.spell && c.spell.has) {
+      const info = (c.spell.classes || []).find((x) => (x.list || []).some((y) => y.id === key)) || c.spell.classes[0];
+      if (info) {
+        const parts = [];
+        if (d.atk) parts.push('Zauberangriff <b>' + sgn(info.atk) + '</b>');
+        if (d.save) parts.push('Rettungswurf-SG <b>' + info.dc + '</b> (' + AB_K[d.save] + ')');
+        if (s.lvl === 0 && d.cant && d.n && d.s) { const k = 1 + (ch.level >= 5) + (ch.level >= 11) + (ch.level >= 17); parts.push('auf deiner Stufe <b>' + d.n * k + 'W' + d.s + '</b>'); }
+        if (s.lvl > info.maxLvl) parts.push('erst ab höherer Stufe verfügbar');
+        if (parts.length) mine = '<p class="ifor">Für dich: ' + parts.join(' · ') + '</p>';
+      }
+    }
+    const tags = (s.conc ? '<i title="Konzentration">K</i>' : '') + (s.ritual ? '<i title="Ritual">R</i>' : '');
+    return { t: s.name, sub: (s.lvl ? 'Grad ' + s.lvl : 'Zaubertrick') + ' · ' + (SCHOOL[s.school] || '') + tags, flav: (typeof SPELL_FLAV !== 'undefined' && SPELL_FLAV[key]) || '',
+      dl: infoRow('Zeitaufwand', esc(s.time)) + infoRow('Reichweite', esc(s.range)) + infoRow('Komponenten', esc(s.comp) + (s.mat ? ' <small>(' + esc(s.mat) + (s.matUsed ? ', wird verbraucht' : '') + ')</small>' : '')) + infoRow('Dauer', esc(s.dur) + (s.conc ? ' <small>(Konzentration)</small>' : '')) + (s.ritual ? infoRow('Ritual', 'ja, auch ohne Zauberplatz wirkbar (+10 Minuten)') : ''),
+      more: '<h4>Wirkung</h4><p class="itx">' + esc(s.text) + '</p>' + mine };
+  }
+  if (kind === 'w') {
+    const W = WEAPONS[key]; if (!W) return null; const M = MASTERY[W[6]];
+    return { t: W[0], sub: (W[1] === 'm' ? 'Kriegswaffe' : 'Einfache Waffe') + ' · ' + (W[2] === 'melee' ? 'Nahkampf' : 'Fernkampf'),
+      dl: infoRow('Schaden', W[3] + ' ' + (DT[W[4]] || '') + (W[8] ? ' <small>(zweihändig ' + W[8] + ')</small>' : '')) + (W[7] ? infoRow('Reichweite', W[7] + ' m') : '') + infoRow('Meisterschaft', M ? M[0] : ''),
+      more: ((W[5] || []).length ? '<h4>Eigenschaften</h4><ul class="iul">' + W[5].map((p) => '<li>' + esc(PROP_DESC[p] || PROP_DE[p] || p) + '</li>').join('') + '</ul>' : '') + (M ? '<h4>Meisterschaft: ' + esc(M[0]) + '</h4><p class="itx">' + esc(M[1]) + '</p>' : '') };
+  }
+  return null;
+}
+XA.info = (t, a) => {
+  const i = a.indexOf(':'); const kind = a.slice(0, i), key = a.slice(i + 1);
+  const x = infoContent(kind, key); if (!x) return;
+  /* zugehörige Auswahl: das Element, in dem das ⓘ steckt, oder der Chip davor */
+  const pick = t.closest('button.card, button.opt') || (t.parentNode && t.parentNode.classList.contains('chipw') ? t.parentNode.querySelector('.chip') : null);
+  let foot = '';
+  if (pick && pick.dataset.act && pick.dataset.act !== 'info') {
+    const on = pick.classList.contains('on'); const attrs = Object.entries(pick.dataset).map(([k, v]) => 'data-' + k.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase()) + '="' + esc(v) + '"').join(' ');
+    const single = /^(setCls|setSpecies|setBg|pick)$/.test(pick.dataset.act);
+    if (pick.disabled && !on) foot = '<p class="ihint">' + (pick.title && /Unterklasse/.test(pick.title) ? esc(pick.title) : 'Du hast schon so viele gewählt, wie erlaubt sind. Wähle zuerst etwas anderes ab.') + '</p>';
+    else if (on && single) foot = '<p class="ihint ok">✓ Gewählt</p>';
+    else foot = '<button class="btn ipick' + (on ? ' ghost' : '') + '" ' + attrs + ' data-ipick="1">' + (on ? 'Abwählen' : 'Wählen') + '</button>';
+  }
+  const m = $('#modal'); S.modal = 'info';
+  m.innerHTML = '<div class="dlg infodlg" role="dialog" aria-modal="true" aria-label="' + esc(x.t) + '"><div class="ihd"><div><b>' + esc(x.t) + '</b><small>' + x.sub + '</small></div><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
+    '<div class="ibody">' + (x.flav ? '<p class="iflav">' + esc(x.flav) + '</p>' : '') + (x.dl ? '<dl class="idl">' + x.dl + '</dl>' : '') + (x.more || '') + '</div>' + (foot ? '<div class="ift">' + foot + '</div>' : '') + '</div>';
+  m.hidden = false; const b = m.querySelector('.ipick, .x'); if (b) b.focus({ preventScroll: true });
+};
+/* „Wählen“ in der Karte schliesst die Karte, bevor die Auswahl ausgeführt wird */
+document.addEventListener('click', (ev) => {
+  const m = $('#modal');
+  if (S.modal === 'info' && ev.target === m) { S.modal = null; m.hidden = true; return; }
+  const t = ev.target.closest('[data-ipick]'); if (t && S.modal === 'info') { S.modal = null; m.hidden = true; }
+}, true);
+document.addEventListener('keydown', (ev) => { const t = ev.target; if (t && t.classList && t.classList.contains('ii') && t.tagName === 'SPAN' && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); ev.stopPropagation(); t.click(); } }, true);
+
 /* ==== Heldenbuch – Oberfläche ==== */
 const S = { chars: {}, hb: {}, cur: null, view: 'heroes', step: 0, mode: 'normal', log: [], sf: { q: '', lvl: 'all', cls: 'all' }, hbEdit: null, confirm: null, open: {}, store: 'local', saving: '', camp: '', share: true, table: {}, campErr: '', combat: null, myInit: null, logOpen: false, logFilter: 'all', npcRoll: false, meta: { dm: null, mercy: {} }, mercyQ: [] };
 const $ = (s, r = document) => r.querySelector(s);
@@ -5804,7 +6352,7 @@ function renderBuild(c) {
   const st = S.step;
   if (st === 0) {
     body += '<h2>Klasse wählen</h2><div class="cards pics">' + Object.entries(CLASSES).map(([k, C]) =>
-      '<button class="card haspic' + (ch.cls === k ? ' on' : '') + '" data-act="setCls" data-arg="' + k + '">' + picOf('cls', k) + '<b>' + C.name + '</b><small>W' + C.hd + ' · ' + C.prim.map((a) => AB_K[a]).join('/') + (C.caster ? ' · Zauber' : '') + '</small><small class="sub">' + (C.subs ? C.subs.length + ' Unterklassen' : C.sub.name) + (C.home ? ' · ✦ Heldenbuch' : '') + '</small></button>').join('') + '</div>' + flavBox(c.cls.name, c.cls.flavor, 'cls', ch.cls);
+      '<button class="card haspic' + (ch.cls === k ? ' on' : '') + '" data-act="setCls" data-arg="' + k + '">' + picOf('cls', k) + '<b>' + C.name + '</b><small>W' + C.hd + ' · ' + C.prim.map((a) => AB_K[a]).join('/') + (C.caster ? ' · Zauber' : '') + '</small><small class="sub">' + (C.subs ? C.subs.length + ' Unterklassen' : C.sub.name) + (C.home ? ' · ✦ Heldenbuch' : '') + '</small>' + ii('cls', k, C.name) + '</button>').join('') + '</div>' + flavBox(c.cls.name, c.cls.flavor, 'cls', ch.cls);
     body += '<div class="row">' + field('Stufe', '<div class="stepper"><button data-act="lvl" data-arg="-1" aria-label="Stufe senken">−</button><b>' + ch.level + '</b><button data-act="lvl" data-arg="1" aria-label="Stufe erhöhen">+</button></div>', 'Übungsbonus ' + sgn(c.pb)) +
       field('Trefferpunkte pro Stufe', sel('hpMode', ch.hpMode, [['avg', 'Durchschnitt (' + (c.hd / 2 + 1) + ')'], ['roll', 'Selbst gewürfelt']])) + '</div>';
     if (ch.hpMode === 'roll' && ch.level > 1) {
@@ -5813,24 +6361,24 @@ function renderBuild(c) {
     if (c.cls.order) body += '<h3 id="a-order">' + c.cls.order.label + '</h3><div class="opts">' + Object.entries(c.cls.order.opts).map(([k, [n, t]]) => '<button class="opt' + (ch.order === k ? ' on' : '') + '" data-act="pick" data-path="order" data-val="' + k + '"><b>' + n + '</b><span>' + t + '</span></button>').join('') + '</div>';
     if (ch.cls === 'dru' && c.lv('dru') >= 3 && c.subOf('dru') === 'land') body += '<h3>Landschaft (Zirkel des Landes)</h3><div class="chips">' + Object.entries(LAND).map(([k, l]) => chip(ch.land === k, l.name, 'data-act="pick" data-path="land" data-val="' + k + '"')).join('') + '</div>';
     body += '<h3>' + c.cls.name + ' bis Stufe ' + ch.level + '</h3><div class="tbl"><table><tbody>' + c.cls.table(ch.level).map(([a, b]) => '<tr><th>' + a + '</th><td>' + b + '</td></tr>').join('') + (c.hasSub ? '<tr><th>Unterklasse</th><td>' + (c.subName || 'noch wählen (' + (c.cls.subs || []).length + ' zur Wahl)') + '</td></tr>' : '<tr><th>Unterklasse</th><td>ab Stufe 3' + (c.cls.subs ? ' (' + c.cls.subs.length + ' zur Wahl)' : ': ' + c.cls.sub.name) + '</td></tr>') + '</tbody></table></div>';
-    if (c.cls.subs && ch.level >= 3) body += '<h3 id="a-sub">Unterklasse</h3><div class="opts">' + c.cls.subs.map((sb) => '<button class="opt' + (ch.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || (sb.feats[0][1] + ': ' + sb.feats[0][2])) + '</span>' + (sb.desc ? '<small class="ofeat">Ab Stufe 3: ' + esc(sb.feats.filter((f) => f[0] <= 3).map((f) => f[1]).join(', ')) + '</small>' : '') + '</button>').join('') + '</div>';
+    if (c.cls.subs && ch.level >= 3) body += '<h3 id="a-sub">Unterklasse</h3><div class="opts">' + c.cls.subs.map((sb) => '<button class="opt' + (ch.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || (sb.feats[0][1] + ': ' + sb.feats[0][2])) + '</span>' + (sb.desc ? '<small class="ofeat">Ab Stufe 3: ' + esc(sb.feats.filter((f) => f[0] <= 3).map((f) => f[1]).join(', ')) + '</small>' : '') + ii('sub', ch.cls + '/' + sb.id, sb.name) + '</button>').join('') + '</div>';
     body += featList(c.features.filter((f) => f.src === c.cls.name || f.src === c.subName));
     body += mcSection(c);
   }
   if (st === 1) {
-    body += '<h2>Spezies</h2><div class="cards pics sp">' + Object.entries(SPECIES).map(([k, s]) => '<button class="card haspic' + (ch.species === k ? ' on' : '') + '" data-act="setSpecies" data-arg="' + k + '">' + picOf('sp', k) + '<b>' + s.name + '</b><small>' + s.size + ' · ' + fmtM(s.speed) + (s.dv ? ' · Dunkelsicht' : '') + '</small></button>').join('') + '</div>' + flavBox(SPECIES[ch.species] && SPECIES[ch.species].name, SPECIES[ch.species] && SPECIES[ch.species].flavor, 'sp', ch.species);
+    body += '<h2>Spezies</h2><div class="cards pics sp">' + Object.entries(SPECIES).map(([k, s]) => '<button class="card haspic' + (ch.species === k ? ' on' : '') + '" data-act="setSpecies" data-arg="' + k + '">' + picOf('sp', k) + '<b>' + s.name + '</b><small>' + s.size + ' · ' + fmtM(s.speed) + (s.dv ? ' · Dunkelsicht' : '') + '</small>' + ii('sp', k, s.name) + '</button>').join('') + '</div>' + flavBox(SPECIES[ch.species] && SPECIES[ch.species].name, SPECIES[ch.species] && SPECIES[ch.species].flavor, 'sp', ch.species);
     const sp = c.sp;
     if (sp.choice) body += '<h3>' + sp.choice.label + '</h3><div class="chips">' + Object.entries(sp.choice.opts).map(([k, l]) => chip(ch.speciesChoice === k, l, 'data-act="pick" data-path="speciesChoice" data-val="' + k + '"')).join('') + '</div>';
-    if (sp.skillPick) body += '<h3 id="a-spskill">Fertigkeit (' + sp.name + ')</h3><div class="chips">' + sp.skillPick.map((s) => chip(ch.speciesSkill === s, SKILLS[s][0], 'data-act="pick" data-path="speciesSkill" data-val="' + s + '"')).join('') + '</div>';
+    if (sp.skillPick) body += '<h3 id="a-spskill">Fertigkeit (' + sp.name + ')</h3><div class="chips">' + sp.skillPick.map((s) => chipI(ch.speciesSkill === s, SKILLS[s][0], 'data-act="pick" data-path="speciesSkill" data-val="' + s + '"', false, 'sk', s, SKILLS[s][0])).join('') + '</div>';
     if (sp.spellAbility) body += '<div class="row">' + field('Zauberattribut für Spezies-Zauber', sel('speciesSpellAbility', ch.speciesSpellAbility, abOpts(['int', 'wis', 'cha']))) + '</div>';
     if (sp.bonusFeat) body += '<div class="row">' + field('Herkunftstalent (Vielseitig)', sel('humanFeat', ch.humanFeat, featOptions('origin', hb))) + '</div>' + (featById(ch.humanFeat, hb) ? '<p class="hint">' + esc(featById(ch.humanFeat, hb).text) + '</p>' : '') + miPicker(c, 'human');
     body += featList(c.features.filter((f) => f.src === sp.name));
-    body += '<h2>Hintergrund</h2><div class="cards">' + Object.entries(BACKGROUNDS).map(([k, b]) => '<button class="card' + (ch.bg === k ? ' on' : '') + '" data-act="setBg" data-arg="' + k + '"><b>' + b.name + '</b><small>' + (b.abil ? b.abil.map((a) => AB_K[a]).join(', ') + ' · ' + FEATS[b.feat].name : 'Selbst zusammenstellen') + '</small></button>').join('') + '</div>' + flavBox(bgOf(ch).name, (BACKGROUNDS[ch.bg] || {}).flavor);
+    body += '<h2>Hintergrund</h2><div class="cards">' + Object.entries(BACKGROUNDS).map(([k, b]) => '<button class="card' + (ch.bg === k ? ' on' : '') + '" data-act="setBg" data-arg="' + k + '"><b>' + b.name + '</b><small>' + (b.abil ? b.abil.map((a) => AB_K[a]).join(', ') + ' · ' + FEATS[b.feat].name : 'Selbst zusammenstellen') + '</small>' + ii('bg', k, b.name) + '</button>').join('') + '</div>' + flavBox(bgOf(ch).name, (BACKGROUNDS[ch.bg] || {}).flavor);
     if (ch.bg === 'custom') {
       const bc = ch.bgCustom;
       body += '<div class="box"><div class="row">' + field('Name', txt('bgCustom.name', bc.name, 'z. B. Schmied')) + field('Herkunftstalent', sel('bgCustom.feat', bc.feat, featOptions('origin', hb))) + '</div>' +
         '<h4>Drei Attribute</h4><div class="chips">' + AB.map((a) => chip(bc.abil.includes(a), AB_DE[a], 'data-act="toggle" data-path="bgCustom.abil" data-val="' + a + '" data-max="3"', bc.abil.length >= 3)).join('') + '</div>' +
-        '<h4>Zwei Fertigkeiten</h4><div class="chips">' + ALL_SKILLS.map((s) => chip(bc.skills.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="bgCustom.skills" data-val="' + s + '" data-max="2"', bc.skills.length >= 2)).join('') + '</div></div>';
+        '<h4>Zwei Fertigkeiten</h4><div class="chips">' + ALL_SKILLS.map((s) => chipI(bc.skills.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="bgCustom.skills" data-val="' + s + '" data-max="2"', bc.skills.length >= 2, 'sk', s, SKILLS[s][0])).join('') + '</div></div>';
     }
     const bg = c.bg;
     body += '<h3 id="a-bgplus">Attributsboni aus „' + esc(bg.name) + '“</h3><div class="chips">' + chip(ch.bgMode === '21', '+2 und +1', 'data-act="bgMode" data-arg="21"') + chip(ch.bgMode === '111', '+1 / +1 / +1', 'data-act="bgMode" data-arg="111"') + '</div>';
@@ -5866,9 +6414,9 @@ function renderBuild(c) {
   if (st === 3) {
     const C = c.cls;
     body += '<h2 id="a-skills">Fertigkeiten</h2><p class="hint">' + C.name + ': wähle ' + C.skillN + '. Vom Hintergrund: ' + (c.bg.skills || []).map((s) => SKILLS[s][0]).join(', ') + '.</p><div class="chips">' +
-      C.skills.map((s) => { const fromBg = (c.bg.skills || []).includes(s); return chip(ch.classSkills.includes(s), SKILLS[s][0] + (fromBg ? ' (Hintergrund)' : ''), 'data-act="toggle" data-path="classSkills" data-val="' + s + '" data-max="' + C.skillN + '"', ch.classSkills.length >= C.skillN || fromBg); }).join('') + '</div>';
-    if (c.extraN) body += '<h3 id="a-extra">Zusätzliche Fertigkeiten (' + c.extraN + ')</h3><p class="hint">' + c.extraSrc.join(', ') + '</p><div class="chips">' + ALL_SKILLS.map((s) => chip(ch.extraSkills.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="extraSkills" data-val="' + s + '" data-max="' + c.extraN + '"', ch.extraSkills.length >= c.extraN)).join('') + '</div>';
-    if (c.expN) body += '<h3 id="a-exp">Expertise (' + c.expN + ')</h3><div class="chips">' + ALL_SKILLS.filter((s) => c.skills[s].prof && (!c.expFrom || c.expFrom.includes(s))).map((s) => chip(ch.expertise.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="expertise" data-val="' + s + '" data-max="' + c.expN + '"', ch.expertise.filter((x) => c.skills[x].prof).length >= c.expN)).join('') + '</div>';
+      C.skills.map((s) => { const fromBg = (c.bg.skills || []).includes(s); return chipI(ch.classSkills.includes(s), SKILLS[s][0] + (fromBg ? ' (Hintergrund)' : ''), 'data-act="toggle" data-path="classSkills" data-val="' + s + '" data-max="' + C.skillN + '"', ch.classSkills.length >= C.skillN || fromBg, 'sk', s, SKILLS[s][0]); }).join('') + '</div>';
+    if (c.extraN) body += '<h3 id="a-extra">Zusätzliche Fertigkeiten (' + c.extraN + ')</h3><p class="hint">' + c.extraSrc.join(', ') + '</p><div class="chips">' + ALL_SKILLS.map((s) => chipI(ch.extraSkills.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="extraSkills" data-val="' + s + '" data-max="' + c.extraN + '"', ch.extraSkills.length >= c.extraN, 'sk', s, SKILLS[s][0])).join('') + '</div>';
+    if (c.expN) body += '<h3 id="a-exp">Expertise (' + c.expN + ')</h3><div class="chips">' + ALL_SKILLS.filter((s) => c.skills[s].prof && (!c.expFrom || c.expFrom.includes(s))).map((s) => chipI(ch.expertise.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="expertise" data-val="' + s + '" data-max="' + c.expN + '"', ch.expertise.filter((x) => c.skills[x].prof).length >= c.expN, 'sk', s, SKILLS[s][0])).join('') + '</div>';
     body += '<div class="skillgrid">' + ALL_SKILLS.map((s) => '<div class="sk' + (c.skills[s].prof ? ' p' + c.skills[s].prof : '') + '"><span>' + SKILLS[s][0] + ' <small>' + AB_K[SKILLS[s][1]] + '</small></span><b>' + sgn(c.skills[s].val) + '</b></div>').join('') + '</div>';
     const styleN = c.styleN;
     if (styleN) {
@@ -5889,7 +6437,7 @@ function renderBuild(c) {
       sc.classes.forEach((info, ix) => {
         const chosenC = getP(ch, info.path + 'cantrips') || []; const chosenP = getP(ch, info.path + 'spells') || [];
         body += (sc.classes.length > 1 ? '<h3 class="clsh">' + info.name + '</h3>' : '') + '<div class="stats3"><div><span>Zauber-SG</span><b>' + info.dc + '</b></div><div><span>Zauberangriff</span><b>' + sgn(info.atk) + '</b></div><div><span>Attribut</span><b>' + AB_K[info.ability] + '</b></div><div><span>Bis Grad</span><b>' + info.maxLvl + '</b></div></div>';
-        if (info.always.length) body += '<h4>Immer vorbereitet</h4><div class="chips">' + info.always.map((id) => '<span class="tag">' + esc(spellName(id)) + '</span>').join('') + '</div>';
+        if (info.always.length) body += '<h4>Immer vorbereitet</h4><div class="chips">' + info.always.map((id) => '<span class="tag wi">' + esc(spellName(id)) + ii('sp1', id, spellName(id)) + '</span>').join('') + '</div>';
         if (info.cantripN) body += '<h3' + (ix === 0 ? ' id="a-cantrips"' : '') + '>Zaubertricks <span class="cnt">' + info.cantrips.length + ' / ' + info.cantripN + '</span></h3>' + spellPicker(info.list.filter((x) => x.lvl === 0), chosenC, info.path + 'cantrips', info.cantripN, info.always);
         body += '<h3' + (ix === 0 ? ' id="a-prep"' : '') + '>Vorbereitete Zauber <span class="cnt">' + info.prepared.length + ' / ' + info.prepN + '</span></h3>';
         body += spellPicker(info.list.filter((x) => x.lvl > 0 && x.lvl <= info.maxLvl), chosenP, info.path + 'spells', info.prepN, info.always);
@@ -5897,7 +6445,7 @@ function renderBuild(c) {
         if (info.arcanum && info.arcanum.length) { const arc = getP(ch, info.path + 'arcanum') || {}; body += '<h3>Mystisches Arkanum</h3><div class="row">' + info.arcanum.map((g) => field('Grad ' + g, sel(info.path + 'arcanum.' + g, arc[g] || '', [['', '— wählen —']].concat(info.list.filter((x) => x.lvl === g).map((x) => [x.id, x.name]))))).join('') + '</div>'; }
       });
     }
-    if (c.extraSpells.length) body += '<h3>Weitere Zauber</h3><ul class="plain">' + c.extraSpells.map((e) => '<li><b>' + esc(spellName(e.id)) + '</b> · ' + esc(e.src) + ' · SG ' + e.dc + ', Angriff ' + sgn(e.atk) + ' (' + AB_K[e.ab] + ')</li>').join('') + '</ul>';
+    if (c.extraSpells.length) body += '<h3>Weitere Zauber</h3><ul class="plain">' + c.extraSpells.map((e) => '<li><b>' + esc(spellName(e.id)) + '</b>' + ii('sp1', e.id, spellName(e.id)) + ' · ' + esc(e.src) + ' · SG ' + e.dc + ', Angriff ' + sgn(e.atk) + ' (' + AB_K[e.ab] + ')</li>').join('') + '</ul>';
   }
   if (st === 5) {
     const armorOpts = Object.entries(ARMOR).map(([k, a]) => [k, a.name + (a.ac ? ' (RK ' + a.ac + (a.type === 'light' ? ' + GES' : a.type === 'medium' ? ' + GES max 2' : '') + ')' : '')]);
@@ -5907,7 +6455,7 @@ function renderBuild(c) {
     body += '<h2 id="a-weapons">Waffen</h2><div class="row">' + field('Waffe hinzufügen', '<select id="addW"><option value="">— Waffe wählen —</option><optgroup label="Einfache Waffen">' + Object.entries(WEAPONS).filter(([, w]) => w[1] === 's').map(([k, w]) => '<option value="' + k + '">' + w[0] + ' (' + w[3] + ')</option>').join('') + '</optgroup><optgroup label="Kriegswaffen">' + Object.entries(WEAPONS).filter(([, w]) => w[1] === 'm').map(([k, w]) => '<option value="' + k + '">' + w[0] + ' (' + w[3] + ')</option>').join('') + '</optgroup></select>') + '</div>';
     if (c.masteryN) body += '<p class="hint">Waffenmeisterschaften: ' + ch.weapons.filter((w) => w.mastery).length + ' / ' + c.masteryN + '</p>';
     body += '<div class="wlist">' + ch.weapons.map((w, i) => { const W = WEAPONS[w.w]; if (!W) return ''; const a = c.attacks.find((x) => x.idx === i);
-      return '<div class="wrow"><div class="wn"><b>' + W[0] + '</b><small>' + a.props + '</small></div><div class="wv">' + sgn(a.atk) + ' · ' + a.dmg + (a.dmg2 ? ' / ' + a.dmg2 : '') + ' ' + a.dtype + '</div>' +
+      return '<div class="wrow"><div class="wn"><b>' + W[0] + ii('w', w.w, W[0]) + '</b><small>' + a.props + '</small></div><div class="wv">' + sgn(a.atk) + ' · ' + a.dmg + (a.dmg2 ? ' / ' + a.dmg2 : '') + ' ' + a.dtype + '</div>' +
         field('Bonus', num('weapons.' + i + '.bonus', w.bonus || 0, 'min="0" max="3"')) + field('Attribut', sel('weapons.' + i + '.ab', w.ab || 'auto', [['auto', 'Automatisch'], ['str', 'STÄ'], ['dex', 'GES'], ['cha', 'CHA'], ['wis', 'WEI'], ['int', 'INT']])) +
         (c.masteryN ? chip(w.mastery, 'Meisterschaft: ' + MASTERY[W[6]][0], 'data-act="flip" data-path="weapons.' + i + '.mastery" title="' + esc(MASTERY[W[6]][1]) + '"') : '') +
         '<button class="x" data-act="rmW" data-arg="' + i + '" aria-label="Entfernen">×</button></div>'; }).join('') + '</div>';
@@ -5930,12 +6478,12 @@ function miPicker(c, slot) {
   const x = c.feats.find((f) => (f.slot === 'asi' ? 'asi' + f.lv : f.slot) === slot && f.f.mi); if (!x) return '';
   const ch = c.char; const m = ch.mi[slot] || {}; const list = spellList(x.f.mi, S.hb); const nC = x.f.miC || 2;
   return '<div class="box" id="a-mi-' + slot + '"><h4>' + esc(x.f.name) + '</h4><div class="row">' + field('Zauberattribut', sel('mi.' + slot + '.ability', m.ability || 'wis', abOpts(['int', 'wis', 'cha']))) + (x.f.miSpell === false ? '' : field('Grad-1-Zauber', sel('mi.' + slot + '.spell', m.spell || '', [['', '— wählen —']].concat(list.filter((s) => s.lvl === 1).map((s) => [s.id, s.name]))))) + '</div>' +
-    '<h4>' + nC + ' Zaubertrick' + (nC > 1 ? 's' : '') + '</h4><div class="chips">' + list.filter((s) => s.lvl === 0).map((s) => chip((m.cantrips || []).includes(s.id), s.name, 'data-act="toggle" data-path="mi.' + slot + '.cantrips" data-val="' + s.id + '" data-max="' + nC + '"', (m.cantrips || []).length >= nC)).join('') + '</div></div>';
+    '<h4>' + nC + ' Zaubertrick' + (nC > 1 ? 's' : '') + '</h4><div class="chips">' + list.filter((s) => s.lvl === 0).map((s) => chipI((m.cantrips || []).includes(s.id), s.name, 'data-act="toggle" data-path="mi.' + slot + '.cantrips" data-val="' + s.id + '" data-max="' + nC + '"', (m.cantrips || []).length >= nC, 'sp1', s.id, s.name)).join('') + '</div></div>';
 }
 function spellPicker(list, chosen, path, max, always) {
   const by = {}; list.forEach((s) => (by[s.lvl] = by[s.lvl] || []).push(s));
   const full = chosen.filter((id) => !always.includes(id)).length >= max;
-  return Object.entries(by).map(([lv, arr]) => (lv > 0 ? '<h4>Grad ' + lv + '</h4>' : '') + '<div class="chips">' + arr.map((s) => always.includes(s.id) ? '' : chip(chosen.includes(s.id), esc(s.name) + (s.conc ? ' <i>K</i>' : '') + (s.ritual ? ' <i>R</i>' : ''), 'data-act="toggle" data-path="' + path + '" data-val="' + s.id + '" title="' + esc(s.text) + '"', full)).join('') + '</div>').join('');
+  return Object.entries(by).map(([lv, arr]) => (lv > 0 ? '<h4>Grad ' + lv + '</h4>' : '') + '<div class="chips">' + arr.map((s) => always.includes(s.id) ? '' : chipI(chosen.includes(s.id), esc(s.name) + (s.conc ? ' <i>K</i>' : '') + (s.ritual ? ' <i>R</i>' : ''), 'data-act="toggle" data-path="' + path + '" data-val="' + s.id + '"', full, 'sp1', s.id, s.name)).join('') + '</div>').join('');
 }
 function featList(fl) {
   if (!fl.length) return '';
@@ -5957,7 +6505,7 @@ function mcSection(c) {
     if (C.order) h += '<div class="opts">' + Object.entries(C.order.opts).map(([k, [n, t]]) => '<button class="opt' + (m.order === k ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.order" data-val="' + k + '"><b>' + n + '</b><span>' + t + '</span></button>').join('') + '</div>';
     if (m.cls === 'dru' && m.level >= 3 && c.subOf('dru') === 'land') h += '<div class="chips">' + Object.entries(LAND).map(([k, l]) => chip((m.land || 'temperate') === k, l.name, 'data-act="pick" data-path="multi.' + i + '.land" data-val="' + k + '"')).join('') + '</div>';
     const ce = (c.classes || []).find((e) => e.id === m.cls) || {};
-    if (C.subs && m.level >= 3) h += '<div class="opts">' + C.subs.map((sb) => '<button class="opt' + (m.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || sb.feats[0][1]) + '</span></button>').join('') + '</div>';
+    if (C.subs && m.level >= 3) h += '<div class="opts">' + C.subs.map((sb) => '<button class="opt' + (m.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || sb.feats[0][1]) + '</span>' + ii('sub', m.cls + '/' + sb.id, sb.name) + '</button>').join('') + '</div>';
     h += featList(c.features.filter((f) => f.src === C.name || f.src === ce.subName));
     h += '</div>';
   });
@@ -6136,7 +6684,7 @@ function castCard(x, c) {
   const upOpts = (preferPact ? lv : lv.slice(1)).map((g) => ['slot', g]).concat(pa && !preferPact ? [['pact', pa]] : []);
   const isConc = P.conc && P.conc.id === s.id;
   return '<details class="spell' + (isConc ? ' concon' : '') + '"><summary><b>' + esc(s.name) + '</b>' + (s.conc ? '<i title="Konzentration">K</i>' : '') + (s.ritual ? '<i title="Ritual">R</i>' : '') + (s.matCost ? '<i class="gm" title="' + esc(s.mat) + '">GM</i>' : '') + (x.tag ? '<em>' + esc(x.tag) + '</em>' : '') + (isConc ? '<em class="cc">aktiv</em>' : '') + '<small>' + esc(s.time) + ' · ' + esc(s.range) + '</small><span class="castbtns">' + btns + '</span></summary>' +
-    '<div class="sbody"><p class="meta">' + (s.lvl ? 'Grad ' + s.lvl : 'Zaubertrick') + ', ' + SCHOOL[s.school] + ' · ' + esc(s.comp) + ' · ' + esc(s.dur) + (s.conc ? ' (Konzentration)' : '') + ' · <span lang="en">' + esc(s.en) + '</span></p><p>' + esc(s.text) + '</p>' + (s.mat ? '<p class="mat' + (s.matCost ? ' cost' : '') + '"><b>Material:</b> ' + esc(s.mat) + (s.matUsed ? ' <span class="used">wird verbraucht</span>' : '') + (s.matCost ? '' : ' <small>(oder Zauberfokus / Komponentenbeutel)</small>') + '</p>' : '') +
+    '<div class="sbody">' + (typeof SPELL_FLAV !== 'undefined' && SPELL_FLAV[s.id] ? '<p class="sflav">' + esc(SPELL_FLAV[s.id]) + '</p>' : '') + '<p class="meta">' + (s.lvl ? 'Grad ' + s.lvl : 'Zaubertrick') + ', ' + SCHOOL[s.school] + ' · ' + esc(s.comp) + ' · ' + esc(s.dur) + (s.conc ? ' (Konzentration)' : '') + ' · <span lang="en">' + esc(s.en) + '</span></p><p>' + esc(s.text) + '</p>' + (s.mat ? '<p class="mat' + (s.matCost ? ' cost' : '') + '"><b>Material:</b> ' + esc(s.mat) + (s.matUsed ? ' <span class="used">wird verbraucht</span>' : '') + (s.matCost ? '' : ' <small>(oder Zauberfokus / Komponentenbeutel)</small>') + '</p>' : '') +
     (upOpts.length ? '<div class="chips upc"><span>Anders wirken:</span>' + upOpts.map(([m, g]) => '<button class="btn sm ghost" data-act="castSp" data-id="' + s.id + '" data-lvl="' + g + '"' + (m === 'pact' ? ' data-mode="pact"' : '') + '>' + (m === 'pact' ? 'Paktplatz (Grad ' + g + ')' : 'Grad ' + g) + (spellDice(s, g, c, abMod) && spellDice(s, g, c, abMod) !== dice ? ' · ' + spellDice(s, g, c, abMod) : '') + '</button>').join('') + '</div>' : '') +
     (dice ? '<div class="chips"><button class="btn sm ghost" data-act="dmg" data-expr="' + esc(dice) + '" data-label="' + esc(s.name) + '">Nur würfeln: ' + esc(dice) + '</button></div>' : '') + '</div></details>';
 }
@@ -6225,7 +6773,7 @@ function concCheck(ch, dmg) {
 function spellCard(s, tag, cast) {
   const dice = (s.text.match(/\d+W\d+(?:\s?\+\s?\d+)?/) || [])[0];
   return '<details class="spell"><summary><b>' + esc(s.name) + '</b>' + (s.conc ? '<i title="Konzentration">K</i>' : '') + (s.ritual ? '<i title="Ritual">R</i>' : '') + (s.matCost ? '<i class="gm" title="' + esc(s.mat) + '">GM</i>' : '') + (tag ? '<em>' + esc(tag) + '</em>' : '') + '<small>' + esc(s.time) + ' · ' + esc(s.range) + '</small></summary>' +
-    '<div class="sbody"><p class="meta">' + (s.lvl ? 'Grad ' + s.lvl : 'Zaubertrick') + ', ' + SCHOOL[s.school] + ' · ' + esc(s.comp) + ' · ' + esc(s.dur) + (s.conc ? ' (Konzentration)' : '') + ' · <span lang="en">' + esc(s.en) + '</span></p><p>' + esc(s.text) + '</p>' + (s.mat ? '<p class="mat' + (s.matCost ? ' cost' : '') + '"><b>Material:</b> ' + esc(s.mat) + (s.matUsed ? ' <span class="used">wird verbraucht</span>' : '') + (s.matCost ? '' : ' <small>(oder Zauberfokus / Komponentenbeutel)</small>') + '</p>' : '') +
+    '<div class="sbody">' + (typeof SPELL_FLAV !== 'undefined' && SPELL_FLAV[s.id] ? '<p class="sflav">' + esc(SPELL_FLAV[s.id]) + '</p>' : '') + '<p class="meta">' + (s.lvl ? 'Grad ' + s.lvl : 'Zaubertrick') + ', ' + SCHOOL[s.school] + ' · ' + esc(s.comp) + ' · ' + esc(s.dur) + (s.conc ? ' (Konzentration)' : '') + ' · <span lang="en">' + esc(s.en) + '</span></p><p>' + esc(s.text) + '</p>' + (s.mat ? '<p class="mat' + (s.matCost ? ' cost' : '') + '"><b>Material:</b> ' + esc(s.mat) + (s.matUsed ? ' <span class="used">wird verbraucht</span>' : '') + (s.matCost ? '' : ' <small>(oder Zauberfokus / Komponentenbeutel)</small>') + '</p>' : '') +
     '<div class="chips">' + (cast ? '<button class="btn sm" data-act="cast" data-arg="' + s.lvl + '" data-label="' + esc(s.name) + '">Wirken (Platz verbrauchen)</button>' : '') + (dice ? '<button class="btn sm ghost" data-act="dmg" data-expr="' + esc(dice.replace(/\s/g, '')) + '" data-label="' + esc(s.name) + '">' + esc(dice) + ' würfeln</button>' : '') + '</div></div></details>';
 }
 

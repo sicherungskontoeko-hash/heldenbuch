@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-10-20T22:11:24+02:00
-- Revision (SHA-256 von index.html, gekürzt): a3613dcfbdfdf719
+- Zeitpunkt: 2026-10-21T11:11:12+02:00
+- Revision (SHA-256 von index.html, gekürzt): 698fc0f65abb1bef
 - Node: v22.22.0 · Playwright: 1.56.0
 - Browser: Chromium 141.0.7390.37
 - System: Linux 6.18.44-fc-v139
@@ -12,6 +12,7 @@
 | Regressionen HB-01–HB-11 (hb.test.js) | 0 | ✔ HB-11 Bewusstlos ausserhalb des Kampfes: kein Zauber 27 / 27 bestanden · /home/claude/heldenbuch/index.html  |
 | Robustheit & Sonderfälle (cases.test.js) | 0 | ✔ HB-26 Fluchklinge: zweite Bonusaktion blockiert, keine Ressource verbraucht 23 / 23 bestanden  |
 | Kritischer Audit A01–A06 (audit2.test.js) | 0 | ✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/heldenbuch/index.html  |
+| Erklärkarten ⓘ (info.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 41 / 41 bestanden  |
 | Klicktest kurz (ui.test.js) | 0 | ✔ Desktop 1280 ✔ Handy 390 (Touch)  |
 | Abnahme-Klicktest (ui-full.test.js) | 0 | ✔ Chromium Desktop 1280: 165/165 Prüfungen ✔ Chromium Handy 390 (Touch): 165/165 Prüfungen  |
 | Kombinationen Klasse×Unterklasse×Stufe (combos.test.js) | 0 | checked 1280 bad 0  |

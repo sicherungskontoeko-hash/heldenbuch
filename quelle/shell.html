@@ -633,6 +633,44 @@ i.kb{background:var(--arcane)}i.kr{background:var(--ember)}i.kf{background:var(-
 .srrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}.srrow small{display:block;opacity:.7}
 .slb{display:inline-block;font-size:.72em;font-style:normal;font-weight:600;padding:1px 7px;margin-left:4px;border-radius:9px;border:1px solid rgba(var(--arcane-rgb),.6);color:var(--arcane);vertical-align:middle;white-space:nowrap}
 .backupline{margin:10px 0;font-size:.9em;opacity:.85}.backupline.warn{color:var(--ember)}.themefold{margin:18px 0}.themefold>summary{cursor:pointer;font-weight:600;padding:8px 0}
+
+/* ---- Erklärkarten (ⓘ) ---- */
+.ii{display:inline-grid;place-items:center;width:18px;height:18px;min-height:0;padding:0;border-radius:50%;border:1px solid var(--line2);background:transparent;color:var(--faint);font:italic 600 11px/1 Georgia,'Times New Roman',serif;cursor:pointer;flex:none;position:relative;opacity:.75;transition:opacity .15s,color .15s,border-color .15s;vertical-align:middle;margin-left:6px}
+.ii::after{content:'';position:absolute;inset:-9px}
+.ii:hover,.ii:focus-visible{opacity:1;color:var(--gold);border-color:rgba(var(--gold-rgb),.6)}
+.card,.opt{position:relative}
+.card>.ii,.opt>.ii{position:absolute;top:8px;right:8px;margin:0}
+.opt:has(>.ii){padding-right:34px}.card:has(>.ii):not(.haspic){padding-right:30px}
+.card.haspic>.ii{background:rgba(var(--deep-rgb),.55);border-color:rgba(255,255,255,.25);color:rgba(255,255,255,.8)}
+.chipw{position:relative;display:inline-flex}
+.chip.wi{padding-right:28px}
+.chipw>.ii{position:absolute;right:5px;top:50%;margin:-9px 0 0}
+.chip.on+.ii{color:var(--gold-ink);border-color:rgba(0,0,0,.3);opacity:.6}
+.chip:disabled+.ii{opacity:.75}
+.tag.wi .ii{width:16px;height:16px;font-size:10px;margin-left:5px}
+.infodlg{padding:0;gap:0;max-height:min(82vh,720px);grid-template-rows:auto 1fr auto;overflow:hidden}
+.infodlg .ihd{display:flex;align-items:flex-start;gap:10px;padding:18px 20px 10px}.infodlg .ihd>div{flex:1;min-width:0}
+.infodlg .ihd b{display:block;font-family:var(--f-display);font-size:1.25rem;color:var(--ink);font-weight:600}
+.infodlg .ihd small{display:block;color:var(--muted);font-size:.84rem;margin-top:2px}
+.infodlg .ihd small i{font-style:normal;font-size:.72rem;border:1px solid var(--line2);border-radius:4px;padding:0 4px;margin-left:6px;color:var(--muted)}
+.infodlg .ibody{overflow:auto;padding:0 20px 16px;display:grid;gap:12px;align-content:start;overscroll-behavior:contain}
+.iflav{margin:0;font-style:italic;color:var(--ink);line-height:1.55;opacity:.92}
+.idl{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.idl div{min-width:0}.idl dt{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}.idl dd{margin:1px 0 0;color:var(--ink);font-size:.92rem;line-height:1.4}.idl small{color:var(--muted)}
+.infodlg h4{margin:2px 0 -4px;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.itx{margin:0;line-height:1.55;color:var(--ink)}
+.iul{margin:0;padding-left:1.1em;display:grid;gap:4px;line-height:1.45}
+.ifor{margin:0;padding:9px 12px;border-radius:10px;background:rgba(var(--gold-rgb),.08);border:1px solid rgba(var(--gold-rgb),.22);color:var(--ink);font-size:.92rem}
+.ifeats{display:grid;gap:4px}.ifeats details{border:1px solid var(--line);border-radius:10px;padding:7px 11px;background:var(--bg2)}.ifeats summary{cursor:pointer;display:flex;justify-content:space-between;gap:8px}.ifeats summary small{color:var(--faint);white-space:nowrap}.ifeats p{margin:6px 0 2px;line-height:1.5;color:var(--muted)}
+.infodlg .ift{padding:12px 20px 18px;border-top:1px solid var(--line)}
+.infodlg .ipick{width:100%}
+.ihint{margin:0;color:var(--muted);font-size:.9rem;text-align:center}.ihint.ok{color:var(--gold)}
+.spell .sflav{font-style:italic;color:var(--muted);margin:0 0 6px;line-height:1.5}
+@media (max-width:640px){
+ #modal:has(.infodlg){place-items:end center;padding:0}
+ .infodlg{width:100%;max-height:86vh;border-radius:18px 18px 0 0;border-bottom:0;padding-bottom:env(safe-area-inset-bottom,0px)}
+ .idl{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+}
 </style>
 <div id="scene" aria-hidden="true"></div>
 <canvas id="embers" aria-hidden="true"></canvas>

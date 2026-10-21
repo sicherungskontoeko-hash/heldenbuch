@@ -24,6 +24,7 @@ run "Regeltests (rules.test.js)" node tests/rules.test.js
 run "Regressionen HB-01–HB-11 (hb.test.js)" node tests/hb.test.js
 run "Robustheit & Sonderfälle (cases.test.js)" node tests/cases.test.js
 run "Kritischer Audit A01–A06 (audit2.test.js)" node tests/audit2.test.js
+run "Erklärkarten ⓘ (info.test.js)" node tests/info.test.js
 run "Klicktest kurz (ui.test.js)" node tests/ui.test.js
 run "Abnahme-Klicktest (ui-full.test.js)" node tests/ui-full.test.js
 run "Kombinationen Klasse×Unterklasse×Stufe (combos.test.js)" node tests/combos.test.js

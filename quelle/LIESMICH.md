@@ -23,6 +23,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/hb.test.js | Regressionen HB-01–HB-11 (auch gegen eine alte Version ausführbar: `node tests/hb.test.js alt.html`) |
 | tests/audit2.test.js | Regressionen Kritischer Audit A01–A06 |
 | tests/cases.test.js | Import/Migration/Speicher-Robustheit, Sonderfälle pro Spezies/Klasse |
+| tests/info.test.js | Erklärkarten (ⓘ) im Heldenbau: öffnen, Inhalt, Wählen/Abwählen, gesperrte Auswahl, Handy und PC |
 | tests/ui.test.js, tests/ui-full.test.js | Klicktests Desktop + Handy (alle Klassen, Unterklassen, Spezies, Schritte, Export/Import, Offline-Neustart) |
 | tests/combos.test.js | alle Klassen × Unterklassen × Stufen 1–20 |
 | tests/turnfuzz.test.js | jede Zugleisten-Option je Klasse einmal ausführen |
@@ -53,6 +54,8 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | explain.js | Rechenweg, Nachbessern nach dem Wurf |
 | ux.js | Rückgängig, Bestätigungen, Layout |
 | help.js | Kontexthilfe |
+| spellflav.js | Zauberbilder: wie man sich jeden Zauber vorstellt |
+| info.js | Erklärkarten (ⓘ) im Heldenbau, Fertigkeits- und Waffeneigenschaftstexte |
 | app.js | Oberfläche, Würfeln, Angriffe, Zauber, Speicherung |
 | appnet.js | nur App-Version: Online-Tisch über MQTT mit Ende-zu-Ende-Verschlüsselung |
 
