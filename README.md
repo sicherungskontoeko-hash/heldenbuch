@@ -13,6 +13,10 @@ Dieses Repository baut automatisch (siehe *Actions*):
 
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
 
+## Neu in Version 1.3
+- Die Android-App aktualisiert sich selbst: Sie holt neue Versionen von der Web-App und nutzt sie ab dem nächsten Öffnen (oder sofort über „Jetzt“). Eine neue APK ist nur noch für grössere Änderungen an der App selbst nötig.
+- Helden bleiben dabei erhalten. Startet eine neue Version nicht sauber, nimmt die App automatisch wieder die eingebaute.
+
 ## Neu in Version 1.2
 - Erklärkarten beim Erstellen: Ein kleines **i** rechts an Klasse, Unterklasse, Spezies, Hintergrund, Fertigkeiten, Zaubern und Waffen öffnet eine Karte mit Beschreibung, Werten und einem Knopf „Wählen“.
 - Zu allen 355 Zaubern ein kurzer Text, wie man sich den Zauber vorstellt, dazu Zeitaufwand, Reichweite, Komponenten, Dauer, Wirkung und die Werte für deinen Helden.

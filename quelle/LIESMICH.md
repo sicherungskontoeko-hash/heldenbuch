@@ -28,6 +28,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/combos.test.js | alle Klassen × Unterklassen × Stufen 1–20 |
 | tests/turnfuzz.test.js | jede Zugleisten-Option je Klasse einmal ausführen |
 | tests/net.test.js | Online-Tisch mit lokalem Broker: Verschlüsselung, Fremdzugriff, Manipulation, Wiederverbindung (braucht `python3 build_app.py`) |
+| tests/boot.test.js | Selbst-Update der Android-App: neue Version laden, Helden behalten, kaputte Version verwerfen, offline (braucht `python3 build_app.py`) |
 | tests/balance.js | erzeugt tests/BALANCE.md (Referenz-Builds) |
 
 ## Dateien (in Build-Reihenfolge)
@@ -58,6 +59,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | info.js | Erklärkarten (ⓘ) im Heldenbau, Fertigkeits- und Waffeneigenschaftstexte |
 | app.js | Oberfläche, Würfeln, Angriffe, Zauber, Speicherung |
 | appnet.js | nur App-Version: Online-Tisch über MQTT mit Ende-zu-Ende-Verschlüsselung |
+| appboot.js | nur App-Version: Android-App holt neue Versionen selbst von GitHub Pages (mit Rückfall auf die eingebaute Version) |
 
 ## Datenformat
 Helden tragen ein Feld `v` (Schemaversion, aktuell 2). `migrateChar()` in rules.js hebt ältere Stände an;

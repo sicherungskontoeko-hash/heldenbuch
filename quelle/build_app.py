@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Baut die eigenständige App-Version des Heldenbuchs (PWA + Einzeldatei)."""
-import base64, json, os, re, shutil, subprocess
+import base64, json, os, re, shutil, subprocess, time
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FONTS = os.path.join(ROOT, 'app', 'fonts')
 OUT = os.path.join(ROOT, 'app', 'www')
-VERSION = '1.2.0'
+VERSION = '1.3.0'
+BUILD = int(time.time())
 
 def rd(p):
     with open(os.path.join(ROOT, p), encoding='utf-8') as f:
@@ -39,7 +40,11 @@ shell = shell.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n'
 scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'spelldata.js', 'calc.js', 'hbclasses.js', 'subs.js', 'subs2.js', 'flavor.js', 'pics.js', 'assets.js', 'crests.js', 'extra.js', 'scenes.js', 'theme.js', 'theme-fx.js', 'turn.js', 'effects.js', 'rules.js', 'search.js', 'encounter.js', 'explain.js', 'ux.js', 'help.js', 'spellflav.js', 'info.js', 'app.js']
 js = '\n'.join(rd(s) for s in scripts)
 js = js.replace("const APP_URL = 'https://claude.ai/artifact/TKockfJH2cR2kDJKqb1CCK';", "const APP_URL = '';")
-single = shell + '<script>\n' + js + '\n</script>\n'
+boot = rd('appboot.js').replace('__HB_BUILD__', str(BUILD)).replace('__HB_VERSION__', VERSION)
+m = re.search(r'<meta charset="[^"]*">', shell, re.I)
+assert m, 'meta charset fehlt'
+shell = shell[:m.end()] + '\n<script>\n' + boot + '</script>' + shell[m.end():]
+single = shell + '<script>\n' + js + '\n</script>\n<!--HB_END-->\n'
 pwa = single.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">', 1)
 
 if os.path.exists(OUT):
@@ -58,6 +63,8 @@ manifest = {
     'icons': [{'src': 'icons/icon-192.png', 'sizes': '192x192', 'type': 'image/png'},
               {'src': 'icons/icon-512.png', 'sizes': '512x512', 'type': 'image/png'},
               {'src': 'icons/icon-maskable-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'}]}
+with open(os.path.join(OUT, 'version.json'), 'w', encoding='utf-8') as f:
+    json.dump({'version': VERSION, 'build': BUILD}, f)
 with open(os.path.join(OUT, 'manifest.webmanifest'), 'w', encoding='utf-8') as f:
     json.dump(manifest, f, ensure_ascii=False, indent=2)
 sw = """/* Heldenbuch Service Worker – macht die App offline nutzbar */
@@ -77,4 +84,8 @@ _tmpjs = os.path.join(tempfile.mkdtemp(), 'app_all.js')
 with open(_tmpjs, 'w', encoding='utf-8') as f:
     f.write(js)
 subprocess.run(['node', '--check', _tmpjs], check=True)
+_tb = os.path.join(os.path.dirname(_tmpjs), 'boot.js')
+with open(_tb, 'w', encoding='utf-8') as f:
+    f.write(boot)
+subprocess.run(['node', '--check', _tb], check=True)
 print('App gebaut:', os.path.getsize(os.path.join(OUT, 'index.html')) // 1024, 'KB')

@@ -29,6 +29,6 @@ run "Klicktest kurz (ui.test.js)" node tests/ui.test.js
 run "Abnahme-Klicktest (ui-full.test.js)" node tests/ui-full.test.js
 run "Kombinationen Klasse×Unterklasse×Stufe (combos.test.js)" node tests/combos.test.js
 for c in bar brd cle dru fig mon pal ran rog sor wlk wiz rk bw fk ma; do run "Zugleisten-Fuzz $c" node tests/turnfuzz.test.js $c; done
-if [ -f app/www/index.html ]; then run "Online-Tisch (net.test.js)" node tests/net.test.js; fi
+if [ -f app/www/index.html ]; then run "Online-Tisch (net.test.js)" node tests/net.test.js; run "Selbst-Update Android-App (boot.test.js)" node tests/boot.test.js; fi
 echo "" >> $OUT; echo "Gesamtergebnis: $([ $fail = 0 ] && echo 'alle Suiten bestanden' || echo 'mindestens eine Suite fehlgeschlagen')" >> $OUT
 echo; cat $OUT; exit $fail
