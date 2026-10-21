@@ -215,6 +215,9 @@ function turnOpts(c) {
   c.feats.forEach((x) => { const u = x.f.uses; if (!u) return; const k = 'ft_' + (x.slot === 'asi' ? 'asi' + x.lv : x.slot) + '_' + x.id; const left = resLeft(k); out.push({ id: 'ft:' + k, cost: featureCost(x.f.text), grp: 'Talent', n: u.name || x.f.name, sub: x.f.text.slice(0, 70) + '…', left, empty: left !== null && left <= 0 }); });
   /* Tränke */
   if (typeof itemList === 'function') itemList(ch).forEach((x) => { const d = itemDef(x); if (d.drink && (+x.qty || 1) > 0) out.push({ id: 'it:' + x.uid, cost: 'b', grp: 'Gegenstand', n: d.name + ' trinken', sub: d.drink + ' TP · ' + (+x.qty || 1) + '×' }); });
+  const ushDc = 8 + c.mod.str + c.pb;
+  out.push({ id: 'ush:grapple', cost: 'a', grp: 'Angriff', n: 'Packen (waffenloser Schlag)', sub: 'statt eines Angriffs · Ziel: STÄ- oder GES-RW gegen SG ' + ushDc });
+  out.push({ id: 'ush:shove', cost: 'a', grp: 'Angriff', n: 'Stossen (waffenloser Schlag)', sub: 'statt eines Angriffs · 1,5 m weg oder liegend · SG ' + ushDc });
   STD_ACTIONS.forEach(([id, n, k, sub]) => out.push({ id: 'std:' + id, cost: k, grp: 'Allgemein', n, sub }));
   return out.filter((o) => !o.hide);
 }
@@ -249,6 +252,8 @@ function turnRun(ch, id) {
   if (kind === 'opt') { const it = (c.optSets || []).find((o) => o.key === a1); const item = it && it.items.find((x) => x.k === a2); if (item && !tSpend(ch, featureCost(item.text.replace(/^[^:]*Solange aktiv:[^.]*\./, '')), item.name)) return; return optUse(ch, a1, a2); }
   if (kind === 'ft') { const k = id.slice(3); const r = c.res.find((x) => x.k === k); const used = +P.res[k] || 0; if (!r || used >= r.max) { pushLog({ label: r ? r.n : 'Talent', total: '✗', detail: 'Keine Nutzung mehr übrig' }); return; } const fx = c.feats.find((x) => k.endsWith('_' + x.id)); const cost = fx ? featureCost(fx.f.text) : 'f'; if (!tSpend(ch, cost, r.n)) return; P.res[k] = used + 1; tLog(r.n, fx ? fx.f.text : ''); commit(); return; }
   if (kind === 'it') { if (!tSpend(ch, 'b', 'Trank')) return; XA.itDrink(null, a1, '', ch); return; }
+  if (kind === 'ush') { const nm = a1 === 'grapple' ? 'Packen' : 'Stossen'; if (!tCountAttack(ch, c, '', nm)) return; const dc = 8 + c.mod.str + c.pb;
+    tLog(nm + ' (waffenloser Schlag)', 'Das Ziel (höchstens eine Grösse grösser) macht einen STÄ- oder GES-Rettungswurf (es wählt) gegen SG ' + dc + '. Misslingt er: ' + (a1 === 'grapple' ? 'gepackt (Bewegungsrate 0). Du brauchst eine freie Hand.' : '1,5 m weggestossen oder liegend (du wählst).') + ' ' + (typeof slTag === 'function' ? 'SL entscheidet.' : '')); commit(); return; }
   if (kind === 'std') { const s = STD_ACTIONS.find((x) => x[0] === a1); if (!tSpend(ch, s[2], s[1])) return; stdRun(ch, c, a1); commit(); }
 }
 function tLohPrompt(ch, c) {

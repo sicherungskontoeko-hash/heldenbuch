@@ -13,6 +13,12 @@ Dieses Repository baut automatisch (siehe *Actions*):
 
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
 
+## Neu in Version 1.5
+- Stufenaufstieg-Assistent: Aufstieg → „Das ist neu“ (Merkmale als Karten, vorher/nachher) → Entscheiden, mit Feier-Effekt.
+- Kampf: Gegner würfeln erst den Angriff, die SL prüft den Treffer, dann Schaden; Schaden und Rettungswürfe werden an die Spieler zugestellt. Nachzügler („noch nicht dabei“), Verstärkung, Überraschung, neue Begegnung mit neuer Initiative, besiegte Gegner werden übersprungen, Packen/Stossen, Todesrettungswurf zu Zugbeginn.
+- Bestiarium: 184 Kreaturen, nach typischem Fundort und Stufenempfehlung sortiert.
+- Handy: Würfelbecher und ⚠ in der Kopfleiste, Menüs als Leiste von unten, nichts verdeckt mehr den Inhalt. Alle Helden lassen sich löschen.
+
 ## Neu in Version 1.4
 - Würfel: räumliche Würfel (W4 bis W100) in 10 wählbaren Designs, jedes mit eigener Form und eigenem Auftritt bei der natürlichen 20; bei der 1 bebt der Bildschirm und reisst. Am Online-Tisch gehört jedes Set nur einem Helden, die anderen sehen deine Würfel in deinem Design. Effekte voll/ruhig/aus, Geräusche (optional).
 - Aufgeräumtes Layout: rotes ⚠ mit offenen Punkten zum Aufklappen und Hinspringen, kompakte Übersicht am Handy, „⋯“-Menü auf dem Bogen, „Mehr“-Menü am PC.

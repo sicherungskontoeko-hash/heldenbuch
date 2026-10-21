@@ -26,6 +26,9 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/info.test.js | Erklärkarten (ⓘ) im Heldenbau: öffnen, Inhalt, Wählen/Abwählen, gesperrte Auswahl, Handy und PC |
 | tests/layout.test.js | Layout: ⚠ offene Punkte (Anzahl, Liste, Sprung, ✓), Mehr-Menü, ⋯-Menü, kompakte Übersicht am Handy |
 | tests/dice.test.js | Würfel-Designs: Körper/Zahlen, alle Sets, Auswahl pro Raum, Konflikt, SL-Set, Effekte voll/ruhig/aus, Überspringen, Teilen, Geräusche |
+| tests/levelup.test.js | Stufenaufstieg-Assistent: drei Schritte, neue Merkmale, Veränderungen, TP, Multiclass, offene Entscheidungen mit Sprung |
+| tests/npc.test.js | Gegnerangriff: Angriff → Treffer prüfen (Ziel-RK) → erst dann Schaden; Krit doppelt, natürliche 1 verfehlt |
+| tests/combat2.test.js | Kampf: Verstärkung, „noch nicht dabei“, Überraschung, neue Begegnung, besiegte/tote überspringen, Treffer zustellen, Packen/Stossen, Todesrettung zu Zugbeginn; Bestiarium nach Fundort und Stufe |
 | tests/ui.test.js, tests/ui-full.test.js | Klicktests Desktop + Handy (alle Klassen, Unterklassen, Spezies, Schritte, Export/Import, Offline-Neustart) |
 | tests/combos.test.js | alle Klassen × Unterklassen × Stufen 1–20 |
 | tests/turnfuzz.test.js | jede Zugleisten-Option je Klasse einmal ausführen |
@@ -54,11 +57,13 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | rules.js | Regelkern: Regeloptionen, Durchsetzung, 1×-pro-Zug, Ziele, Zugbeginn, Zauberprüfung, Meisterschaften, Tiergestalt, Rasten, Import-Prüfung, Migration, Kampf-Zusammenführung |
 | search.js | Regelsuche |
 | encounter.js | Begegnungsplaner, Monsterkarten |
+| monsters2.js | Weitere SRD-Kreaturen, typische Fundorte, Stufenempfehlung, Bestiarium-Ansicht |
 | explain.js | Rechenweg, Nachbessern nach dem Wurf |
 | ux.js | Rückgängig, Bestätigungen, Layout |
 | help.js | Kontexthilfe |
 | spellflav.js | Zauberbilder: wie man sich jeden Zauber vorstellt |
 | dice3d.js | Räumliche Würfel (SVG), 10 Designs + Heldenbuch + Spielleitung, Effekte für 20 und 1, Geräusche, Set-Vergabe pro Raum |
+| levelup.js | Stufenaufstieg-Assistent (Aufstieg · Das ist neu · Entscheiden) mit Feier-Effekt |
 | info.js | Erklärkarten (ⓘ) im Heldenbau, Fertigkeits- und Waffeneigenschaftstexte |
 | app.js | Oberfläche, Würfeln, Angriffe, Zauber, Speicherung |
 | appnet.js | nur App-Version: Online-Tisch über MQTT mit Ende-zu-Ende-Verschlüsselung |

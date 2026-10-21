@@ -145,6 +145,7 @@ function paintWarn() {
   const ch = cur(); const show = ch && (S.view === 'build' || S.view === 'sheet') && !(ch.play && ch.play.dead);
   const c = show ? derive(ch, S.hb) : null; const n = c ? c.warn.length : 0;
   if (!el) { el = document.createElement('div'); el.id = 'warnfab'; document.body.appendChild(el); }
+  const mw = document.querySelector('.mwarn'); if (mw) { mw.hidden = !(show && n); const bb = mw.querySelector('b'); if (bb) bb.textContent = n || ''; mw.classList.toggle('on', !!S.warnOpen); mw.dataset.act = S.warnOpen ? 'warnClose' : 'warnOpen'; }
   if (!show || (!n && warnLastN <= 0)) { el.innerHTML = ''; el.className = ''; warnLastN = show ? n : -1; S.warnOpen = false; return; }
   if (!n) { /* gerade alles erledigt: kurz grünes ✓ */
     el.className = 'wdone'; el.innerHTML = '<span class="wfb ok" role="status">✓ Alles ausgewählt</span>'; warnLastN = 0; S.warnOpen = false;
@@ -162,6 +163,6 @@ XA.sumToggle = () => { S.sumOpen = !S.sumOpen; render(); };
 /* Aufklappmenüs (<details class="mnu">): Klick daneben oder Auswahl schliesst */
 document.addEventListener('click', (ev) => {
   document.querySelectorAll('details.mnu[open]').forEach((d) => { if (!d.contains(ev.target) || (ev.target.closest('.mnul button'))) d.removeAttribute('open'); });
-  if (S.warnOpen && !ev.target.closest('#warnfab') && !ev.target.closest('[data-act="warnOpen"]') && window.innerWidth < 1100) { S.warnOpen = false; paintWarn(); }
+  if (S.warnOpen && !ev.target.closest('#warnfab') && !ev.target.closest('[data-act="warnOpen"]') && !ev.target.closest('.mwarn') && window.innerWidth < 1100) { S.warnOpen = false; paintWarn(); }
 }, true);
 document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { document.querySelectorAll('details.mnu[open]').forEach((d) => d.removeAttribute('open')); if (S.warnOpen) { S.warnOpen = false; paintWarn(); } } });

@@ -10,9 +10,10 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     const tap = async (sel) => { const el = p.locator(sel).first(); if (dev.m) await el.tap(); else await el.click(); await p.waitForTimeout(150); };
     await p.evaluate(() => { const n = newChar({ name: 'Brakk', cls: 'wiz', level: 3 }); S.chars[n.id] = n; S.cur = n.id; S.view = 'sheet'; render(); });
     const n = await p.evaluate(() => derive(cur(), S.hb).warn.length);
-    T(dev.n + ': ⚠ zeigt Anzahl offener Punkte', await p.evaluate((k) => { const b = document.querySelector('#warnfab .wfb b'); return b && +b.textContent === k; }, n), n);
+    if (dev.m) T('handy: ⚠ und Würfelbecher oben in der Leiste, nichts schwebt über dem Inhalt', await p.evaluate(() => getComputedStyle($('#diceFab')).display === 'none' && getComputedStyle($('#warnfab .wfb')).display === 'none' && getComputedStyle($('.mdice')).display !== 'none'));
+    T(dev.n + ': ⚠ zeigt Anzahl offener Punkte', await p.evaluate(([k, m]) => { const b = document.querySelector(m ? '.mwarn b' : '#warnfab .wfb b'); return b && +b.textContent === k; }, [n, !!dev.m]), n);
     T(dev.n + ': kein grosser „Noch offen“-Kasten mehr auf dem Bogen', await p.evaluate(() => !document.querySelector('.sheet .notice')));
-    await tap('#warnfab .wfb'); T(dev.n + ': ⚠ klappt Liste auf', await p.evaluate((k) => document.querySelectorAll('#warnfab .wpan li').length === k, n));
+    await tap(dev.m ? '.mwarn' : '#warnfab .wfb'); T(dev.n + ': ⚠ klappt Liste auf', await p.evaluate((k) => document.querySelectorAll('#warnfab .wpan li').length === k, n));
     await tap('#warnfab .wpan li button'); T(dev.n + ': Antippen springt zum Punkt (Erstellen, Stelle markiert)', await p.evaluate(() => S.view === 'build' && !!document.querySelector('.flash')));
     /* Übersicht beim Erstellen */
     if (dev.m) {
@@ -39,6 +40,7 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     /* Menüs */
     await p.evaluate(() => { S.view = 'sheet'; render(); window.scrollTo(0, 0); });
     await tap('.smore summary'); T(dev.n + ': ⋯-Menü öffnet', await p.evaluate(() => document.querySelector('.smore').open));
+    T(dev.n + ': ⋯-Menü vollständig sichtbar', await p.evaluate(() => { const r = document.querySelector('.smore .mnul').getBoundingClientRect(); return r.left >= 0 && r.right <= window.innerWidth && r.top >= 0 && r.bottom <= window.innerHeight; }));
     await tap('.smore .mnul button[data-act="exportOne"]'); T(dev.n + ': Exportieren aus dem Menü öffnet Export, Menü zu', await p.evaluate(() => S.modal === 'export' && !document.querySelector('.smore[open]')));
     await p.evaluate(() => { S.modal = null; $('#modal').hidden = true; });
     if (!dev.m) {

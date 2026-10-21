@@ -79,6 +79,7 @@ function rollState(kind) {
   if (c) {
     const L = c.level, P = ch.play;
     if (k.type === 'init' && c.initAdv) adv.push('Klassenmerkmal');
+    if (k.type === 'init' && S.combat && S.combat.active && (S.combat.surp || []).includes(UID)) dis.push('Überrascht');
     if (k.type === 'check' && k.skill === 'ste' && c.armorStealthDis) dis.push('Rüstung');
     const ab = k.type === 'init' ? 'dex' : k.ab;
     if (c.armorNonProf && (ab === 'str' || ab === 'dex')) dis.push('Rüstung ohne Übung');
@@ -424,6 +425,7 @@ function renderTop() {
   $('#top').innerHTML = '<div class="wrap"><div class="bar"><button class="brand" data-act="view" data-arg="heroes">' + LOGO + 'Heldenbuch</button>' +
     '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') +
       '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '</div></details></nav>' +
+    '<button class="mbtn mwarn" data-act="warnOpen" hidden aria-label="Offene Punkte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg><b></b></button><button class="mbtn mdice" data-act="drOpen" aria-label="Würfelbecher"><svg viewBox="0 0 64 64" aria-hidden="true"><polygon points="32,4 56,18 56,46 32,60 8,46 8,18"/><polygon points="32,18 46,42 18,42"/></svg></button>' +
     '<button class="tbtn tsearch" data-act="search" title="Suchen (Strg+K oder /)" aria-label="Suchen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>' +
     '<button class="tbtn" data-act="themeOpen" title="Stimmung wählen" aria-label="Stimmung wählen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.2-1-1.6-1-2.6 0-1 .8-1.7 1.9-1.7H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z"/><circle cx="7.5" cy="11" r="1.3"/><circle cx="10.5" cy="7" r="1.3"/><circle cx="15" cy="7.5" r="1.3"/></svg></button>' + (ch ? '<button class="curhero" data-act="view" data-arg="heroes" title="Helden wechseln">' + sigil(ch) + '<span>' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</span></button>' : '') +
     '</div><span id="saveState" class="savest"></span></div><div id="turnbar"></div>';
@@ -966,9 +968,9 @@ function meDoc() {
   return { char: ch.name.replace(/^Beispiel:\s*/, ''), cls: ch.cls, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: ch.play.hp ?? (c ? c.hpMax : 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0,
     cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, dice: ch.dice || '', diceAt: ch.diceAt || 0, t: Date.now() };
 }
-function queueMe() { if (!S.camp || !DB) return; clearTimeout(meTimer); meTimer = setTimeout(writeMe, 250); }
+function queueMe() { if (!S.camp || !DB || !cur()) return; clearTimeout(meTimer); meTimer = setTimeout(writeMe, 250); }
 async function writeMe() {
-  if (!S.camp || !DB) return;
+  if (!S.camp || !DB || !cur()) return;
   if (meBusy) { meDirty = true; return; }
   meBusy = true;
   try { await DB.collection('camp/' + S.camp + '/players').doc(UID).set(meDoc()); if (S.campErr) { S.campErr = ''; paintCamp(); } }
@@ -1133,7 +1135,7 @@ function subCombat() {
   try { combatUnsub = combatRef().onSnapshot((snap) => { const prev = S.combat; const d = snap.exists ? snap.data() : null; S.combatRemote = d;
     const pend = S.combatPend; if (pend && d && d.w && d.w !== UID && (+d.rev || 0) <= (+pend.ours.rev || 0) && Date.now() - pend.at < 15000) { S.combatPend = null; const merged = mergeCombat(pend.base, pend.ours, d); if (JSON.stringify(merged) !== JSON.stringify(d)) { S.combat = d; saveCombat(merged); return; } }
     if (pend && Date.now() - pend.at >= 15000) S.combatPend = null;
-    S.combat = d;
+    S.combat = d; if (typeof hitCheck === 'function') setTimeout(hitCheck, 0);
     if (S.combat && S.combat.active && (!prev || !prev.active || prev.id !== S.combat.id)) { if (!S.myInit || S.myInit.cid !== S.combat.id) bannerToast('Kampf beginnt!', 'Würfelt Initiative.'); }
     paintCamp(); }, () => {}); } catch (e) { combatUnsub = null; }
 }
@@ -1146,20 +1148,26 @@ function setMyInit(v) { S.myInit = { v: +v, cid: S.combat.id }; queueMe(); setTi
 function order() {
   const c = S.combat; if (!c || !c.active) return [];
   const list = [];
-  for (const [uid, p] of Object.entries(S.table)) if (p.init && p.init.cid === c.id) list.push({ key: 'p:' + uid, name: p.char, cls: p.cls, portrait: p.portrait, pimg: p.pimg, v: +p.init.v, dex: +p.dex || 0, me: uid === UID, hp: p.hp, hpMax: p.hpMax });
-  for (const n of c.npcs || []) list.push({ key: 'n:' + n.id, id: n.id, name: n.name, cls: 'npc', v: +n.v, dex: +n.dex || 0, npc: true, ally: !!n.ally, hp: n.hp, hpMax: n.hpMax, ac: n.ac, mid: n.mid, cond: n.cond || [], note: n.note || '' });
+  for (const [uid, p] of Object.entries(S.table)) if (p.init && p.init.cid === c.id && !p.init.away) list.push({ key: 'p:' + uid, name: p.char, cls: p.cls, portrait: p.portrait, pimg: p.pimg, v: +p.init.v, dex: +p.dex || 0, me: uid === UID, hp: p.hp, hpMax: p.hpMax, dead: !!p.dead });
+  for (const n of c.npcs || []) if (!n.reserve) list.push({ key: 'n:' + n.id, id: n.id, name: n.name, cls: 'npc', v: +n.v, dex: +n.dex || 0, npc: true, ally: !!n.ally, hp: n.hp, hpMax: n.hpMax, ac: n.ac, mid: n.mid, cond: n.cond || [], note: n.note || '' });
   return list.sort((a, b) => b.v - a.v || b.dex - a.dex || a.name.localeCompare(b.name, 'de'));
 }
 function waiting() { const c = S.combat; if (!c || !c.active) return []; return Object.entries(S.table).filter(([, p]) => !(p.init && p.init.cid === c.id)).map(([uid, p]) => ({ uid, name: p.char, me: uid === UID })); }
+function awayList() { const c = S.combat; if (!c || !c.active) return []; return Object.entries(S.table).filter(([, p]) => p.init && p.init.cid === c.id && p.init.away).map(([uid, p]) => ({ uid, name: p.char, me: uid === UID })); }
+const skipTurn = (x) => (x.npc && x.hpMax > 0 && x.hp <= 0) || (!x.npc && x.dead);
+const initKey = (x) => [-x.v, -x.dex, x.name];
+function initAfter(a, b) { const ka = initKey(a), kb = initKey(b); return ka[0] !== kb[0] ? ka[0] > kb[0] : ka[1] !== kb[1] ? ka[1] > kb[1] : ka[2].localeCompare(kb[2], 'de') > 0; }
 function curEntry() { const o = order(); return o.find((x) => x.key === (S.combat && S.combat.turn)) || null; }
 function nextTurn() {
   const c = S.combat; const o = order(); if (!o.length) return;
   let i = o.findIndex((x) => x.key === c.turn); let round = c.round || 1;
-  if (i < 0) i = -1;
-  let ni = i + 1; if (ni >= o.length) { ni = 0; round++; }
+  if (i < 0 && c.turnAt) { i = -1; for (let k = 0; k < o.length; k++) if (!initAfter(o[k], c.turnAt)) i = k; } /* der Aktuelle wurde entfernt: an seiner Stelle weitermachen */
+  else if (i < 0) i = -1;
+  let ni = i; for (let tries = 0; tries < o.length; tries++) { ni++; if (ni >= o.length) { ni = 0; round++; } if (!skipTurn(o[ni])) break; } /* besiegte Gegner überspringen */
+  if (skipTurn(o[ni])) return;
   const tk = typeof effTick === 'function' ? effTick(c, c.turn, o[ni].key) : { effects: c.effects, rem: c.rem, log: [] };
   let lg = clog(c, 'Runde ' + round + ': ' + o[ni].name + ' ist am Zug'); tk.log.forEach((x) => { lg = clog({ log: lg }, x); });
-  saveCombat(Object.assign({}, c, { turn: o[ni].key, round, t: Date.now(), effects: tk.effects || [], rem: tk.rem || [], log: lg }));
+  saveCombat(Object.assign({}, c, { turn: o[ni].key, turnAt: { v: o[ni].v, dex: o[ni].dex, name: o[ni].name }, round, t: Date.now(), effects: tk.effects || [], rem: tk.rem || [], log: lg }));
 }
 function clog(c, x) { return ((c && c.log) || []).concat([{ t: Date.now(), x }]).slice(-25); }
 function fightHtml() {
@@ -1169,14 +1177,18 @@ function fightHtml() {
   const o = order(), w = waiting(), cur = curEntry(); const mine = cur && cur.key === 'p:' + UID;
   let h = '<div class="fhead"><div><h2>Kampf · Runde ' + (c.round || 1) + '</h2><p class="hint" style="margin:0">' + (c.turn ? (cur ? 'Am Zug: <b>' + esc(cur.name) + '</b>' : '') : 'Alle würfeln Initiative (auf dem Bogen oder hier). Dann „Ersten Zug starten“.') + '</p></div><div class="chips">' +
     (!c.turn ? (lead ? '<button class="btn" data-act="fightGo"' + (o.length ? '' : ' disabled') + '>Ersten Zug starten</button>' : '') : mine ? '<button class="btn big glowbtn" data-act="turnEnd">Zug beenden</button>' : lead ? '<button class="btn ghost sm" data-act="turnEnd" title="Für Gegner oder abwesende Spieler">Weiter zum Nächsten</button>' : '') +
-    (lead && c.turn ? '<button class="btn ghost sm" data-act="fightReset" data-confirm="Neue Begegnung? Runde, Zug und alle Effekte werden zurückgesetzt – Teilnehmer bleiben." title="Runde und Zug zurücksetzen – Teilnehmer und Initiative bleiben">Neue Begegnung</button>' : '') + (lead ? '<button class="btn ghost sm" data-act="fightEnd" data-confirm="Kampf beenden? Initiative, Gegner und Effekte werden für alle gelöscht.">Kampf beenden</button>' : '') + '</div></div>';
+    (lead && c.turn ? '<button class="btn ghost sm" data-act="fightReset" data-confirm="Neue Begegnung? Alle würfeln neu Initiative, Runde, Zug und Effekte werden zurückgesetzt. Besiegte Gegner verschwinden, die übrigen bleiben." title="Neuer Kampf mit denselben Teilnehmern – alle würfeln neu Initiative">Neue Begegnung</button>' : '') + (lead ? '<button class="btn ghost sm" data-act="fightEnd" data-confirm="Kampf beenden? Initiative, Gegner und Effekte werden für alle gelöscht.">Kampf beenden</button>' : '') + '</div></div>';
   h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + x.v + '</span>' + (x.npc ? '<span class="sigil npc" aria-hidden="true">⚔</span>' : sigil({ name: x.name, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : '') + (typeof effBadges === 'function' ? effBadges(x.key, lead) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + (x.npc && lead ? '<button class="x" data-act="npcDel" data-arg="' + x.key.slice(2) + '" aria-label="Entfernen">×</button>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
   if (c.log && c.log.length) h += '<details class="clog"><summary>Verlauf <small>' + c.log.length + '</small></summary><ul>' + c.log.slice().reverse().slice(0, 12).map((e) => '<li><span>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</span>' + esc(e.x) + '</li>').join('') + '</ul></details>';
   if (w.length) h += '<p class="hint">Würfelt noch: ' + w.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + '</p>';
+  if (lead && !c.turn && Object.keys(S.table || {}).length) h += '<div class="fgrp"><b>Überrascht? <small>Nachteil auf den Initiativewurf</small></b><div class="chips">' + Object.entries(S.table).map(([u, p]) => chip((c.surp || []).includes(u), esc(p.char || '?'), 'data-act="surpTog" data-arg="' + u + '"')).join('') + '</div><p class="hint">Gegner überrascht: beim Hinzufügen „überrascht“ ankreuzen.</p></div>';
+  const aw = awayList(); if (aw.length) h += '<p class="hint">Noch nicht im Kampf (zu weit weg): ' + aw.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + ' – sie würfeln Initiative, sobald sie eingreifen, und werden einsortiert.</p>';
+  if (lead && typeof saveReqForm === 'function') h += saveReqForm();
+  const rs = (c.npcs || []).filter((x) => x.reserve); if (rs.length && lead) { const gs = {}; rs.forEach((x) => { const k = x.grp || x.id; (gs[k] = gs[k] || []).push(x); }); h += '<div class="fgrp reserve"><b>Verstärkung (wartet)</b><div class="chips">' + Object.values(gs).map((g) => '<button class="btn sm ghost" data-act="npcJoin" data-arg="' + g[0].id + '"' + (g[0].grp && g.length > 1 ? ' data-grp="' + g[0].grp + '"' : '') + '>' + esc(g.length > 1 ? g.length + '× ' + (BESTIARY[g[0].mid] || [g[0].name])[0] : g[0].name) + ' greift ein</button>').join('') + '</div></div>'; }
   const ch = cur ? null : null; const meIn = !w.some((x) => x.me);
   if (typeof npcBulkBar === 'function') h += npcBulkBar();
   if (o.length) h += '<div class="chips" style="margin:4px 0 10px"><button class="btn ghost sm" data-act="effNew">+ Effekt / Zustand mit Dauer</button>' + (lead && (c.npcs || []).some((x) => x.mid) ? '<button class="btn ghost sm" data-act="encFromFight">Gegner als Begegnung speichern</button>' : '') + '</div>';
-  h += '<div class="fctl"><div class="fgrp"><b>Deine Initiative</b><div class="chips"><button class="btn sm" data-act="initRoll">' + (meIn ? 'Neu würfeln' : 'Initiative würfeln') + '</button><input type="number" id="initMan" placeholder="Wert" aria-label="Eigene Initiative eintragen"><button class="btn ghost sm" data-act="initSet">Eintragen</button></div></div>' +
+  h += '<div class="fctl"><div class="fgrp"><b>Deine Initiative</b><div class="chips"><button class="btn sm" data-act="initRoll">' + (S.myInit && S.myInit.away && S.myInit.cid === c.id ? 'Eingreifen: Initiative würfeln' : meIn ? 'Neu würfeln' : 'Initiative würfeln') + '</button>' + (!(S.myInit && S.myInit.away && S.myInit.cid === c.id) ? '<button class="btn ghost sm" data-act="initAway" title="Dein Held ist noch zu weit weg und greift später ein">Noch nicht dabei</button>' : '') + '<input type="number" id="initMan" placeholder="Wert" aria-label="Eigene Initiative eintragen"><button class="btn ghost sm" data-act="initSet">Eintragen</button></div></div>' +
     (lead ? '<div class="fgrp"><b>Gegner hinzufügen</b><div class="chips"><input type="text" id="npcName" placeholder="z. B. Goblin 1" aria-label="Name"><input type="number" id="npcBonus" placeholder="Bonus" aria-label="Initiativebonus" value="0"><button class="btn ghost sm" data-act="npcAdd">Würfeln & hinzufügen</button></div></div>' + bestiaryAdder() : '') + '</div>';
   return h;
 }
@@ -1185,10 +1197,10 @@ function paintTurn() {
   const c = S.combat; if (!S.camp || !c || !c.active) { el.innerHTML = ''; document.body.classList.remove('myturn'); wasMyTurn = false; return; }
   const o = order(), cur = curEntry(); const mine = cur && cur.key === 'p:' + UID;
   let next = null; if (cur) { const i = o.findIndex((x) => x.key === cur.key); next = o[(i + 1) % o.length]; }
-  const meWaiting = waiting().some((x) => x.me);
+  const meWaiting = waiting().some((x) => x.me); const meAway = S.myInit && S.myInit.away && S.myInit.cid === c.id;
   el.innerHTML = '<div class="wrap tb' + (mine ? ' mine' : '') + '"><span class="tbr">Runde ' + (c.round || 1) + '</span>' +
     (mine ? '<b class="tbme">Du bist am Zug!</b>' : cur ? '<span>Am Zug: <b>' + esc(cur.name) + '</b>' + (next ? ' · danach ' + esc(next.name) : '') + '</span>' : '<span>Kampf beginnt – Initiative würfeln</span>') +
-    '<span class="tbsp"></span>' + (meWaiting ? '<button class="btn sm" data-act="initRoll">Initiative würfeln</button>' : '') + (mine ? '<button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>' : '') + (S.view !== 'camp' ? '<button class="link" data-act="view" data-arg="camp">Reihenfolge</button>' : '') + '</div>';
+    '<span class="tbsp"></span>' + (meAway ? '<span class="tbaway">Du bist noch nicht im Kampf</span><button class="btn sm" data-act="initRoll">Eingreifen</button>' : meWaiting ? '<button class="btn sm" data-act="initRoll">Initiative würfeln</button><button class="btn sm ghost" data-act="initAway">Noch nicht dabei</button>' : '') + (mine ? '<button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>' : '') + (S.view !== 'camp' ? '<button class="link" data-act="view" data-arg="camp">Reihenfolge</button>' : '') + '</div>';
   document.body.classList.toggle('myturn', !!mine);
   if (mine && !wasMyTurn && S.chars[S.cur] && typeof turnReset === 'function') { const me = S.chars[S.cur]; setTimeout(() => { turnReset(me); if (S.chars[S.cur] === me) commit(); }, 0); }
   if (mine && !wasMyTurn) { bannerToast('Du bist am Zug!', cur.name + ', Runde ' + (c.round || 1)); try { navigator.vibrate && navigator.vibrate([120, 60, 120]); } catch (e) {} }
@@ -1235,14 +1247,30 @@ let rendering = false;
 function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } }
 function render0() {
   applyTheme();
-  if (!cur()) { const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; }
+  if (!cur()) { let first = false; try { first = !localStorage.getItem('hb_sample_done') && !Object.keys(S.chars).length; } catch (e) {} if (first) { const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; try { localStorage.setItem('hb_sample_done', '1'); } catch (e) {} } else { S.cur = Object.keys(S.chars)[0] || null; } }
   renderTop();
-  const c = derive(cur(), S.hb);
   const v = $('#view'); const y = window.scrollY;
+  if (!cur() && (S.view === 'sheet' || S.view === 'build')) { v.innerHTML = noHeroView(); window.scrollTo(0, y); return; }
+  const c = cur() ? derive(cur(), S.hb) : null;
   v.innerHTML = S.view === 'camp' ? renderCamp() : S.view === 'heroes' ? renderHeroes() : S.view === 'build' ? renderBuild(c) : S.view === 'spells' ? renderSpellBook() : S.view === 'hb' ? renderHB() : S.view === 'mobs' ? '<div class="camp">' + bestiaryView() + '</div>' : S.view === 'help' ? helpView() : renderSheet(c);
   window.scrollTo(0, y);
 }
-function commit(rerender = true) { const ch = cur(); ch.updated = Date.now(); persist('c', ch.id); queueMe(); if (rerender) render(); }
+function commit(rerender = true) { const ch = cur(); if (ch) { ch.updated = Date.now(); persist('c', ch.id); } queueMe(); if (rerender) render(); }
+function noHeroView() { return '<div class="camp"><div class="hero-intro banner" style="' + bannerStyle('paladin') + '"><h1>Noch kein Held</h1><p>Du hast im Moment keinen Helden. Erschaffe einen neuen oder lade einen gesicherten Helden.</p><div class="chips"><button class="btn big" data-act="newChar">Neuen Helden erschaffen</button><button class="btn ghost" data-act="loadSample">Beispielheld ansehen</button><button class="btn ghost" data-act="view" data-arg="heroes">Zu den Helden</button></div></div></div>'; }
+
+/* TP ändern (Schaden mit Temp-TP, 0 TP, Todesrettung, Massiver Schaden, Konzentration; Heilung; Temp-TP) */
+function hpChange(ch, arg, n, crit) { const c = derive(ch, S.hb); const P = ch.play; if (P.hp == null) P.hp = c.hpMax;
+      if (arg === 'dmg') { let d = n; const ab = Math.min(P.temp, d); P.temp -= ab; d -= ab; const before = P.hp;
+        if (before <= 0 && d > 0) {
+          if (d >= c.hpMax) { pushLog({ label: 'Massiver Schaden', total: '†', detail: d + ' Schaden bei 0 TP ist mindestens so hoch wie dein TP-Maximum – sofortiger Tod.' }); fall(P); }
+          else { const wasStable = P.stable; P.stable = false; P.ds[1] = Math.min(3, (P.ds[1] || 0) + (crit ? 2 : 1)); pushLog({ label: 'Schaden bei 0 TP', total: P.ds[1] + '/3', detail: (wasStable ? 'Du bist nicht mehr stabil. ' : '') + (crit ? '2 Fehlschläge (kritischer Treffer).' : '1 Fehlschlag beim Todesrettungswurf. War es ein kritischer Treffer, hake einen zweiten ab.') }); if (P.ds[1] >= 3) fall(P); }
+        } else {
+          P.hp = Math.max(0, before - d);
+          if (P.hp <= 0) { const over = d - before; const relR = c.res.find((r) => r.k === 'rel'); if (over >= c.hpMax) { pushLog({ label: 'Massiver Schaden', total: '†', detail: 'Der Restschaden (' + over + ') ist mindestens so hoch wie dein TP-Maximum – sofortiger Tod.' }); fall(P); } else if (relR && (+P.res.rel || 0) < relR.max) { P.res.rel = (+P.res.rel || 0) + 1; P.hp = 1; pushLog({ label: 'Unerbittliche Ausdauer', total: '1', detail: 'Statt auf 0 fällst du auf 1 TP (1× pro langer Rast).' }); if (P.conc) concCheck(ch, n); } else if (P.raging && c.lv('bar') >= 11) { const dc = 10 + 5 * (+P.relRage || 0); const rr = 1 + Math.floor(rnd() * 20); const tot = rr + c.saves.con.val; P.relRage = (+P.relRage || 0) + 1; if (tot >= dc) { P.hp = 2 * c.lv('bar'); pushLog({ label: 'Unerbittlicher Kampfrausch', total: tot, detail: 'KON-Rettungswurf SG ' + dc + ' geschafft (W20 ' + rr + ' ' + sgn(c.saves.con.val) + '): Du hast ' + P.hp + ' TP.', sides: 20, nat: rr }); } else { pushLog({ label: 'Unerbittlicher Kampfrausch', total: tot, detail: 'KON-Rettungswurf SG ' + dc + ' misslungen.', sides: 20, nat: rr }); knockOut(P); } } else { knockOut(P); } }
+          else if (P.conc) concCheck(ch, n);
+        } }
+      if (arg === 'heal') { if (P.dead) return false; if (P.hp <= 0) { P.ds = [0, 0]; P.stable = false; wakeUp(P); } P.hp = Math.min(c.hpMax, P.hp + n); }
+      if (arg === 'temp') P.temp = Math.max(P.temp, n);   commit(); return true; }
 
 /* ---------- Ereignisse ---------- */
 document.addEventListener('click', (ev) => {
@@ -1257,7 +1285,8 @@ document.addEventListener('click', (ev) => {
     dupChar: () => { const src = S.chars[arg] || ch; const n = JSON.parse(JSON.stringify(src)); n.id = newChar().id; n.name = n.name.replace(/^Beispiel:\s*/, '') + ' (Kopie)'; n.updated = Date.now(); S.chars[n.id] = n; persist('c', n.id); render(); },
     askDel: () => { S.confirm = 'del:' + arg; render(); },
     noDel: () => { S.confirm = null; render(); },
-    delChar: () => { delete S.chars[arg]; persist('c', arg); if (S.cur === arg) S.cur = Object.keys(S.chars)[0] || null; S.confirm = null; if (!S.cur) { const n = newChar({ name: 'Neuer Held' }); S.chars[n.id] = n; S.cur = n.id; persist('c', n.id); } render(); },
+    delChar: () => { delete S.chars[arg]; persist('c', arg); if (S.cur === arg) S.cur = Object.keys(S.chars)[0] || null; S.confirm = null; try { localStorage.setItem('hb_sample_done', '1'); } catch (e) {} if (!S.cur && (S.view === 'sheet' || S.view === 'build')) S.view = 'heroes'; render(); },
+    loadSample: () => { const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; persist('c', s.id); S.view = 'sheet'; render(); },
     play: () => { S.cur = arg; S.view = 'sheet'; S.confirm = null; lsSet(); render(); window.scrollTo(0, 0); },
     edit: () => { S.cur = arg; S.view = 'build'; S.step = 0; S.confirm = null; lsSet(); render(); window.scrollTo(0, 0); },
     exportOne: () => { const c = S.chars[arg] || ch; doExport([c], fileName(c)); },
@@ -1286,18 +1315,7 @@ document.addEventListener('click', (ev) => {
     mode: () => { S.mode = arg; render(); },
     d20: () => { const c = derive(ch, S.hb); d20(+t.dataset.mod, t.dataset.label, { kind: t.dataset.kind || 'check', crit: c.critRange }); },
     dmg: () => rollDmg(t.dataset.expr, t.dataset.label),
-    hp: () => { const c = derive(ch, S.hb); const n = Math.max(0, +$('#hpAmt').value || 0); if (!n) { $('#hpAmt').focus(); return; } const P = ch.play; if (P.hp == null) P.hp = c.hpMax;
-      if (arg === 'dmg') { let d = n; const ab = Math.min(P.temp, d); P.temp -= ab; d -= ab; const before = P.hp;
-        if (before <= 0 && d > 0) {
-          if (d >= c.hpMax) { pushLog({ label: 'Massiver Schaden', total: '†', detail: d + ' Schaden bei 0 TP ist mindestens so hoch wie dein TP-Maximum – sofortiger Tod.' }); fall(P); }
-          else { const wasStable = P.stable; P.stable = false; P.ds[1] = Math.min(3, (P.ds[1] || 0) + 1); pushLog({ label: 'Schaden bei 0 TP', total: P.ds[1] + '/3', detail: (wasStable ? 'Du bist nicht mehr stabil. ' : '') + '1 Fehlschlag beim Todesrettungswurf. War es ein kritischer Treffer, hake einen zweiten ab.' }); if (P.ds[1] >= 3) fall(P); }
-        } else {
-          P.hp = Math.max(0, before - d);
-          if (P.hp <= 0) { const over = d - before; const relR = c.res.find((r) => r.k === 'rel'); if (over >= c.hpMax) { pushLog({ label: 'Massiver Schaden', total: '†', detail: 'Der Restschaden (' + over + ') ist mindestens so hoch wie dein TP-Maximum – sofortiger Tod.' }); fall(P); } else if (relR && (+P.res.rel || 0) < relR.max) { P.res.rel = (+P.res.rel || 0) + 1; P.hp = 1; pushLog({ label: 'Unerbittliche Ausdauer', total: '1', detail: 'Statt auf 0 fällst du auf 1 TP (1× pro langer Rast).' }); if (P.conc) concCheck(ch, n); } else if (P.raging && c.lv('bar') >= 11) { const dc = 10 + 5 * (+P.relRage || 0); const rr = 1 + Math.floor(rnd() * 20); const tot = rr + c.saves.con.val; P.relRage = (+P.relRage || 0) + 1; if (tot >= dc) { P.hp = 2 * c.lv('bar'); pushLog({ label: 'Unerbittlicher Kampfrausch', total: tot, detail: 'KON-Rettungswurf SG ' + dc + ' geschafft (W20 ' + rr + ' ' + sgn(c.saves.con.val) + '): Du hast ' + P.hp + ' TP.', sides: 20, nat: rr }); } else { pushLog({ label: 'Unerbittlicher Kampfrausch', total: tot, detail: 'KON-Rettungswurf SG ' + dc + ' misslungen.', sides: 20, nat: rr }); knockOut(P); } } else { knockOut(P); } }
-          else if (P.conc) concCheck(ch, n);
-        } }
-      if (arg === 'heal') { if (P.dead) return; if (P.hp <= 0) { P.ds = [0, 0]; P.stable = false; wakeUp(P); } P.hp = Math.min(c.hpMax, P.hp + n); }
-      if (arg === 'temp') P.temp = Math.max(P.temp, n); commit(); },
+    hp: () => { const n = Math.max(0, +$('#hpAmt').value || 0); if (!n) { $('#hpAmt').focus(); return; } hpChange(ch, arg, n); },
     spendHd: () => { const c = derive(ch, S.hb); if (rule('hdrest') || c.hdPool.length > 1) return shortRestOpen(ch); const pools = hdPools(c, ch.play); const p = pools.find((x) => x.used < x.n); if (p && spendHdDie(ch, p.d)) commit(); },
     deathRoll: () => { const c = derive(ch, S.hb); const P = ch.play; if (P.hp == null) P.hp = c.hpMax; if (P.stable) { pushLog({ label: 'Todesrettungswurf', total: '✓', detail: 'Du bist stabil – keine Todesrettungswürfe mehr, bis du Schaden nimmst.' }); return; } if (P.hp > 0 || P.dead) return; const notes = []; let r = 1 + Math.floor(rnd() * 20);
       if (ch.species === 'halfling' && r === 1) { r = 1 + Math.floor(rnd() * 20); notes.push('Glück: 1 neu gewürfelt'); }
@@ -1318,11 +1336,14 @@ document.addEventListener('click', (ev) => {
     logOpen: () => { S.logOpen = !S.logOpen; paintCamp(); },
     logFilter: () => { S.logFilter = arg; paintCamp(); },
     fightStart: () => { S.myInit = null; saveCombat({ id: 'k' + Date.now().toString(36), active: true, round: 1, turn: null, npcs: [], t: Date.now() }); },
-    fightGo: () => { const o = order(); if (o.length) saveCombat(Object.assign({}, S.combat, { turn: o[0].key, round: 1, t: Date.now(), log: clog(S.combat, 'Kampf beginnt – Runde 1: ' + o[0].name + ' ist am Zug') })); },
-    fightReset: () => { const c = S.combat; if (!c) return; saveCombat(Object.assign({}, c, { turn: null, round: 1, t: Date.now(), effects: [], rem: [], log: [{ t: Date.now(), x: 'Neue Begegnung – Runde und Zug zurückgesetzt' }] })); },
+    fightGo: () => { const o = order().filter((x) => !skipTurn(x)); if (o.length) saveCombat(Object.assign({}, S.combat, { turn: o[0].key, turnAt: { v: o[0].v, dex: o[0].dex, name: o[0].name }, round: 1, t: Date.now(), log: clog(S.combat, 'Kampf beginnt – Runde 1: ' + o[0].name + ' ist am Zug') })); },
+    fightReset: () => { const c = S.combat; if (!c) return; const gr = {}; const npcs = (c.npcs || []).filter((x) => !(x.hpMax > 0 && x.hp <= 0)).map((x) => { const r = x.grp ? (gr[x.grp] = gr[x.grp] || 1 + Math.floor(rnd() * 20)) : 1 + Math.floor(rnd() * 20); return Object.assign({}, x, { v: r + (+x.dex || 0) }); }); S.myInit = null; queueMe();
+      saveCombat({ id: 'k' + Date.now().toString(36), active: true, round: 1, turn: null, npcs, t: Date.now(), effects: [], rem: [], log: [{ t: Date.now(), x: 'Neue Begegnung – alle würfeln neu Initiative, besiegte Gegner entfernt' }] }); },
     fightEnd: () => { saveCombat({ id: '', active: false, t: Date.now() }); S.myInit = null; queueMe(); },
     turnEnd: () => { nextTurn(); if (typeof turnReset === 'function') { turnReset(ch, true); commit(); } },
     initRoll: () => { const c = derive(ch, S.hb); if (!S.combat || !S.combat.active) return; d20(c.init, 'Initiative', { kind: 'init' }); },
+    surpTog: () => { const c = S.combat; if (!c) return; const sp = (c.surp || []).slice(); const i = sp.indexOf(arg); if (i >= 0) sp.splice(i, 1); else sp.push(arg); saveCombat(Object.assign({}, c, { surp: sp, t: Date.now() })); },
+    initAway: () => { if (!S.combat || !S.combat.active) return; S.myInit = { cid: S.combat.id, away: true }; queueMe(); pushLog({ label: 'Noch nicht im Kampf', total: '…', detail: ch.name + ' ist noch zu weit weg und greift später ein.', share: true }); setTimeout(paintCamp, 50); },
     initSet: () => { const v = $('#initMan').value; if (v === '' || !S.combat) { $('#initMan').focus(); return; } setMyInit(+v); pushLog({ label: 'Initiative (eingetragen)', total: +v, detail: 'von Hand', share: true }); },
     npcAdd: () => { const n = ($('#npcName').value || '').trim() || 'Gegner'; const b = +$('#npcBonus').value || 0; const r = 1 + Math.floor(rnd() * 20); const c = S.combat; if (!c) return;
       saveCombat(Object.assign({}, c, { npcs: (c.npcs || []).concat([{ id: Math.random().toString(36).slice(2, 8), name: n, v: r + b, dex: b }]), t: Date.now(), log: clog(c, n + ' tritt dem Kampf bei (Initiative ' + (r + b) + ')') })); pushLog({ label: n + ': Initiative', total: r + b, detail: 'W20 ' + r + ' ' + sgn(b), sides: 20, nat: r }); },

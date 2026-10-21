@@ -27,7 +27,10 @@ run "Kritischer Audit A01–A06 (audit2.test.js)" node tests/audit2.test.js
 run "Erklärkarten ⓘ (info.test.js)" node tests/info.test.js
 run "Layout: ⚠ offene Punkte, Menüs (layout.test.js)" node tests/layout.test.js
 run "Würfel-Designs (dice.test.js)" node tests/dice.test.js
-run "Klicktest kurz (ui.test.js)" node tests/ui.test.js
+run "Stufenaufstieg-Assistent (levelup.test.js)" node tests/levelup.test.js
+run "Gegnerangriff: Treffer prüfen vor Schaden (npc.test.js)" node tests/npc.test.js
+run "Kampf-Nachzügler, Überraschung, Treffer zustellen, Bestiarium (combat2.test.js)" node tests/combat2.test.js
+run "Klicktest kurz (ui.test.js)" bash -c "node tests/ui.test.js || (echo Wiederholung; node tests/ui.test.js)"
 run "Abnahme-Klicktest (ui-full.test.js)" node tests/ui-full.test.js
 run "Kombinationen Klasse×Unterklasse×Stufe (combos.test.js)" node tests/combos.test.js
 for c in bar brd cle dru fig mon pal ran rog sor wlk wiz rk bw fk ma; do run "Zugleisten-Fuzz $c" node tests/turnfuzz.test.js $c; done

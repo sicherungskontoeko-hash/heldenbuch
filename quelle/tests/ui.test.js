@@ -37,7 +37,7 @@ async function run(b, label, ctxOpt) {
   /* Suche */
   await tap('.tsearch'); await p.fill('#srchQ', 'Feuerball'); await p.waitForTimeout(200); ok('Suche findet Feuerball', /Feuerball/.test(await p.locator('#modal').textContent())); await p.evaluate(() => { document.getElementById('modal').hidden = true; S.modal = null; });
   /* Würfelbecher */
-  const dr = p.locator('[data-act=drOpen]'); if (await dr.count()) { await dr.first().click(); await tap('[data-act=drRoll]'); }
+  const dr = p.locator('[data-act=drOpen]:visible'); if (await dr.count()) { await dr.first().click(); await tap('[data-act=drRoll]'); }
   /* Hausregeln + Regeloptionen */
   { await go('hb'); ok('Regeloptionen sichtbar', await p.locator('.rulesp').count() === 1); await tap('input[data-act=ruleT][data-arg=strict]'); await tap('input[data-act=ruleT][data-arg=strict]'); }
   /* Speichern und Wiederherstellen */

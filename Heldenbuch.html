@@ -7,7 +7,7 @@
    weil die App ihre Adresse (localhost) dabei nicht wechselt.
    Sicherung: Startet eine heruntergeladene Version nicht sauber, wird sie verworfen und die eingebaute genutzt. */
 (function () {
-  var BUILD = 1792597467, VER = '1.4.0';
+  var BUILD = 1792607247, VER = '1.5.0';
   var REMOTE = 'https://sicherungskontoeko-hash.github.io/heldenbuch/';
   var C = window.Capacitor; var native = !!(C && (typeof C.isNativePlatform === 'function' ? C.isNativePlatform() : C.isNative));
   if (window.HB_BOOT_TEST) native = true; /* nur für Tests */
@@ -946,6 +946,41 @@ body.d3quake{animation:d3quake .6s cubic-bezier(.36,.07,.19,.97)}
 .lunum{left:var(--x);top:var(--y);transform:translate(-50%,-50%);font-family:var(--f-display);font-size:150px;font-weight:700;color:#ffe08a;text-shadow:0 0 40px #ffb020,0 0 8px #fff;opacity:0;animation:lunum 2s ease-out forwards}
 @keyframes lunum{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}45%{transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-60%) scale(1.05)}}
 @media (max-width:640px){.lusteps span{font-size:0}.lusteps span b{font-size:.75rem}.lusteps .on{font-size:.82rem}.lunum{font-size:110px}}
+.pr .okc{color:var(--moss)}.pr .badc{color:#f08a8a}.pr .btn.rec{box-shadow:0 0 0 2px var(--gold),0 0 16px rgba(var(--gold-rgb),.45)}
+.mob summary .mrec{margin-left:auto;font-size:.78rem;font-weight:700;color:var(--gold);border:1px solid rgba(var(--gold-rgb),.35);border-radius:999px;padding:1px 8px;white-space:nowrap}
+.mob summary{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}.mob summary small{flex-basis:100%}
+.mhab{margin:18px 0 8px;font-family:var(--f-display);color:var(--gold-hi)}.mhab small{color:var(--faint);font-size:.8rem}
+.mhabs{margin:6px 0 4px}
+.tbaway{color:var(--muted);font-size:.9rem}
+.fgrp.reserve{border:1px dashed var(--line2);border-radius:12px;padding:8px 10px;margin:6px 0}
+@media (max-width:640px){.mhabs{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding-bottom:6px;scrollbar-width:none;margin-left:-4px;margin-right:-4px}.mhabs .chip{flex:none}}
+
+/* ---- Handy hochkant: nichts schwebt über dem Inhalt ---- */
+.mbtn{display:none}
+#top{background:rgba(var(--bg-rgb),.97)}
+@media (max-width:820px){
+ #diceFab{display:none!important}
+ #warnfab .wfb{display:none!important}
+ #warnfab{top:calc(env(safe-area-inset-top,0px) + 62px);bottom:auto!important;right:8px!important;left:8px;align-items:stretch}
+ #warnfab .wpan{width:auto;max-height:65vh}
+ .mbtn{display:grid;place-items:center;position:relative;width:38px;height:38px;border-radius:50%;border:1px solid var(--line2);background:var(--surface);color:var(--gold-hi);padding:0;flex:none}
+ .mbtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:3;stroke-linejoin:round}
+ .mbtn.mwarn svg{stroke-width:2;width:18px;height:18px}
+ .mbtn.mwarn{background:linear-gradient(180deg,#c9575a,var(--wine));border-color:rgba(var(--wine-rgb),.8);color:#fff}
+ .mbtn.mwarn[hidden]{display:none}
+ .mbtn.mwarn b{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;border-radius:9px;background:#fff;color:var(--wine);font-size:.68rem;font-weight:800;display:grid;place-items:center;padding:0 3px;line-height:1}
+ .mbtn.mwarn.on{box-shadow:0 0 0 3px rgba(var(--wine-rgb),.35)}
+ .bar{flex-wrap:nowrap}
+ .brand{font-size:1.02rem;min-width:0}
+ .savest{display:none}
+ .dlg{max-height:calc(100vh - 32px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow:auto}
+ #toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important;right:10px!important;left:auto}
+ .mnul{position:fixed!important;left:10px!important;right:10px!important;top:auto!important;bottom:calc(84px + env(safe-area-inset-bottom,0px))!important;min-width:0;z-index:60;padding:8px;border-radius:18px;box-shadow:0 -10px 50px rgba(0,0,0,.6)}
+ .mnul button{padding:13px 14px;font-size:1rem}
+ details.mnu[open]>summary::before{content:'';position:fixed;inset:0;z-index:59;background:rgba(var(--deep-rgb),.45);cursor:default}
+}
+@media (max-width:380px){.brand{font-size:0}.brand svg{width:28px;height:28px}}
+.sreq{border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:8px 0;background:var(--bg2)}.sreq summary{cursor:pointer}.sreq .row{margin-top:8px}.srres{margin-top:8px;display:grid;gap:4px}.srres p{margin:0;font-size:.9rem;color:var(--muted)}.srres b{color:var(--ink)}
 </style>
 <div id="scene" aria-hidden="true"></div>
 <canvas id="embers" aria-hidden="true"></canvas>
@@ -4541,6 +4576,9 @@ function turnOpts(c) {
   c.feats.forEach((x) => { const u = x.f.uses; if (!u) return; const k = 'ft_' + (x.slot === 'asi' ? 'asi' + x.lv : x.slot) + '_' + x.id; const left = resLeft(k); out.push({ id: 'ft:' + k, cost: featureCost(x.f.text), grp: 'Talent', n: u.name || x.f.name, sub: x.f.text.slice(0, 70) + '…', left, empty: left !== null && left <= 0 }); });
   /* Tränke */
   if (typeof itemList === 'function') itemList(ch).forEach((x) => { const d = itemDef(x); if (d.drink && (+x.qty || 1) > 0) out.push({ id: 'it:' + x.uid, cost: 'b', grp: 'Gegenstand', n: d.name + ' trinken', sub: d.drink + ' TP · ' + (+x.qty || 1) + '×' }); });
+  const ushDc = 8 + c.mod.str + c.pb;
+  out.push({ id: 'ush:grapple', cost: 'a', grp: 'Angriff', n: 'Packen (waffenloser Schlag)', sub: 'statt eines Angriffs · Ziel: STÄ- oder GES-RW gegen SG ' + ushDc });
+  out.push({ id: 'ush:shove', cost: 'a', grp: 'Angriff', n: 'Stossen (waffenloser Schlag)', sub: 'statt eines Angriffs · 1,5 m weg oder liegend · SG ' + ushDc });
   STD_ACTIONS.forEach(([id, n, k, sub]) => out.push({ id: 'std:' + id, cost: k, grp: 'Allgemein', n, sub }));
   return out.filter((o) => !o.hide);
 }
@@ -4575,6 +4613,8 @@ function turnRun(ch, id) {
   if (kind === 'opt') { const it = (c.optSets || []).find((o) => o.key === a1); const item = it && it.items.find((x) => x.k === a2); if (item && !tSpend(ch, featureCost(item.text.replace(/^[^:]*Solange aktiv:[^.]*\./, '')), item.name)) return; return optUse(ch, a1, a2); }
   if (kind === 'ft') { const k = id.slice(3); const r = c.res.find((x) => x.k === k); const used = +P.res[k] || 0; if (!r || used >= r.max) { pushLog({ label: r ? r.n : 'Talent', total: '✗', detail: 'Keine Nutzung mehr übrig' }); return; } const fx = c.feats.find((x) => k.endsWith('_' + x.id)); const cost = fx ? featureCost(fx.f.text) : 'f'; if (!tSpend(ch, cost, r.n)) return; P.res[k] = used + 1; tLog(r.n, fx ? fx.f.text : ''); commit(); return; }
   if (kind === 'it') { if (!tSpend(ch, 'b', 'Trank')) return; XA.itDrink(null, a1, '', ch); return; }
+  if (kind === 'ush') { const nm = a1 === 'grapple' ? 'Packen' : 'Stossen'; if (!tCountAttack(ch, c, '', nm)) return; const dc = 8 + c.mod.str + c.pb;
+    tLog(nm + ' (waffenloser Schlag)', 'Das Ziel (höchstens eine Grösse grösser) macht einen STÄ- oder GES-Rettungswurf (es wählt) gegen SG ' + dc + '. Misslingt er: ' + (a1 === 'grapple' ? 'gepackt (Bewegungsrate 0). Du brauchst eine freie Hand.' : '1,5 m weggestossen oder liegend (du wählst).') + ' ' + (typeof slTag === 'function' ? 'SL entscheidet.' : '')); commit(); return; }
   if (kind === 'std') { const s = STD_ACTIONS.find((x) => x[0] === a1); if (!tSpend(ch, s[2], s[1])) return; stdRun(ch, c, a1); commit(); }
 }
 function tLohPrompt(ch, c) {
@@ -4869,6 +4909,7 @@ function startOfTurn(ch) {
     if (c.lv('fig') >= 18 && c.subOf('fig') === 'champion' && P.hp <= Math.floor(c.hpMax / 2)) { const h = Math.max(0, 5 + c.mod.con); const old = P.hp; P.hp = Math.min(c.hpMax, P.hp + h); log.push('Überlebender: +' + (P.hp - old) + ' TP (angeschlagen)'); }
   }
   if (log.length) pushLog({ label: 'Zugbeginn', total: '✦', detail: log.join(' · '), share: true });
+  if (inFight(ch) && P.hp <= 0 && !P.dead && !P.stable) setTimeout(() => orbPrompt('<div class="pr"><b>Todesrettungswurf</b><p>' + esc(ch.name) + ' hat 0 TP. Zu Beginn deines Zuges würfelst du einen Todesrettungswurf: 10+ Erfolg, 1 zählt doppelt als Fehlschlag, 20 bringt dich mit 1 TP zurück.</p><div class="chips end"><button class="btn" data-act="deathRoll">Todesrettungswurf würfeln</button></div></div>'), 400);
 }
 /* Zeit ausserhalb des Kampfes fortschreiben (1 Runde = 6 Sekunden) */
 function timePass(ch, rounds) {
@@ -4988,6 +5029,7 @@ function mergeCombat(base, ours, theirs) {
   const m = Object.assign({}, theirs);
   for (const k of Object.keys(ours)) {
     if (['npcs', 'effects', 'rem'].includes(k)) m[k] = mergeById(base[k], ours[k], theirs[k]);
+    else if (['hits', 'reqs', 'saveRes'].includes(k)) { const seen = new Set(); m[k] = (theirs[k] || []).concat(ours[k] || []).filter((x) => { const key = (x.id || '') + '|' + (x.uid || x.to || '') + '|' + x.t; if (seen.has(key)) return false; seen.add(key); return true; }).sort((a, b) => a.t - b.t).slice(-30); }
     else if (k === 'log') { const seen = new Set(); m.log = (theirs.log || []).concat(ours.log || []).filter((x) => { const key = x.t + x.x; if (seen.has(key)) return false; seen.add(key); return true; }).sort((a, b) => a.t - b.t).slice(-25); }
     else if (JSON.stringify(base[k]) !== JSON.stringify(ours[k])) m[k] = ours[k];
   }
@@ -5181,6 +5223,7 @@ function burstExplode(r, cap) {
   if (extra.length) { const add = extra.reduce((a, b) => a + b, 0); r.total += add; r.groups.push({ sides: 8, rolls: extra, sign: 1 }); r.detail += ' + Explosion ' + extra.length + 'W8[' + extra.join(',') + ']' + (extra.length >= cap && pending > 0 ? ' (Höchstzahl ' + cap + ' erreicht)' : ''); }
   return r;
 }
+document.addEventListener('click', (ev) => { const t = ev.target.closest && ev.target.closest('#prompt [data-act="deathRoll"]'); if (t) setTimeout(() => orbPrompt(''), 0); });
 
 /* ==== Globale Suche (P02): Zauber, Talente, Fähigkeiten, Gegenstände, Regeln, Monster … ==== */
 const RULES = [
@@ -5316,15 +5359,16 @@ function encRating(xp, levels) {
 }
 function mkMobs(mid, n, opts, existing) {
   const M = BESTIARY[mid]; if (!M) return []; const same = (existing || []).filter((x) => x.mid === mid).length; const out = [];
-  const shared = opts.groupInit ? 1 + Math.floor(rnd() * 20) : null; const grp = opts.groupInit ? uidX() : null;
-  for (let i = 0; i < n; i++) { const r = shared ?? 1 + Math.floor(rnd() * 20); const hp = opts.rollHp ? Math.max(1, rollExpr(M[4]).total) : M[3]; out.push({ id: uidX(), mid, name: M[0] + (n > 1 || same ? ' ' + (same + i + 1) : ''), v: r + M[6], dex: M[6], hp, hpMax: hp, ac: M[2], grp, cond: [] }); }
+  const d20i = () => { const a1 = 1 + Math.floor(rnd() * 20); return opts.surprised ? Math.min(a1, 1 + Math.floor(rnd() * 20)) : a1; }; const shared = opts.groupInit ? d20i() : null; const grp = opts.groupInit ? uidX() : null;
+  for (let i = 0; i < n; i++) { const r = shared ?? d20i(); const hp = opts.rollHp ? Math.max(1, rollExpr(M[4]).total) : M[3]; out.push({ id: uidX(), mid, name: M[0] + (n > 1 || same ? ' ' + (same + i + 1) : ''), v: r + M[6], dex: M[6], hp, hpMax: hp, ac: M[2], grp, cond: [], reserve: opts.reserve ? true : undefined }); }
   return out;
 }
 function encInsert(mobs, label, opts) {
   const c = S.combat; if (!c || !c.active) return; let all = (c.npcs || []).slice(); const add = [];
   for (const m of mobs) { const x = mkMobs(m.mid, +m.n || 1, opts, all.concat(add)); add.push(...x); }
-  saveCombat(Object.assign({}, c, { npcs: all.concat(add), t: Date.now(), log: clog(c, (label ? label + ': ' : '') + mobs.map((m) => m.n + '× ' + BESTIARY[m.mid][0]).join(', ') + ' treten dem Kampf bei') }));
-  pushLog({ label: label || 'Gegner', total: add.length + '×', detail: mobs.map((m) => m.n + '× ' + BESTIARY[m.mid][0]).join(', ') + ' · Initiative gewürfelt' });
+  const what = mobs.map((m) => m.n + '× ' + BESTIARY[m.mid][0]).join(', ');
+  saveCombat(Object.assign({}, c, { npcs: all.concat(add), t: Date.now(), log: clog(c, (label ? label + ': ' : '') + what + (opts.reserve ? ' warten als Verstärkung' : ' treten dem Kampf bei')) }));
+  pushLog({ label: label || 'Gegner', total: add.length + '×', detail: what + (opts.reserve ? ' · als Verstärkung bereit (noch nicht in der Reihenfolge)' : ' · Initiative gewürfelt') });
 }
 
 /* ---------- Kompakte Gegnerzeile + Detaildialog ---------- */
@@ -5367,7 +5411,7 @@ function encPlanner() {
   const E = S.enc; const auto = partyLevels();
   const levels = auto.length ? auto : (E.np && E.lv ? Array.from({ length: Math.max(1, +E.np) }, () => +E.lv) : []);
   const valid = E.mobs.filter((m) => BESTIARY[m.mid] && +m.n > 0); const xp = encXp(valid); const r = encRating(xp, levels);
-  const opts = '<option value="">— Monster —</option>' + Object.entries(BESTIARY).sort((a, b) => a[1][0].localeCompare(b[1][0], 'de')).map(([k, mm]) => '<option value="' + k + '">' + esc(mm[0]) + ' (HG ' + mm[1] + ')</option>').join('');
+  const opts = '<option value="">— Monster —</option>' + (typeof HABITATS !== 'undefined' ? Object.keys(HABITATS).map((h) => { const l = Object.entries(BESTIARY).filter(([k]) => mobHab(k)[0] === h).sort((a, b) => crNum(a[1][1]) - crNum(b[1][1])); return l.length ? '<optgroup label="' + esc(HABITATS[h]) + '">' + l.map(([k, mm]) => '<option value="' + k + '">' + esc(mm[0]) + ' (HG ' + mm[1] + ')</option>').join('') + '</optgroup>' : ''; }).join('') : Object.entries(BESTIARY).sort((a, b) => a[1][0].localeCompare(b[1][0], 'de')).map(([k, mm]) => '<option value="' + k + '">' + esc(mm[0]) + ' (HG ' + mm[1] + ')</option>').join(''));
   const saved = encLoad();
   const m = $('#modal'); S.modal = 'enc';
   m.innerHTML = '<div class="dlg encdlg" role="dialog" aria-modal="true" aria-label="Begegnung planen"><div class="dph"><h3>Begegnung planen</h3><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
@@ -5415,6 +5459,233 @@ Object.assign(XA, {
 });
 document.addEventListener('change', (ev) => { const t = ev.target; if (t && (t.id === 'encGrp' || t.id === 'encRoll')) { encOpts(); return; } if (t && t.dataset && t.dataset.enc && S.enc) { const k = t.dataset.enc; if (k === 'mid' || k === 'n') { const mo = S.enc.mobs[+t.dataset.i]; if (mo) mo[k] = k === 'n' ? Math.max(1, +t.value || 1) : t.value; } else S.enc[k] = t.value; const nm = $('#encName'); if (nm) S.enc.name = nm.value; encPlanner(); }
   if (t && t.id === 'bulkCond' && t.value) { const k = t.value; const c = S.combat; const sel = S.npcSel || []; saveCombat(Object.assign({}, c, { npcs: (c.npcs || []).map((x) => sel.includes(x.id) ? Object.assign({}, x, { cond: [...new Set((x.cond || []).concat([k]))] }) : x), t: Date.now(), log: clog(c, sel.length + ' Gegner: ' + COND[k].name) })); } });
+
+/* ---------- Gegnerangriff: Angriff würfeln → Treffer prüfen (Ziel-RK) → erst dann Schaden ---------- */
+function npcTargets() {
+  const out = []; for (const [uid, p] of Object.entries(S.table || {})) if (p && p.char && !p.dead) out.push({ k: 'p:' + uid, name: p.char, ac: +p.ac || 0 });
+  const ch = cur(); if (ch && !out.some((t) => t.k === 'p:' + UID)) { try { out.unshift({ k: 'me', name: ch.name, ac: derive(ch, S.hb).ac }); } catch (e) {} }
+  return out;
+}
+function critExpr(expr) { return String(expr).replace(/(\d*)W(\d+)/g, (m, n, s) => (2 * (+n || 1)) + 'W' + s); }
+function npcPrompt() {
+  const o = S.npcA; if (!o) return orbPrompt('');
+  const tg = npcTargets(); const t = tg.find((x) => x.k === o.tgt) || null;
+  const verdict = o.nat === 1 ? 'Eine natürliche 1 verfehlt immer.' : o.nat === 20 ? 'Natürliche 20: trifft immer – kritischer Treffer, alle Schadenswürfel doppelt.' : t && t.ac ? (o.total >= t.ac ? '<b class="okc">Trifft ' + esc(t.name) + '</b> (' + o.total + ' gegen RK ' + t.ac + ').' : '<b class="badc">Verfehlt ' + esc(t.name) + '</b> (' + o.total + ' gegen RK ' + t.ac + ').') : 'Trifft das die RK des Ziels? ' + slTag();
+  const hitDefault = o.nat === 20 || (o.nat !== 1 && t && t.ac && o.total >= t.ac);
+  orbPrompt('<div class="pr' + (o.nat === 20 ? ' crit' : '') + '"><b>' + esc(o.name) + ': Angriff ' + o.total + '</b><p>' + verdict + '</p>' +
+    (tg.length ? '<div class="chips"><span class="hint">Ziel:</span>' + tg.map((x) => chip(o.tgt === x.k, esc(x.name) + (x.ac ? ' · RK ' + x.ac : ''), 'data-act="npcTgt" data-arg="' + x.k + '"')).join('') + '</div>' : '') +
+    '<div class="chips end"><button class="btn ghost' + (!hitDefault && t ? ' rec' : '') + '" data-act="npcMiss">Verfehlt</button><button class="btn' + (hitDefault ? ' rec' : '') + '" data-act="npcHit"' + (o.nat === 1 ? ' disabled' : '') + '>' + (o.nat === 20 ? 'Kritischen Schaden würfeln' : 'Treffer – Schaden würfeln') + '</button></div></div>');
+}
+XA.npcAtk = (t, a) => {
+  const x = ((S.combat && S.combat.npcs) || []).find((y) => y.id === a); const M = x && BESTIARY[x.mid]; if (!M) return; const at = M[7][+t.dataset.j];
+  const before = S.log.length; const tot = rawD20(at[1], x.name + ': ' + at[0], true); const e = S.log[0];
+  const tg = npcTargets(); S.npcA = { name: x.name + ': ' + at[0], dmg: at[2], dtype: at[3], total: tot, nat: e && e.nat, tgt: (S.npcA && tg.some((q) => q.k === S.npcA.tgt)) ? S.npcA.tgt : (tg.length === 1 ? tg[0].k : '') };
+  setTimeout(npcPrompt, typeof d3fx === 'function' && d3fx() === 'voll' ? 950 : 150); return tot;
+};
+XA.npcTgt = (t, a) => { if (!S.npcA) return; S.npcA.tgt = S.npcA.tgt === a ? '' : a; npcPrompt(); };
+XA.npcMiss = () => { const o = S.npcA; if (!o) return; pushLog({ label: o.name, total: 'verfehlt', detail: 'kein Schaden', share: true }); S.npcA = { tgt: o.tgt }; orbPrompt(''); hitFlush(); };
+function hitFlush() { const q = S.hitQ || []; if (!q.length) return; S.hitQ = []; const sum = q.reduce((a2, x) => a2 + x.amount, 0); setTimeout(() => hitPrompt(q.length > 1 ? { by: q.map((x) => x.by).join(', '), amount: sum, dtype: 'mehrere Treffer', crit: q.some((x) => x.crit), t: Date.now() } : q[0]), 150); }
+XA.npcHit = () => { const o = S.npcA; if (!o) return; const crit = o.nat === 20; orbPrompt(''); rollDmg(crit ? critExpr(o.dmg) : o.dmg, o.name + (crit ? ' · kritisch' : '') + ' (' + o.dtype + ')'); S.npcA = { tgt: o.tgt };
+  const amt = +S.log[0].total || 0; if (!o.tgt || !amt) return; const h = { by: o.name, amount: amt, dtype: o.dtype, crit, t: Date.now() };
+  const uid = o.tgt === 'me' ? UID : o.tgt.slice(2);
+  if (uid === UID) { setTimeout(() => hitPrompt(h), typeof d3fx === 'function' && d3fx() === 'voll' ? 1100 : 200); hitFlush(); return; }
+  const c = S.combat; if (!c) return; saveCombat(Object.assign({}, c, { hits: ((c.hits || []).concat([Object.assign({ to: uid }, h)])).slice(-20), t: Date.now(), log: clog(c, o.name + ' trifft ' + ((S.table[uid] || {}).char || 'einen Helden') + ': ' + amt + ' ' + o.dtype) }));
+  bannerToast('Schaden zugestellt', ((S.table[uid] || {}).char || 'Der Held') + ' bekommt ' + amt + ' Schaden zum Eintragen angezeigt.'); hitFlush(); };
+/* Treffer an meinen Helden: anzeigen und auf Wunsch eintragen (Resistenz usw. wählt der Spieler) */
+function hitPrompt(h) { const ch = cur(); if (!ch) return; if (S.npcA && S.npcA.name) { S.hitQ = (S.hitQ || []).concat([h]); return; } S.hitPend = h;
+  orbPrompt('<div class="pr' + (h.crit ? ' crit' : '') + '"><b>' + esc(h.by) + ' trifft ' + esc(ch.name) + ': ' + h.amount + ' Schaden</b><p>' + esc(h.dtype || '') + (h.crit ? ' · kritischer Treffer' : '') + '. Eintragen? Resistenz halbiert, Immunität verhindert den Schaden.</p><div class="chips end"><button class="btn ghost" data-act="hitApply" data-arg="0">Nicht eintragen</button><button class="btn ghost" data-act="hitApply" data-arg="0.5">Halb (' + Math.floor(h.amount / 2) + ')</button><button class="btn" data-act="hitApply" data-arg="1">Voll (' + h.amount + ')</button></div></div>'); }
+XA.hitApply = (t, a) => { const h = S.hitPend; S.hitPend = null; orbPrompt(''); const ch = cur(); if (!h || !ch || !+a) return; const n = Math.floor(h.amount * +a); if (n > 0) { hpChange(ch, 'dmg', n, h.crit); pushLog({ label: 'Schaden erhalten', total: n, detail: h.by + ' · ' + (h.dtype || '') + (+a < 1 ? ' (halbiert)' : ''), share: true }); } };
+function hitCheck() { const c = S.combat; if (!c || !c.hits) return; let seen = 0; try { seen = +sessionStorage.getItem('hb_hit_' + c.id) || 0; } catch (e) {}
+  const mine = c.hits.filter((h) => h.to === UID && h.t > seen); if (!mine.length) return; const h = mine[mine.length - 1]; try { sessionStorage.setItem('hb_hit_' + c.id, String(h.t)); } catch (e) {}
+  if (mine.length > 1) { const sum = mine.reduce((s2, x) => s2 + x.amount, 0); hitPrompt({ by: mine.map((x) => x.by).join(', '), amount: sum, dtype: 'mehrere Treffer', crit: mine.some((x) => x.crit), t: h.t }); } else hitPrompt(h); }
+
+/* Verstärkung: bereitgehaltene Gegner treten bei – neue Initiative, werden einsortiert */
+XA.npcJoin = (t, a) => { const c = S.combat; if (!c) return; const grp = t.dataset.grp; const ids = (c.npcs || []).filter((x) => x.reserve && (grp ? x.grp === grp : x.id === a)).map((x) => x.id); if (!ids.length) return;
+  const shared = 1 + Math.floor(rnd() * 20); const names = [];
+  const npcs = (c.npcs || []).map((x) => { if (!ids.includes(x.id)) return x; const r = grp ? shared : 1 + Math.floor(rnd() * 20); names.push(x.name + ' (' + (r + (+x.dex || 0)) + ')'); return Object.assign({}, x, { reserve: undefined, v: r + (+x.dex || 0) }); });
+  saveCombat(Object.assign({}, c, { npcs, t: Date.now(), log: clog(c, 'Verstärkung: ' + names.join(', ') + ' greift ein') })); pushLog({ label: 'Verstärkung greift ein', total: names.length + '×', detail: names.join(', ') + ' · Initiative gewürfelt', share: true }); };
+
+/* ---------- Rettungswurf anfordern (SL → Spieler): z. B. Odem oder Feuerball, Schaden wird gleich mitgewürfelt ---------- */
+const AB_LIST = [['dex', 'GES'], ['con', 'KON'], ['wis', 'WEI'], ['str', 'STÄ'], ['int', 'INT'], ['cha', 'CHA']];
+function saveReqForm() {
+  const ps = Object.entries(S.table || {}); if (!ps.length) return '';
+  const c = S.combat || {}; const reqs = (c.reqs || []).slice(-3).reverse(); const F = S.srForm || {}; const fv = (k, d) => esc(F[k] != null ? F[k] : d);
+  return '<details class="fgrp sreq"' + (S.sreqOpen ? ' open' : '') + '><summary><b>Rettungswurf anfordern</b> <small>z. B. Odem, Feuerball, Gift</small></summary>' +
+    '<div class="row">' + field('Quelle', '<input type="text" id="srBy" value="' + fv('by', '') + '" placeholder="z. B. Drachenodem">') + field('Attribut', '<select id="srAb">' + AB_LIST.map(([k, l]) => '<option value="' + k + '"' + (F.ab === k ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>') + field('SG', '<input type="number" id="srDc" value="' + fv('dc', '13') + '" min="1" max="30">') + '</div>' +
+    '<div class="row">' + field('Schaden (optional)', '<input type="text" id="srDmg" value="' + fv('dmg', '') + '" placeholder="z. B. 8W6">') + field('Schadensart', '<input type="text" id="srTy" value="' + fv('ty', '') + '" placeholder="z. B. Feuer">') + '</div>' +
+    '<label class="chk"><input type="checkbox" id="srHalf"' + (F.half === false ? '' : ' checked') + '> halber Schaden bei Erfolg</label>' +
+    '<div class="chips"><span class="hint">Wer?</span>' + ps.map(([u, p]) => chip((S.srTo || []).includes(u), esc(p.char || '?'), 'data-act="srTo" data-arg="' + u + '"')).join('') + chip(false, 'alle', 'data-act="srTo" data-arg="*"') + '</div>' +
+    '<div class="chips end"><button class="btn sm" data-act="srSend">Anfordern</button></div>' +
+    (reqs.length ? '<div class="srres">' + reqs.map((r) => { const res = (c.saveRes || []).filter((x) => x.id === r.id); return '<p><b>' + esc(r.by) + '</b> · ' + (AB_LIST.find((a) => a[0] === r.ab) || ['', r.ab])[1] + ' SG ' + r.dc + (r.amount ? ' · ' + r.amount + ' Schaden' : '') + ': ' + r.to.map((u) => { const x = res.find((y) => y.uid === u); const nm = esc((S.table[u] || {}).char || '?'); return x ? nm + ' ' + x.total + (x.ok ? ' ✓' : ' ✗') : nm + ' …'; }).join(', ') + '</p>'; }).join('') + '</div>' : '') + '</details>';
+}
+const srGrab = () => { const g = (id) => ($('#' + id) || {}).value; S.srForm = { by: g('srBy'), ab: g('srAb'), dc: g('srDc'), dmg: g('srDmg'), ty: g('srTy'), half: ($('#srHalf') || {}).checked }; };
+XA.srTo = (t, a) => { srGrab(); S.sreqOpen = true; const all = Object.keys(S.table || {}); let to = (S.srTo || []).slice(); if (a === '*') to = to.length === all.length ? [] : all; else { const i = to.indexOf(a); if (i >= 0) to.splice(i, 1); else to.push(a); } S.srTo = to; paintCamp(); };
+XA.srSend = () => { const c = S.combat; if (!c) return; const to = S.srTo || []; if (!to.length) { bannerToast('Wer soll würfeln?', 'Wähle mindestens einen Helden.'); return; }
+  const by = ($('#srBy').value || 'Rettungswurf').trim(); const ab = $('#srAb').value; const dc = Math.max(1, +$('#srDc').value || 10); const dmg = ($('#srDmg').value || '').trim(); const dtype = ($('#srTy').value || '').trim(); const half = $('#srHalf').checked;
+  let amount = 0; if (dmg && /W|\d/.test(dmg)) { rollDmg(dmg.replace(/−/g, '-'), by + ' (Schaden' + (dtype ? ', ' + dtype : '') + ')'); amount = +S.log[0].total || 0; }
+  const req = { id: uidX(), by, ab, dc, amount, dtype, half, to: to.slice(), t: Date.now() };
+  saveCombat(Object.assign({}, c, { reqs: ((c.reqs || []).concat([req])).slice(-10), t: Date.now(), log: clog(c, by + ': ' + (AB_LIST.find((x) => x[0] === ab) || ['', ab])[1] + '-Rettungswurf SG ' + dc + ' für ' + to.map((u) => (S.table[u] || {}).char || '?').join(', ')) }));
+  S.srTo = []; S.srForm = null; S.sreqOpen = true; setTimeout(reqCheck, 50); };
+function reqCheck() { const c = S.combat; if (!c || !c.reqs || !cur()) return; const me = String(UID); const r = c.reqs.find((x) => x.to.includes(me) && !(c.saveRes || []).some((y) => y.id === x.id && y.uid === me) && !reqSeen(x.id)); if (!r || S.reqPend) return; S.reqPend = r.id;
+  const ch = cur(); const cc = derive(ch, S.hb); const sv = cc.saves[r.ab]; const ab = (AB_LIST.find((x) => x[0] === r.ab) || ['', r.ab])[1];
+  orbPrompt('<div class="pr"><b>' + esc(r.by) + ': ' + ab + '-Rettungswurf SG ' + r.dc + '</b><p>Die Spielleitung verlangt einen Rettungswurf von ' + esc(ch.name) + ' (' + sgn(sv.val) + ').' + (r.amount ? ' Schaden: ' + r.amount + (r.dtype ? ' ' + esc(r.dtype) : '') + (r.half ? ', bei Erfolg die Hälfte.' : ', bei Erfolg keiner.') : '') + '</p><div class="chips end"><button class="btn" data-act="reqRoll" data-arg="' + r.id + '">Rettungswurf würfeln</button></div></div>'); }
+const reqSeen = (id) => { try { return sessionStorage.getItem('hb_req_' + id) === '1'; } catch (e) { return false; } };
+XA.reqRoll = (t, a) => { const c = S.combat; const r = c && (c.reqs || []).find((x) => x.id === a); S.reqPend = null; orbPrompt(''); if (!r) return; try { sessionStorage.setItem('hb_req_' + a, '1'); } catch (e) {}
+  const ch = cur(); const cc = derive(ch, S.hb); const total = d20(cc.saves[r.ab].val, r.by + ': ' + (AB_LIST.find((x) => x[0] === r.ab) || ['', r.ab])[1] + '-Rettungswurf (SG ' + r.dc + ')', { kind: 'save:' + r.ab }); if (typeof total !== 'number') return;
+  const ok = total >= r.dc; const c2 = S.combat;
+  saveCombat(Object.assign({}, c2, { saveRes: ((c2.saveRes || []).concat([{ id: r.id, uid: String(UID), total, ok, t: Date.now() }])).slice(-30), t: Date.now(), log: clog(c2, ch.name + ': ' + total + (ok ? ' – geschafft' : ' – misslungen') + ' (' + r.by + ')') }));
+  if (r.amount) { const amt = ok ? (r.half ? Math.floor(r.amount / 2) : 0) : r.amount; if (amt > 0) setTimeout(() => hitPrompt({ by: r.by + (ok ? ' (geschafft – halber Schaden)' : ''), amount: amt, dtype: r.dtype, crit: false, t: Date.now() }), typeof d3fx === 'function' && d3fx() === 'voll' ? 1200 : 300); else bannerToast('Geschafft!', 'Kein Schaden durch ' + r.by + '.'); }
+  setTimeout(reqCheck, 1500); };
+const _hitCheck0 = hitCheck; hitCheck = function () { _hitCheck0(); reqCheck(); };
+
+/* ==== Bestiarium II: weitere SRD-Kreaturen, typische Fundorte und Stufenempfehlung ====
+   Werte nach dem SRD (deutsche Kurzfassung). Format wie BESTIARY: [Name, HG, RK, TP, TP-Würfel, Bewegung, Initiative, Angriffe, Merkmale] */
+Object.assign(CR_XP, { '21': 33000, '22': 41000, '23': 50000, '24': 62000, '30': 155000 });
+Object.assign(BESTIARY, {
+ /* Stadt, Strasse & Lager */
+ 'tribal-warrior':['Stammeskrieger','1/8',12,11,'2W8+2','9 m',0,[['Speer',3,'1W6+1','Stich']],'Rudeltaktik: Vorteil, wenn ein Verbündeter neben dem Ziel steht.'],
+ mastiff:['Dogge','1/8',12,5,'1W8+1','12 m',2,[['Biss',3,'1W6+1','Stich']],'Treffer wirft ein höchstens mittelgrosses Ziel um (STÄ SG 11).'],
+ 'swarm-of-rats':['Rattenschwarm','1/4',10,24,'7W8-7','9 m',0,[['Bisse',2,'2W6','Stich']],'Schwarm: nur 1W6 Schaden bei halben TP oder weniger. Resistenz gegen Wucht/Stich/Hieb.'],
+ wererat:['Werratte','2',12,33,'6W8+6','9 m',2,[['Biss',4,'1W4+2','Stich'],['Kurzschwert',4,'1W6+2','Stich']],'Gestaltwandler. Biss kann mit Werratten-Lykanthropie anstecken.'],
+ doppelganger:['Doppelgänger','3',14,52,'8W8+16','9 m',4,[['Hieb',6,'1W6+4','Wucht']],'Mehrfachangriff: zwei Hiebe. Gestaltwandler, liest Oberflächengedanken. Hinterhalt: +3W6 im ersten Zug.'],
+ archmage:['Erzmagier','12',12,99,'18W8+18','9 m',2,[['Dolch',6,'1W4+2','Stich']],'Zauber bis Grad 9 (z. B. Kegel der Kälte 8W8, Zeitstopp). Magieresistenz: Vorteil auf Rettungswürfe gegen Zauber.'],
+ /* Wald & Wildnis */
+ panther:['Panther','1/4',12,13,'3W8','15 m',2,[['Biss',4,'1W6+2','Stich'],['Klaue',4,'1W4+2','Hieb']],'Anspringen: nach 6 m Anlauf STÄ SG 12 oder liegend.'],
+ 'giant-owl':['Rieseneule','1/4',12,19,'3W10+3','1,5 m, Fliegen 18 m',2,[['Krallen',3,'2W6+1','Hieb']],'Vorbeifliegen ohne Gelegenheitsangriffe. Scharfe Sinne.'],
+ sprite:['Sprite','1/4',15,2,'1W4','3 m, Fliegen 12 m',4,[['Langschwert',2,'1','Hieb'],['Kurzbogen',6,'1','Stich']],'Pfeil: KON SG 10 oder vergiftet (bei 5+ verfehlt bewusstlos). Herzblick, Unsichtbarkeit.'],
+ 'awakened-tree':['Erweckter Baum','2',13,59,'7W12+14','6 m',-2,[['Schlag',6,'3W6+4','Wucht']],'Verwundbar gegen Feuer. Resistenz gegen Wucht und Stich. Wirkt reglos wie ein Baum.'],
+ unicorn:['Einhorn','5',12,67,'9W10+18','15 m',2,[['Huf',7,'2W6+4','Wucht'],['Horn',7,'1W8+4','Stich']],'Heilende Berührung (3×/Tag 2W8+2), Teleport 18 m. Magieresistenz.'],
+ treant:['Baumhirte','9',16,138,'12W12+60','9 m',-1,[['Schlag',10,'3W6+6','Wucht'],['Felsen',10,'4W10+6','Wucht']],'Mehrfachangriff: zwei Schläge. Belebt Bäume. Verwundbar gegen Feuer, doppelter Schaden an Gebäuden.'],
+ /* Gebirge & Hügel */
+ orc:['Ork','1/2',13,15,'2W8+6','9 m',1,[['Zweihandaxt',5,'1W12+3','Hieb'],['Wurfspeer',5,'1W6+3','Stich']],'Aggressiv: Bonusaktion bis zur Bewegungsrate auf einen Feind zu.'],
+ 'giant-goat':['Riesenziege','1/2',11,19,'3W10+3','12 m',0,[['Rammen',5,'2W4+3','Wucht']],'Sturmangriff: nach 6 m +2W4 und STÄ SG 13 oder liegend. Trittsicher.'],
+ 'white-wyrmling':['Weisser Drachennestling','2',16,32,'5W8+10','9 m, Fliegen 18 m, Schwimmen 9 m',0,[['Biss',4,'1W10+2','Stich + 1W4 Kälte']],'Kälteodem (Aufladung 5–6): 4,5-m-Kegel, KON SG 12, 5W8 Kälte (halb bei Erfolg).'],
+ 'green-wyrmling':['Grüner Drachennestling','2',17,38,'7W8+7','9 m, Fliegen 18 m, Schwimmen 9 m',1,[['Biss',4,'1W10+2','Stich + 1W4 Gift']],'Giftodem (Aufladung 5–6): 4,5-m-Kegel, KON SG 11, 6W6 Gift (halb bei Erfolg).'],
+ 'blue-wyrmling':['Blauer Drachennestling','3',17,52,'8W8+16','9 m, Graben 4,5 m, Fliegen 18 m',0,[['Biss',5,'1W10+3','Stich + 1W6 Blitz']],'Blitzodem (Aufladung 5–6): 9-m-Linie, GES SG 12, 4W10 Blitz (halb bei Erfolg).'],
+ 'young-white':['Junger weisser Drache','6',17,133,'14W10+56','12 m, Fliegen 24 m, Schwimmen 12 m',0,[['Biss',7,'2W10+4','Stich + 1W8 Kälte'],['Klaue',7,'2W6+4','Hieb']],'Mehrfachangriff: Biss + zwei Klauen. Kälteodem: 9-m-Kegel, KON SG 15, 10W8.'],
+ 'young-black':['Junger schwarzer Drache','7',18,127,'15W10+45','12 m, Fliegen 24 m, Schwimmen 12 m',2,[['Biss',7,'2W10+4','Stich + 1W8 Säure'],['Klaue',7,'2W6+4','Hieb']],'Mehrfachangriff: Biss + zwei Klauen. Säureodem: 9-m-Linie, GES SG 14, 11W8.'],
+ 'cloud-giant':['Wolkenriese','9',14,200,'16W12+96','12 m',0,[['Morgenstern',12,'3W8+8','Stich'],['Felsen',12,'4W10+8','Wucht']],'Mehrfachangriff: zwei Morgensterne. Zauber: Nebelwolke, Fliegen, Federfall.'],
+ roc:['Roc','11',15,248,'16W20+80','6 m, Fliegen 36 m',0,[['Schnabel',13,'4W8+9','Stich'],['Krallen',13,'4W6+9','Hieb']],'Mehrfachangriff: Schnabel + Krallen. Krallen packen (SG 19) und tragen Beute fort.'],
+ /* Höhlen & Unterreich */
+ stirge:['Blutmücke','1/8',14,2,'1W4','3 m, Fliegen 12 m',3,[['Rüssel',5,'1W4+3','Stich']],'Saugt sich fest: 1W4+3 Blutverlust zu Beginn jedes Zuges, bis 10 TP gesaugt.'],
+ 'violet-fungus':['Violetter Pilz','1/4',5,18,'4W8','1,5 m',-5,[['Fäulnisberührung',2,'1W8','nekrotisch']],'Mehrfachangriff: 1W4 Berührungen. Wirkt wie ein gewöhnlicher Pilz.'],
+ drow:['Drow','1/4',15,13,'3W8','9 m',2,[['Kurzschwert',4,'1W6+2','Stich'],['Handarmbrust',4,'1W6+2','Stich']],'Bolzen: KON SG 13 oder vergiftet (bei 5+ verfehlt bewusstlos). Feenahnen, Sonnenlichtempfindlich.'],
+ darkmantle:['Dunkelmantel','1/2',11,22,'5W6+5','3 m, Fliegen 9 m',1,[['Zerquetschen',5,'1W6+3','Wucht']],'Hängt sich über den Kopf (blind, erstickt). Dunkelheitsaura 4,5 m (1×/Tag).'],
+ 'gray-ooze':['Graue Schlammmasse','1/2',8,22,'3W8+9','3 m, Klettern 3 m',-2,[['Scheinfuss',3,'1W6+1','Wucht + 2W6 Säure']],'Zersetzt Metall: nichtmagische Waffen und Rüstung verlieren an Wert.'],
+ duergar:['Duergar','1',16,26,'4W8+8','7,5 m',0,[['Kriegspicke',4,'1W8+2','Stich'],['Wurfspeer',4,'1W6+2','Stich']],'Vergrössern und Unsichtbarkeit (je 1×/Rast). Sonnenlichtempfindlich.'],
+ grick:['Grick','2',14,27,'6W8','9 m, Klettern 9 m',2,[['Tentakel',4,'2W6+2','Hieb'],['Schnabel',4,'1W6+2','Stich']],'Mehrfachangriff: Tentakel, bei Treffer zusätzlich Schnabel. Steintarnung.'],
+ 'gibbering-mouther':['Brabbelnder Schlund','2',9,67,'9W8+27','3 m, Schwimmen 3 m',-1,[['Bisse',2,'5W6','Stich']],'Wahnsinniges Gebrabbel: WEI SG 10 oder verwirrt. Lässt Boden zu Schlamm werden.'],
+ 'black-pudding':['Schwarzer Schlamm','4',7,85,'10W10+30','6 m, Klettern 6 m',-3,[['Scheinfuss',5,'1W6+3','Wucht + 4W8 Säure']],'Teilt sich bei Hieb- und Blitzschaden. Zersetzt Holz und Metall.'],
+ roper:['Raffer','5',20,93,'11W10+33','3 m, Klettern 3 m',-1,[['Biss',7,'4W8+4','Stich'],['Fangarm',7,'zieht heran','—']],'Vier Fangarme ziehen 7,5 m heran und schwächen (Nachteil auf STÄ). Wirkt wie ein Stalagmit.'],
+ /* Sumpf & Moor */
+ 'giant-frog':['Riesenfrosch','1/4',11,18,'4W8','9 m, Schwimmen 9 m',1,[['Biss',3,'1W6+1','Stich']],'Packt (SG 11) und verschluckt kleine Ziele. Springt 6 m weit.'],
+ lizardfolk:['Echsenmensch','1/2',15,22,'4W8+4','9 m, Schwimmen 9 m',0,[['Biss',4,'1W6+2','Stich'],['Speer',4,'1W6+2','Stich']],'Mehrfachangriff: zwei Angriffe. Hält 15 Minuten die Luft an.'],
+ 'giant-toad':['Riesenkröte','1',11,39,'6W10+6','6 m, Schwimmen 12 m',1,[['Biss',4,'1W10+2','Stich + 1W10 Gift']],'Packt (SG 13) und verschluckt mittelgrosse Ziele: 3W6 Säure pro Zug.'],
+ 'giant-constrictor':['Riesenwürgeschlange','2',12,60,'8W12+8','9 m, Schwimmen 9 m',2,[['Biss',6,'2W6+4','Stich'],['Umschlingen',6,'2W8+4','Wucht']],'Umschlingen packt (SG 16): festgesetzt, jeden Zug erneut Schaden.'],
+ 'shambling-mound':['Schlurfender Hügel','5',15,136,'16W10+48','6 m, Schwimmen 6 m',-1,[['Hieb',7,'2W8+4','Wucht']],'Mehrfachangriff: zwei Hiebe, dann Verschlingen (2W8+4 pro Zug). Blitz heilt ihn.'],
+ /* Gruft, Ruine & Friedhof */
+ 'crawling-claw':['Kriechende Klaue','0',12,2,'1W4','6 m, Klettern 6 m',2,[['Klaue',3,'1W4+1','Wucht oder Hieb']],'Untot. Immun gegen bezaubert und verängstigt.'],
+ ghast:['Ghast','2',13,36,'8W8','9 m',3,[['Biss',3,'2W8+1','Stich'],['Klauen',5,'2W6+3','Hieb']],'Klauen: KON SG 10 oder gelähmt (1 Minute, nicht Elfen). Gestank: KON SG 10 oder vergiftet.'],
+ 'ogre-zombie':['Ogerzombie','2',8,85,'9W10+36','9 m',-2,[['Morgenstern',6,'2W8+4','Wucht']],'Untote Zähigkeit: Bei 0 TP KON-Wurf (SG 5 + Schaden), bei Erfolg 1 TP.'],
+ 'mummy-lord':['Mumienfürst','15',17,97,'13W8+39','6 m',0,[['Fäulnisfaust',9,'3W6+4','Wucht + 6W6 nekrotisch']],'Mehrfachangriff: Blick + Faust. Legendäre Aktionen. Zauber (Priester). Kehrt aus dem Herz zurück.'],
+ lich:['Leichnam','21',17,135,'18W8+54','9 m',3,[['Lähmende Berührung',12,'3W6','Kälte']],'Zauber bis Grad 9. Legendäre Aktionen und Widerstand. Kehrt mit seinem Seelengefäss zurück.'],
+ /* Küste & Gewässer */
+ merfolk:['Meervolk','1/8',11,11,'2W8+2','3 m, Schwimmen 12 m',1,[['Speer',2,'1W6','Stich']],'Amphibisch.'],
+ 'giant-crab':['Riesenkrabbe','1/8',15,13,'3W8','9 m, Schwimmen 9 m',1,[['Schere',3,'1W6+1','Wucht']],'Schere packt (SG 11). Amphibisch.'],
+ 'reef-shark':['Riffhai','1/2',12,22,'4W8+4','Schwimmen 12 m',1,[['Biss',4,'1W8+2','Stich']],'Rudeltaktik. Wasseratmer.'],
+ 'giant-octopus':['Riesenkrake','1',11,52,'8W10+8','3 m, Schwimmen 18 m',1,[['Tentakel',5,'2W6+3','Wucht']],'Tentakel packt (SG 16). Tintenwolke zur Flucht.'],
+ 'hunter-shark':['Jagdhai','2',12,45,'6W10+12','Schwimmen 12 m',1,[['Biss',6,'2W8+4','Stich']],'Blutrausch: Vorteil gegen verletzte Ziele.'],
+ 'sea-hag':['Meervettel','2',14,52,'7W8+21','9 m, Schwimmen 12 m',1,[['Klauen',5,'2W6+3','Hieb']],'Schreckliche Erscheinung: WEI SG 11 oder verängstigt. Tödlicher Blick.'],
+ plesiosaurus:['Plesiosaurus','2',13,68,'8W10+24','6 m, Schwimmen 12 m',2,[['Biss',6,'3W6+4','Stich']],'Hält 1 Stunde die Luft an.'],
+ 'water-elemental':['Wasserelementar','5',14,114,'12W10+48','9 m, Schwimmen 27 m',2,[['Hieb',7,'2W8+4','Wucht']],'Mehrfachangriff: zwei Hiebe. Überfluten: verschlingt Kreaturen (STÄ SG 15).'],
+ /* Wüste & Ödland */
+ jackal:['Schakal','0',12,3,'1W6','12 m',2,[['Biss',1,'1W4-1','Stich']],'Rudeltaktik. Scharfer Geruchs- und Gehörsinn.'],
+ 'dust-mephit':['Staubmephit','1/2',12,17,'5W6','9 m, Fliegen 9 m',2,[['Klauen',4,'1W4+2','Hieb']],'Blendender Atem: 4,5-m-Kegel, GES SG 10 oder blind. Explodiert beim Tod.'],
+ lamia:['Lamia','4',13,97,'13W10+26','9 m',1,[['Klauen',5,'2W10+3','Hieb'],['Dolch',5,'1W4+3','Stich']],'Rauschende Berührung (Fluch: Nachteil auf WEI). Zauber: Verkleiden, Einflüsterung.'],
+ 'earth-elemental':['Erdelementar','5',17,126,'12W10+60','9 m, Graben 9 m',-1,[['Schlag',8,'2W8+5','Wucht']],'Mehrfachangriff: zwei Schläge. Gleitet durch Stein und Erde.'],
+ 'air-elemental':['Luftelementar','5',15,90,'12W10+24','Fliegen 27 m',5,[['Schlag',8,'2W8+5','Wucht']],'Mehrfachangriff: zwei Schläge. Wirbelwind: STÄ SG 13, 3W8+2 und weggeschleudert.'],
+ 'purple-worm':['Purpurwurm','15',18,247,'15W20+90','15 m, Graben 9 m',-2,[['Biss',14,'3W8+9','Stich'],['Schwanzstachel',14,'3W6+9','Stich + 12W6 Gift']],'Mehrfachangriff: Biss + Stachel. Verschlingt grosse Ziele (6W6 Säure pro Zug).'],
+ /* Eis & Hoher Norden */
+ 'ice-mephit':['Eismephit','1/2',11,21,'6W6','9 m, Fliegen 9 m',1,[['Klauen',3,'1W4+1','Hieb + 1W4 Kälte']],'Frostatem: 4,5-m-Kegel, GES SG 10, 2W4 Kälte. Explodiert beim Tod in Eissplitter.'],
+ 'polar-bear':['Eisbär','2',12,42,'5W10+15','12 m, Schwimmen 9 m',0,[['Biss',7,'1W8+5','Stich'],['Klauen',7,'2W6+5','Hieb']],'Mehrfachangriff: Biss + Klauen.'],
+ 'winter-wolf':['Winterwolf','3',13,75,'10W10+20','15 m',1,[['Biss',6,'2W6+4','Stich']],'Kälteodem (Aufladung 5–6): 4,5-m-Kegel, GES SG 12, 4W8 Kälte. Rudeltaktik, Schneetarnung.'],
+ remorhaz:['Remorhaz','11',17,195,'17W12+85','9 m, Graben 6 m',1,[['Biss',11,'6W10+7','Stich + 3W6 Feuer']],'Glühender Körper: Berührung 3W6 Feuer. Verschlingt Ziele (6W6 Säure pro Zug).'],
+ /* Andere Ebenen */
+ quasit:['Quasit','1',13,7,'3W4','12 m',3,[['Klauen',4,'1W4+3','Stich']],'Gift: KON SG 10, 2W4 und vergiftet. Gestaltwandel, Unsichtbarkeit, Schrecken.'],
+ nightmare:['Nachtmahr','3',13,68,'8W10+24','18 m, Fliegen 27 m',2,[['Hufe',6,'2W8+4','Wucht + 2W6 Feuer']],'Ätherischer Schritt mit Reiter. Verleiht Licht 3 m.'],
+ pegasus:['Pegasus','2',12,59,'7W10+21','18 m, Fliegen 27 m',2,[['Hufe',6,'2W6+4','Wucht']],'Himmlisch. Lässt sich als Reittier zähmen.'],
+ couatl:['Couatl','4',19,97,'13W8+39','9 m, Fliegen 27 m',5,[['Biss',8,'1W6+5','Stich'],['Umschlingen',6,'2W6+3','Wucht']],'Biss: KON SG 13 oder vergiftet (24 h bewusstlos). Gestaltwandel, Zauber, Telepathie.'],
+ succubus:['Sukkubus','4',15,66,'12W8+12','9 m, Fliegen 18 m',3,[['Klaue',5,'1W6+3','Hieb']],'Bezaubern (WEI SG 15), Lebensentzug durch Kuss (5W10+5 psychisch). Gestaltwandel.'],
+ 'barbed-devil':['Stachelteufel','5',15,110,'13W8+52','9 m',3,[['Klaue',6,'1W6+3','Stich'],['Schwanz',6,'2W6+3','Stich']],'Mehrfachangriff: zwei Klauen + Schwanz. Stachelhaut: 1W10 bei Packen. Schleudert Flammen.'],
+ vrock:['Vrock','6',15,104,'11W10+44','12 m, Fliegen 18 m',1,[['Schnabel',6,'2W6+3','Stich'],['Krallen',6,'2W10+3','Hieb']],'Mehrfachangriff. Sporen (Gift) und betäubendes Kreischen (KON SG 14).'],
+ hezrou:['Hezrou','8',16,136,'13W10+65','9 m',3,[['Biss',7,'2W10+4','Stich'],['Klaue',7,'2W6+4','Hieb']],'Mehrfachangriff: Biss + zwei Klauen. Gestank: KON SG 14 oder vergiftet.'],
+ 'bone-devil':['Knochenteufel','9',19,142,'15W10+60','12 m, Fliegen 12 m',3,[['Klaue',8,'1W8+4','Hieb'],['Stachel',8,'2W8+4','Stich + 5W6 Gift']],'Mehrfachangriff: zwei Klauen + Stachel. Teufelssicht, Magieresistenz.'],
+ deva:['Deva','10',17,136,'16W8+64','9 m, Fliegen 27 m',4,[['Streitkolben',8,'1W6+4','Wucht + 4W8 gleissend']],'Mehrfachangriff: zwei Angriffe. Heilende Berührung, Gestaltwandel, Magieresistenz.'],
+ djinni:['Dschinn','11',17,161,'14W10+84','9 m, Fliegen 27 m',2,[['Krummsäbel',9,'2W6+5','Hieb + 1W6 Blitz']],'Mehrfachangriff: drei Angriffe. Wirbelwind, Zauber (Wunsch für Befreier).'],
+ efreeti:['Efriti','11',17,200,'16W10+112','12 m, Fliegen 18 m',1,[['Krummsäbel',10,'2W6+6','Hieb + 2W6 Feuer'],['Flammenstrahl',7,'5W6','Feuer']],'Mehrfachangriff: zwei Krummsäbel. Immun gegen Feuer. Zauber.'],
+ balor:['Balor','19',19,262,'21W12+126','12 m, Fliegen 24 m',2,[['Langschwert',14,'3W8+8','Hieb + 3W8 Blitz'],['Flammenpeitsche',14,'2W6+8','Hieb + 3W6 Feuer']],'Feueraura 3W6. Todeskrampf: 20W6 Feuer im Umkreis von 9 m. Magieresistenz.'],
+ 'pit-fiend':['Grubenscheusal','20',19,300,'24W10+168','9 m, Fliegen 18 m',2,[['Streitkolben',14,'2W6+8','Wucht + 6W6 Feuer'],['Biss',14,'4W6+8','Stich + Gift']],'Mehrfachangriff: vier Angriffe. Furchtaura (WEI SG 21). Zauber: Feuerball, Festhalten.'],
+ /* Magierturm & Verliese */
+ homunculus:['Homunkulus','0',13,5,'2W4','6 m, Fliegen 12 m',2,[['Biss',4,'1','Stich']],'Biss: KON SG 10 oder vergiftet bzw. bewusstlos. Telepathische Bindung an den Schöpfer.'],
+ 'flying-sword':['Fliegendes Schwert','1/4',17,17,'5W6','Fliegen 15 m',2,[['Langschwert',3,'1W8+1','Hieb']],'Konstrukt. Wirkt reglos wie ein gewöhnliches Schwert.'],
+ 'animated-armor':['Belebte Rüstung','1',18,33,'6W8+6','7,5 m',0,[['Schlag',4,'1W6+2','Wucht']],'Mehrfachangriff: zwei Schläge. Konstrukt, wirkt wie eine leere Rüstung.'],
+ 'rug-of-smothering':['Erstickender Teppich','2',12,33,'6W10','3 m',2,[['Ersticken',5,'2W6+3','Wucht']],'Hüllt das Ziel ein (gepackt, blind, erstickt). Schaden wird geteilt.'],
+ 'shield-guardian':['Schildwächter','7',17,142,'15W10+60','9 m',-1,[['Faust',7,'2W6+4','Wucht']],'Mehrfachangriff: zwei Fäuste. Schützt seinen Träger (Schaden geteilt), speichert einen Zauber.'],
+ 'clay-golem':['Lehmgolem','9',14,133,'14W10+56','6 m',-1,[['Schlag',8,'2W10+5','Wucht']],'Mehrfachangriff: zwei Schläge, senken das TP-Maximum. Säure heilt ihn. Hast (Aufladung).'],
+ 'stone-golem':['Steingolem','10',17,178,'17W10+85','9 m',-1,[['Schlag',10,'3W8+6','Wucht']],'Mehrfachangriff: zwei Schläge. Verlangsamen (Aufladung, WEI SG 17). Magieresistenz.'],
+ 'iron-golem':['Eisengolem','16',20,210,'20W10+100','9 m',-1,[['Schlag',13,'3W8+7','Wucht'],['Schwert',13,'3W10+7','Hieb']],'Giftodem (Aufladung 6): 4,5-m-Kegel, 10W8 Gift. Feuer heilt ihn. Magieresistenz.']
+});
+
+/* ---- Typische Fundorte (erster = Hauptfundort) ---- */
+const HABITATS = { stadt: 'Stadt, Strasse & Lager', wald: 'Wald & Wildnis', gebirge: 'Gebirge & Hügel', hoehle: 'Höhlen & Unterreich', sumpf: 'Sumpf & Moor', gruft: 'Gruft, Ruine & Friedhof', kueste: 'Küste & Gewässer', wueste: 'Wüste & Ödland', eis: 'Eis & Hoher Norden', ebenen: 'Andere Ebenen', arkan: 'Magierturm & Verliese' };
+const MOB_HAB = {
+ bandit: 'stadt wald', 'bandit-captain': 'stadt wald', cultist: 'stadt gruft', 'cult-fanatic': 'stadt gruft', guard: 'stadt', thug: 'stadt', veteran: 'stadt', knight: 'stadt', priest: 'stadt', mage: 'stadt arkan', assassin: 'stadt', commoner: 'stadt', noble: 'stadt', acolyte: 'stadt', scout: 'wald stadt', spy: 'stadt', berserker: 'gebirge eis', druid: 'wald', gladiator: 'stadt', 'tribal-warrior': 'wald wueste', mastiff: 'stadt', 'swarm-of-rats': 'stadt hoehle', wererat: 'stadt hoehle', doppelganger: 'stadt', archmage: 'arkan stadt',
+ goblin: 'wald hoehle', 'goblin-boss': 'wald hoehle', hobgoblin: 'gebirge wald', kobold: 'hoehle gebirge', gnoll: 'wueste wald', bugbear: 'wald hoehle', orc: 'gebirge wald', ogre: 'gebirge wald', minotaur: 'hoehle gruft', troll: 'gebirge sumpf', 'hill-giant': 'gebirge', 'stone-giant': 'gebirge hoehle', 'frost-giant': 'eis gebirge', 'fire-giant': 'gebirge ebenen', ettin: 'gebirge hoehle', 'cloud-giant': 'gebirge',
+ skeleton: 'gruft', zombie: 'gruft', ghoul: 'gruft', shadow: 'gruft', wight: 'gruft', ghost: 'gruft', mummy: 'gruft wueste', 'vampire-spawn': 'gruft stadt', vampire: 'gruft', banshee: 'gruft wald', specter: 'gruft', wraith: 'gruft', 'crawling-claw': 'gruft', ghast: 'gruft', 'ogre-zombie': 'gruft', 'mummy-lord': 'gruft wueste', lich: 'gruft arkan',
+ wolf: 'wald gebirge', 'dire-wolf': 'wald gebirge', 'giant-rat': 'stadt hoehle', boar: 'wald', 'brown-bear': 'wald gebirge', 'black-bear': 'wald', 'giant-spider': 'wald hoehle', owlbear: 'wald', werewolf: 'wald', panther: 'wald', 'giant-owl': 'wald', sprite: 'wald', 'awakened-tree': 'wald', unicorn: 'wald', treant: 'wald', dryad: 'wald', satyr: 'wald', centaur: 'wald', 'green-hag': 'wald sumpf', 'will-o-wisp': 'sumpf gruft', harpy: 'kueste gebirge', lion: 'wueste wald', 'giant-eagle': 'gebirge', griffon: 'gebirge', hippogriff: 'gebirge', manticore: 'gebirge wueste', chimera: 'gebirge', wyvern: 'gebirge', 'giant-goat': 'gebirge', roc: 'gebirge kueste',
+ basilisk: 'hoehle gebirge', mimic: 'hoehle arkan gruft', 'gelatinous-cube': 'hoehle gruft', 'rust-monster': 'hoehle', 'ochre-jelly': 'hoehle', ankheg: 'wald wueste', otyugh: 'stadt hoehle', 'giant-scorpion': 'wueste', stirge: 'hoehle sumpf', 'violet-fungus': 'hoehle', drow: 'hoehle', darkmantle: 'hoehle', 'gray-ooze': 'hoehle', duergar: 'hoehle', grick: 'hoehle', 'gibbering-mouther': 'hoehle', 'black-pudding': 'hoehle gruft', roper: 'hoehle',
+ crocodile: 'sumpf kueste', 'giant-frog': 'sumpf', lizardfolk: 'sumpf', 'giant-toad': 'sumpf', 'giant-constrictor': 'sumpf wald', 'shambling-mound': 'sumpf', 'black-wyrmling': 'sumpf', 'young-black': 'sumpf', 'green-wyrmling': 'wald', 'night-hag': 'sumpf ebenen',
+ sahuagin: 'kueste', merfolk: 'kueste', 'giant-crab': 'kueste', 'reef-shark': 'kueste', 'giant-octopus': 'kueste', 'hunter-shark': 'kueste', 'sea-hag': 'kueste sumpf', plesiosaurus: 'kueste', 'water-elemental': 'kueste ebenen',
+ jackal: 'wueste', 'dust-mephit': 'wueste ebenen', lamia: 'wueste', 'blue-wyrmling': 'wueste', 'earth-elemental': 'wueste ebenen hoehle', 'air-elemental': 'wueste ebenen gebirge', 'purple-worm': 'wueste hoehle', medusa: 'wueste gruft', hydra: 'sumpf kueste',
+ mammoth: 'eis', 'ice-mephit': 'eis ebenen', 'polar-bear': 'eis', 'winter-wolf': 'eis', remorhaz: 'eis', 'white-wyrmling': 'eis', 'young-white': 'eis',
+ imp: 'ebenen stadt', 'hell-hound': 'ebenen gebirge', 'fire-elemental': 'ebenen gebirge', quasit: 'ebenen', nightmare: 'ebenen', pegasus: 'ebenen gebirge', couatl: 'ebenen wald', succubus: 'ebenen stadt', 'barbed-devil': 'ebenen', vrock: 'ebenen', hezrou: 'ebenen', 'bone-devil': 'ebenen', deva: 'ebenen', djinni: 'ebenen wueste', efreeti: 'ebenen wueste', balor: 'ebenen', 'pit-fiend': 'ebenen',
+ 'red-wyrmling': 'gebirge', 'young-red': 'gebirge', 'adult-red': 'gebirge', gargoyle: 'gruft stadt', 'flesh-golem': 'arkan', homunculus: 'arkan', 'flying-sword': 'arkan gruft', 'animated-armor': 'arkan gruft', 'rug-of-smothering': 'arkan', 'shield-guardian': 'arkan', 'clay-golem': 'arkan', 'stone-golem': 'arkan gruft', 'iron-golem': 'arkan',
+ 'x-schlund': 'hoehle', 'x-aschewurm': 'gebirge', 'x-nebelspinne': 'wald', 'x-glockenkraehe': 'stadt gruft', 'x-moosriese': 'wald sumpf', 'x-spiegelwicht': 'arkan', 'x-knochenharfner': 'gruft', 'x-sumpflaterne': 'sumpf', 'x-eisenmotte': 'hoehle arkan', 'x-schattenhund': 'gruft wald', 'x-kristallkrabbe': 'kueste hoehle', 'x-runenwaechter': 'arkan gruft', 'x-aderfuerst': 'gruft stadt'
+};
+const mobHab = (k) => (MOB_HAB[k] || 'wald').split(' ');
+
+/* Empfehlung für eine Gruppe von 4 Helden: Stufen, für die eine Kreatur allein eine niedrige bis hohe Begegnung ist; schwache Kreaturen als Schar */
+function mobRec(cr) {
+  const x = CR_XP[cr] || 0; if (!x) return { txt: '–', lo: 1, hi: 1 };
+  const P = 4; let lo = 0, hi = 0;
+  for (let L = 1; L <= 20; L++) { const b = XP_BUDGET[L]; if (x >= P * b[0] * 0.75 && x <= P * b[2]) { if (!lo) lo = L; hi = L; } }
+  if (!lo) { if (x < P * XP_BUDGET[1][0]) { const n1 = Math.max(2, Math.ceil((P * XP_BUDGET[1][0]) / x)), n2 = Math.max(n1, Math.round((P * XP_BUDGET[1][1]) / x)); if (n1 > 12) return { txt: 'Kanonenfutter · Stufe 1', lo: 1, hi: 1, swarm: 12 }; return { txt: 'Gruppe ×' + n1 + (n2 > n1 ? '–' + Math.min(12, n2) : '') + ' · Stufe 1', lo: 1, hi: 2, swarm: n1 }; } return { txt: 'Stufe 20+', lo: 20, hi: 20 }; }
+  return { txt: 'Stufe ' + lo + (hi > lo ? '–' + hi : ''), lo, hi };
+}
+function mobFits(cr, L) { const r = mobRec(cr); return L >= r.lo && L <= r.hi + (r.swarm ? 1 : 0); }
+
+/* ---- Bestiarium-Ansicht: nach Fundort, darin nach Stufenempfehlung ---- */
+function bestiaryView() {
+  const q = (S.mq || '').toLowerCase(); const hab = S.mhab || ''; const ch = cur(); const L = +S.mlv || 0;
+  const all = Object.entries(BESTIARY).filter(([k, m]) => (!q || m[0].toLowerCase().includes(q)) && (!hab || mobHab(k).includes(hab)) && (!L || mobFits(m[1], L)));
+  const byCr = (a, b) => crNum(a[1][1]) - crNum(b[1][1]) || a[1][0].localeCompare(b[1][0], 'de');
+  const groups = hab ? [[hab, all.sort(byCr)]] : Object.keys(HABITATS).map((h) => [h, all.filter(([k]) => mobHab(k)[0] === h).sort(byCr)]).filter(([, l]) => l.length);
+  const card = ([k, m]) => { const r = mobRec(m[1]); return '<details class="mob"><summary><b>' + esc(m[0]) + '</b><span class="mrec">' + r.txt + '</span><small>HG ' + m[1] + ' · ' + (CR_XP[m[1]] || 0) + ' EP · RK ' + m[2] + ' · TP ' + m[3] + ' · ' + esc(m[5]) + '</small></summary><div class="atks">' + m[7].map((a) => '<div class="atk"><div class="an"><b>' + esc(a[0]) + '</b><small>' + esc(a[3]) + '</small></div><button class="rb" data-act="xroll" data-atk="1" data-mod="' + a[1] + '" data-label="' + esc(m[0]) + ': ' + esc(a[0]) + '">' + sgn(a[1]) + '</button>' + (/W/.test(a[2]) ? '<button class="rb dmgb" data-act="dmg" data-expr="' + esc(a[2].replace(/−/g, '-')) + '" data-label="' + esc(m[0]) + ': ' + esc(a[0]) + ' Schaden">' + esc(a[2]) + '</button>' : '<span class="rb dmgb">' + esc(a[2]) + '</span>') + '</div>').join('') + '</div>' + (m[8] ? '<p>' + esc(m[8]) + '</p>' : '') + '<p class="hint">Fundorte: ' + mobHab(k).map((h) => HABITATS[h]).join(', ') + '</p></details>'; };
+  return '<div class="hero-intro banner" style="' + bannerStyle('drache') + '"><h1>Bestiarium</h1><p>Sortiert nach typischem Fundort, darin nach Stärke. Die Empfehlung gilt für eine Gruppe von vier Helden – so wird ein spontaner Kampf weder unlogisch noch zu übel.</p><button class="btn" data-act="encOpen">Begegnung planen</button></div>' +
+    '<section class="blk"><h2>Bestiarium <small>' + Object.keys(BESTIARY).length + ' Kreaturen</small></h2>' +
+    '<div class="row">' + field('Suchen', '<input type="text" id="mq" value="' + esc(S.mq || '') + '" placeholder="z. B. Goblin">') + field('Passend für Gruppenstufe', '<select id="mlv"><option value="">alle Stufen</option>' + Array.from({ length: 20 }, (_, i) => i + 1).map((l) => '<option value="' + l + '"' + (L === l ? ' selected' : '') + '>Stufe ' + l + (ch && derive(ch, S.hb).level === l ? ' (dein Held)' : '') + '</option>').join('') + '</select>') + '</div>' +
+    '<div class="chips mhabs">' + chip(!hab, 'Alle Fundorte', 'data-act="mHab" data-arg=""') + Object.entries(HABITATS).map(([k, l]) => chip(hab === k, l, 'data-act="mHab" data-arg="' + k + '"')).join('') + '</div>' +
+    (groups.length ? groups.map(([h, l]) => '<h3 class="mhab">' + esc(HABITATS[h]) + ' <small>' + l.length + '</small></h3><div class="mobs">' + l.map(card).join('') + '</div>').join('') : '<p class="empty">Keine Kreatur passt zu diesem Filter.</p>') + '</section>';
+}
+function bestiaryAdder() {
+  const L = (() => { try { return derive(cur(), S.hb).level; } catch (e) { return 0; } })();
+  const opts = Object.keys(HABITATS).map((h) => { const l = Object.entries(BESTIARY).filter(([k]) => mobHab(k)[0] === h).sort((a, b) => crNum(a[1][1]) - crNum(b[1][1])); return l.length ? '<optgroup label="' + esc(HABITATS[h]) + '">' + l.map(([k, m]) => '<option value="' + k + '">' + esc(m[0]) + ' · HG ' + m[1] + ' · ' + mobRec(m[1]).txt + '</option>').join('') + '</optgroup>' : ''; }).join('');
+  return '<div class="fgrp"><b>Aus dem Bestiarium</b><div class="chips"><select id="mobSel" aria-label="Monster"><option value="">— Monster wählen —</option>' + opts + '</select><input type="number" id="mobN" value="1" min="1" max="12" aria-label="Anzahl"><label class="chk"><input type="checkbox" id="mobRoll"> TP würfeln</label><label class="chk"><input type="checkbox" id="mobGrp" checked> gemeinsame Initiative</label><label class="chk" title="Nachteil auf den Initiativewurf"><input type="checkbox" id="mobSur"> überrascht</label><label class="chk" title="Kommt erst später dazu, z. B. als Verstärkung"><input type="checkbox" id="mobRes"> als Verstärkung bereithalten</label><button class="btn ghost sm" data-act="mobAdd">Hinzufügen</button></div></div>';
+}
+XA.mHab = (t, a) => { S.mhab = a; render(); };
+document.addEventListener('change', (ev) => { if (ev.target && ev.target.id === 'mlv') { S.mlv = ev.target.value; render(); } });
+
+XA.mobAdd = () => { const id = $('#mobSel').value; if (!BESTIARY[id]) return; const n = Math.max(1, Math.min(12, +$('#mobN').value || 1)); encInsert([{ mid: id, n }], '', { rollHp: $('#mobRoll').checked, groupInit: ($('#mobGrp') || {}).checked, reserve: ($('#mobRes') || {}).checked, surprised: ($('#mobSur') || {}).checked }); };
 
 /* ==== Erklärbare Berechnungen und Nachbessern nach dem Wurf (P07) ==== */
 function explainOn() { if (S.explain === undefined) { try { S.explain = localStorage.getItem('hb_explain') === '1'; } catch (e) { S.explain = false; } } return S.explain; }
@@ -6161,6 +6432,7 @@ function paintWarn() {
   const ch = cur(); const show = ch && (S.view === 'build' || S.view === 'sheet') && !(ch.play && ch.play.dead);
   const c = show ? derive(ch, S.hb) : null; const n = c ? c.warn.length : 0;
   if (!el) { el = document.createElement('div'); el.id = 'warnfab'; document.body.appendChild(el); }
+  const mw = document.querySelector('.mwarn'); if (mw) { mw.hidden = !(show && n); const bb = mw.querySelector('b'); if (bb) bb.textContent = n || ''; mw.classList.toggle('on', !!S.warnOpen); mw.dataset.act = S.warnOpen ? 'warnClose' : 'warnOpen'; }
   if (!show || (!n && warnLastN <= 0)) { el.innerHTML = ''; el.className = ''; warnLastN = show ? n : -1; S.warnOpen = false; return; }
   if (!n) { /* gerade alles erledigt: kurz grünes ✓ */
     el.className = 'wdone'; el.innerHTML = '<span class="wfb ok" role="status">✓ Alles ausgewählt</span>'; warnLastN = 0; S.warnOpen = false;
@@ -6178,7 +6450,7 @@ XA.sumToggle = () => { S.sumOpen = !S.sumOpen; render(); };
 /* Aufklappmenüs (<details class="mnu">): Klick daneben oder Auswahl schliesst */
 document.addEventListener('click', (ev) => {
   document.querySelectorAll('details.mnu[open]').forEach((d) => { if (!d.contains(ev.target) || (ev.target.closest('.mnul button'))) d.removeAttribute('open'); });
-  if (S.warnOpen && !ev.target.closest('#warnfab') && !ev.target.closest('[data-act="warnOpen"]') && window.innerWidth < 1100) { S.warnOpen = false; paintWarn(); }
+  if (S.warnOpen && !ev.target.closest('#warnfab') && !ev.target.closest('[data-act="warnOpen"]') && !ev.target.closest('.mwarn') && window.innerWidth < 1100) { S.warnOpen = false; paintWarn(); }
 }, true);
 document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { document.querySelectorAll('details.mnu[open]').forEach((d) => d.removeAttribute('open')); if (S.warnOpen) { S.warnOpen = false; paintWarn(); } } });
 
@@ -6580,6 +6852,91 @@ document.addEventListener('change', (ev) => { if (ev.target && ev.target.id === 
 function diceRow(ch, small) { if (!ch) return ''; const id = d3setOf(ch); const s = D3_SETS[id];
   return '<div class="d3row' + (small ? ' sm' : '') + '"><span class="d3pv" style="--dg:' + s.glow + '">' + d3svg(20, 20, id, { tilt: 0.42, thin: true }) + '</span><div><b>' + esc(s.name) + '</b>' + (small ? '' : '<small>' + esc(s.desc) + '</small>') + '</div><button class="btn sm ghost" data-act="diceOpen">' + (small ? 'Ändern' : 'Würfel-Set wählen') + '</button></div>'; }
 
+/* ==== Stufenaufstieg-Assistent: 1. Aufstieg (Klasse, TP) · 2. Das ist neu (Merkmale + was sich verändert) · 3. Jetzt entscheiden ====
+   Ersetzt das einfache Fenster aus extra.js (gleiche Namen lvlUpOpen/lvlUpGo, später geladen). */
+function luPreview(ch, id, roll) {
+  const t = JSON.parse(JSON.stringify(ch)); const b = derive(ch, S.hb); const nl = b.lv(id) + 1;
+  if (id === t.cls) { t.level = nl; if (t.hpMode === 'roll') t.hpRolls[nl] = roll || Math.floor(CLASSES[id].hd / 2) + 1; }
+  else { const mm = (t.multi || []).find((x) => x.cls === id); if (mm) { mm.level = nl; if (t.hpMode === 'roll') { mm.hpRolls = mm.hpRolls || {}; mm.hpRolls[nl] = roll || Math.floor(CLASSES[id].hd / 2) + 1; } } }
+  return { b, a: derive(t, S.hb), nl };
+}
+function luGains(c, id, nl) {
+  const C = CLASSES[id]; const e = c.classes.find((x) => x.id === id); const gain = C.feats.filter((f) => f[0] === nl).map((f) => [f[1], f[2], C.name]);
+  if (nl >= 3 && e && e.subFeats) e.subFeats.filter((f) => f[0] === nl).forEach((f) => gain.push([f[1], f[2], e.subName]));
+  if ((C.asi || []).includes(nl) && !gain.some((g) => /Attributswert/.test(g[0]))) gain.push(['Attributswerterhöhung oder Talent', 'Erhöhe ein Attribut um 2 oder zwei Attribute um 1 – oder wähle ein Talent.', 'Wahl']);
+  if (nl === 19) gain.push(['Epische Gabe', 'Wähle eine Epische Gabe oder eine Attributswerterhöhung.', 'Wahl']);
+  if (C.options) { const o0 = C.options.n(nl - 1), o1 = C.options.n(nl); if (o1 > o0) gain.push([C.options.label, 'Du lernst ' + (o1 - o0) + ' weitere (jetzt ' + o1 + ').', 'Wahl']); }
+  if (nl === 3 && C.subs && e && !e.subChosen) gain.push(['Unterklasse', 'Jetzt wählst du deine Unterklasse – sie prägt deinen Helden für den Rest des Abenteuers.', 'Wahl']);
+  return gain;
+}
+function luDiff(b, a, id) {
+  const rows = []; const add = (l, x, y) => { if (String(x) !== String(y)) rows.push([l, x, y]); };
+  add('TP-Maximum', b.hpMax, a.hpMax); add('Übungsbonus', sgn(b.pb), sgn(a.pb));
+  const C = CLASSES[id]; const t0 = C.table(b.lv(id)), t1 = C.table(a.lv(id)); t1.forEach(([l, v]) => { const o = t0.find((r) => r[0] === l); add(l, o ? o[1] : '–', v); });
+  const sb = b.spell || {}, sa = a.spell || {};
+  if (sa.has) { const n = Math.max((sb.slots || []).length, (sa.slots || []).length); for (let g = 0; g < n; g++) add('Zauberplätze Grad ' + (g + 1), (sb.slots || [])[g] || 0, (sa.slots || [])[g] || 0);
+    if (sa.pact) add('Paktplätze', sb.pact ? sb.pact.n + '× Grad ' + sb.pact.lvl : '–', sa.pact.n + '× Grad ' + sa.pact.lvl);
+    (sa.classes || []).forEach((ia) => { const ib = (sb.classes || []).find((x) => x.id === ia.id) || {}; const pre = (sa.classes.length > 1 ? ia.name + ': ' : '');
+      add(pre + 'Zaubertricks', ib.cantripN || 0, ia.cantripN || 0); add(pre + 'Vorbereitete Zauber', ib.prepN || 0, ia.prepN || 0); add(pre + 'Zauber bis Grad', ib.maxLvl || 0, ia.maxLvl || 0); }); }
+  (a.res || []).forEach((r) => { const o = (b.res || []).find((x) => x.k === r.k); add(r.n, o ? o.max : '–', r.max); });
+  add('Waffenmeisterschaften', b.masteryN || 0, a.masteryN || 0); add('Kampfstile', b.styleN || 0, a.styleN || 0); add('Anrufungen', b.invN || 0, a.invN || 0);
+  const seen = new Set(); return rows.filter(([l]) => (seen.has(l) ? false : (seen.add(l), true)));
+}
+function lvlUpOpen() {
+  const ch = cur(); if (!ch) return; const c = derive(ch, S.hb); if (c.level >= 20 && !(S.lu && S.lu.step === 3)) return;
+  S.lu = S.lu || { cls: ch.cls, roll: null, step: 1 };
+  const m = $('#modal'); S.modal = 'lvl'; const st = S.lu.step;
+  const dots = '<div class="lusteps">' + ['Aufstieg', 'Das ist neu', 'Entscheiden'].map((l, i) => '<span class="' + (i + 1 === st ? 'on' : i + 1 < st ? 'done' : '') + '"><b>' + (i + 1) + '</b>' + l + '</span>').join('') + '</div>';
+  let body = '', foot = '';
+  if (st === 1) {
+    const id = S.lu.cls; const C = CLASSES[id]; const nl = c.lv(id) + 1;
+    const opts = [[ch.cls, CLASSES[ch.cls].name + ' ' + c.lv(ch.cls) + ' → ' + (c.lv(ch.cls) + 1)]].concat((ch.multi || []).map((mm) => [mm.cls, CLASSES[mm.cls].name + ' ' + mm.level + ' → ' + (+mm.level + 1)]));
+    const avg = C.hd / 2 + 1, con = c.mod.con;
+    body = '<div class="luhero">' + (typeof picOf === 'function' ? picOf('cls', id).replace('cpic', 'lupic') : '') + '<div><small>' + esc(ch.name) + '</small><b>Stufe ' + c.level + ' → <em>' + (c.level + 1) + '</em></b><span>' + esc(C.name) + ' ' + nl + '</span></div></div>' +
+      (opts.length > 1 ? '<h4>In welcher Klasse steigst du auf?</h4><div class="chips">' + opts.map(([k, l]) => chip(k === id, l, 'data-act="luCls" data-arg="' + k + '"')).join('') + '</div>' : '') +
+      '<p class="hint">Neue Klasse dazunehmen? <button class="link" data-act="luMulti">Multiclassing im Erschaffen-Bereich</button></p>' +
+      '<h4>Trefferpunkte</h4><div class="luhp">' + (ch.hpMode === 'roll' ? (S.lu.roll ? '<div class="luhpv"><span>W' + C.hd + ' = ' + S.lu.roll + ' ' + sgn(con) + ' KON</span><b>+' + Math.max(1, S.lu.roll + con) + ' TP</b></div>' : '<button class="btn big" data-act="luRoll">W' + C.hd + ' würfeln</button><p class="hint">Du hast „selbst gewürfelt“ eingestellt.</p>')
+        : '<div class="luhpv"><span>Durchschnitt ' + avg + ' ' + sgn(con) + ' KON</span><b>+' + Math.max(1, avg + con) + ' TP</b></div>') + '</div>';
+    foot = '<button class="btn ghost" data-act="closeModal">Abbrechen</button><button class="btn" data-act="luNext"' + (ch.hpMode === 'roll' && !S.lu.roll ? ' disabled' : '') + '>Weiter: Was ist neu? →</button>';
+  } else if (st === 2) {
+    const { b, a, nl } = luPreview(ch, S.lu.cls, S.lu.roll); const gains = luGains(a, S.lu.cls, nl); const diff = luDiff(b, a, S.lu.cls);
+    body = '<h3 class="luh">Das bringt dir Stufe ' + a.level + '</h3>' +
+      (gains.length ? '<div class="lucards">' + gains.map(([n, t, src], i) => '<div class="lucard' + (src === 'Wahl' ? ' wahl' : '') + '" style="--i:' + i + '"><small>' + esc(src === 'Wahl' ? 'Deine Wahl' : src) + '</small><b>' + esc(n) + '</b><p>' + esc(t) + '</p></div>').join('') + '</div>' : '<p class="hint">Keine neuen Merkmale auf dieser Stufe – aber mehr Trefferpunkte und stärkere Werte.</p>') +
+      (diff.length ? '<h4>Das verändert sich</h4><div class="ludiff">' + diff.map(([l, x, y]) => '<div><span>' + esc(l) + '</span><s>' + esc(x) + '</s><i aria-hidden="true">→</i><b>' + esc(y) + '</b></div>').join('') + '</div>' : '');
+    foot = '<button class="btn ghost" data-act="luBack">← Zurück</button><button class="btn big lugo" data-act="luGo">✦ Aufsteigen</button>';
+  } else {
+    const w = c.warn;
+    body = '<div class="luhero done"><div><small>' + esc(ch.name) + '</small><b>Stufe <em>' + c.level + '</em> erreicht!</b></div></div>' +
+      (w.length ? '<h4>Jetzt entscheiden</h4><p class="hint">Diese Auswahlen sind durch den Aufstieg neu dazugekommen oder noch offen. Tippe darauf, um direkt hinzuspringen.</p><div class="luwarn">' + w.map((x, i) => '<button data-act="luWarn" data-arg="' + i + '"><span>' + esc(x) + '</span><i aria-hidden="true">→</i></button>').join('') + '</div>'
+        : '<p class="ok">✓ Nichts mehr zu entscheiden – viel Spass mit deinem stärkeren Helden!</p>');
+    foot = '<button class="btn" data-act="luDone">Fertig</button>';
+  }
+  m.innerHTML = '<div class="dlg lvlup luwiz" role="dialog" aria-modal="true" aria-label="Stufenaufstieg">' + dots + '<div class="lubody">' + body + '</div><div class="chips end lufoot">' + foot + '</div></div>';
+  m.hidden = false;
+}
+function lvlUpGo() {
+  const ch = cur(); const before = derive(ch, S.hb); const id = S.lu.cls; const nl = before.lv(id) + 1;
+  if (id === ch.cls) { ch.level = nl; if (ch.hpMode === 'roll') ch.hpRolls[nl] = S.lu.roll; }
+  else { const mm = ch.multi.find((x) => x.cls === id); if (!mm) return; mm.level = nl; if (ch.hpMode === 'roll') { mm.hpRolls = mm.hpRolls || {}; mm.hpRolls[nl] = S.lu.roll; } }
+  const after = derive(ch, S.hb); const P = ch.play; P.hp = Math.min(after.hpMax, (P.hp ?? before.hpMax) + (after.hpMax - before.hpMax));
+  pushLog({ label: 'Stufenaufstieg', total: after.level, detail: CLASSES[id].name + ' ' + nl + ' · TP-Maximum ' + before.hpMax + ' → ' + after.hpMax, share: true });
+  commit(); S.lu.step = 3; lvlUpOpen(); luCelebrate(after.level);
+}
+function luCelebrate(lv) {
+  if (typeof d3fx === 'function' && d3fx() === 'aus') return; const full = typeof d3fx !== 'function' || d3fx() === 'voll';
+  const st = document.createElement('div'); st.className = 'd3stage lucel'; st.setAttribute('aria-hidden', 'true');
+  st.style.cssText = '--x:' + window.innerWidth / 2 + 'px;--y:' + window.innerHeight * 0.42 + 'px;--c:#ffd36b;--c2:#fff6d6';
+  let h = '<div class="sg-vig"></div><div class="sg-aura"></div><div class="sg-ring"></div><div class="sg-ring r2"></div><div class="lunum">' + lv + '</div>';
+  if (full) for (let i = 0; i < 28; i++) { const a = (i / 28) * Math.PI * 2; const d = 120 + Math.random() * 200; h += '<span class="d3p sg burst" style="--dx:' + (Math.cos(a) * d).toFixed(0) + 'px;--dy:' + (Math.sin(a) * d).toFixed(0) + 'px;--c:' + ['#ffd36b', '#fff6d6', '#ffb347'][i % 3] + ';--d:' + (Math.random() * 200).toFixed(0) + 'ms;--r:0deg;--sz:' + (1 + Math.random()).toFixed(2) + '"><i class="ps"></i></span>'; }
+  st.innerHTML = h; document.body.appendChild(st); if (typeof d3snd === 'function') d3snd('n20'); setTimeout(() => st.remove(), 2300);
+}
+Object.assign(XA, {
+  luNext: () => { S.lu.step = 2; lvlUpOpen(); },
+  luBack: () => { S.lu.step = 1; lvlUpOpen(); },
+  luDone: () => { S.lu = null; S.modal = null; $('#modal').hidden = true; render(); },
+  luWarn: (t, a) => { const ch = cur(); const c = derive(ch, S.hb); S.lu = null; S.modal = null; $('#modal').hidden = true; goWarn(c, c.warn[+a]); }
+});
+
 /* ==== Heldenbuch – Oberfläche ==== */
 const S = { chars: {}, hb: {}, cur: null, view: 'heroes', step: 0, mode: 'normal', log: [], sf: { q: '', lvl: 'all', cls: 'all' }, hbEdit: null, confirm: null, open: {}, store: 'local', saving: '', camp: '', share: true, table: {}, campErr: '', combat: null, myInit: null, logOpen: false, logFilter: 'all', npcRoll: false, meta: { dm: null, mercy: {} }, mercyQ: [] };
 const $ = (s, r = document) => r.querySelector(s);
@@ -6661,6 +7018,7 @@ function rollState(kind) {
   if (c) {
     const L = c.level, P = ch.play;
     if (k.type === 'init' && c.initAdv) adv.push('Klassenmerkmal');
+    if (k.type === 'init' && S.combat && S.combat.active && (S.combat.surp || []).includes(UID)) dis.push('Überrascht');
     if (k.type === 'check' && k.skill === 'ste' && c.armorStealthDis) dis.push('Rüstung');
     const ab = k.type === 'init' ? 'dex' : k.ab;
     if (c.armorNonProf && (ab === 'str' || ab === 'dex')) dis.push('Rüstung ohne Übung');
@@ -7006,6 +7364,7 @@ function renderTop() {
   $('#top').innerHTML = '<div class="wrap"><div class="bar"><button class="brand" data-act="view" data-arg="heroes">' + LOGO + 'Heldenbuch</button>' +
     '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') +
       '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '</div></details></nav>' +
+    '<button class="mbtn mwarn" data-act="warnOpen" hidden aria-label="Offene Punkte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg><b></b></button><button class="mbtn mdice" data-act="drOpen" aria-label="Würfelbecher"><svg viewBox="0 0 64 64" aria-hidden="true"><polygon points="32,4 56,18 56,46 32,60 8,46 8,18"/><polygon points="32,18 46,42 18,42"/></svg></button>' +
     '<button class="tbtn tsearch" data-act="search" title="Suchen (Strg+K oder /)" aria-label="Suchen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>' +
     '<button class="tbtn" data-act="themeOpen" title="Stimmung wählen" aria-label="Stimmung wählen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.2-1-1.6-1-2.6 0-1 .8-1.7 1.9-1.7H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z"/><circle cx="7.5" cy="11" r="1.3"/><circle cx="10.5" cy="7" r="1.3"/><circle cx="15" cy="7.5" r="1.3"/></svg></button>' + (ch ? '<button class="curhero" data-act="view" data-arg="heroes" title="Helden wechseln">' + sigil(ch) + '<span>' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</span></button>' : '') +
     '</div><span id="saveState" class="savest"></span></div><div id="turnbar"></div>';
@@ -7548,9 +7907,9 @@ function meDoc() {
   return { char: ch.name.replace(/^Beispiel:\s*/, ''), cls: ch.cls, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: ch.play.hp ?? (c ? c.hpMax : 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0,
     cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, dice: ch.dice || '', diceAt: ch.diceAt || 0, t: Date.now() };
 }
-function queueMe() { if (!S.camp || !DB) return; clearTimeout(meTimer); meTimer = setTimeout(writeMe, 250); }
+function queueMe() { if (!S.camp || !DB || !cur()) return; clearTimeout(meTimer); meTimer = setTimeout(writeMe, 250); }
 async function writeMe() {
-  if (!S.camp || !DB) return;
+  if (!S.camp || !DB || !cur()) return;
   if (meBusy) { meDirty = true; return; }
   meBusy = true;
   try { await DB.collection('camp/' + S.camp + '/players').doc(UID).set(meDoc()); if (S.campErr) { S.campErr = ''; paintCamp(); } }
@@ -7715,7 +8074,7 @@ function subCombat() {
   try { combatUnsub = combatRef().onSnapshot((snap) => { const prev = S.combat; const d = snap.exists ? snap.data() : null; S.combatRemote = d;
     const pend = S.combatPend; if (pend && d && d.w && d.w !== UID && (+d.rev || 0) <= (+pend.ours.rev || 0) && Date.now() - pend.at < 15000) { S.combatPend = null; const merged = mergeCombat(pend.base, pend.ours, d); if (JSON.stringify(merged) !== JSON.stringify(d)) { S.combat = d; saveCombat(merged); return; } }
     if (pend && Date.now() - pend.at >= 15000) S.combatPend = null;
-    S.combat = d;
+    S.combat = d; if (typeof hitCheck === 'function') setTimeout(hitCheck, 0);
     if (S.combat && S.combat.active && (!prev || !prev.active || prev.id !== S.combat.id)) { if (!S.myInit || S.myInit.cid !== S.combat.id) bannerToast('Kampf beginnt!', 'Würfelt Initiative.'); }
     paintCamp(); }, () => {}); } catch (e) { combatUnsub = null; }
 }
@@ -7728,20 +8087,26 @@ function setMyInit(v) { S.myInit = { v: +v, cid: S.combat.id }; queueMe(); setTi
 function order() {
   const c = S.combat; if (!c || !c.active) return [];
   const list = [];
-  for (const [uid, p] of Object.entries(S.table)) if (p.init && p.init.cid === c.id) list.push({ key: 'p:' + uid, name: p.char, cls: p.cls, portrait: p.portrait, pimg: p.pimg, v: +p.init.v, dex: +p.dex || 0, me: uid === UID, hp: p.hp, hpMax: p.hpMax });
-  for (const n of c.npcs || []) list.push({ key: 'n:' + n.id, id: n.id, name: n.name, cls: 'npc', v: +n.v, dex: +n.dex || 0, npc: true, ally: !!n.ally, hp: n.hp, hpMax: n.hpMax, ac: n.ac, mid: n.mid, cond: n.cond || [], note: n.note || '' });
+  for (const [uid, p] of Object.entries(S.table)) if (p.init && p.init.cid === c.id && !p.init.away) list.push({ key: 'p:' + uid, name: p.char, cls: p.cls, portrait: p.portrait, pimg: p.pimg, v: +p.init.v, dex: +p.dex || 0, me: uid === UID, hp: p.hp, hpMax: p.hpMax, dead: !!p.dead });
+  for (const n of c.npcs || []) if (!n.reserve) list.push({ key: 'n:' + n.id, id: n.id, name: n.name, cls: 'npc', v: +n.v, dex: +n.dex || 0, npc: true, ally: !!n.ally, hp: n.hp, hpMax: n.hpMax, ac: n.ac, mid: n.mid, cond: n.cond || [], note: n.note || '' });
   return list.sort((a, b) => b.v - a.v || b.dex - a.dex || a.name.localeCompare(b.name, 'de'));
 }
 function waiting() { const c = S.combat; if (!c || !c.active) return []; return Object.entries(S.table).filter(([, p]) => !(p.init && p.init.cid === c.id)).map(([uid, p]) => ({ uid, name: p.char, me: uid === UID })); }
+function awayList() { const c = S.combat; if (!c || !c.active) return []; return Object.entries(S.table).filter(([, p]) => p.init && p.init.cid === c.id && p.init.away).map(([uid, p]) => ({ uid, name: p.char, me: uid === UID })); }
+const skipTurn = (x) => (x.npc && x.hpMax > 0 && x.hp <= 0) || (!x.npc && x.dead);
+const initKey = (x) => [-x.v, -x.dex, x.name];
+function initAfter(a, b) { const ka = initKey(a), kb = initKey(b); return ka[0] !== kb[0] ? ka[0] > kb[0] : ka[1] !== kb[1] ? ka[1] > kb[1] : ka[2].localeCompare(kb[2], 'de') > 0; }
 function curEntry() { const o = order(); return o.find((x) => x.key === (S.combat && S.combat.turn)) || null; }
 function nextTurn() {
   const c = S.combat; const o = order(); if (!o.length) return;
   let i = o.findIndex((x) => x.key === c.turn); let round = c.round || 1;
-  if (i < 0) i = -1;
-  let ni = i + 1; if (ni >= o.length) { ni = 0; round++; }
+  if (i < 0 && c.turnAt) { i = -1; for (let k = 0; k < o.length; k++) if (!initAfter(o[k], c.turnAt)) i = k; } /* der Aktuelle wurde entfernt: an seiner Stelle weitermachen */
+  else if (i < 0) i = -1;
+  let ni = i; for (let tries = 0; tries < o.length; tries++) { ni++; if (ni >= o.length) { ni = 0; round++; } if (!skipTurn(o[ni])) break; } /* besiegte Gegner überspringen */
+  if (skipTurn(o[ni])) return;
   const tk = typeof effTick === 'function' ? effTick(c, c.turn, o[ni].key) : { effects: c.effects, rem: c.rem, log: [] };
   let lg = clog(c, 'Runde ' + round + ': ' + o[ni].name + ' ist am Zug'); tk.log.forEach((x) => { lg = clog({ log: lg }, x); });
-  saveCombat(Object.assign({}, c, { turn: o[ni].key, round, t: Date.now(), effects: tk.effects || [], rem: tk.rem || [], log: lg }));
+  saveCombat(Object.assign({}, c, { turn: o[ni].key, turnAt: { v: o[ni].v, dex: o[ni].dex, name: o[ni].name }, round, t: Date.now(), effects: tk.effects || [], rem: tk.rem || [], log: lg }));
 }
 function clog(c, x) { return ((c && c.log) || []).concat([{ t: Date.now(), x }]).slice(-25); }
 function fightHtml() {
@@ -7751,14 +8116,18 @@ function fightHtml() {
   const o = order(), w = waiting(), cur = curEntry(); const mine = cur && cur.key === 'p:' + UID;
   let h = '<div class="fhead"><div><h2>Kampf · Runde ' + (c.round || 1) + '</h2><p class="hint" style="margin:0">' + (c.turn ? (cur ? 'Am Zug: <b>' + esc(cur.name) + '</b>' : '') : 'Alle würfeln Initiative (auf dem Bogen oder hier). Dann „Ersten Zug starten“.') + '</p></div><div class="chips">' +
     (!c.turn ? (lead ? '<button class="btn" data-act="fightGo"' + (o.length ? '' : ' disabled') + '>Ersten Zug starten</button>' : '') : mine ? '<button class="btn big glowbtn" data-act="turnEnd">Zug beenden</button>' : lead ? '<button class="btn ghost sm" data-act="turnEnd" title="Für Gegner oder abwesende Spieler">Weiter zum Nächsten</button>' : '') +
-    (lead && c.turn ? '<button class="btn ghost sm" data-act="fightReset" data-confirm="Neue Begegnung? Runde, Zug und alle Effekte werden zurückgesetzt – Teilnehmer bleiben." title="Runde und Zug zurücksetzen – Teilnehmer und Initiative bleiben">Neue Begegnung</button>' : '') + (lead ? '<button class="btn ghost sm" data-act="fightEnd" data-confirm="Kampf beenden? Initiative, Gegner und Effekte werden für alle gelöscht.">Kampf beenden</button>' : '') + '</div></div>';
+    (lead && c.turn ? '<button class="btn ghost sm" data-act="fightReset" data-confirm="Neue Begegnung? Alle würfeln neu Initiative, Runde, Zug und Effekte werden zurückgesetzt. Besiegte Gegner verschwinden, die übrigen bleiben." title="Neuer Kampf mit denselben Teilnehmern – alle würfeln neu Initiative">Neue Begegnung</button>' : '') + (lead ? '<button class="btn ghost sm" data-act="fightEnd" data-confirm="Kampf beenden? Initiative, Gegner und Effekte werden für alle gelöscht.">Kampf beenden</button>' : '') + '</div></div>';
   h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + x.v + '</span>' + (x.npc ? '<span class="sigil npc" aria-hidden="true">⚔</span>' : sigil({ name: x.name, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : '') + (typeof effBadges === 'function' ? effBadges(x.key, lead) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + (x.npc && lead ? '<button class="x" data-act="npcDel" data-arg="' + x.key.slice(2) + '" aria-label="Entfernen">×</button>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
   if (c.log && c.log.length) h += '<details class="clog"><summary>Verlauf <small>' + c.log.length + '</small></summary><ul>' + c.log.slice().reverse().slice(0, 12).map((e) => '<li><span>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</span>' + esc(e.x) + '</li>').join('') + '</ul></details>';
   if (w.length) h += '<p class="hint">Würfelt noch: ' + w.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + '</p>';
+  if (lead && !c.turn && Object.keys(S.table || {}).length) h += '<div class="fgrp"><b>Überrascht? <small>Nachteil auf den Initiativewurf</small></b><div class="chips">' + Object.entries(S.table).map(([u, p]) => chip((c.surp || []).includes(u), esc(p.char || '?'), 'data-act="surpTog" data-arg="' + u + '"')).join('') + '</div><p class="hint">Gegner überrascht: beim Hinzufügen „überrascht“ ankreuzen.</p></div>';
+  const aw = awayList(); if (aw.length) h += '<p class="hint">Noch nicht im Kampf (zu weit weg): ' + aw.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + ' – sie würfeln Initiative, sobald sie eingreifen, und werden einsortiert.</p>';
+  if (lead && typeof saveReqForm === 'function') h += saveReqForm();
+  const rs = (c.npcs || []).filter((x) => x.reserve); if (rs.length && lead) { const gs = {}; rs.forEach((x) => { const k = x.grp || x.id; (gs[k] = gs[k] || []).push(x); }); h += '<div class="fgrp reserve"><b>Verstärkung (wartet)</b><div class="chips">' + Object.values(gs).map((g) => '<button class="btn sm ghost" data-act="npcJoin" data-arg="' + g[0].id + '"' + (g[0].grp && g.length > 1 ? ' data-grp="' + g[0].grp + '"' : '') + '>' + esc(g.length > 1 ? g.length + '× ' + (BESTIARY[g[0].mid] || [g[0].name])[0] : g[0].name) + ' greift ein</button>').join('') + '</div></div>'; }
   const ch = cur ? null : null; const meIn = !w.some((x) => x.me);
   if (typeof npcBulkBar === 'function') h += npcBulkBar();
   if (o.length) h += '<div class="chips" style="margin:4px 0 10px"><button class="btn ghost sm" data-act="effNew">+ Effekt / Zustand mit Dauer</button>' + (lead && (c.npcs || []).some((x) => x.mid) ? '<button class="btn ghost sm" data-act="encFromFight">Gegner als Begegnung speichern</button>' : '') + '</div>';
-  h += '<div class="fctl"><div class="fgrp"><b>Deine Initiative</b><div class="chips"><button class="btn sm" data-act="initRoll">' + (meIn ? 'Neu würfeln' : 'Initiative würfeln') + '</button><input type="number" id="initMan" placeholder="Wert" aria-label="Eigene Initiative eintragen"><button class="btn ghost sm" data-act="initSet">Eintragen</button></div></div>' +
+  h += '<div class="fctl"><div class="fgrp"><b>Deine Initiative</b><div class="chips"><button class="btn sm" data-act="initRoll">' + (S.myInit && S.myInit.away && S.myInit.cid === c.id ? 'Eingreifen: Initiative würfeln' : meIn ? 'Neu würfeln' : 'Initiative würfeln') + '</button>' + (!(S.myInit && S.myInit.away && S.myInit.cid === c.id) ? '<button class="btn ghost sm" data-act="initAway" title="Dein Held ist noch zu weit weg und greift später ein">Noch nicht dabei</button>' : '') + '<input type="number" id="initMan" placeholder="Wert" aria-label="Eigene Initiative eintragen"><button class="btn ghost sm" data-act="initSet">Eintragen</button></div></div>' +
     (lead ? '<div class="fgrp"><b>Gegner hinzufügen</b><div class="chips"><input type="text" id="npcName" placeholder="z. B. Goblin 1" aria-label="Name"><input type="number" id="npcBonus" placeholder="Bonus" aria-label="Initiativebonus" value="0"><button class="btn ghost sm" data-act="npcAdd">Würfeln & hinzufügen</button></div></div>' + bestiaryAdder() : '') + '</div>';
   return h;
 }
@@ -7767,10 +8136,10 @@ function paintTurn() {
   const c = S.combat; if (!S.camp || !c || !c.active) { el.innerHTML = ''; document.body.classList.remove('myturn'); wasMyTurn = false; return; }
   const o = order(), cur = curEntry(); const mine = cur && cur.key === 'p:' + UID;
   let next = null; if (cur) { const i = o.findIndex((x) => x.key === cur.key); next = o[(i + 1) % o.length]; }
-  const meWaiting = waiting().some((x) => x.me);
+  const meWaiting = waiting().some((x) => x.me); const meAway = S.myInit && S.myInit.away && S.myInit.cid === c.id;
   el.innerHTML = '<div class="wrap tb' + (mine ? ' mine' : '') + '"><span class="tbr">Runde ' + (c.round || 1) + '</span>' +
     (mine ? '<b class="tbme">Du bist am Zug!</b>' : cur ? '<span>Am Zug: <b>' + esc(cur.name) + '</b>' + (next ? ' · danach ' + esc(next.name) : '') + '</span>' : '<span>Kampf beginnt – Initiative würfeln</span>') +
-    '<span class="tbsp"></span>' + (meWaiting ? '<button class="btn sm" data-act="initRoll">Initiative würfeln</button>' : '') + (mine ? '<button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>' : '') + (S.view !== 'camp' ? '<button class="link" data-act="view" data-arg="camp">Reihenfolge</button>' : '') + '</div>';
+    '<span class="tbsp"></span>' + (meAway ? '<span class="tbaway">Du bist noch nicht im Kampf</span><button class="btn sm" data-act="initRoll">Eingreifen</button>' : meWaiting ? '<button class="btn sm" data-act="initRoll">Initiative würfeln</button><button class="btn sm ghost" data-act="initAway">Noch nicht dabei</button>' : '') + (mine ? '<button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>' : '') + (S.view !== 'camp' ? '<button class="link" data-act="view" data-arg="camp">Reihenfolge</button>' : '') + '</div>';
   document.body.classList.toggle('myturn', !!mine);
   if (mine && !wasMyTurn && S.chars[S.cur] && typeof turnReset === 'function') { const me = S.chars[S.cur]; setTimeout(() => { turnReset(me); if (S.chars[S.cur] === me) commit(); }, 0); }
   if (mine && !wasMyTurn) { bannerToast('Du bist am Zug!', cur.name + ', Runde ' + (c.round || 1)); try { navigator.vibrate && navigator.vibrate([120, 60, 120]); } catch (e) {} }
@@ -7817,14 +8186,30 @@ let rendering = false;
 function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } }
 function render0() {
   applyTheme();
-  if (!cur()) { const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; }
+  if (!cur()) { let first = false; try { first = !localStorage.getItem('hb_sample_done') && !Object.keys(S.chars).length; } catch (e) {} if (first) { const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; try { localStorage.setItem('hb_sample_done', '1'); } catch (e) {} } else { S.cur = Object.keys(S.chars)[0] || null; } }
   renderTop();
-  const c = derive(cur(), S.hb);
   const v = $('#view'); const y = window.scrollY;
+  if (!cur() && (S.view === 'sheet' || S.view === 'build')) { v.innerHTML = noHeroView(); window.scrollTo(0, y); return; }
+  const c = cur() ? derive(cur(), S.hb) : null;
   v.innerHTML = S.view === 'camp' ? renderCamp() : S.view === 'heroes' ? renderHeroes() : S.view === 'build' ? renderBuild(c) : S.view === 'spells' ? renderSpellBook() : S.view === 'hb' ? renderHB() : S.view === 'mobs' ? '<div class="camp">' + bestiaryView() + '</div>' : S.view === 'help' ? helpView() : renderSheet(c);
   window.scrollTo(0, y);
 }
-function commit(rerender = true) { const ch = cur(); ch.updated = Date.now(); persist('c', ch.id); queueMe(); if (rerender) render(); }
+function commit(rerender = true) { const ch = cur(); if (ch) { ch.updated = Date.now(); persist('c', ch.id); } queueMe(); if (rerender) render(); }
+function noHeroView() { return '<div class="camp"><div class="hero-intro banner" style="' + bannerStyle('paladin') + '"><h1>Noch kein Held</h1><p>Du hast im Moment keinen Helden. Erschaffe einen neuen oder lade einen gesicherten Helden.</p><div class="chips"><button class="btn big" data-act="newChar">Neuen Helden erschaffen</button><button class="btn ghost" data-act="loadSample">Beispielheld ansehen</button><button class="btn ghost" data-act="view" data-arg="heroes">Zu den Helden</button></div></div></div>'; }
+
+/* TP ändern (Schaden mit Temp-TP, 0 TP, Todesrettung, Massiver Schaden, Konzentration; Heilung; Temp-TP) */
+function hpChange(ch, arg, n, crit) { const c = derive(ch, S.hb); const P = ch.play; if (P.hp == null) P.hp = c.hpMax;
+      if (arg === 'dmg') { let d = n; const ab = Math.min(P.temp, d); P.temp -= ab; d -= ab; const before = P.hp;
+        if (before <= 0 && d > 0) {
+          if (d >= c.hpMax) { pushLog({ label: 'Massiver Schaden', total: '†', detail: d + ' Schaden bei 0 TP ist mindestens so hoch wie dein TP-Maximum – sofortiger Tod.' }); fall(P); }
+          else { const wasStable = P.stable; P.stable = false; P.ds[1] = Math.min(3, (P.ds[1] || 0) + (crit ? 2 : 1)); pushLog({ label: 'Schaden bei 0 TP', total: P.ds[1] + '/3', detail: (wasStable ? 'Du bist nicht mehr stabil. ' : '') + (crit ? '2 Fehlschläge (kritischer Treffer).' : '1 Fehlschlag beim Todesrettungswurf. War es ein kritischer Treffer, hake einen zweiten ab.') }); if (P.ds[1] >= 3) fall(P); }
+        } else {
+          P.hp = Math.max(0, before - d);
+          if (P.hp <= 0) { const over = d - before; const relR = c.res.find((r) => r.k === 'rel'); if (over >= c.hpMax) { pushLog({ label: 'Massiver Schaden', total: '†', detail: 'Der Restschaden (' + over + ') ist mindestens so hoch wie dein TP-Maximum – sofortiger Tod.' }); fall(P); } else if (relR && (+P.res.rel || 0) < relR.max) { P.res.rel = (+P.res.rel || 0) + 1; P.hp = 1; pushLog({ label: 'Unerbittliche Ausdauer', total: '1', detail: 'Statt auf 0 fällst du auf 1 TP (1× pro langer Rast).' }); if (P.conc) concCheck(ch, n); } else if (P.raging && c.lv('bar') >= 11) { const dc = 10 + 5 * (+P.relRage || 0); const rr = 1 + Math.floor(rnd() * 20); const tot = rr + c.saves.con.val; P.relRage = (+P.relRage || 0) + 1; if (tot >= dc) { P.hp = 2 * c.lv('bar'); pushLog({ label: 'Unerbittlicher Kampfrausch', total: tot, detail: 'KON-Rettungswurf SG ' + dc + ' geschafft (W20 ' + rr + ' ' + sgn(c.saves.con.val) + '): Du hast ' + P.hp + ' TP.', sides: 20, nat: rr }); } else { pushLog({ label: 'Unerbittlicher Kampfrausch', total: tot, detail: 'KON-Rettungswurf SG ' + dc + ' misslungen.', sides: 20, nat: rr }); knockOut(P); } } else { knockOut(P); } }
+          else if (P.conc) concCheck(ch, n);
+        } }
+      if (arg === 'heal') { if (P.dead) return false; if (P.hp <= 0) { P.ds = [0, 0]; P.stable = false; wakeUp(P); } P.hp = Math.min(c.hpMax, P.hp + n); }
+      if (arg === 'temp') P.temp = Math.max(P.temp, n);   commit(); return true; }
 
 /* ---------- Ereignisse ---------- */
 document.addEventListener('click', (ev) => {
@@ -7839,7 +8224,8 @@ document.addEventListener('click', (ev) => {
     dupChar: () => { const src = S.chars[arg] || ch; const n = JSON.parse(JSON.stringify(src)); n.id = newChar().id; n.name = n.name.replace(/^Beispiel:\s*/, '') + ' (Kopie)'; n.updated = Date.now(); S.chars[n.id] = n; persist('c', n.id); render(); },
     askDel: () => { S.confirm = 'del:' + arg; render(); },
     noDel: () => { S.confirm = null; render(); },
-    delChar: () => { delete S.chars[arg]; persist('c', arg); if (S.cur === arg) S.cur = Object.keys(S.chars)[0] || null; S.confirm = null; if (!S.cur) { const n = newChar({ name: 'Neuer Held' }); S.chars[n.id] = n; S.cur = n.id; persist('c', n.id); } render(); },
+    delChar: () => { delete S.chars[arg]; persist('c', arg); if (S.cur === arg) S.cur = Object.keys(S.chars)[0] || null; S.confirm = null; try { localStorage.setItem('hb_sample_done', '1'); } catch (e) {} if (!S.cur && (S.view === 'sheet' || S.view === 'build')) S.view = 'heroes'; render(); },
+    loadSample: () => { const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; persist('c', s.id); S.view = 'sheet'; render(); },
     play: () => { S.cur = arg; S.view = 'sheet'; S.confirm = null; lsSet(); render(); window.scrollTo(0, 0); },
     edit: () => { S.cur = arg; S.view = 'build'; S.step = 0; S.confirm = null; lsSet(); render(); window.scrollTo(0, 0); },
     exportOne: () => { const c = S.chars[arg] || ch; doExport([c], fileName(c)); },
@@ -7868,18 +8254,7 @@ document.addEventListener('click', (ev) => {
     mode: () => { S.mode = arg; render(); },
     d20: () => { const c = derive(ch, S.hb); d20(+t.dataset.mod, t.dataset.label, { kind: t.dataset.kind || 'check', crit: c.critRange }); },
     dmg: () => rollDmg(t.dataset.expr, t.dataset.label),
-    hp: () => { const c = derive(ch, S.hb); const n = Math.max(0, +$('#hpAmt').value || 0); if (!n) { $('#hpAmt').focus(); return; } const P = ch.play; if (P.hp == null) P.hp = c.hpMax;
-      if (arg === 'dmg') { let d = n; const ab = Math.min(P.temp, d); P.temp -= ab; d -= ab; const before = P.hp;
-        if (before <= 0 && d > 0) {
-          if (d >= c.hpMax) { pushLog({ label: 'Massiver Schaden', total: '†', detail: d + ' Schaden bei 0 TP ist mindestens so hoch wie dein TP-Maximum – sofortiger Tod.' }); fall(P); }
-          else { const wasStable = P.stable; P.stable = false; P.ds[1] = Math.min(3, (P.ds[1] || 0) + 1); pushLog({ label: 'Schaden bei 0 TP', total: P.ds[1] + '/3', detail: (wasStable ? 'Du bist nicht mehr stabil. ' : '') + '1 Fehlschlag beim Todesrettungswurf. War es ein kritischer Treffer, hake einen zweiten ab.' }); if (P.ds[1] >= 3) fall(P); }
-        } else {
-          P.hp = Math.max(0, before - d);
-          if (P.hp <= 0) { const over = d - before; const relR = c.res.find((r) => r.k === 'rel'); if (over >= c.hpMax) { pushLog({ label: 'Massiver Schaden', total: '†', detail: 'Der Restschaden (' + over + ') ist mindestens so hoch wie dein TP-Maximum – sofortiger Tod.' }); fall(P); } else if (relR && (+P.res.rel || 0) < relR.max) { P.res.rel = (+P.res.rel || 0) + 1; P.hp = 1; pushLog({ label: 'Unerbittliche Ausdauer', total: '1', detail: 'Statt auf 0 fällst du auf 1 TP (1× pro langer Rast).' }); if (P.conc) concCheck(ch, n); } else if (P.raging && c.lv('bar') >= 11) { const dc = 10 + 5 * (+P.relRage || 0); const rr = 1 + Math.floor(rnd() * 20); const tot = rr + c.saves.con.val; P.relRage = (+P.relRage || 0) + 1; if (tot >= dc) { P.hp = 2 * c.lv('bar'); pushLog({ label: 'Unerbittlicher Kampfrausch', total: tot, detail: 'KON-Rettungswurf SG ' + dc + ' geschafft (W20 ' + rr + ' ' + sgn(c.saves.con.val) + '): Du hast ' + P.hp + ' TP.', sides: 20, nat: rr }); } else { pushLog({ label: 'Unerbittlicher Kampfrausch', total: tot, detail: 'KON-Rettungswurf SG ' + dc + ' misslungen.', sides: 20, nat: rr }); knockOut(P); } } else { knockOut(P); } }
-          else if (P.conc) concCheck(ch, n);
-        } }
-      if (arg === 'heal') { if (P.dead) return; if (P.hp <= 0) { P.ds = [0, 0]; P.stable = false; wakeUp(P); } P.hp = Math.min(c.hpMax, P.hp + n); }
-      if (arg === 'temp') P.temp = Math.max(P.temp, n); commit(); },
+    hp: () => { const n = Math.max(0, +$('#hpAmt').value || 0); if (!n) { $('#hpAmt').focus(); return; } hpChange(ch, arg, n); },
     spendHd: () => { const c = derive(ch, S.hb); if (rule('hdrest') || c.hdPool.length > 1) return shortRestOpen(ch); const pools = hdPools(c, ch.play); const p = pools.find((x) => x.used < x.n); if (p && spendHdDie(ch, p.d)) commit(); },
     deathRoll: () => { const c = derive(ch, S.hb); const P = ch.play; if (P.hp == null) P.hp = c.hpMax; if (P.stable) { pushLog({ label: 'Todesrettungswurf', total: '✓', detail: 'Du bist stabil – keine Todesrettungswürfe mehr, bis du Schaden nimmst.' }); return; } if (P.hp > 0 || P.dead) return; const notes = []; let r = 1 + Math.floor(rnd() * 20);
       if (ch.species === 'halfling' && r === 1) { r = 1 + Math.floor(rnd() * 20); notes.push('Glück: 1 neu gewürfelt'); }
@@ -7900,11 +8275,14 @@ document.addEventListener('click', (ev) => {
     logOpen: () => { S.logOpen = !S.logOpen; paintCamp(); },
     logFilter: () => { S.logFilter = arg; paintCamp(); },
     fightStart: () => { S.myInit = null; saveCombat({ id: 'k' + Date.now().toString(36), active: true, round: 1, turn: null, npcs: [], t: Date.now() }); },
-    fightGo: () => { const o = order(); if (o.length) saveCombat(Object.assign({}, S.combat, { turn: o[0].key, round: 1, t: Date.now(), log: clog(S.combat, 'Kampf beginnt – Runde 1: ' + o[0].name + ' ist am Zug') })); },
-    fightReset: () => { const c = S.combat; if (!c) return; saveCombat(Object.assign({}, c, { turn: null, round: 1, t: Date.now(), effects: [], rem: [], log: [{ t: Date.now(), x: 'Neue Begegnung – Runde und Zug zurückgesetzt' }] })); },
+    fightGo: () => { const o = order().filter((x) => !skipTurn(x)); if (o.length) saveCombat(Object.assign({}, S.combat, { turn: o[0].key, turnAt: { v: o[0].v, dex: o[0].dex, name: o[0].name }, round: 1, t: Date.now(), log: clog(S.combat, 'Kampf beginnt – Runde 1: ' + o[0].name + ' ist am Zug') })); },
+    fightReset: () => { const c = S.combat; if (!c) return; const gr = {}; const npcs = (c.npcs || []).filter((x) => !(x.hpMax > 0 && x.hp <= 0)).map((x) => { const r = x.grp ? (gr[x.grp] = gr[x.grp] || 1 + Math.floor(rnd() * 20)) : 1 + Math.floor(rnd() * 20); return Object.assign({}, x, { v: r + (+x.dex || 0) }); }); S.myInit = null; queueMe();
+      saveCombat({ id: 'k' + Date.now().toString(36), active: true, round: 1, turn: null, npcs, t: Date.now(), effects: [], rem: [], log: [{ t: Date.now(), x: 'Neue Begegnung – alle würfeln neu Initiative, besiegte Gegner entfernt' }] }); },
     fightEnd: () => { saveCombat({ id: '', active: false, t: Date.now() }); S.myInit = null; queueMe(); },
     turnEnd: () => { nextTurn(); if (typeof turnReset === 'function') { turnReset(ch, true); commit(); } },
     initRoll: () => { const c = derive(ch, S.hb); if (!S.combat || !S.combat.active) return; d20(c.init, 'Initiative', { kind: 'init' }); },
+    surpTog: () => { const c = S.combat; if (!c) return; const sp = (c.surp || []).slice(); const i = sp.indexOf(arg); if (i >= 0) sp.splice(i, 1); else sp.push(arg); saveCombat(Object.assign({}, c, { surp: sp, t: Date.now() })); },
+    initAway: () => { if (!S.combat || !S.combat.active) return; S.myInit = { cid: S.combat.id, away: true }; queueMe(); pushLog({ label: 'Noch nicht im Kampf', total: '…', detail: ch.name + ' ist noch zu weit weg und greift später ein.', share: true }); setTimeout(paintCamp, 50); },
     initSet: () => { const v = $('#initMan').value; if (v === '' || !S.combat) { $('#initMan').focus(); return; } setMyInit(+v); pushLog({ label: 'Initiative (eingetragen)', total: +v, detail: 'von Hand', share: true }); },
     npcAdd: () => { const n = ($('#npcName').value || '').trim() || 'Gegner'; const b = +$('#npcBonus').value || 0; const r = 1 + Math.floor(rnd() * 20); const c = S.combat; if (!c) return;
       saveCombat(Object.assign({}, c, { npcs: (c.npcs || []).concat([{ id: Math.random().toString(36).slice(2, 8), name: n, v: r + b, dex: b }]), t: Date.now(), log: clog(c, n + ' tritt dem Kampf bei (Initiative ' + (r + b) + ')') })); pushLog({ label: n + ': Initiative', total: r + b, detail: 'W20 ' + r + ' ' + sgn(b), sides: 20, nat: r }); },

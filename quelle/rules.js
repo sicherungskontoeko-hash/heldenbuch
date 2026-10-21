@@ -109,6 +109,7 @@ function startOfTurn(ch) {
     if (c.lv('fig') >= 18 && c.subOf('fig') === 'champion' && P.hp <= Math.floor(c.hpMax / 2)) { const h = Math.max(0, 5 + c.mod.con); const old = P.hp; P.hp = Math.min(c.hpMax, P.hp + h); log.push('Überlebender: +' + (P.hp - old) + ' TP (angeschlagen)'); }
   }
   if (log.length) pushLog({ label: 'Zugbeginn', total: '✦', detail: log.join(' · '), share: true });
+  if (inFight(ch) && P.hp <= 0 && !P.dead && !P.stable) setTimeout(() => orbPrompt('<div class="pr"><b>Todesrettungswurf</b><p>' + esc(ch.name) + ' hat 0 TP. Zu Beginn deines Zuges würfelst du einen Todesrettungswurf: 10+ Erfolg, 1 zählt doppelt als Fehlschlag, 20 bringt dich mit 1 TP zurück.</p><div class="chips end"><button class="btn" data-act="deathRoll">Todesrettungswurf würfeln</button></div></div>'), 400);
 }
 /* Zeit ausserhalb des Kampfes fortschreiben (1 Runde = 6 Sekunden) */
 function timePass(ch, rounds) {
@@ -228,6 +229,7 @@ function mergeCombat(base, ours, theirs) {
   const m = Object.assign({}, theirs);
   for (const k of Object.keys(ours)) {
     if (['npcs', 'effects', 'rem'].includes(k)) m[k] = mergeById(base[k], ours[k], theirs[k]);
+    else if (['hits', 'reqs', 'saveRes'].includes(k)) { const seen = new Set(); m[k] = (theirs[k] || []).concat(ours[k] || []).filter((x) => { const key = (x.id || '') + '|' + (x.uid || x.to || '') + '|' + x.t; if (seen.has(key)) return false; seen.add(key); return true; }).sort((a, b) => a.t - b.t).slice(-30); }
     else if (k === 'log') { const seen = new Set(); m.log = (theirs.log || []).concat(ours.log || []).filter((x) => { const key = x.t + x.x; if (seen.has(key)) return false; seen.add(key); return true; }).sort((a, b) => a.t - b.t).slice(-25); }
     else if (JSON.stringify(base[k]) !== JSON.stringify(ours[k])) m[k] = ours[k];
   }
@@ -421,3 +423,4 @@ function burstExplode(r, cap) {
   if (extra.length) { const add = extra.reduce((a, b) => a + b, 0); r.total += add; r.groups.push({ sides: 8, rolls: extra, sign: 1 }); r.detail += ' + Explosion ' + extra.length + 'W8[' + extra.join(',') + ']' + (extra.length >= cap && pending > 0 ? ' (Höchstzahl ' + cap + ' erreicht)' : ''); }
   return r;
 }
+document.addEventListener('click', (ev) => { const t = ev.target.closest && ev.target.closest('#prompt [data-act="deathRoll"]'); if (t) setTimeout(() => orbPrompt(''), 0); });
