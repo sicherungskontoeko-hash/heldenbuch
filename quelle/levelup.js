@@ -1,5 +1,5 @@
 /* ==== Stufenaufstieg-Assistent: 1. Aufstieg (Klasse, TP) · 2. Das ist neu (Merkmale + was sich verändert) · 3. Jetzt entscheiden ====
-   Ersetzt das einfache Fenster aus extra.js (gleiche Namen lvlUpOpen/lvlUpGo, später geladen). */
+   Drei Schritte: Vorschau, Entscheidungen, Feier. */
 function luPreview(ch, id, roll) {
   const t = JSON.parse(JSON.stringify(ch)); const b = derive(ch, S.hb); const nl = b.lv(id) + 1;
   if (id === t.cls) { t.level = nl; if (t.hpMode === 'roll') t.hpRolls[nl] = roll || Math.floor(CLASSES[id].hd / 2) + 1; }

@@ -1,10 +1,10 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-10-21T20:20:55+02:00
-- Revision (SHA-256 von index.html, gekürzt): 496c243410b198ed
+- Zeitpunkt: 2026-10-22T09:55:21+02:00
+- Revision (SHA-256 von index.html, gekürzt): f1d05762a04b6b5c
 - Node: v22.22.0 · Playwright: 1.56.0
 - Browser: Chromium 141.0.7390.37
-- System: Linux 6.18.44-fc-v139
+- System: Linux 6.18.44-fc-v140
 
 | Suite | Exit-Code | Ergebnis |
 |---|---|---|
@@ -17,7 +17,13 @@
 | Würfel-Designs (dice.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 50 / 50 bestanden  |
 | Stufenaufstieg-Assistent (levelup.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 28 / 28 bestanden  |
 | Gegnerangriff: Treffer prüfen vor Schaden (npc.test.js) | 0 | ✔ critExpr verdoppelt alle Würfel 8 / 8 bestanden  |
-| Kampf-Nachzügler, Überraschung, Treffer zustellen, Bestiarium (combat2.test.js) | 0 | ✔ Monsterauswahl im Kampf nach Fundort gruppiert 39 / 39 bestanden  |
+| Kampf-Nachzügler, Überraschung, Treffer zustellen, Bestiarium (combat2.test.js) | 0 | ✔ Planer: Monsterauswahl nach Fundort gruppiert, Verstärkung/überrascht im Kampf 40 / 40 bestanden  |
+| SL-Werkzeuge: Zufallsbegegnung, Aufladung, eigene Monster, Beute (dmtools.test.js) | 0 | ✔ Keine Skriptfehler 46 / 46 bestanden  |
+| Schaden mit Rettungswurf: erst fragen, dann würfeln (savedmg.test.js) | 0 | ✔ Keine Skriptfehler 18 / 18 bestanden  |
+| Abläufe mit Zwischenschritt: Zustände, Reaktionen, Zusatzeffekte (mechanics.test.js) | 0 | ✔ Keine Skriptfehler 40 / 40 bestanden  |
+| Aufgeräumter Spieltisch (table.test.js) | 0 | ✔ Keine Skriptfehler 29 / 29 bestanden  |
+| Abfragen und Ziele: nichts verdrängt, Ziel festgehalten (flow.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
+| Sicherung: alles sichern und wiederherstellen (backup.test.js) | 0 | ✔ Keine Skriptfehler 11 / 11 bestanden  |
 | Klicktest kurz (ui.test.js) | 0 | ✔ Desktop 1280 ✔ Handy 390 (Touch)  |
 | Abnahme-Klicktest (ui-full.test.js) | 0 | ✔ Chromium Desktop 1280: 165/165 Prüfungen ✔ Chromium Handy 390 (Touch): 165/165 Prüfungen  |
 | Kombinationen Klasse×Unterklasse×Stufe (combos.test.js) | 0 | checked 1280 bad 0  |
@@ -39,5 +45,6 @@
 | Zugleisten-Fuzz ma | 0 | ran 292 bad 0  |
 | Online-Tisch (net.test.js) | 0 | ✔ Nach Verbindungsabbruch: Spieler verbindet neu, Würfe kommen an 7 / 7 bestanden  |
 | Selbst-Update Android-App (boot.test.js) | 0 | ✔ Im normalen Browser: keine Update-Logik 16 / 16 bestanden  |
+| Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js) | 0 | ✔ Handy: kein Querscrollen bei den Spielern 18 / 18 bestanden  |
 
 Gesamtergebnis: alle Suiten bestanden

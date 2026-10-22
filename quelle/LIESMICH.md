@@ -29,6 +29,14 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/levelup.test.js | Stufenaufstieg-Assistent: drei Schritte, neue Merkmale, Veränderungen, TP, Multiclass, offene Entscheidungen mit Sprung |
 | tests/npc.test.js | Gegnerangriff: Angriff → Treffer prüfen (Ziel-RK) → erst dann Schaden; Krit doppelt, natürliche 1 verfehlt |
 | tests/combat2.test.js | Kampf: Verstärkung, „noch nicht dabei“, Überraschung, neue Begegnung, besiegte/tote überspringen, Treffer zustellen, Packen/Stossen, Todesrettung zu Zugbeginn; Bestiarium nach Fundort und Stufe |
+| tests/dmtools.test.js | SL-Werkzeuge: Zufallsbegegnung (Fundort, Gruppe, Schwierigkeit), Aufladung W6 und legendäre Aktionen/Widerstände, eigene Monster (Editor, Teilen, Laden), Beute nach HG |
+| tests/savedmg.test.js | Zauber und Fähigkeiten mit Rettungswurf des Ziels: erst Ausgang wählen (misslungen, geschafft, mehrere Ziele), dann Schaden voll, halb oder keiner |
+| tests/flow.test.js | Abfragen und Ziele: eingehende Treffer/Anforderungen verdrängen keine offene Entscheidung, Ziel wird beim Auslösen festgehalten, Rückgängig nur für den eigenen Helden |
+| tests/backup.test.js | „Alles sichern“: Helden, Hausregeln, eigene Monster, Begegnungen, SL-Notizen sichern und wiederherstellen; alte Exporte bleiben lesbar |
+| tests/multi.test.js | Mehrgeräte-Test über lokalen Server: SL + 2 Spieler, gleichzeitige Änderungen, kein Hin-und-her-Schreiben, Verbindungsabbruch, ganzer Kampfablauf |
+| tests/MONSTERHILFE.txt | Übersicht: was die Monsterhilfe aus den Bestiariumstexten erkennt (Aufladung, legendär, Zusatzeffekte) |
+| tests/table.test.js | Aufgeräumter Spieltisch: Spielleitung kämpft nicht mit (ausser „Ich spiele selbst mit“), keine doppelten Knöpfe, kleine Meldungen statt Würfelfenster, eine Effekte-Einstellung, Rast im ⋯-Menü |
+| tests/mechanics.test.js | Zustände durch Rettungswurf (Person festhalten, Betäubender Schlag, Packen), Zielzustand beim Gegnerangriff (Vorteil/Nachteil, Krit aus 1,5 m, Deckung), Schild, Unglaubliches Ausweichen, Resistenz-Hinweis, Zusatzeffekte von Monsterangriffen, Entrinnen, Ausweichen, Eismesser, Schaden aufs gewählte Ziel |
 | tests/ui.test.js, tests/ui-full.test.js | Klicktests Desktop + Handy (alle Klassen, Unterklassen, Spezies, Schritte, Export/Import, Offline-Neustart) |
 | tests/combos.test.js | alle Klassen × Unterklassen × Stufen 1–20 |
 | tests/turnfuzz.test.js | jede Zugleisten-Option je Klasse einmal ausführen |
@@ -58,12 +66,18 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | search.js | Regelsuche |
 | encounter.js | Begegnungsplaner, Monsterkarten |
 | monsters2.js | Weitere SRD-Kreaturen, typische Fundorte, Stufenempfehlung, Bestiarium-Ansicht |
+| randenc.js | Zufallsbegegnung auf Knopfdruck: Fundort, Gruppe, Schwierigkeit → ausgewogene Gegnergruppe nach EP-Budget, ✦ Szenen-Aufhänger |
+| mobfx.js | Gegner-Fähigkeiten im Kampf: Aufladung (W6 zu Zugbeginn), legendäre Aktionen und Widerstände als Zähler (nur SL) |
+| mobedit.js | Eigene Monster: Editor mit Richtwerten je HG, Vorlage aus dem Bestiarium, Teilen/Laden als Text (localStorage `hb_mobs`) |
+| loot.js | ✦ Beute nach Herausforderungsgrad: Münzen, Wertsachen, magische Gegenstände, EP – füllt das Verteilen-Formular |
 | explain.js | Rechenweg, Nachbessern nach dem Wurf |
 | ux.js | Rückgängig, Bestätigungen, Layout |
 | help.js | Kontexthilfe |
 | spellflav.js | Zauberbilder: wie man sich jeden Zauber vorstellt |
 | dice3d.js | Räumliche Würfel (SVG), 10 Designs + Heldenbuch + Spielleitung, Effekte für 20 und 1, Geräusche, Set-Vergabe pro Raum |
 | levelup.js | Stufenaufstieg-Assistent (Aufstieg · Das ist neu · Entscheiden) mit Feier-Effekt |
+| savedmg.js | Schaden mit Rettungswurf des Ziels: Abfrage vor dem Schadenswurf (Zauber, andauernde Zauber, Klassenmerkmale) |
+| mechanics.js | Abläufe mit Zwischenschritt: Zustände durch Rettungswurf, Zielzustand und Deckung beim Gegnerangriff, Reaktionen bei Treffern, Zusatzeffekte von Monsterangriffen, Entrinnen |
 | info.js | Erklärkarten (ⓘ) im Heldenbau, Fertigkeits- und Waffeneigenschaftstexte |
 | app.js | Oberfläche, Würfeln, Angriffe, Zauber, Speicherung |
 | appnet.js | nur App-Version: Online-Tisch über MQTT mit Ende-zu-Ende-Verschlüsselung |

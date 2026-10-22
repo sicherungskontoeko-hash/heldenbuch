@@ -28,13 +28,19 @@ const HELP = {
     'Effekte aus Konzentrationszaubern enden automatisch, wenn deine Konzentration endet.',
     'Erinnerungen an Rettungswürfe („am Ende des Zuges wiederholen“) erscheinen genau dann, wenn die betroffene Kreatur dran ist.']],
   kampf: ['Kampf & Initiative', [
-    'Alle am Tisch sehen dieselbe Initiativeleiste. Die Spielleitung fügt Monster aus dem Bestiarium hinzu und klickt sich mit „Nächster Zug“ durch die Runde.',
+    'Alle am Tisch sehen dieselbe Initiativeleiste. Die Spielleitung fügt Gegner mit „+ Gegner“ hinzu und klickt sich oben mit „Weiter ▸“ durch die Runde. Sie selbst kämpft nicht mit – ausser sie hakt „Ich spiele selbst mit“ an.',
     'Auf ein Monster tippen öffnet seine Karte: TP, Zustände, Angriffe und Notizen. Mehrere Monster kannst du auswählen und gemeinsam Schaden oder Rettungswürfe abhandeln.',
-    'Der Begegnungsplaner berechnet die Schwierigkeit nach den SRD-5.2-Erfahrungsbudgets für deine Gruppe.']],
+    'Der Begegnungsplaner berechnet die Schwierigkeit nach den SRD-5.2-Erfahrungsbudgets für deine Gruppe.',
+    'Gegner mit Odem oder ähnlichen Fähigkeiten zeigen der Spielleitung einen ⚡-Knopf: Antippen setzt die Fähigkeit ein und füllt „Rettungswurf anfordern“ vor. Zu Beginn ihres Zugs würfelt die App die Aufladung (W6) automatisch.',
+    'Gegnerangriff: Die App zeigt, wenn das Ziel liegt, gelähmt ist oder ausweicht (Vorteil/Nachteil, Krit aus 1,5 m), und rechnet Deckung (+2/+5) mit. Zusatzeffekte wie „KON SG 10 oder gelähmt“ gehen mit dem Treffer an den Spieler.',
+    'Zauber und Fähigkeiten mit Rettungswurf (Feuerball, Person festhalten, Betäubender Schlag, Packen) fragen zuerst, wie der Rettungswurf ausging. Ist oben ein Ziel gewählt, landen Schaden und Zustand direkt beim Gegner.',
+    'Legendäre Kreaturen haben goldene Punkte für legendäre Aktionen (zu Zugbeginn wieder voll) und violette für legendäre Widerstände. Antippen verbraucht einen Punkt, ein leerer Punkt stellt ihn wieder her.']],
   planer: ['Begegnungsplaner', [
     'Wähle Monster und Anzahl. Die App summiert die Erfahrungspunkte und vergleicht sie mit dem Budget der Gruppe: niedrig, mittel oder hoch.',
     'Mit „Gruppeninitiative“ würfeln gleiche Monster gemeinsam – das spart Zeit bei grossen Gruppen.',
-    'Begegnungen kannst du speichern und später mit einem Klick in den Kampf übernehmen.']],
+    'Begegnungen kannst du speichern und später mit einem Klick in den Kampf übernehmen.',
+    '🎲 Zufallsbegegnung: Fundort und Schwierigkeit wählen, „Würfeln“ – die App stellt eine passende Gruppe zusammen (Einzelgegner, Rudel, Anführer mit Gefolge oder gemischt) und liefert einen kurzen Szenen-Aufhänger.',
+    'Eigene Monster legst du im Bestiarium an („+ Eigenes Monster“ oder „Als Vorlage für eigenes“). Sie erscheinen im Planer, beim Hinzufügen und bei Zufallsbegegnungen. Mit „Teilen“ gibst du sie als Text weiter.']],
   rechenweg: ['Rechenweg', [
     'Ist „Rechenweg“ eingeschaltet, steht unter jedem Wert klein, woraus er sich zusammensetzt – Attribut, Übungsbonus, Gegenstände, Talente.',
     'So siehst du sofort, warum deine RK 17 ist oder woher ein +1 auf Rettungswürfe kommt.']],
@@ -45,7 +51,9 @@ const HELP = {
   tisch: ['Am Tisch', [
     'Am Tisch spielt ihr gemeinsam: Würfe, Initiative, Effekte und Handouts sind für alle sichtbar, die im selben Raum sind.',
     'Die Spielleitung erstellt einen Raum und teilt den Code. Spielerinnen und Spieler treten mit diesem Code bei – ein Konto braucht es nicht.',
-    'Mit dem Schalter oben bestimmst du, wer deine Würfe sieht: alle, nur die Spielleitung oder niemand (verdeckt).']],
+    'Wirst du getroffen, bietet die App passende Reaktionen an: Schild (wenn er den Angriff abwehrt), Unglaubliches Ausweichen, und sie markiert „Halb“, wenn du resistent bist (z. B. im Kampfrausch). Entrinnen rechnet sie bei GES-Rettungswürfen automatisch.',
+    'Mit dem Schalter oben bestimmst du, wer deine Würfe sieht: alle, nur die Spielleitung oder niemand (verdeckt).',
+    'Beute würfeln (Spielleitung): nimmt die besiegten Gegner des Kampfs – oder die des zuletzt beendeten – und würfelt Münzen, Wertsachen und mit etwas Glück einen magischen Gegenstand passend zum Herausforderungsgrad. „Hort“ gibt deutlich mehr. „Ins Formular übernehmen“ teilt EP und Gold durch die Zahl der Helden.']],
   boost: ['Nachbessern', [
     'Nach einem Wurf zeigt die App, was du noch draufpacken darfst: Heldeninspiration, Glückskind, Taktischer Verstand und ähnliche Fähigkeiten.',
     'Bekommst du von anderen einen Bonus (z. B. Segnen +1W4 oder Bardische Inspiration), wählst du den Würfel unter „Von Verbündeten“.']],
@@ -76,7 +84,7 @@ XA.help = (t, a) => {
   m.hidden = false;
 };
 /* nach jedem Rendern die passenden Überschriften mit „?“ versehen */
-const HELP_HEADS = [[/^Zustände/, 'zustand'], [/^Ressourcen/, 'res'], [/^Zauberplätze/, 'slots'], [/^Angriffe/, 'angriff'], [/^Kampf/, 'kampf'], [/^Begegnung planen/, 'planer'], [/^Am Tisch|^Als Spielleitung|^Würfe am Tisch/, 'tisch'], [/^Klasse wählen/, 'build'], [/^Unterklasse$/, 'sub'], [/^Attributswerte/, 'attr'], [/^Effekt/, 'effekt'], [/^Regeloptionen/, 'regeln'], [/^Würfe am Tisch|^Deine Würfe/, 'auto']];
+const HELP_HEADS = [[/^Zustände/, 'zustand'], [/^Kampf/, 'kampf'], [/^Begegnung planen/, 'planer'], [/^Als Spielleitung/, 'tisch'], [/^Klasse wählen/, 'build'], [/^Unterklasse$/, 'sub'], [/^Attributswerte/, 'attr'], [/^Effekt/, 'effekt'], [/^Regeloptionen/, 'regeln']];
 function addHelp() {
   document.querySelectorAll('#view h2, #view h3, #modal h3').forEach((h) => {
     if (h.querySelector('.hlp')) return; const tx = h.textContent.trim();
@@ -84,6 +92,5 @@ function addHelp() {
   });
   const tb = document.querySelector('.turnblk .tbar'); if (tb && !tb.querySelector('.hlp')) tb.insertAdjacentHTML('beforeend', helpBtn('zug'));
   const mx = document.querySelector('.mnav .mexp'); if (mx && !mx.parentNode.querySelector('.hlp[data-arg=rechenweg]')) mx.insertAdjacentHTML('afterend', helpBtn('rechenweg'));
-  const ub = document.querySelector('.mnav .undobtn, .undobtn'); if (ub && !ub.parentNode.querySelector('.hlp[data-arg=undo]')) ub.insertAdjacentHTML('afterend', helpBtn('undo'));
   const bb = document.querySelector('#boostBar .bbh'); if (bb && !bb.querySelector('.hlp')) bb.querySelector('.x').insertAdjacentHTML('beforebegin', helpBtn('boost'));
 }

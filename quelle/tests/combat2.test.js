@@ -57,7 +57,9 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
   /* Packen/Stossen, Todesrettung zu Zugbeginn, tote Helden überspringen */
   T('Packen und Stossen als Angriffsersatz in der Zugleiste', await p.evaluate(() => { const o = turnOpts(derive(cur(), S.hb)); return o.some((x) => x.id === 'ush:grapple') && o.some((x) => x.id === 'ush:shove'); }));
   await p.evaluate(() => { S.camp = ''; S.combat = null; const ch = cur(); ch.play.hp = 20; ch.play.ds = [0, 0]; ch.play.cond = []; ch.play.localFight = true; turnReset(ch); turnRun(ch, 'ush:shove'); });
-  T('Stossen verbraucht einen Angriff und nennt den SG', await p.evaluate(() => turnSt(cur()).atk === 1 && /SG \d+/.test(S.log[0].detail)));
+  T('Stossen verbraucht einen Angriff und fragt den Rettungswurf (SG) ab', await p.evaluate(() => turnSt(cur()).atk === 1 && /Stossen.*Rettungswurf SG \d+/.test($('#prompt').textContent)));
+  await p.evaluate(() => document.querySelector('#prompt [data-act="scRes"][data-arg="fail"]').click());
+  T('… misslungen: Eintrag mit weggestossen/liegend', await p.evaluate(() => /misslungen.*weggestossen oder liegend/.test(S.log[0].detail)));
   await p.evaluate(() => { const ch = cur(); ch.play.hp = 0; ch.play.stable = false; ch.play.dead = false; startOfTurn(ch); });
   await p.waitForTimeout(600);
   T('0 TP zu Zugbeginn: Todesrettungswurf wird angeboten', await p.evaluate(() => !$('#prompt').hidden && !!$('#prompt [data-act="deathRoll"]')));
@@ -96,7 +98,7 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
   T('Innerhalb des Fundorts nach Stärke sortiert', await p.evaluate(() => [...document.querySelectorAll('.mobs')].every((g) => { const v = [...g.querySelectorAll('summary small')].map((s) => crNum(/HG ([\d/]+)/.exec(s.textContent)[1])); return v.every((x, i) => !i || x >= v[i - 1]); })));
   await p.evaluate(() => { S.mhab = 'hoehle'; S.mlv = '3'; render(); });
   T('Filter Fundort + Gruppenstufe zeigt nur Passendes', await p.evaluate(() => { const ks = [...document.querySelectorAll('.mob summary b')].map((x) => x.textContent); return ks.length > 0 && ks.every((n) => { const k = Object.keys(BESTIARY).find((q) => BESTIARY[q][0] === n); return mobHab(k).includes('hoehle') && mobFits(BESTIARY[k][1], 3); }); }));
-  T('Monsterauswahl im Kampf nach Fundort gruppiert', await p.evaluate(() => { const d = document.createElement('div'); d.innerHTML = bestiaryAdder(); return d.querySelectorAll('optgroup').length >= 8 && !!d.querySelector('#mobRes'); }));
+  T('Planer: Monsterauswahl nach Fundort gruppiert, Verstärkung/überrascht im Kampf', await p.evaluate(() => { S.enc = null; encPlanner(); const ok = document.querySelectorAll('#modal select[data-enc="mid"] optgroup').length >= 8 && !!$('#encRes') && !!$('#encSur'); $('#modal').hidden = true; S.modal = null; return ok; }));
   let fail = 0; for (const r of out) { if (!r.ok) fail++; console.log((r.ok ? '✔ ' : '✘ ') + r.n + (r.ok ? '' : '  → ' + JSON.stringify(r.got))); }
   console.log('\n' + (out.length - fail) + ' / ' + out.length + ' bestanden' + (errs.length ? ' · JS-Fehler: ' + errs.join(' | ') : ''));
   await b.close(); process.exit(fail || errs.length ? 1 : 0);

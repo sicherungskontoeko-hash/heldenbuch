@@ -42,10 +42,14 @@ function effConcEnd(spellId) {
   setTimeout(() => { const c = S.combat; if (!c || !c.active || !(c.effects || []).some(drop)) return; const keep = c.effects.filter((e) => !drop(e)); effSave({ effects: keep, rem: (c.rem || []).filter((r) => keep.some((e) => e.id === r.eff)) }); }, 0);
 }
 /* Auf dem eigenen Gerät: Zustände aus Effekten auf den eigenen Helden übernehmen, abgelaufene Konzentration beenden */
+/* Zustände eines Effekts (ein Effekt kann mehrere Zustände setzen) */
+const effConds = (e) => (e.conds || (e.cond ? [e.cond] : [])).filter((k) => COND[k]);
+/* Zustände eines Gegners: eigene + aus laufenden Effekten (enden mit dem Effekt von selbst) */
+function npcConds(x) { const fromEff = effList().filter((e) => e.tgt === 'n:' + x.id).flatMap(effConds); return [...new Set((x.cond || []).concat(fromEff))]; }
 function effSyncMine() {
   const ch = S.chars[S.cur]; if (!ch || !UID || !S.camp) return; const P = ch.play; const me = 'p:' + UID; let changed = false;
   const eff = effList();
-  const want = [...new Set(eff.filter((e) => e.tgt === me && e.cond && COND[e.cond]).map((e) => e.cond))];
+  const want = [...new Set(eff.filter((e) => e.tgt === me).flatMap(effConds))];
   const had = P.effCond || [];
   P.cond = P.cond || [];
   for (const k of want) if (!P.cond.includes(k)) { P.cond.push(k); (COND[k].adds || []).forEach((a) => { if (!P.cond.includes(a)) P.cond.push(a); }); changed = true; }

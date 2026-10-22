@@ -387,7 +387,7 @@ function diceModal() {
 }
 XA.diceOpen = () => diceModal();
 XA.diceSet = (t, a) => { const ch = cur(); if (!ch || !D3_SETS[a] || D3_SETS[a].dm) return; if (d3taken()[a]) return; ch.dice = a === 'klassik' ? '' : a; ch.diceAt = Date.now(); persist('c', ch.id); if (typeof queueMe === 'function') queueMe(); diceModal(); };
-XA.diceFx = (t, a) => { d3set('hb_dice_fx', a); diceModal(); };
+XA.diceFx = (t, a) => { d3set('hb_dice_fx', a); d3set('hb_fx', { voll: 'stark', ruhig: 'dezent', aus: 'aus' }[a] || 'stark'); if (typeof applyFxLevel === 'function') { applyFxLevel(); if (typeof startFx === 'function') startFx(); } diceModal(); };
 XA.diceSnd = (t, a) => { d3set('hb_dice_snd', a); if (a === '1') { d3ac(); d3snd('land'); } diceModal(); };
 XA.diceTry = (t, a) => { const m = $('#modal'); m.hidden = true; S.modal = null; const n = a === 'n20' ? 20 : a === 'n1' ? 1 : 1 + Math.floor(Math.random() * 20); pushLog({ label: 'Probewurf', total: n, detail: 'W20 [' + n + '] · nur zum Anschauen', sides: 20, nat: n, crit: n === 20, fumble: n === 1, preview: true }); };
 document.addEventListener('input', (ev) => { if (ev.target && ev.target.id === 'd3vol') d3set('hb_dice_vol', ev.target.value); });

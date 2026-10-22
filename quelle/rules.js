@@ -225,9 +225,12 @@ function mergeById(base, ours, theirs) {
   return [...out.values()];
 }
 function mergeCombat(base, ours, theirs) {
-  if (!theirs || !base) return ours; if (ours.id !== theirs.id) return ours;
+  if (!theirs || !base) return ours;
+  /* Die andere Seite hat inzwischen einen neuen Kampf begonnen oder ihn beendet: unsere Änderung gehörte zum alten Kampf und entfällt */
+  if (ours.id !== theirs.id || theirs.active === false) return theirs;
   const m = Object.assign({}, theirs);
   for (const k of Object.keys(ours)) {
+    if (k === 'rev' || k === 'w' || k === 't') continue; /* Verwaltungsfelder setzt saveCombat neu */
     if (['npcs', 'effects', 'rem'].includes(k)) m[k] = mergeById(base[k], ours[k], theirs[k]);
     else if (['hits', 'reqs', 'saveRes'].includes(k)) { const seen = new Set(); m[k] = (theirs[k] || []).concat(ours[k] || []).filter((x) => { const key = (x.id || '') + '|' + (x.uid || x.to || '') + '|' + x.t; if (seen.has(key)) return false; seen.add(key); return true; }).sort((a, b) => a.t - b.t).slice(-30); }
     else if (k === 'log') { const seen = new Set(); m.log = (theirs.log || []).concat(ours.log || []).filter((x) => { const key = x.t + x.x; if (seen.has(key)) return false; seen.add(key); return true; }).sort((a, b) => a.t - b.t).slice(-25); }
@@ -359,7 +362,7 @@ XA.tsGo = (t, a, p, ch) => { orbPrompt(''); const ts = S.tsPend; S.tsPend = null
 function healPrompt(ch, amount, name, multi) {
   S.healPend = { amount, name, multi, done: [] };
   const tg = onlineFight() ? order().filter((x) => x.key !== 'p:' + UID && x.npc) : [];
-  const pl = S.camp ? Object.entries(S.table).filter(([u]) => u !== UID) : [];
+  const pl = S.camp ? players().filter(([u]) => u !== UID) : [];
   orbPrompt('<div class="pr"><b>' + esc(name) + ': ' + amount + ' TP Heilung</b><p>Auf wen' + (multi ? ' (mehrere möglich)' : '') + '? Trefferpunkte steigen höchstens bis zum Maximum.</p><div class="chips"><button class="btn sm" data-act="healGo" data-arg="me">Auf mich</button>' +
     tg.map((x) => '<button class="btn sm ghost" data-act="healGo" data-arg="' + x.key + '">' + esc(x.name) + (x.hpMax ? ' (' + x.hp + '/' + x.hpMax + ')' : '') + '</button>').join('') +
     pl.map(([u, p]) => '<button class="btn sm ghost" data-act="healGo" data-arg="u:' + u + '">' + esc(p.char) + ' (meldet die Heilung)</button>').join('') +
@@ -388,21 +391,22 @@ for (const [id, f] of Object.entries(FOLLOW)) {
   FEAT_ACTIONS.push({ id: 'fo_' + id, n: f.n, cost: f.cost, when: (c) => !!(c.char.play.fx || {})['fo_' + id], sub: f.save ? f.save + '-Rettungswurf' : 'Zauberangriff', run: (ch, c) => {
     const s = getSpell(id); const L = +((ch.play.fx || {})['fo_' + id + '_L']) || s.lvl; const ctx = spellCtx(c, id); const expr = f.expr(L, ctx.mod);
     if (f.atk) return spellAttack(ch, s, 1, expr, '', '', ctx.atk);
+    if (f.save && typeof saveDmg === 'function') return saveDmg({ label: s.name, expr, ab: f.save, dc: ctx.dc, half: true, type: (SPELL_DATA[id] || {}).type || '' });
     rollDmg(expr, s.name + (f.save ? ' (' + f.save + '-RW SG ' + ctx.dc + ', halber Schaden bei Erfolg)' : ''));
   } });
 }
 
 /* ---------- Schaden auf ein Ziel anwenden (Spielleitung/Spieler bestätigt Resistenz usw.) ---------- */
-function applyPrompt(tgt, amount, label, next) {
-  const t = order().find((x) => x.key === tgt); if (!t) { orbPrompt(next || ''); return; }
-  S.applyPend = { tgt, amount, next };
-  orbPrompt('<div class="pr"><b>' + esc(label) + ': ' + amount + ' Schaden auf ' + esc(t.name) + (t.hpMax ? ' (' + t.hp + '/' + t.hpMax + ' TP)' : '') + '</b><p>Anwenden? Resistenz, Immunität und Verwundbarkeit des Ziels kennt die Spielleitung – wähle entsprechend. ' + slTag() + '</p><div class="chips"><button class="btn" data-act="applyDmg" data-arg="1">Voll (' + amount + ')</button><button class="btn ghost" data-act="applyDmg" data-arg="0.5">Halb · Resistenz (' + Math.floor(amount / 2) + ')</button><button class="btn ghost" data-act="applyDmg" data-arg="2">Doppelt · Verwundbar (' + amount * 2 + ')</button><button class="btn ghost" data-act="applyDmg" data-arg="0">Immun (0)</button><button class="btn ghost" data-act="applyDmg" data-arg="x">Nicht anwenden</button></div></div>');
+function applyPrompt(tgt, amount, label, next, cb) {
+  const t = order().find((x) => x.key === tgt); if (!t) { orbPrompt(next || ''); if (cb) cb(); return; }
+  S.applyPend = { tgt, amount, next, cb };
+  orbPrompt('<div class="pr"><b>' + esc(label) + ': ' + amount + ' Schaden auf ' + esc(t.name) + (t.hpMax ? ' (' + t.hp + '/' + t.hpMax + ' TP)' : '') + '</b><p>Eintragen? Resistenzen kennt die Spielleitung. ' + slTag() + '</p><div class="chips end"><button class="btn ghost" data-act="applyDmg" data-arg="x">Nicht</button><button class="btn ghost" data-act="applyDmg" data-arg="0.5">Halb (' + Math.floor(amount / 2) + ')</button><button class="btn" data-act="applyDmg" data-arg="1">Voll (' + amount + ')</button></div></div>');
 }
 XA.applyDmg = (t, a) => {
   const pd = S.applyPend; S.applyPend = null; if (!pd) return orbPrompt('');
   if (a !== 'x') { const c = S.combat; const id = pd.tgt.slice(2); const n = (c.npcs || []).find((x) => x.id === id); const dmg = Math.floor(pd.amount * +a);
     if (n) { const hp = n.hp != null ? Math.max(0, (+n.hp || 0) - dmg) : n.hp; saveCombat(Object.assign({}, c, { npcs: c.npcs.map((x) => x.id === id ? Object.assign({}, x, { hp }) : x), t: Date.now(), log: clog(c, n.name + ' erleidet ' + dmg + ' Schaden' + (hp != null ? ' (TP ' + hp + ')' : '')) })); } }
-  orbPrompt(pd.next || '');
+  orbPrompt(pd.next || ''); if (pd.cb) pd.cb();
 };
 
 function freshId() { let id; do { const u = new Uint32Array(2); try { crypto.getRandomValues(u); } catch (e) { u[0] = Date.now(); u[1] = Math.floor(Math.random() * 4e9); } id = 'c' + u[0].toString(36) + u[1].toString(36); } while (S.chars[id]); return id; }

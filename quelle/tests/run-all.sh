@@ -30,10 +30,16 @@ run "Würfel-Designs (dice.test.js)" node tests/dice.test.js
 run "Stufenaufstieg-Assistent (levelup.test.js)" node tests/levelup.test.js
 run "Gegnerangriff: Treffer prüfen vor Schaden (npc.test.js)" node tests/npc.test.js
 run "Kampf-Nachzügler, Überraschung, Treffer zustellen, Bestiarium (combat2.test.js)" node tests/combat2.test.js
+run "SL-Werkzeuge: Zufallsbegegnung, Aufladung, eigene Monster, Beute (dmtools.test.js)" node tests/dmtools.test.js
+run "Schaden mit Rettungswurf: erst fragen, dann würfeln (savedmg.test.js)" node tests/savedmg.test.js
+run "Abläufe mit Zwischenschritt: Zustände, Reaktionen, Zusatzeffekte (mechanics.test.js)" node tests/mechanics.test.js
+run "Aufgeräumter Spieltisch (table.test.js)" node tests/table.test.js
+run "Abfragen und Ziele: nichts verdrängt, Ziel festgehalten (flow.test.js)" node tests/flow.test.js
+run "Sicherung: alles sichern und wiederherstellen (backup.test.js)" node tests/backup.test.js
 run "Klicktest kurz (ui.test.js)" bash -c "node tests/ui.test.js || (echo Wiederholung; node tests/ui.test.js)"
 run "Abnahme-Klicktest (ui-full.test.js)" node tests/ui-full.test.js
 run "Kombinationen Klasse×Unterklasse×Stufe (combos.test.js)" node tests/combos.test.js
 for c in bar brd cle dru fig mon pal ran rog sor wlk wiz rk bw fk ma; do run "Zugleisten-Fuzz $c" node tests/turnfuzz.test.js $c; done
-if [ -f app/www/index.html ]; then run "Online-Tisch (net.test.js)" node tests/net.test.js; run "Selbst-Update Android-App (boot.test.js)" node tests/boot.test.js; fi
+if [ -f app/www/index.html ]; then run "Online-Tisch (net.test.js)" node tests/net.test.js; run "Selbst-Update Android-App (boot.test.js)" node tests/boot.test.js; run "Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js)" node tests/multi.test.js; fi
 echo "" >> $OUT; echo "Gesamtergebnis: $([ $fail = 0 ] && echo 'alle Suiten bestanden' || echo 'mindestens eine Suite fehlgeschlagen')" >> $OUT
 echo; cat $OUT; exit $fail

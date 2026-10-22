@@ -130,4 +130,4 @@ function themeBurst(kind) {
   else if (t === 'wueste') { add('flash', 'background:radial-gradient(circle at 85% 0%,rgba(255,245,200,.9),rgba(255,190,90,.35) 30%,transparent 60%)'); parts(['235,200,140', '255,220,160'], 60, 'spark'); }
   else { add('flash', 'background:radial-gradient(circle at 50% 50%,rgba(255,170,80,.45),transparent 60%)'); parts(['255,214,140', '226,130,60'], 60, 'spark'); }
 }
-XA.fxLevel = (t, a) => { try { localStorage.setItem('hb_fx', a); } catch (e) {} applyFxLevel(); startFx(); if (S.modal === 'theme') openThemeModal(); else render(); };
+XA.fxLevel = (t, a) => { try { localStorage.setItem('hb_fx', a); localStorage.setItem('hb_dice_fx', { stark: 'voll', dezent: 'ruhig', aus: 'aus' }[a] || 'voll'); } catch (e) {} applyFxLevel(); startFx(); if (S.modal === 'theme') openThemeModal(); else render(); };

@@ -133,24 +133,23 @@ function startFx() {
 }
 
 /* ---------- Auswahl ---------- */
-function themeSwatches(dmMode) {
-  const cur = dmMode ? ((S.meta && S.meta.theme) || '') : themeNow();
-  return '<div class=\"tswatch\">' + Object.entries(THEMES).map(([k, t]) => { const s = THEME_SCENES[k] || {}; return '<button class=\"tsw' + (cur === k ? ' on' : '') + '\" data-act=\"' + (dmMode ? 'themeDm' : 'theme') + '\" data-arg=\"' + k + '\" style=\"--sa:' + t.c.bg + ';--sb:' + t.c.raised + ';--sc:' + t.c.gold + ';--sd:' + t.c['gold-hi'] + ';--sf:' + t.font.replace(/"/g, "'") + '\"><i></i><b>' + t.name + '</b><small>' + t.desc + '</small></button>'; }).join('') + '</div>';
+function themeSwatches() {
+  const cur = themeNow();
+  return '<div class=\"tswatch\">' + Object.entries(THEMES).map(([k, t]) => { const s = THEME_SCENES[k] || {}; return '<button class=\"tsw' + (cur === k ? ' on' : '') + '\" data-act=\"theme\" data-arg=\"' + k + '\" style=\"--sa:' + t.c.bg + ';--sb:' + t.c.raised + ';--sc:' + t.c.gold + ';--sd:' + t.c['gold-hi'] + ';--sf:' + t.font.replace(/"/g, "'") + '\"><i></i><b>' + t.name + '</b><small>' + t.desc + '</small></button>'; }).join('') + '</div>';
 }
 function themeBlock() {
   const dm = S.camp && S.meta && S.meta.theme && THEMES[S.meta.theme];
-  return '<section class="panel themep"><div class="tph"><h2>Stimmung</h2><span class="hint" style="margin:0">Ändert nur das Aussehen – alle Funktionen bleiben gleich.</span></div>' + themeSwatches(false) +
+  return '<section class="panel themep"><div class="tph"><h2>Stimmung</h2><span class="hint" style="margin:0">Ändert nur das Aussehen – alle Funktionen bleiben gleich.</span></div>' + themeSwatches() +
     '<div class="fxlv"><span>Effekte:</span>' + [['stark', 'Stark'], ['dezent', 'Dezent'], ['aus', 'Aus']].map(([k, l]) => chip(fxLevel() === k, l, 'data-act="fxLevel" data-arg="' + k + '"')).join('') + '</div>' +
-    (dm ? '<label class="chk tfollow"><input type="checkbox" id="themeFollow"' + (themeFollow() ? ' checked' : '') + '> Stimmung der Spielleitung folgen (' + THEMES[S.meta.theme].name + ')</label>' : '') + '</section>';
+    (typeof isDM === 'function' && isDM() ? '<label class="chk tfollow"><input type="checkbox" id="themeAll"' + (S.dmThemeAll !== false ? ' checked' : '') + '> Für die ganze Runde (du leitest)</label>' : dm ? '<label class="chk tfollow"><input type="checkbox" id="themeFollow"' + (themeFollow() ? ' checked' : '') + '> Stimmung der Spielleitung folgen (' + THEMES[S.meta.theme].name + ')</label>' : '') + '</section>';
 }
 function openThemeModal() {
   const m = $('#modal'); S.modal = 'theme';
   m.innerHTML = '<div class="dlg themedlg" role="dialog" aria-modal="true" aria-label="Stimmung wählen">' + themeBlock() + '<div class="chips"><button class="btn" data-act="closeModal">Fertig</button></div></div>';
   m.hidden = false;
 }
-XA.theme = (t, a) => { setTheme(a); if (S.modal === 'theme') openThemeModal(); else render(); };
-XA.themeDm = (t, a) => { saveMeta({ theme: a }); setTheme(a, true); try { localStorage.setItem('hb_theme_follow', '1'); } catch (e) {} render(); };
+XA.theme = (t, a) => { if (typeof isDM === 'function' && isDM() && S.dmThemeAll !== false) { saveMeta({ theme: a }); setTheme(a, true); try { localStorage.setItem('hb_theme_follow', '1'); } catch (e) {} if (S.modal === 'theme') openThemeModal(); else render(); return; } setTheme(a); if (S.modal === 'theme') openThemeModal(); else render(); };
 XA.themeOpen = () => { S.more = false; const bn = $('#bnav'); if (bn) bn.innerHTML = bnavHtml(); openThemeModal(); };
-document.addEventListener('change', (ev) => { if (ev.target && ev.target.id === 'themeFollow') { try { localStorage.setItem('hb_theme_follow', ev.target.checked ? '1' : '0'); } catch (e) {} applyTheme(); if (S.modal === 'theme') openThemeModal(); else render(); } });
+document.addEventListener('change', (ev) => { if (ev.target && ev.target.id === 'themeAll') { S.dmThemeAll = ev.target.checked; return; } if (ev.target && ev.target.id === 'themeFollow') { try { localStorage.setItem('hb_theme_follow', ev.target.checked ? '1' : '0'); } catch (e) {} applyTheme(); if (S.modal === 'theme') openThemeModal(); else render(); } });
 
 ensureScene();

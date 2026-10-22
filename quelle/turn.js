@@ -10,7 +10,7 @@ function turnSt(ch) {
 function turnReset(ch, keepReaction) {
   const t = turnSt(ch); const r = t.r;
   ch.play.turn = { a: 0, aMax: 1, b: 0, r: keepReaction ? r : 0, atk: 0, mv: 0, mvMax: 0, bonusAtk: 0, bSpell: false, slotSpell: false, lightIdx: null };
-  const fx = ch.play.fx || {}; delete fx.reckless; delete fx.aim; ch.play.fx = fx;
+  const fx = ch.play.fx || {}; delete fx.reckless; delete fx.aim; if (!keepReaction) delete fx.dodge; ch.play.fx = fx;
   if (!keepReaction && typeof startOfTurn === 'function') { try { startOfTurn(ch); } catch (e) {} }
 }
 const tLeft = (ch, k) => { const t = turnSt(ch); return k === 'a' ? t.aMax - t.a : k === 'b' ? 1 - t.b : k === 'r' ? 1 - t.r : 1; };
@@ -50,6 +50,8 @@ function tCountSpell(ch, s, lvl, usedSlot) {
 
 /* ---------- Was kann der Held? ---------- */
 const tRoll = (expr, label) => rollDmg(expr, label);
+/* Schaden mit Rettungswurf des Ziels: erst Ausgang wählen, dann würfeln (savedmg.js) */
+const tSave = (expr, label, ab, dc, half, type) => (typeof saveDmg === 'function' ? saveDmg({ label, expr, ab, dc, half, type: type || '' }) : tRoll(expr, label + ' (' + ab + '-RW SG ' + dc + (half ? ' halbiert' : '') + ')'));
 function tHealSelf(ch, c, expr, label, temp) {
   const r = rollExpr(expr); const P = ch.play;
   if (temp) { P.temp = Math.max(P.temp || 0, r.total); pushLog({ label, total: r.total, detail: r.detail + ' · temporäre TP', groups: r.groups, sides: (r.groups[0] || {}).sides || 0, nat: r.total }); return; }
@@ -73,7 +75,7 @@ const FEAT_ACTIONS = [
   { id: 'binsp', n: 'Bardische Inspiration', cost: 'b', res: 'insp', when: (c) => c.lv('brd'), sub: (c) => c.res.find((r) => r.k === 'insp').n.replace(/^.*\(/, '').replace(')', ''), run: (ch, c) => tLog('Bardische Inspiration', 'Eine Kreatur in 18 m erhält einen Inspirationswürfel (' + c.res.find((r) => r.k === 'insp').n.replace(/^.*\(/, '').replace(')', '') + ').') },
   { id: 'cutting', n: 'Schneidende Worte', cost: 'r', res: 'insp', when: (c) => c.lv('brd') >= 3 && c.subOf('brd') === 'lore', run: (ch, c) => tRoll('1W' + step(6, [[5, 8], [10, 10], [15, 12]])(c.lv('brd')), 'Schneidende Worte (abziehen)') },
   /* Kleriker */
-  { id: 'spark', n: 'Göttlicher Funke', cost: 'a', res: 'cd', when: (c) => c.lv('cle') >= 2, sub: (c) => step(1, [[7, 2], [13, 3], [18, 4]])(c.lv('cle')) + 'W8 ' + sgn(c.mod.wis), run: (ch, c) => tRoll(step(1, [[7, 2], [13, 3], [18, 4]])(c.lv('cle')) + 'W8' + sgn(c.mod.wis).replace('−', '-'), 'Göttlicher Funke (Heilung oder Schaden, KON-RW halbiert)') },
+  { id: 'spark', n: 'Göttlicher Funke', cost: 'a', res: 'cd', when: (c) => c.lv('cle') >= 2, sub: (c) => step(1, [[7, 2], [13, 3], [18, 4]])(c.lv('cle')) + 'W8 ' + sgn(c.mod.wis), run: (ch, c) => { S.spark = { expr: step(1, [[7, 2], [13, 3], [18, 4]])(c.lv('cle')) + 'W8' + sgn(c.mod.wis).replace('−', '-'), dc: c.spell.dc }; orbPrompt('<div class="pr"><b>Göttlicher Funke</b><p>Heilst du eine Kreatur oder fügst du Schaden zu (gleissend oder nekrotisch, KON-Rettungswurf halbiert)?</p><div class="chips end"><button class="btn ghost" data-act="sparkGo" data-arg="heal">Heilen</button><button class="btn" data-act="sparkGo" data-arg="dmg">Schaden</button></div></div>'); } },
   { id: 'turnu', n: 'Untote vertreiben', cost: 'a', res: 'cd', when: (c) => c.lv('cle') >= 2, sub: (c) => 'WEI-RW SG ' + (8 + c.pb + c.mod.wis), run: (ch, c) => { tLog('Untote vertreiben', 'Untote in 9 m: WEI-Rettungswurf SG ' + (8 + c.pb + c.mod.wis) + ' oder 1 Minute verängstigt und kampfunfähig.'); if (c.lv('cle') >= 5) tRoll(Math.max(1, c.mod.wis) + 'W8', 'Untote versengen'); } },
   { id: 'preserve', n: 'Bewahrung des Lebens', cost: 'a', res: 'cd', when: (c) => c.lv('cle') >= 3 && c.subOf('cle') === 'life', sub: (c) => (5 * c.lv('cle')) + ' TP verteilen', run: (ch, c) => tLog('Bewahrung des Lebens', 'Verteile ' + 5 * c.lv('cle') + ' TP auf Kreaturen in 9 m (höchstens bis zur Hälfte ihres Maximums).') },
   { id: 'divint', n: 'Göttliches Eingreifen', cost: 'a', res: 'di', when: (c) => c.lv('cle') >= 10, run: () => tLog('Göttliches Eingreifen', 'Wirke einen Klerikerzauber bis Grad 5 ohne Zauberplatz.') },
@@ -83,7 +85,7 @@ const FEAT_ACTIONS = [
   { id: 'hmmove', n: 'Mal des Jägers versetzen', cost: 'b', check: (ch) => markMoveCheck(ch, 'hm'), when: (c) => !!(c.char.play.fx || {}).hm, sub: 'auf das gewählte Ziel', run: (ch) => { ch.play.fx.hmTgt = S.tgt || null; tLog('Mal des Jägers', 'liegt jetzt auf ' + (S.tgt ? partName(S.tgt) : 'einem neuen Ziel')); } },
   { id: 'hexmove', n: 'Verhexen versetzen', cost: 'b', check: (ch) => markMoveCheck(ch, 'hex'), when: (c) => !!(c.char.play.fx || {}).hex, sub: 'auf das gewählte Ziel', run: (ch) => { ch.play.fx.hexTgt = S.tgt || null; tLog('Verhexen', 'liegt jetzt auf ' + (S.tgt ? partName(S.tgt) : 'einem neuen Ziel')); } },
   { id: 'flameatk', n: 'Flamme werfen', cost: 'a', when: (c) => !!(c.char.play.fx || {}).flame, sub: 'Zauberangriff, 18 m', run: (ch, c) => { const s = getSpell('produce-flame'); const ctx = spellCtx(c, 'produce-flame'); tSpellAtk(ch, s, spellDice(s, 0, c, ctx.mod), ctx.atk); } },
-  { id: 'landaid', n: 'Hilfe des Landes', cost: 'a', res: 'ws', when: (c) => c.lv('dru') >= 3 && c.subOf('dru') === 'land', sub: (c) => step(2, [[10, 3], [14, 4]])(c.lv('dru')) + 'W6', run: (ch, c) => { const n = step(2, [[10, 3], [14, 4]])(c.lv('dru')); tRoll(n + 'W6', 'Hilfe des Landes: Schaden (KON-RW SG ' + (8 + c.pb + c.mod.wis) + ' halbiert)'); setTimeout(() => tRoll(n + 'W6', 'Hilfe des Landes: Heilung'), 500); } },
+  { id: 'landaid', n: 'Hilfe des Landes', cost: 'a', res: 'ws', when: (c) => c.lv('dru') >= 3 && c.subOf('dru') === 'land', sub: (c) => step(2, [[10, 3], [14, 4]])(c.lv('dru')) + 'W6', run: (ch, c) => { const n = step(2, [[10, 3], [14, 4]])(c.lv('dru')); tRoll(n + 'W6', 'Hilfe des Landes: Heilung'); tSave(n + 'W6', 'Hilfe des Landes', 'KON', 8 + c.pb + c.mod.wis, true, 'nekrotisch'); } },
   /* Kämpfer */
   { id: 'swind', n: 'Zweiter Atem', cost: 'b', res: 'sw', when: (c) => c.lv('fig'), sub: (c) => '1W10+' + c.lv('fig') + ' TP', run: (ch, c) => tHealSelf(ch, c, '1W10+' + c.lv('fig'), 'Zweiter Atem') },
   { id: 'surge', n: 'Tatendrang', cost: 'f', res: 'as', sub: 'eine zusätzliche Aktion', when: (c) => c.lv('fig') >= 2, run: (ch) => { turnSt(ch).aMax++; tLog('Tatendrang', 'Du erhältst eine zusätzliche Aktion.'); } },
@@ -94,7 +96,7 @@ const FEAT_ACTIONS = [
   { id: 'windstep', n: 'Schritt des Windes', cost: 'b', when: (c) => c.lv('mon') >= 2, sub: 'Spurt', run: (ch, c) => { turnSt(ch).mvMax += c.speed; tLog('Schritt des Windes', 'Spurt als Bonusaktion (für 1 Fokus auch Rückzug, doppelte Sprungweite).'); } },
   { id: 'deflect', n: 'Angriffe abwehren', cost: 'r', when: (c) => c.lv('mon') >= 3, sub: (c) => '1W10' + sgn(c.mod.dex + c.lv('mon')), run: (ch, c) => tRoll('1W10' + sgn(c.mod.dex + c.lv('mon')).replace('−', '-'), 'Angriffe abwehren (Schaden verringern)') },
   { id: 'slowfall', n: 'Langsamer Fall', cost: 'r', when: (c) => c.lv('mon') >= 4, sub: (c) => '−' + 5 * c.lv('mon') + ' Fallschaden', run: (ch, c) => tLog('Langsamer Fall', 'Fallschaden um ' + 5 * c.lv('mon') + ' verringert.') },
-  { id: 'stun', n: 'Betäubender Schlag', cost: 'f', res: 'focus', when: (c) => c.lv('mon') >= 5, sub: (c) => 'KON-RW SG ' + (8 + c.pb + c.mod.wis), run: (ch, c) => tLog('Betäubender Schlag', 'Ziel: KON-Rettungswurf SG ' + (8 + c.pb + c.mod.wis) + ' oder betäubt bis zum Beginn deines nächsten Zuges.') },
+  { id: 'stun', n: 'Betäubender Schlag', cost: 'f', res: 'focus', when: (c) => c.lv('mon') >= 5, sub: (c) => 'KON-RW SG ' + (8 + c.pb + c.mod.wis), run: (ch, c) => (typeof saveCond === 'function' ? saveCond({ label: 'Betäubender Schlag', ab: 'KON', dc: 8 + c.pb + c.mod.wis, conds: ['stunned'], dur: 'next', fx: 'bis zum Beginn deines nächsten Zuges', okFx: 'halbe Bewegungsrate, der nächste Angriff gegen es hat Vorteil' }) : tLog('Betäubender Schlag', 'Ziel: KON-Rettungswurf SG ' + (8 + c.pb + c.mod.wis) + ' oder betäubt bis zum Beginn deines nächsten Zuges.')) },
   { id: 'wholeness', n: 'Ganzheit des Körpers', cost: 'b', res: 'wob', when: (c) => c.lv('mon') >= 6 && c.subOf('mon') === 'openhand', sub: (c) => '1' + maDie(c) + sgn(c.mod.wis), run: (ch, c) => tHealSelf(ch, c, '1' + maDie(c) + sgn(Math.max(1, c.mod.wis)).replace('−', '-'), 'Ganzheit des Körpers') },
   /* Paladin */
   { id: 'loh', n: 'Handauflegen', cost: 'b', when: (c) => c.lv('pal'), sub: (c) => { const r = c.res.find((x) => x.k === 'loh'); return (r.max - (+c.char.play.res.loh || 0)) + ' TP im Pool'; }, run: (ch, c) => tLohPrompt(ch, c) },
@@ -128,7 +130,7 @@ const FEAT_ACTIONS = [
   { id: 'fkmark', n: 'Fluchmarke setzen', cost: 'b', res: 'mark', when: (c) => c.lv('fk'), sub: (c) => '+1' + RW_DIE(c.lv('fk')) + ' pro Zug', run: (ch, c) => tLog('Fluchmarke', 'Kreatur in 18 m markiert (+1' + RW_DIE(c.lv('fk')) + ' im Trefferdialog, kritisch ab 19 ab Stufe 3).') },
   { id: 'fkmark20', n: 'Fluchmarke setzen', cost: 'b', when: (c) => c.lv('fk') >= 20, run: () => tLog('Fluchmarke', 'Kreatur markiert.') },
   /* Spezies */
-  { id: 'breath', n: 'Odemwaffe', cost: 'a', res: 'breath', when: (c) => c.char.species === 'dragonborn', sub: (c) => step(1, [[5, 2], [11, 3], [17, 4]])(c.level) + 'W10 · GES-RW SG ' + (8 + c.mod.con + c.pb), run: (ch, c) => tRoll(step(1, [[5, 2], [11, 3], [17, 4]])(c.level) + 'W10', 'Odemwaffe (GES-RW SG ' + (8 + c.mod.con + c.pb) + ' halbiert)') },
+  { id: 'breath', n: 'Odemwaffe', cost: 'a', res: 'breath', when: (c) => c.char.species === 'dragonborn', sub: (c) => step(1, [[5, 2], [11, 3], [17, 4]])(c.level) + 'W10 · GES-RW SG ' + (8 + c.mod.con + c.pb), run: (ch, c) => tSave(step(1, [[5, 2], [11, 3], [17, 4]])(c.level) + 'W10', 'Odemwaffe', 'GES', 8 + c.mod.con + c.pb, true) },
   { id: 'dflight', n: 'Drachenflug', cost: 'b', res: 'dflight', when: (c) => c.char.species === 'dragonborn' && c.level >= 5, run: () => tLog('Drachenflug', '10 Minuten Flugbewegung.') },
   { id: 'adren', n: 'Adrenalinschub', cost: 'b', res: 'adr', when: (c) => c.char.species === 'orc', sub: (c) => 'Spurt + ' + c.pb + ' temp. TP', run: (ch, c) => { turnSt(ch).mvMax += c.speed; ch.play.temp = Math.max(ch.play.temp || 0, c.pb); tLog('Adrenalinschub', 'Spurt und ' + c.pb + ' temporäre TP.'); } },
   { id: 'stonec', n: 'Steingespür', cost: 'b', res: 'stone', when: (c) => c.char.species === 'dwarf', run: () => tLog('Steingespür', '10 Minuten Erschütterungssinn 18 m auf Stein.') },
@@ -143,17 +145,17 @@ const FEAT_ACTIONS = [
   { id: 'xahnenschild', n: 'Ahnenschild', cost: 'f', when: (c) => c.lv('bar') >= 3 && c.subOf('bar') === 'ahnen', run: (ch, c) => tLog('Ahnenschild', 'Verbündeter in 9 m: ' + (c.lv('bar') >= 16 ? 4 : c.lv('bar') >= 9 ? 3 : 2) + ' + ' + c.mod.con + ' temporäre TP.') },
   { id: 'xsippe', n: 'Sippenruf', cost: 'r', res: 'sippe', when: (c) => c.lv('bar') >= 6 && c.subOf('bar') === 'ahnen', run: (ch, c) => tLog('Sippenruf', 'Verbündeter wiederholt den Rettungswurf mit +' + c.mod.con + '.') },
   { id: 'xfelswurf', n: 'Felswurf', cost: 'b', res: 'felswurf', when: (c) => c.lv('bar') >= 6 && c.subOf('bar') === 'koloss', run: (ch, c) => tRoll('2W8+' + (c.lv('bar') >= 16 ? 4 : c.lv('bar') >= 9 ? 3 : 2), 'Felswurf (Wucht, STÄ-RW SG ' + (8 + c.pb + c.mod.str) + ' oder liegend)') },
-  { id: 'xbeben', n: 'Bebenstoss', cost: 'b', when: (c) => c.lv('bar') >= 10 && c.subOf('bar') === 'koloss', run: (ch, c) => tRoll('2W6', 'Bebenstoss (GES-RW SG ' + (8 + c.pb + c.mod.str) + ', Wucht + liegend)') },
+  { id: 'xbeben', n: 'Bebenstoss', cost: 'b', when: (c) => c.lv('bar') >= 10 && c.subOf('bar') === 'koloss', run: (ch, c) => tSave('2W6', 'Bebenstoss (bei Misserfolg auch liegend)', 'GES', 8 + c.pb + c.mod.str, false, 'Wucht') },
   { id: 'xmaske', n: 'Maskenwechsel', cost: 'b', when: (c) => c.lv('brd') >= 3 && c.subOf('brd') === 'masken', run: (ch, c) => tLog('Maskenwechsel', 'Heldin, Narr oder Herrscherin – 10 Minuten.') },
   { id: 'xbuehne', n: 'Bühnenwechsel', cost: 'r', res: 'insp', when: (c) => c.lv('brd') >= 6 && c.subOf('brd') === 'masken', run: (ch, c) => tLog('Bühnenwechsel', 'Platztausch mit einem Verbündeten in 9 m.') },
   { id: 'xfinale', n: 'Grosses Finale', cost: 'a', res: 'finale', when: (c) => c.lv('brd') >= 14 && c.subOf('brd') === 'masken', run: (ch, c) => tLog('Grosses Finale', 'Feinde in 9 m: WEI-RW SG ' + c.spell.dc + ' oder bezaubert und kampfunfähig.') },
   { id: 'xcrescendo', resN: 3, n: 'Crescendo', cost: 'b', res: 'takt', when: (c) => c.lv('brd') >= 14 && c.subOf('brd') === 'klingentakt', run: (ch, c) => tLog('Crescendo', 'Angriff gegen bis zu drei Kreaturen, je +3W6 Schall bei Treffer.') },
-  { id: 'xkrone', n: 'Donnerkrone', cost: 'b', res: 'cd', when: (c) => c.lv('cle') >= 3 && c.subOf('cle') === 'sturmkrone', run: (ch, c) => tRoll((c.lv('cle') >= 10 ? 3 : 2) + 'W6', 'Donnerkrone (GES-RW SG ' + c.spell.dc + ', Blitz)') },
+  { id: 'xkrone', n: 'Donnerkrone', cost: 'b', res: 'cd', when: (c) => c.lv('cle') >= 3 && c.subOf('cle') === 'sturmkrone', run: (ch, c) => tSave((c.lv('cle') >= 10 ? 3 : 2) + 'W6', 'Donnerkrone', 'GES', c.spell.dc, false, 'Blitz') },
   { id: 'xthron', n: 'Sturmthron', cost: 'b', res: 'thron', when: (c) => c.lv('cle') >= 17 && c.subOf('cle') === 'sturmkrone', run: (ch, c) => tLog('Sturmthron', '1 Minute Flug 18 m.') },
   { id: 'xglutsegen', n: 'Glutsegen', cost: 'a', res: 'cd', when: (c) => c.lv('cle') >= 3 && c.subOf('cle') === 'esse', run: (ch, c) => tLog('Glutsegen', 'Waffe +1W4 Feuer oder Rüstung mit Feuerresistenz – 1 Stunde.') },
   { id: 'xfunken', n: 'Funkenflug', cost: 'r', res: 'funken', when: (c) => c.lv('cle') >= 6 && c.subOf('cle') === 'esse', run: (ch, c) => tRoll('1W8+' + Math.max(0, c.mod.wis), 'Funkenflug (Feuer)') },
   { id: 'xschnuppe', n: 'Sternschnuppe', cost: 'r', res: 'schnuppe', when: (c) => c.lv('dru') >= 6 && c.subOf('dru') === 'sternspur', run: (ch, c) => tRoll('2W6', 'Sternschnuppe (gleissend, Nachteil auf den Angriff)') },
-  { id: 'xriss', n: 'Himmelsriss', cost: 'a', res: 'riss', when: (c) => c.lv('dru') >= 14 && c.subOf('dru') === 'sternspur', run: (ch, c) => tRoll('8W8', 'Himmelsriss (KON-RW SG ' + c.spell.dc + ', gleissend)') },
+  { id: 'xriss', n: 'Himmelsriss', cost: 'a', res: 'riss', when: (c) => c.lv('dru') >= 14 && c.subOf('dru') === 'sternspur', run: (ch, c) => tSave('8W8', 'Himmelsriss (bei Misserfolg auch blind)', 'KON', c.spell.dc, true, 'gleissend') },
   { id: 'xlageblick', n: 'Lageblick', cost: 'b', when: (c) => c.lv('fig') >= 7 && c.subOf('fig') === 'feldkunst', run: (ch, c) => tLog('Lageblick', 'RK und TP des Ziels im Vergleich zu deinen.') },
   { id: 'xgegenzug', n: 'Gegenzug', cost: 'r', res: 'taktik', when: (c) => c.lv('fig') >= 15 && c.subOf('fig') === 'feldkunst', run: (ch, c) => tLog('Gegenzug', 'Angriff gegen den Angreifer.') },
   { id: 'xschild', n: 'Schildzeichen', cost: 'r', res: 'arkan', when: (c) => c.lv('fig') >= 3 && c.subOf('fig') === 'arkanklinge', run: (ch, c) => tLog('Schildzeichen', '+4 RK gegen diesen Angriff.') },
@@ -188,6 +190,7 @@ const STD_ACTIONS = [
 ];
 function stdRun(ch, c, id) {
   if (id === 'dash') { turnSt(ch).mvMax += c.speed; tLog('Spurt', 'Zusätzliche Bewegung: ' + fmtM(c.speed)); }
+  else if (id === 'dodge') { ch.play.fx = ch.play.fx || {}; ch.play.fx.dodge = Date.now(); tLog('Ausweichen', 'Bis zu deinem nächsten Zug: Angriffe gegen dich mit Nachteil (wenn du den Angreifer siehst), Vorteil auf GES-Rettungswürfe.'); if (typeof queueMe === 'function') queueMe(); }
   else if (id === 'hide') d20(c.skills.ste.val, 'Verstecken (Heimlichkeit)', { kind: 'check:dex:ste:' + c.skills.ste.prof });
   else if (id === 'search') d20(c.skills.prc.val, 'Suchen (Wahrnehmung)', { kind: 'check:wis:prc:' + c.skills.prc.prof });
   else if (id === 'study') d20(c.skills.inv.val, 'Studieren (Nachforschungen)', { kind: 'check:int:inv:' + c.skills.inv.prof });
@@ -253,6 +256,7 @@ function turnRun(ch, id) {
   if (kind === 'ft') { const k = id.slice(3); const r = c.res.find((x) => x.k === k); const used = +P.res[k] || 0; if (!r || used >= r.max) { pushLog({ label: r ? r.n : 'Talent', total: '✗', detail: 'Keine Nutzung mehr übrig' }); return; } const fx = c.feats.find((x) => k.endsWith('_' + x.id)); const cost = fx ? featureCost(fx.f.text) : 'f'; if (!tSpend(ch, cost, r.n)) return; P.res[k] = used + 1; tLog(r.n, fx ? fx.f.text : ''); commit(); return; }
   if (kind === 'it') { if (!tSpend(ch, 'b', 'Trank')) return; XA.itDrink(null, a1, '', ch); return; }
   if (kind === 'ush') { const nm = a1 === 'grapple' ? 'Packen' : 'Stossen'; if (!tCountAttack(ch, c, '', nm)) return; const dc = 8 + c.mod.str + c.pb;
+    if (typeof saveCond === 'function') { commit(); return saveCond({ label: nm + ' (waffenloser Schlag)', ab: 'STÄ oder GES', dc, conds: a1 === 'grapple' ? ['grappled'] : [], fx: a1 === 'grapple' ? 'Bewegungsrate 0 – du brauchst eine freie Hand' : '1,5 m weggestossen oder liegend (du wählst)', okFx: 'nichts passiert' }); }
     tLog(nm + ' (waffenloser Schlag)', 'Das Ziel (höchstens eine Grösse grösser) macht einen STÄ- oder GES-Rettungswurf (es wählt) gegen SG ' + dc + '. Misslingt er: ' + (a1 === 'grapple' ? 'gepackt (Bewegungsrate 0). Du brauchst eine freie Hand.' : '1,5 m weggestossen oder liegend (du wählst).') + ' ' + (typeof slTag === 'function' ? 'SL entscheidet.' : '')); commit(); return; }
   if (kind === 'std') { const s = STD_ACTIONS.find((x) => x[0] === a1); if (!tSpend(ch, s[2], s[1])) return; stdRun(ch, c, a1); commit(); }
 }
@@ -269,7 +273,7 @@ function turnBlock(c) {
   const pill = (k, label, left, max) => '<button class="tpill' + (left <= 0 ? ' used' : '') + '" data-act="tPick" data-arg="' + k + '" aria-label="' + label + ' wählen"><i>' + COST_K[k] + '</i><span>' + label + '</span><b>' + (max > 1 ? left + '/' + max : left > 0 ? 'frei' : 'weg') + '</b></button>';
   let h = '<section class="blk turnblk" data-grp="kampf"><div class="tbar">' + pill('a', 'Aktion', t.aMax - t.a, t.aMax) + pill('b', 'Bonusaktion', 1 - t.b, 1) + pill('r', 'Reaktion', 1 - t.r, 1) +
     '<div class="tmove"><span>Bewegung</span><button class="tm" data-act="tMove" data-arg="1.5" aria-label="1,5 m bewegen">−</button><b>' + fmtM(mvLeft) + '</b><button class="tm" data-act="tMove" data-arg="-1.5" aria-label="1,5 m zurück">+</button></div>' +
-    '<button class="btn sm ghost tnew" data-act="tNew" title="Zugbeginn: Aktion, Bonusaktion, Reaktion und Bewegung zurücksetzen, Dauer herunterzählen">Neuer Zug</button></div>' +
+    (typeof onlineFight === 'function' && onlineFight() ? '' : '<button class="btn sm ghost tnew" data-act="tNew" title="Zugbeginn: Aktion, Bonusaktion, Reaktion und Bewegung zurücksetzen, Dauer herunterzählen">Neuer Zug</button>') + '</div>' +
     '<div class="tctx">' + (onlineFight() ? '<span class="tinfo">⚔ Kampf am Tisch' + (offTurn() ? ' · nicht dein Zug' : ' · dein Zug') + '</span>' : '<button class="chip' + (ch.play.localFight ? ' on' : '') + '" data-act="tFight" title="Im Kampfmodus gelten die Zugregeln (Aktionen, Bonusaktion, 1 Zauberplatz pro Zug) streng.">⚔ Kampfmodus ' + (ch.play.localFight ? 'an' : 'aus') + '</button>') + tgtSelect(c) + '</div>';
   /* laufende Angriffsaktion */
   const extra = [];

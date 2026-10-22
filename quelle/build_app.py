@@ -5,7 +5,7 @@ import base64, json, os, re, shutil, subprocess, time
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FONTS = os.path.join(ROOT, 'app', 'fonts')
 OUT = os.path.join(ROOT, 'app', 'www')
-VERSION = '1.5.0'
+VERSION = '1.6.0'
 BUILD = int(time.time())
 
 def rd(p):
@@ -37,7 +37,7 @@ head_extra = ('<link rel="icon" href="%s">\n<meta name="apple-mobile-web-app-cap
               '<meta name="description" content="Deutsches D&amp;D-Heldenbuch: Charaktere erschaffen, Bogen, Würfel und gemeinsamer Tisch.">\n') % fav
 shell = shell.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n' + head_extra, 1)
 
-scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'spelldata.js', 'calc.js', 'hbclasses.js', 'subs.js', 'subs2.js', 'flavor.js', 'pics.js', 'assets.js', 'crests.js', 'extra.js', 'scenes.js', 'theme.js', 'theme-fx.js', 'turn.js', 'effects.js', 'rules.js', 'search.js', 'encounter.js', 'monsters2.js', 'explain.js', 'ux.js', 'help.js', 'spellflav.js', 'info.js', 'dice3d.js', 'levelup.js', 'app.js']
+scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'spelldata.js', 'calc.js', 'hbclasses.js', 'subs.js', 'subs2.js', 'flavor.js', 'pics.js', 'assets.js', 'crests.js', 'extra.js', 'scenes.js', 'theme.js', 'theme-fx.js', 'turn.js', 'effects.js', 'rules.js', 'search.js', 'encounter.js', 'monsters2.js', 'randenc.js', 'mobfx.js', 'mobedit.js', 'loot.js', 'explain.js', 'ux.js', 'help.js', 'spellflav.js', 'info.js', 'dice3d.js', 'levelup.js', 'savedmg.js', 'mechanics.js', 'app.js']
 js = '\n'.join(rd(s) for s in scripts)
 js = js.replace("const APP_URL = 'https://claude.ai/artifact/TKockfJH2cR2kDJKqb1CCK';", "const APP_URL = '';")
 boot = rd('appboot.js').replace('__HB_BUILD__', str(BUILD)).replace('__HB_VERSION__', VERSION)

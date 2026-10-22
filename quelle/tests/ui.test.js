@@ -28,8 +28,8 @@ async function run(b, label, ctxOpt) {
   const hl = await p.locator('#view .hlp').count(); ok('Hilfe-Knöpfe vorhanden', hl >= 3);
   for (let i = 0; i < Math.min(hl, 6); i++) { await tap('#view .hlp', i); ok('Hilfe-Dialog ' + i, await p.locator('.helpdlg').count() === 1); await tap('.helpdlg .x'); }
   /* Kurze Rast mit Trefferwürfeln, lange Rast mit Bestätigung */
-  await tap('button[data-act=rest][data-arg=short]'); ok('Kurze-Rast-Dialog', await p.locator('#modal [data-act=srDone]').count() === 1); await tap('#modal [data-act=srDone]');
-  await tap('button[data-act=rest][data-arg=long]'); const cf = p.locator('[data-act=confirmYes], .cfdlg button.btn:not(.ghost)'); if (await cf.count()) await cf.first().click(); await p.waitForTimeout(150);
+  await tap('.smore summary'); await tap('button[data-act=rest][data-arg=short]'); ok('Kurze-Rast-Dialog', await p.locator('#modal [data-act=srDone]').count() === 1); await tap('#modal [data-act=srDone]');
+  await tap('.smore summary'); await tap('button[data-act=rest][data-arg=long]'); const cf = p.locator('[data-act=confirmYes], .cfdlg button.btn:not(.ghost)'); if (await cf.count()) await cf.first().click(); await p.waitForTimeout(150);
   /* Rückgängig */
   const und = p.locator('.undobtn'); if (await und.count() && await und.isEnabled()) await und.click();
   /* Stufenaufstieg-Dialog */

@@ -1,0 +1,411 @@
+Kultfanatiker (cult-fanatic, HG 2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: zwei Dolche. Zauber (SG 11): Befehl, Person festhalten, Spirituelle Waffe.
+Priester (priest, HG 2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Zauber (SG 13): Heilendes Wort, Spirituelle Wächter, Lenkendes Geschoss.
+Magier (mage, HG 6)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: drei Arkane Stösse. Zauber (SG 14): Feuerball, Kältekegel, Schild, Nebelschritt.
+Zombie (zombie, HG 1/4)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Untote Zähigkeit: Fällt auf 0 TP, KON-Rettungswurf (SG 5 + Schaden), bei Erfolg 1 TP (nicht bei gleissendem Schaden oder Krit).
+Ghul (ghoul, HG 1)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Klauen: KON SG10 → paralyzed | 1 Minute gelähmt (nicht Elfen)
+   TEXT: Klauen: KON-Rettungswurf (SG 10) oder 1 Minute gelähmt (nicht Elfen).
+Geist (ghost, HG 4)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Körperlos, Entsetzlicher Anblick (WEI SG 13), Besessenheit (CHA SG 13).
+Mumie (mummy, HG 3)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Fauler Hieb: KON SG12 →  | Mumienfäule (keine Heilung, TP-Maximum sinkt)
+   TEXT: Fauler Hieb: KON SG 12 oder Mumienfäule (keine Heilung, TP-Maximum sinkt). Furchteinflössender Blick (WEI SG 11).
+Wildschwein (boar, HG 1/4)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Sturmangriff: +1W6 nach 6 m Anlauf, Ziel liegt (STÄ SG 11).
+Riesenspinne (giant-spider, HG 1)
+   AUF: Netz[5-6 dex SG13 - ]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Netz (Aufladung 5–6): GES SG 13 oder festgesetzt. Spinnenklettern.
+Minotaurus (minotaur, HG 3)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Aufspiessen: STÄ SG14 → prone (Anlauf) | liegt
+   TEXT: Sturmangriff mit Aufspiessen nach 3 m: STÄ SG 14 oder liegt.
+Werwolf (werewolf, HG 3)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Biss: KON SG12 →  | Fluch der Lykanthropie (KON SG 12)
+   TEXT: Mehrfachangriff: zwei Angriffe. Biss: Fluch der Lykanthropie (KON SG 12).
+Basilisk (basilisk, HG 3)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Versteinernder Blick: KON SG 12, sonst festgesetzt, danach versteinert.
+Mimik (mimic, HG 2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Pseudopodium: packt SG13 grappled
+   TEXT: Klebrig: Pseudopodium packt (SG 13). Gestaltwandel.
+Gallertwürfel (gelatinous-cube, HG 2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Verschlingen: GES SG 12, sonst 3W6 Säure und gefangen. Durchsichtig.
+Höllenhund (hell-hound, HG 3)
+   AUF: Feueratem[5-6 dex SG12 6W6 Feuer halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Feueratem (Aufladung 5–6): 4,5-m-Kegel, GES SG 12, 6W6 Feuer. Rudeltaktik.
+Schwarzer Drachennestling (black-wyrmling, HG 2)
+   AUF: Säureatem[5-6 dex SG11 5W8 Säure halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Säureatem (Aufladung 5–6): 4,5-m-Linie, GES SG 11, 5W8 Säure.
+Roter Drachennestling (red-wyrmling, HG 4)
+   AUF: Feueratem[5-6 dex SG13 7W6 Feuer halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Feueratem (Aufladung 5–6): 4,5-m-Kegel, GES SG 13, 7W6 Feuer.
+Wyvern (wyvern, HG 6)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: Biss und Stachel. Gift: KON SG 14, halber Giftschaden bei Erfolg.
+Akolyth (acolyte, HG 1/4)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Zauber (SG 12): Heilige Flamme, Segnen, Wunden heilen.
+Druide (druid, HG 2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Zauber (SG 12): Verstricken, Donnerwoge, Mondstrahl, Rindenhaut.
+Krokodil (crocodile, HG 1/2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Biss: packt SG12 grappled
+   TEXT: Biss packt (SG 12). Hält 15 Minuten die Luft an.
+Löwe (lion, HG 1)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Rudeltaktik. Anspringen: nach 6 m Anlauf STÄ SG 13 oder liegend.
+Riesenskorpion (giant-scorpion, HG 3)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Klaue: packt SG12 grappled
+   TEXT: Mehrfachangriff: zwei Klauen und Stachel. Klaue packt (SG 12). Gift: KON SG 12, halb bei Erfolg.
+Mammut (mammoth, HG 6)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Stampfen: STÄ SG18 → prone (Anlauf) | liegend; Stampfen gegen Liegende als Bonusaktion
+   TEXT: Sturmangriff: nach 6 m Anlauf STÄ SG 18 oder liegend; Stampfen gegen Liegende als Bonusaktion.
+Ankheg (ankheg, HG 2)
+   AUF: Säurespray[6-6 dex SG13 3W6 Säure halb]
+   LA 0 LW 0
+   ZUS: Biss: packt SG13 grappled
+   TEXT: Biss packt (SG 13). Säurespray (Aufladung 6): 9-m-Linie, GES SG 13, 3W6 Säure.
+Satyr (satyr, HG 1/2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Magieresistenz. Panflöte: bezaubernde, verängstigende oder einschläfernde Melodie (WEI SG 13).
+Dryade (dryad, HG 1)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Baumschritt. Feenbezauberung (WEI SG 14). Spricht mit Pflanzen und Tieren.
+Harpyie (harpy, HG 1)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Lockender Gesang: WEI SG 11 oder bezaubert und bewegt sich auf die Harpyie zu.
+Chimäre (chimera, HG 6)
+   AUF: Feueratem[5-6 dex SG15 7W8 Feuer halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: drei Angriffe. Feueratem (Aufladung 5–6): 4,5-m-Kegel, GES SG 15, 7W8 Feuer.
+Medusa (medusa, HG 6)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff. Versteinernder Blick: KON SG 14, erst festgesetzt, dann versteinert.
+Otyugh (otyugh, HG 5)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Biss: KON SG15 →  | Biss überträgt Krankheit (KON SG 15)
+   TEXT: Mehrfachangriff: Biss und zwei Tentakel. Biss überträgt Krankheit (KON SG 15). Telepathie.
+Todesfee (banshee, HG 4)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Körperlos. Klagen (1× pro Tag): KON SG 13 oder 0 TP, bei Erfolg 3W6 psychisch.
+Gespenst (specter, HG 1)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Lebensentzug: KON SG10 →  | das TP-Maximum sinkt um den Schaden
+   TEXT: Körperlos. Lebensentzug: KON SG 10 oder das TP-Maximum sinkt um den Schaden.
+Vampir (vampire, HG 13)
+   AUF: 
+   LA 3 LW 3
+   ZUS: 
+   TEXT: Legendär. Regeneration 20 (ausser gleissend/Wasser). Bezaubern (WEI SG 17), Gestaltwandel, Vampirschwächen.
+Ausgewachsener roter Drache (adult-red, HG 17)
+   AUF: Feueratem[5-6 dex SG21 18W6 Feuer halb]
+   LA 3 LW 3
+   ZUS: 
+   TEXT: Mehrfachangriff: Biss und zwei Klauen. Feueratem (Aufladung 5–6): 18-m-Kegel, GES SG 21, 18W6 Feuer. Legendäre Aktionen und Widerstände.
+✦ Gedächtnisschlund (x-schlund, HG 6)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Ein Kopf pro verschlungenem Opfer (Start: 3 Köpfe, je ein Biss). Lied des Vergessens: Wer es hört, macht täglich einen WEI-Rettungswurf (SG 15), sonst nimmt er den Schlund nicht wahr und vergisst seine Opfer vollständig. Schriftliche Notizen wirken gegen das Vergessen.
+✦ Aschenwurm (x-aschewurm, HG 2)
+   AUF: Aschewolke[5-6 con SG12 - ]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Glutbauch: Wer ihn im Nahkampf trifft, erleidet 1W6 Feuerschaden. Aschewolke (Aufladung 5–6): 3-m-Kugel, KON SG 12 oder 1 Runde blind.
+✦ Nebelweberin (x-nebelspinne, HG 3)
+   AUF: Nebelnetz[5-6 dex SG13 -  halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Nebelnetz (Aufladung 5–6): 6-m-Würfel aus Nebel, darin festgesetzt bei GES SG 13 und stark verdeckt. Sieht durch Nebel.
+✦ Glockenkrähenschwarm (x-glockenkraehe, HG 1)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Schwarm. Totenläuten: Läutet, wenn in 18 m jemand stirbt – Kreaturen in 9 m: WEI SG 11 oder verängstigt.
+✦ Moosriese (x-moosriese, HG 5)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: zwei Fäuste. Verwurzeln: Kreaturen in 3 m, STÄ SG 15 oder festgesetzt. Regeneration 10 bei Regen oder im Wald (ausser nach Feuer).
+✦ Knochenharfner (x-knochenharfner, HG 4)
+   AUF: Klagelied[5-6 wis SG14 3W8 psychisch]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Untot. Klagelied (Aufladung 5–6): Kreaturen in 9 m, WEI SG 14 oder 3W8 psychisch und kampfunfähig bis zum Ende ihres nächsten Zuges.
+✦ Sumpflaterne (x-sumpflaterne, HG 1/2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Lockruf: Eine Kreatur in 18 m, WEI SG 12 oder sie bewegt sich in ihrem Zug auf die Laterne zu.
+✦ Kristallkrabbe (x-kristallkrabbe, HG 2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Schere: packt SG13 grappled
+   TEXT: Schere packt (SG 13). Prisma: Wird sie von einem Zauber mit Strahl getroffen, lenkt sie ihn auf eine Kreatur in 9 m um (1× pro Runde).
+✦ Aderfürst (x-aderfuerst, HG 7)
+   AUF: Roter Nebel[5-6 con SG15 6W8 nekrotisch halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: zwei Blutklingen. Blutband: heilt die Hälfte des nekrotischen Schadens. Roter Nebel (Aufladung 5–6): 6-m-Kugel, KON SG 15, 6W8 nekrotisch.
+Junger roter Drache (young-red, HG 10)
+   AUF: Feueratem[5-6 dex SG17 16W6 Feuer halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: Biss und zwei Klauen. Feueratem (Aufladung 5–6): 9-m-Kegel, GES SG 17, 16W6 Feuer.
+Dogge (mastiff, HG 1/8)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Biss: STÄ SG11 → prone | liegend (nur höchstens mittelgrosse Ziele)
+   TEXT: Biss: STÄ SG 11 oder liegend (nur höchstens mittelgrosse Ziele).
+Panther (panther, HG 1/4)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Anspringen: nach 6 m Anlauf STÄ SG 12 oder liegend.
+Sprite (sprite, HG 1/4)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Kurzbogen: KON SG10 → poisoned | vergiftet (bei 5+ verfehlt bewusstlos)
+   TEXT: Kurzbogen: KON SG 10 oder vergiftet (bei 5+ verfehlt bewusstlos). Herzblick, Unsichtbarkeit.
+Riesenziege (giant-goat, HG 1/2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Sturmangriff: nach 6 m +2W4 und STÄ SG 13 oder liegend. Trittsicher.
+Weisser Drachennestling (white-wyrmling, HG 2)
+   AUF: Kälteodem[5-6 con SG12 5W8 Kälte halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Kälteodem (Aufladung 5–6): 4,5-m-Kegel, KON SG 12, 5W8 Kälte (halb bei Erfolg).
+Grüner Drachennestling (green-wyrmling, HG 2)
+   AUF: Giftodem[5-6 con SG11 6W6 Gift halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Giftodem (Aufladung 5–6): 4,5-m-Kegel, KON SG 11, 6W6 Gift (halb bei Erfolg).
+Blauer Drachennestling (blue-wyrmling, HG 3)
+   AUF: Blitzodem[5-6 dex SG12 4W10 Blitz halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Blitzodem (Aufladung 5–6): 9-m-Linie, GES SG 12, 4W10 Blitz (halb bei Erfolg).
+Junger weisser Drache (young-white, HG 6)
+   AUF: Kälteodem[5-6 con SG15 10W8 Kälte halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: Biss + zwei Klauen. Kälteodem (Aufladung 5–6): 9-m-Kegel, KON SG 15, 10W8 Kälte (halb bei Erfolg).
+Junger schwarzer Drache (young-black, HG 7)
+   AUF: Säureodem[5-6 dex SG14 11W8 Säure halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: Biss + zwei Klauen. Säureodem (Aufladung 5–6): 9-m-Linie, GES SG 14, 11W8 Säure (halb bei Erfolg).
+Roc (roc, HG 11)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Krallen: packt SG19 grappled
+   TEXT: Mehrfachangriff: Schnabel + Krallen. Krallen packen (SG 19) und tragen Beute fort.
+Drow (drow, HG 1/4)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Handarmbrust: KON SG13 → poisoned | vergiftet (bei 5+ verfehlt bewusstlos)
+   TEXT: Handarmbrust: KON SG 13 oder vergiftet (bei 5+ verfehlt bewusstlos). Feenahnen, Sonnenlichtempfindlich.
+Brabbelnder Schlund (gibbering-mouther, HG 2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Wahnsinniges Gebrabbel: WEI SG 10 oder verwirrt. Lässt Boden zu Schlamm werden.
+Riesenfrosch (giant-frog, HG 1/4)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Biss: packt SG11 grappled
+   TEXT: Biss packt (SG 11) und verschluckt kleine Ziele. Springt 6 m weit.
+Riesenkröte (giant-toad, HG 1)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Biss: packt SG13 grappled
+   TEXT: Biss packt (SG 13) und verschluckt mittelgrosse Ziele: 3W6 Säure pro Zug.
+Riesenwürgeschlange (giant-constrictor, HG 2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Umschlingen: packt SG16 grappled,restrained
+   TEXT: Umschlingen packt (SG 16): festgesetzt, jeden Zug erneut Schaden.
+Ghast (ghast, HG 2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Klauen: KON SG10 → paralyzed | gelähmt (1 Minute, nicht Elfen)
+   TEXT: Klauen: KON SG 10 oder gelähmt (1 Minute, nicht Elfen). Gestank: KON SG 10 oder vergiftet.
+Ogerzombie (ogre-zombie, HG 2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Untote Zähigkeit: Bei 0 TP KON-Wurf (SG 5 + Schaden), bei Erfolg 1 TP.
+Mumienfürst (mummy-lord, HG 15)
+   AUF: 
+   LA 3 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: Blick + Faust. Legendäre Aktionen. Zauber (Priester). Kehrt aus dem Herz zurück.
+Leichnam (lich, HG 21)
+   AUF: 
+   LA 3 LW 3
+   ZUS: 
+   TEXT: Zauber bis Grad 9. Legendäre Aktionen und Widerstand. Kehrt mit seinem Seelengefäss zurück.
+Riesenkrabbe (giant-crab, HG 1/8)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Schere: packt SG11 grappled
+   TEXT: Schere packt (SG 11). Amphibisch.
+Riesenkrake (giant-octopus, HG 1)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Tentakel: packt SG16 grappled
+   TEXT: Tentakel packt (SG 16). Tintenwolke zur Flucht.
+Meervettel (sea-hag, HG 2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Schreckliche Erscheinung: WEI SG 11 oder verängstigt. Tödlicher Blick.
+Wasserelementar (water-elemental, HG 5)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: zwei Hiebe. Überfluten: verschlingt Kreaturen (STÄ SG 15).
+Staubmephit (dust-mephit, HG 1/2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Blendender Atem: 4,5-m-Kegel, GES SG 10 oder blind. Explodiert beim Tod.
+Luftelementar (air-elemental, HG 5)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: zwei Schläge. Wirbelwind: STÄ SG 13, 3W8+2 und weggeschleudert.
+Eismephit (ice-mephit, HG 1/2)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Frostatem: 4,5-m-Kegel, GES SG 10, 2W4 Kälte. Explodiert beim Tod in Eissplitter.
+Winterwolf (winter-wolf, HG 3)
+   AUF: Kälteodem[5-6 dex SG12 4W8 Kälte halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Kälteodem (Aufladung 5–6): 4,5-m-Kegel, GES SG 12, 4W8 Kälte. Rudeltaktik, Schneetarnung.
+Quasit (quasit, HG 1)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Klauen: KON SG10 → poisoned | vergiftet (1 Minute)
+   TEXT: Klauen: KON SG 10 oder vergiftet (1 Minute). Gestaltwandel, Unsichtbarkeit, Schrecken.
+Couatl (couatl, HG 4)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Biss: KON SG13 → poisoned | vergiftet (24 h bewusstlos)
+   TEXT: Biss: KON SG 13 oder vergiftet (24 h bewusstlos). Gestaltwandel, Zauber, Telepathie.
+Sukkubus (succubus, HG 4)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Bezaubern (WEI SG 15), Lebensentzug durch Kuss (5W10+5 psychisch). Gestaltwandel.
+Vrock (vrock, HG 6)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff. Sporen (Gift) und betäubendes Kreischen (KON SG 14).
+Hezrou (hezrou, HG 8)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: Biss + zwei Klauen. Gestank: KON SG 14 oder vergiftet.
+Grubenscheusal (pit-fiend, HG 20)
+   AUF: 
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: vier Angriffe. Furchtaura (WEI SG 21). Zauber: Feuerball, Festhalten.
+Homunkulus (homunculus, HG 0)
+   AUF: 
+   LA 0 LW 0
+   ZUS: Biss: KON SG10 → poisoned | vergiftet (bei 5+ verfehlt bewusstlos)
+   TEXT: Biss: KON SG 10 oder vergiftet (bei 5+ verfehlt bewusstlos). Telepathische Bindung an den Schöpfer.
+Lehmgolem (clay-golem, HG 9)
+   AUF: Hast[5-6 - SG0 - ]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: zwei Schläge, senken das TP-Maximum. Säure heilt ihn. Hast (Aufladung).
+Steingolem (stone-golem, HG 10)
+   AUF: Verlangsamen[5-6 wis SG17 - ]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Mehrfachangriff: zwei Schläge. Verlangsamen (Aufladung, WEI SG 17). Magieresistenz.
+Eisengolem (iron-golem, HG 16)
+   AUF: Giftodem[6-6 con SG19 10W8 Gift halb]
+   LA 0 LW 0
+   ZUS: 
+   TEXT: Giftodem (Aufladung 6): 4,5-m-Kegel, KON SG 19, 10W8 Gift (halb bei Erfolg). Feuer heilt ihn. Magieresistenz.
+82

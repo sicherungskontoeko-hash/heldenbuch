@@ -85,6 +85,7 @@ function rollState(kind) {
     if (c.armorNonProf && (ab === 'str' || ab === 'dex')) dis.push('Rüstung ohne Übung');
     if (c.lv('bar') && P.raging && !c.heavyArmor && ab === 'str' && (k.type === 'check' || k.type === 'save')) adv.push('Kampfrausch');
     if (c.lv('bar') >= 2 && k.type === 'save' && k.ab === 'dex') adv.push('Gefahrengespür');
+    if (P.fx && P.fx.dodge && k.type === 'save' && k.ab === 'dex' && !cond.some((x) => ['incapacitated', 'paralyzed', 'stunned', 'unconscious', 'petrified'].includes(x))) adv.push('Ausweichen');
     if (ch.species === 'gnome' && k.type === 'save' && ['int', 'wis', 'cha'].includes(k.ab)) adv.push('Gnomische Gerissenheit');
     if (c.lv('fig') >= 3 && c.subOf('fig') === 'champion' && k.type === 'check' && k.skill === 'ath') adv.push('Bemerkenswerter Athlet');
     if (k.type === 'save' && k.skill === 'conc' && c.lv('wlk') && (ch.invocations || []).includes('mind')) adv.push('Schauerlicher Geist');
@@ -254,7 +255,7 @@ function dmgRoll(ch) {
 }
 
 /* ---------- Angriffszauber: Angriff → Treffer? → Schaden, auch mehrere Strahlen ---------- */
-function spellAttack(ch, s, count, expr, tail, note, atk) { S.sa = { name: s.name, sid: s.id, k: 1, count, expr, tail, note: note || '', atk }; saAttack(); }
+function spellAttack(ch, s, count, expr, tail, note, atk) { S.sa = { name: s.name, sid: s.id, k: 1, count, expr, tail, note: note || '', atk, tgt: S.tgt || '' }; saAttack(); }
 function saAttack() {
   const o = S.sa; if (!o) return; const c = derive(cur(), S.hb);
   S.lastAttack = null;
@@ -263,16 +264,19 @@ function saAttack() {
   const la = S.lastAttack || {}; o.crit = !!la.crit; const fumble = !!la.fumble;
   setTimeout(() => orbPrompt('<div class="pr' + (o.crit ? ' crit' : '') + '"><b>' + esc(o.name) + (o.count > 1 ? ' · ' + o.k + ' von ' + o.count : '') + ': ' + (o.crit ? 'Kritischer Treffer! ' : '') + 'Angriff ' + total + '</b><p>' + (o.crit ? 'Die Schadenswürfel werden verdoppelt.' : fumble ? 'Eine natürliche 1 verfehlt immer.' : 'Trifft das die RK des Ziels? ' + slTag() + '') + (o.count > 1 && o.k === 1 ? ' Jeder Strahl darf ein anderes Ziel treffen.' : '') + '</p><div class="chips end"><button class="btn ghost" data-act="saMiss">Verfehlt</button><button class="btn" data-act="saHit"' + (fumble ? ' disabled' : '') + '>' + (o.crit ? 'Kritischen Schaden würfeln' : 'Treffer – Schaden würfeln') + '</button></div></div>'), 650);
 }
-function saNext() { const o = S.sa; if (!o) return; orbPrompt(''); if (o.k < o.count) { o.k++; setTimeout(saAttack, 350); } else S.sa = null; }
+function saNext() { const o = S.sa; if (!o) return; orbPrompt(''); if (o.k < o.count) { o.k++; setTimeout(saAttack, 350); } else { S.sa = null; iceKnifeBurst(); } }
+/* Eismesser: nach dem Angriff (Treffer oder nicht) explodiert er – GES-Rettungswurf, kein halber Schaden */
+function iceKnifeBurst() { const k = S.iceKnife; S.iceKnife = null; if (!k) return; setTimeout(() => (typeof saveDmg === 'function' ? saveDmg({ label: 'Eismesser: Explosion (1,5 m um das Ziel)', expr: k.expr, ab: 'GES', dc: k.dc, half: false, type: 'Kälte', tgt: k.tgt }) : rollDmg(k.expr, 'Eismesser: Explosion')), 400); }
 function saHit() {
   const o = S.sa; if (!o) return;
   const P = cur().play; const c = derive(cur(), S.hb); let base = o.expr; const add = [];
-  if (P.fx && P.fx.hm && markOk(P, 'hm', S.tgt || '')) { base += '+1W' + (c.lv('ran') >= 20 ? 10 : 6); add.push('Mal des Jägers'); }
-  if (P.fx && P.fx.hex && markOk(P, 'hex', S.tgt || '')) { base += '+1W6'; add.push('Verhexen'); }
+  if (P.fx && P.fx.hm && markOk(P, 'hm', o.tgt || '')) { base += '+1W' + (c.lv('ran') >= 20 ? 10 : 6); add.push('Mal des Jägers'); }
+  if (P.fx && P.fx.hex && markOk(P, 'hex', o.tgt || '')) { base += '+1W6'; add.push('Verhexen'); }
   const expr = o.crit ? base.replace(/(\d+)W(\d+)/g, (m, n, d) => 2 * n + 'W' + d) : base;
   const r = rollExpr(expr); const mm = /W(\d+)/.exec(expr);
   if (o.sid === 'sorcerous-burst') burstExplode(r, Math.max(0, spellCtx(c, 'sorcerous-burst').mod));
   pushLog({ label: o.name + (o.count > 1 ? ' · ' + o.k + '/' + o.count : '') + ': Schaden' + (o.crit ? ' (kritisch)' : ''), groups: r.groups, total: r.total, detail: r.detail + (o.note ? ' · ' + o.note : '') + (add.length ? ' · inkl. ' + add.join(', ') : '') + (o.k === 1 && o.tail ? ' · ' + o.tail : ''), sides: mm ? +mm[1] : 0, nat: r.total, crit: o.crit });
+  if (o.tgt && o.tgt.startsWith('n:') && typeof onlineFight === 'function' && onlineFight()) return applyPrompt(o.tgt, r.total, o.name, '', () => saNext());
   saNext();
 }
 function rollDmg(expr, label) { const r = rollExpr(expr); const m = /W(\d+)/.exec(String(expr)); const g = /\[([\d,]+)\]/.exec(r.detail); pushLog({ label, groups: r.groups, total: r.total, detail: r.detail, sides: m ? +m[1] : 0, nat: g ? g[1].split(',').reduce((a, b) => a + +b, 0) : r.total }); }
@@ -354,6 +358,10 @@ function showToast(e) {
   const flat = (e.groups || []).flatMap((g) => g.rolls.map((v) => ({ v, sides: g.sides, neg: g.sign < 0 })));
   if (flat.length > 1) return showMulti(e, flat);
   const sides = e.sides || 0;
+  if (!sides && !flat.length) { /* kein Würfelwurf (Ereignis, Hinweis): kleine Meldung statt Würfelfenster */
+    t.hidden = true; const tot = typeof e.total === 'number' || /^\d/.test(String(e.total)) ? ': ' + e.total : e.total === '✗' ? ' ✗' : '';
+    return bannerToast(e.label + tot, String(e.detail || '').replace(/<[^>]*>/g, '').slice(0, 140));
+  }
   const head = '<div class="tl">' + esc(e.label) + (e.pair ? ' <span class="mode">' + (e.adv ? 'Vorteil' : 'Nachteil') + '</span>' : '') + '</div>';
   const vals = e.pair || (flat.length === 1 ? [flat[0].v] : sides ? [e.nat ?? e.total] : []);
   const keep = e.pair ? e.keep : 0;
@@ -449,21 +457,31 @@ function renderHeroes() {
       '<div class="acts2"><button data-act="exportOne" data-arg="' + id + '">Exportieren</button><button data-act="dupChar" data-arg="' + id + '">Duplizieren</button>' +
       (conf ? '<button class="del" data-act="delChar" data-arg="' + id + '">Wirklich löschen?</button><button data-act="noDel">Nein</button>' : '<button class="del" data-act="askDel" data-arg="' + id + '">Löschen</button>') + '</div></article>';
   }
-  h += '</div>' + (isApp() ? transferHtml() : '') + '<details class="themefold"><summary>Stimmung &amp; Aussehen</summary>' + themeBlock() + '</details>' + '<div class="herobar"><label class="btn ghost filebtn">Helden aus Datei laden<input type="file" id="importFile" accept=".json,application/json"></label><button class="btn ghost" data-act="importText">Text einfügen</button>' + (ids.length > 1 ? '<button class="btn ghost" data-act="exportAll">Alle Helden exportieren</button>' : '') + '</div>';
+  h += '</div>' + (isApp() ? transferHtml() : '') + '<div class="herobar"><label class="btn ghost filebtn">Helden aus Datei laden<input type="file" id="importFile" accept=".json,application/json"></label><button class="btn ghost" data-act="importText">Text einfügen</button>' + (ids.length ? '<button class="btn ghost" data-act="exportAll" title="Helden, Hausregeln, eigene Monster, Begegnungen und SL-Notizen in einer Datei">Alles sichern</button>' : '') + '</div>';
   return h;
 }
 
 /* ---------- Export / Import ---------- */
-function exportData(list) { return JSON.stringify({ heldenbuch: 1, exportiert: new Date().toISOString(), chars: list, hb: Object.values(S.hb) }, null, 2); }
+function exportData(list, full) { const d = { heldenbuch: 1, exportiert: new Date().toISOString(), chars: list, hb: Object.values(S.hb) }; if (full) d.extra = backupExtras(); return JSON.stringify(d, null, 2); }
+/* „Alles sichern“: neben Helden und Hausregeln auch eigene Monster, gespeicherte Begegnungen und SL-Notizen (liegen sonst nur im Browser) */
+function backupExtras() { const notes = {}; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.indexOf('heldenbuch_dm_') === 0 && localStorage.getItem(k)) notes[k.slice(14)] = localStorage.getItem(k); } } catch (e) {}
+  return { mobs: typeof ownMobs === 'function' ? ownMobs() : [], enc: typeof encLoad === 'function' ? encLoad() : [], dmNotes: notes }; }
+function restoreExtras(x) {
+  if (!x || typeof x !== 'object') return []; const done = [];
+  if (Array.isArray(x.mobs) && x.mobs.length && typeof ownMobsStore === 'function') { const list = ownMobs(); let n = 0; x.mobs.forEach((o) => { if (!o || !o.id || !o.name || !CR_XP[o.cr]) return; const i = list.findIndex((y) => y.id === o.id); if (i >= 0) list[i] = o; else list.push(o); n++; }); ownMobsStore(list); ownMobsLoad(); if (n) done.push(n + ' eigene Monster'); }
+  if (Array.isArray(x.enc) && x.enc.length && typeof encStore === 'function') { const list = encLoad(); let n = 0; x.enc.forEach((e) => { if (!e || !e.id || !Array.isArray(e.mobs) || list.some((y) => y.id === e.id)) return; list.push(e); n++; }); encStore(list.slice(0, 60)); if (n) done.push(n + ' Begegnungen'); }
+  if (x.dmNotes && typeof x.dmNotes === 'object') { let n = 0; Object.entries(x.dmNotes).forEach(([room, txt]) => { if (typeof txt !== 'string' || !txt) return; try { const k = 'heldenbuch_dm_' + room; const cur0 = localStorage.getItem(k) || ''; if (cur0 === txt) return; localStorage.setItem(k, cur0 ? cur0 + '\n\n— aus der Sicherung —\n' + txt : txt); n++; } catch (e) {} }); if (n) done.push('SL-Notizen (' + n + ' Runde' + (n > 1 ? 'n' : '') + ')'); }
+  return done;
+}
 function backupLine(n) {
   if (!n) return ''; let t = 0; try { t = +localStorage.getItem('hb_lastExport') || 0; } catch (e) {}
   const days = t ? Math.floor((Date.now() - t) / 864e5) : null;
   const warn = days === null || days >= 14;
-  return '<p class="backupline' + (warn ? ' warn' : '') + '">' + (days === null ? 'Noch keine Sicherung exportiert.' : 'Letzte Sicherung: ' + (days === 0 ? 'heute' : 'vor ' + days + ' Tag' + (days === 1 ? '' : 'en')) + '.') + (warn ? ' Der Browser-Speicher ist kein Archiv – <button class="link" data-act="exportAll">jetzt alle Helden exportieren</button>.' : '') + '</p>';
+  return '<p class="backupline' + (warn ? ' warn' : '') + '">' + (days === null ? 'Noch keine Sicherung exportiert.' : 'Letzte Sicherung: ' + (days === 0 ? 'heute' : 'vor ' + days + ' Tag' + (days === 1 ? '' : 'en')) + '.') + (warn ? ' Der Browser-Speicher ist kein Archiv – <button class="link" data-act="exportAll">jetzt alles sichern</button>.' : '') + '</p>';
 }
 function markExported() { try { localStorage.setItem('hb_lastExport', String(Date.now())); } catch (e) {} }
-async function doExport(list, fname) {
-  const data = exportData(list); markExported();
+async function doExport(list, fname, full) {
+  const data = exportData(list, full); markExported();
   try { const d = await (window.claude && window.claude.use ? window.claude.use('downloads') : null); if (!d) throw new Error('none'); await d.save({ filename: fname, data }); pushLog({ label: 'Exportiert', total: '✓', detail: fname + ' gespeichert' }); }
   catch (e) { if (e && e.code === 'declined') return; openModal('export', data); }
 }
@@ -471,15 +489,16 @@ function fileName(ch) { return (ch.name || 'held').replace(/^Beispiel:\s*/, '').
 function importJson(text) {
   let d; try { d = JSON.parse(text); } catch (e) { throw new Error('Kein gültiger Heldentext (JSON fehlerhaft).'); }
   const list = Array.isArray(d.chars) ? d.chars : (d && d.id && d.cls ? [d] : []);
-  if (!list.length) throw new Error('Im Text wurde kein Held gefunden.');
+  if (!list.length && !(d && d.extra)) throw new Error('Im Text wurde kein Held gefunden.');
   const errs = []; list.forEach((c, i) => { const e = validateChar(c); if (e.length) errs.push((c && c.name ? '„' + c.name + '“' : 'Held ' + (i + 1)) + ': ' + e.join(' ')); });
   if (errs.length) throw new Error('Nicht geladen – bestehende Helden bleiben unverändert. ' + errs.join(' | '));
   if (d.hb !== undefined && !Array.isArray(d.hb)) throw new Error('Hausregeln im Text sind ungültig.');
   (d.hb || []).forEach((h) => { S.hb[h.id] = h; persist('h', h.id); });
   let last = null;
   const notes = []; list.forEach((c) => { const n = normChar(JSON.parse(JSON.stringify(c))); notes.push(...cleanRefs(n)); if (typeof n.id !== 'string' || !n.id || S.chars[n.id]) n.id = freshId(); S.chars[n.id] = n; persist('c', n.id); last = n.id; }); if (notes.length) bannerToast('Beim Laden bereinigt', notes.join(' · '));
-  S.cur = last; S.view = 'heroes'; S.modal = null; render();
-  pushLog({ label: 'Geladen', total: list.length, detail: list.length === 1 ? '„' + list[0].name + '“ ist jetzt in deinen Helden' : 'Helden importiert' });
+  const ex = restoreExtras(d.extra);
+  if (last) S.cur = last; S.view = 'heroes'; S.modal = null; render();
+  pushLog({ label: 'Geladen', total: list.length, detail: (list.length === 1 ? '„' + list[0].name + '“ ist jetzt in deinen Helden' : list.length + ' Helden importiert') + (ex.length ? ' · dazu ' + ex.join(', ') : '') });
 }
 function openModal(kind, data) {
   S.modal = kind; const m = $('#modal');
@@ -670,7 +689,7 @@ function renderSheet(c) {
   let h = P.dead ? fallenHtml(ch, c) + '<div class="sheet fallen" aria-hidden="true" inert>' : (mgOf(c) === 'alle' ? '<div class="sheet' + (explainOn() ? ' explain' : '') + '">' : '<div class="sheet' + (explainOn() ? ' explain' : '') + '" data-mg="' + mgOf(c) + '">');
   h += '<header class="shead"><div class="who">' + sigil(ch) + '<div><h1><button type="button" class="hrn" data-act="renameHero" title="Namen ändern">' + esc(ch.name) + '<span aria-hidden="true">✎</span></button></h1><p>' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' (' + c.subName + ')' : '') + ' · ' + c.sp.name + ' · ' + esc(c.bg.name) + (ch.alignment ? ' · ' + esc(ch.alignment) : '') + '</p></div></div>' +
     '<div class="sctl"><div class="seg" role="group" aria-label="Würfelmodus">' + [['dis', 'Nachteil'], ['normal', 'Normal'], ['adv', 'Vorteil']].map(([k, l]) => '<button class="' + (S.mode === k ? 'on' : '') + '" data-act="mode" data-arg="' + k + '">' + l + '</button>').join('') + '</div>' +
-    '<button class="btn ghost" data-act="rest" data-arg="short">Kurze Rast</button><button class="btn ghost" data-act="rest" data-arg="long" data-confirm="Lange Rast: TP, Trefferwürfel, Zauberplätze und alle Ressourcen werden zurückgesetzt.">Lange Rast</button><details class="mnu smore"><summary class="btn ghost" aria-label="Weitere Aktionen" title="Weitere Aktionen">⋯</summary><div class="mnul"><button data-act="exportOne" data-arg="' + ch.id + '">Exportieren</button><button data-act="print">Drucken</button><button data-act="renameHero">Namen ändern</button><button data-act="diceOpen">Würfel-Set</button></div></details></div></header>';
+    '<details class="mnu smore"><summary class="btn ghost" aria-label="Rast und weitere Aktionen" title="Rast und weitere Aktionen">Rast · ⋯</summary><div class="mnul"><button data-act="rest" data-arg="short">Kurze Rast</button><button data-act="rest" data-arg="long" data-confirm="Lange Rast: TP, Trefferwürfel, Zauberplätze und alle Ressourcen werden zurückgesetzt.">Lange Rast</button><hr><button data-act="exportOne" data-arg="' + ch.id + '">Exportieren</button><button data-act="print">Drucken</button><button data-act="renameHero">Namen ändern</button><button data-act="diceOpen">Würfel-Set</button></div></details></div></header>';
   h += sheetNav(c);
   if (typeof hintBlock === 'function') h += hintBlock(c);
   h += '<div class="vitals">' +
@@ -713,7 +732,7 @@ function renderSheet(c) {
   h += '<section class="blk" data-grp="faehig"><h2>Merkmale & Talente</h2>' + featList(c.features) + '</section>';
   h += '<section class="blk gear" data-grp="gear">' + gearBlock(c) + '</section>';
   h += '<section class="blk" data-grp="notiz"><h2>Notizen</h2>' + area('notes', ch.notes, 'Notizen, Hintergrund, Kampagne …', 6) + '</section>';
-  h += '</div></div><div class="logs" data-grp="notiz kampf">' + (S.camp ? '<section class="blk logblk"><h2>Am Tisch <small>' + esc(S.camp) + '</small></h2><div id="tableBox">' + tableBox(6) + '</div></section>' : '') + '<section class="blk logblk"><h2>Deine Würfe</h2><ul id="log" class="log">' + logHtml() + '</ul></section></div></div>';
+  h += '</div></div><div class="logs" data-grp="notiz kampf">' + (S.camp ? '<section class="blk logblk"><h2>Am Tisch <small>' + esc(S.camp) + '</small></h2><div id="tableBox">' + tableBox(6) + '</div></section>' : '') + '<section class="blk logblk"><h2>Dein Verlauf</h2><ul id="log" class="log">' + logHtml() + '</ul></section></div></div>';
   return h;
 }
 function fxChips(c) {
@@ -861,6 +880,8 @@ function castSpell(ch, id, lvl, mode, resKey) {
   const dice = spellDice(s, lvl || s.lvl, c, abMod, { noSlot: s.lvl > 0 && !slotUsed });
   const label = s.name + (s.lvl && lvl > s.lvl ? ' (Grad ' + lvl + ')' : '');
   if (id === 'chromatic-orb') { commit(); return chromaticOrb(ch, lvl || 1, used, concNote); }
+  const scd = typeof SPELL_COND !== 'undefined' && SPELL_COND[id]; const scAb = scd && (((typeof SPELL_DATA !== 'undefined' && SPELL_DATA[id]) || {}).save ? AB_K[SPELL_DATA[id].save] : (/(STÄ|GES|KON|INT|WEI|CHA)-Rettungswurf/.exec(s.text) || [])[1]);
+  if (scAb && typeof saveCond === 'function') { commit(); return saveCond({ label, ab: scAb, dc: ctxS.dc, conds: scd[0], fx: scd[1], spell: id, tail: [used ? used + ' verbraucht' : '', concNote.replace(/^ · /, ''), s.matUsed ? 'Material verbraucht: ' + s.mat : ''].filter(Boolean).join(' · ') }); }
   if (NO_ROLL.has(id) || id.startsWith('summon-')) { const svN = /(STÄ|GES|KON|INT|WEI|CHA)-Rettungswurf/.exec(s.text); pushLog({ label, total: '✦', detail: (used ? used + ' verbraucht' : (s.lvl ? 'gewirkt' : 'Zaubertrick')) + concNote + (svN ? ' · ' + svN[1] + '-Rettungswurf gegen SG ' + spellCtx(c, id).dc : '') + (s.matUsed ? ' · Material verbraucht: ' + s.mat : '') + ' · Würfel bei Bedarf über „Nur würfeln“ in der Zauberkarte', share: true }); commit(); return; }
   const L2 = lvl || s.lvl;
   const tailX = (used ? used + ' verbraucht' : (s.lvl ? '' : 'Zaubertrick')) + concNote + (s.matUsed ? ' · Material verbraucht: ' + s.mat : '');
@@ -871,19 +892,32 @@ function castSpell(ch, id, lvl, mode, resKey) {
     if (id === 'eldritch-blast') { count = c.level >= 17 ? 4 : c.level >= 11 ? 3 : c.level >= 5 ? 2 : 1; const ag = (ch.invocations || []).includes('agonizing') ? c.mod.cha : 0; expr = '1W10' + (ag ? (ag > 0 ? '+' : '-') + Math.abs(ag) : ''); if (ag) note = 'Quälender Strahl ' + sgn(ag); }
     if (id === 'scorching-ray') { count = 3 + Math.max(0, L2 - 2); expr = '2W6'; }
     if (id === 'spiritual-weapon') expr = (1 + Math.max(0, L2 - 2)) + 'W8' + (abMod ? (abMod > 0 ? '+' : '-') + Math.abs(abMod) : '');
-    if (id === 'ice-knife') rollDmg((2 + Math.max(0, L2 - 1)) + 'W6', 'Eissplitter: Explosion (GES-Rettungswurf SG ' + ctxS.dc + ', Kälte) – trifft auch bei Fehlschlag');
-    commit(); return spellAttack(ch, s, count, expr, tailX, note, ctxS.atk);
+    commit(); if (id === 'ice-knife') S.iceKnife = { expr: (2 + Math.max(0, L2 - 1)) + 'W6', dc: ctxS.dc, tgt: S.tgt || '' };
+    return spellAttack(ch, s, count, expr, tailX, note, ctxS.atk);
   }
   const sv = sdat && sdat.save ? [0, AB_K[sdat.save]] : /(STÄ|GES|KON|INT|WEI|CHA)-Rettungswurf/.exec(s.text);
   const saveNote = sv ? ' · Ziele: ' + sv[1] + '-Rettungswurf gegen SG ' + ctxS.dc + (sdat && sdat.half ? ', bei Erfolg halber Schaden' : '') + (sdat && sdat.type ? ' · ' + sdat.type : '') + ' · Rettungswurf und Anwendung: Spielleitung' : '';
 
   const tail = (used ? used + ' verbraucht' : 'Zaubertrick') + concNote + saveNote + (s.matUsed ? ' · Material verbraucht: ' + s.mat : '');
+  if (dice && sv && !HEAL_SPELLS.has(id) && typeof saveDmg === 'function') { commit(); return saveDmg({ label, expr: dice, ab: sv[1], dc: ctxS.dc, half: sdat ? !!sdat.half : /Hälfte|halbe[nr]? Schaden/.test(s.text), type: (sdat && sdat.type) || '', tail: (used ? used + ' verbraucht' : (s.lvl ? '' : 'Zaubertrick')) + concNote + (s.matUsed ? ' · Material verbraucht: ' + s.mat : '') }); }
   if (dice) { const r = rollExpr(dice); const mm = /W(\d+)/.exec(dice); const g = /\[([\d,]+)\]/.exec(r.detail); pushLog({ label, groups: r.groups, total: r.total, detail: r.detail + ' · ' + tail, sides: mm ? +mm[1] : 0, nat: g ? g[1].split(',').reduce((a, b) => a + +b, 0) : r.total }); if (HEAL_SPELLS.has(id)) { commit(); return healPrompt(ch, r.total, s.name, /mass|prayer/.test(id)); } }
   else pushLog({ label, total: '✦', detail: tail, share: true });
   commit();
 }
 /* Chromatische Kugel: Schritt für Schritt, Sprünge löst der Spieler aus */
-function orbPrompt(html) { const p = $('#prompt'); if (!html) { p.hidden = true; p.innerHTML = ''; return; } p.innerHTML = html; p.hidden = false; }
+/* Abfrage am unteren Rand (nur eine zugleich). Eingehende Abfragen (Treffer, Rettungswurf-Anforderung) warten, solange etwas offen ist;
+   verdrängt eine eigene Aktion eine offene eingehende Abfrage, kommt diese danach wieder. */
+function orbPrompt(html) {
+  const p = $('#prompt');
+  if (!html) { p.hidden = true; p.innerHTML = ''; clearTimeout(orbPrompt.idle); orbPrompt.idle = setTimeout(promptIdle, 300); return; }
+  if (!p.hidden) {
+    if (S.hitPend && html.indexOf('data-act="hitApply"') < 0) { S.hitQ = [S.hitPend].concat(S.hitQ || []); S.hitPend = null; }
+    if (S.reqPend && html.indexOf('data-act="reqRoll"') < 0) S.reqPend = null;
+  }
+  p.innerHTML = html; p.hidden = false;
+}
+const promptOpen = () => { const p = $('#prompt'); return !!(p && !p.hidden); };
+function promptIdle() { if (promptOpen()) return; if (typeof hitFlush === 'function') hitFlush(); if (!promptOpen() && typeof reqCheck === 'function') reqCheck(); }
 function chromaticOrb(ch, lvl, used, concNote) {
   S.orb = { lvl, n: 3 + Math.max(0, lvl - 1), max: Math.max(1, lvl), i: 0, used, conc: concNote || '' };
   orbAttack();
@@ -965,7 +999,7 @@ function saveCampPref() { try { localStorage.setItem('heldenbuch_camp', JSON.str
 function myRolls() { return S.log.filter((e) => (e.sides || e.share) && !e.preview).slice(0, 30).map((e) => ({ label: e.label, total: e.total, detail: e.detail, crit: !!e.crit, fumble: !!e.fumble, t: e.t, secret: !!e.secret, sides: e.sides || 0, nat: e.nat || 0, dset: e.dset || '' })); }
 function meDoc() {
   const ch = cur(); let c = null; try { c = derive(ch, S.hb); } catch (e) {}
-  return { char: ch.name.replace(/^Beispiel:\s*/, ''), cls: ch.cls, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: ch.play.hp ?? (c ? c.hpMax : 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0,
+  return { char: ch.name.replace(/^Beispiel:\s*/, ''), cls: ch.cls, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: ch.play.hp ?? (c ? c.hpMax : 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0, dodge: !!(ch.play.fx || {}).dodge,
     cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, dice: ch.dice || '', diceAt: ch.diceAt || 0, t: Date.now() };
 }
 function queueMe() { if (!S.camp || !DB || !cur()) return; clearTimeout(meTimer); meTimer = setTimeout(writeMe, 250); }
@@ -1028,9 +1062,10 @@ function campStatus() {
   return '<p class="cstat ok">● Verbunden' + (!S.share ? ' – du würfelst verdeckt' : S.secret ? ' – nur die Spielleitung sieht deine Würfe' : ' – deine Würfe werden geteilt') + '</p>';
 }
 function partyHtml() {
-  const ps = Object.entries(S.table).sort((a, b) => (a[1].char || '').localeCompare(b[1].char || '', 'de'));
-  if (!ps.length) return '<p class="empty">Noch niemand am Tisch.</p>';
-  return '<div class="party">' + ps.map(([uid, p]) => { const pct = p.hpMax ? Math.max(0, Math.min(100, (p.hp / p.hpMax) * 100)) : 0;
+  const ps = players().sort((a, b) => (a[1].char || '').localeCompare(b[1].char || '', 'de')); const dmP = S.meta.dm && S.table[S.meta.dm];
+  const dmLine = dmP && dmOut(S.meta.dm) ? '<p class="hint pmdm">Spielleitung: <b>' + esc(dmP.char || '?') + '</b>' + (S.meta.dm === UID ? ' (du)' : '') + '</p>' : '';
+  if (!ps.length) return dmLine + '<p class="empty">Noch niemand am Tisch.</p>';
+  return dmLine + '<div class="party">' + ps.map(([uid, p]) => { const pct = p.hpMax ? Math.max(0, Math.min(100, (p.hp / p.hpMax) * 100)) : 0;
     return '<div class="pm' + (uid === UID ? ' me' : '') + '">' + psig(p) + '<div class="pmb"><b>' + esc(p.char) + (uid === UID ? ' <small>(du)</small>' : '') + '</b><small>' + esc(p.clsName) + ' ' + esc(p.level) + ' · ' + esc(p.species) + '</small>' +
       '<div class="pmhp"><span>TP ' + esc(p.hp) + '/' + esc(p.hpMax) + (p.temp ? ' +' + esc(p.temp) : '') + '</span><span>RK ' + esc(p.ac) + '</span></div><div class="hpbar"><i style="width:' + pct + '%"></i></div>' +
       (p.cond && p.cond.length ? '<div class="pmc">' + p.cond.map((c) => '<span>' + esc(c) + '</span>').join('') + '</div>' : '') +
@@ -1050,11 +1085,11 @@ function renderCamp() {
     '<div class="cols"><section class="blk"><h2>Die Gruppe</h2><div id="partyBox">' + partyHtml() + '</div></section><section class="blk"><h2>Würfe am Tisch</h2><div id="tableBox">' + tableBox(12) + '</div></section></div></div>';
 }
 function tableBox(n) {
-  const all = tableRolls(); const players = Object.entries(S.table).map(([uid, p]) => [uid, p.char]);
+  const all = tableRolls(); const plist = Object.entries(S.table).map(([uid, p]) => [uid, p.char]);
   const list = S.logFilter === 'all' ? all : all.filter((r) => r.uid === S.logFilter);
   const shown = S.logOpen ? list : list.slice(0, n);
   let h = '';
-  if (S.logOpen && players.length > 1) h += '<div class="chips lf">' + chip(S.logFilter === 'all', 'Alle', 'data-act="logFilter" data-arg="all"') + players.map(([uid, name]) => chip(S.logFilter === uid, esc(name), 'data-act="logFilter" data-arg="' + uid + '"')).join('') + '</div>';
+  if (S.logOpen && plist.length > 1) h += '<div class="chips lf">' + chip(S.logFilter === 'all', 'Alle', 'data-act="logFilter" data-arg="all"') + plist.map(([uid, name]) => chip(S.logFilter === uid, esc(name), 'data-act="logFilter" data-arg="' + uid + '"')).join('') + '</div>';
   h += '<ul id="tablelog" class="log tlog' + (S.logOpen ? ' open' : '') + '">' + rollItems(shown) + '</ul>';
   if (list.length > n || S.logOpen) h += '<button class="link more" data-act="logOpen">' + (S.logOpen ? 'Weniger anzeigen' : 'Alle ' + list.length + ' Würfe anzeigen') + '</button>';
   return h;
@@ -1080,6 +1115,9 @@ function paintCamp() {
 let metaUnsub = null;
 const metaRef = () => DB.doc('camp/' + S.camp + '/state/meta');
 const isDM = () => !!(S.camp && UID && S.meta.dm === UID);
+/* Die Spielleitung kämpft nicht mit – ausser sie schaltet „Ich spiele selbst mit“ ein */
+const dmOut = (uid) => !!(S.meta && S.meta.dm && String(uid) === String(S.meta.dm) && !S.meta.dmPlays);
+const players = () => Object.entries(S.table || {}).filter(([u]) => !dmOut(u));
 function knockOut(P) { P.cond = (P.cond || []).filter((k) => COND[k]); ['unconscious', 'incapacitated', 'prone'].forEach((x) => { if (!P.cond.includes(x)) P.cond.push(x); }); if (P.conc) endConc(P); P.raging = false; P.rageKeep = false; P.ws = null; P.stable = false; pushLog({ label: '0 Trefferpunkte', total: '0', detail: 'Du bist bewusstlos und liegst am Boden. Ab jetzt: Todesrettungswürfe.' }); }
 function wakeUp(P) { P.stable = false; P.cond = (P.cond || []).filter((k) => k !== 'unconscious'); const still = P.cond.some((k) => ['paralyzed', 'petrified', 'stunned'].includes(k)); if (!still) P.cond = P.cond.filter((k) => k !== 'incapacitated'); }
 function fall(P) { if (P.dead) return; if (P.conc) endConc(P); P.dead = true; P.deadAt = Date.now(); P.deathFinal = false; setTimeout(() => { render(); window.scrollTo(0, 0); }, 900); }
@@ -1115,7 +1153,7 @@ function decide(uid, d) { const p = S.table[uid]; if (!p) return; const mercy = 
 function dmHtml() {
   if (!S.camp) return '';
   const dm = S.meta.dm, p = dm && S.table[dm];
-  if (isDM()) return '<span class="dmlbl">Du leitest die Runde</span> <button class="link" data-act="dmDrop">abgeben</button>';
+  if (isDM()) return '<span class="dmlbl">Du leitest die Runde</span> <button class="link" data-act="dmDrop">abgeben</button> · <label class="chk dmplay" title="Nur wenn du als Spielleitung auch einen eigenen Helden im Kampf führst"><input type="checkbox" id="dmPlays"' + (S.meta.dmPlays ? ' checked' : '') + '> Ich spiele selbst mit</label>';
   return '<span class="dmlbl">Spielleitung: ' + (dm ? esc(p ? p.char : 'unbekannt') : 'noch niemand') + '</span> <button class="link" data-act="dmTake">' + (dm ? 'übernehmen' : 'Ich leite die Runde') + '</button>';
 }
 function fallenHtml(ch, c) {
@@ -1128,12 +1166,14 @@ function fallenHtml(ch, c) {
 
 /* ---------- Kampf & Initiative ---------- */
 let combatUnsub = null, wasMyTurn = false;
+/* Inhalt eines Kampfstands ohne Verwaltungsfelder – nur echte Unterschiede lösen ein Zusammenführen aus (sonst schaukeln sich Geräte auf) */
+const combatSig = (c) => { const x = Object.assign({}, c); delete x.rev; delete x.w; delete x.t; return JSON.stringify(x); };
 const combatRef = () => DB.doc('camp/' + S.camp + '/state/combat');
 function subCombat() {
   if (combatUnsub) { try { combatUnsub(); } catch (e) {} combatUnsub = null; }
   if (!DB || !S.camp) return;
   try { combatUnsub = combatRef().onSnapshot((snap) => { const prev = S.combat; const d = snap.exists ? snap.data() : null; S.combatRemote = d;
-    const pend = S.combatPend; if (pend && d && d.w && d.w !== UID && (+d.rev || 0) <= (+pend.ours.rev || 0) && Date.now() - pend.at < 15000) { S.combatPend = null; const merged = mergeCombat(pend.base, pend.ours, d); if (JSON.stringify(merged) !== JSON.stringify(d)) { S.combat = d; saveCombat(merged); return; } }
+    const pend = S.combatPend; if (pend && d && d.w && d.w !== UID && (+d.rev || 0) <= (+pend.ours.rev || 0) && Date.now() - pend.at < 15000) { S.combatPend = null; const merged = mergeCombat(pend.base, pend.ours, d); if (combatSig(merged) !== combatSig(d)) { S.combat = d; saveCombat(merged); return; } }
     if (pend && Date.now() - pend.at >= 15000) S.combatPend = null;
     S.combat = d; if (typeof hitCheck === 'function') setTimeout(hitCheck, 0);
     if (S.combat && S.combat.active && (!prev || !prev.active || prev.id !== S.combat.id)) { if (!S.myInit || S.myInit.cid !== S.combat.id) bannerToast('Kampf beginnt!', 'Würfelt Initiative.'); }
@@ -1148,12 +1188,12 @@ function setMyInit(v) { S.myInit = { v: +v, cid: S.combat.id }; queueMe(); setTi
 function order() {
   const c = S.combat; if (!c || !c.active) return [];
   const list = [];
-  for (const [uid, p] of Object.entries(S.table)) if (p.init && p.init.cid === c.id && !p.init.away) list.push({ key: 'p:' + uid, name: p.char, cls: p.cls, portrait: p.portrait, pimg: p.pimg, v: +p.init.v, dex: +p.dex || 0, me: uid === UID, hp: p.hp, hpMax: p.hpMax, dead: !!p.dead });
+  for (const [uid, p] of players()) if (p.init && p.init.cid === c.id && !p.init.away) list.push({ key: 'p:' + uid, name: p.char, cls: p.cls, portrait: p.portrait, pimg: p.pimg, v: +p.init.v, dex: +p.dex || 0, me: uid === UID, hp: p.hp, hpMax: p.hpMax, dead: !!p.dead });
   for (const n of c.npcs || []) if (!n.reserve) list.push({ key: 'n:' + n.id, id: n.id, name: n.name, cls: 'npc', v: +n.v, dex: +n.dex || 0, npc: true, ally: !!n.ally, hp: n.hp, hpMax: n.hpMax, ac: n.ac, mid: n.mid, cond: n.cond || [], note: n.note || '' });
   return list.sort((a, b) => b.v - a.v || b.dex - a.dex || a.name.localeCompare(b.name, 'de'));
 }
-function waiting() { const c = S.combat; if (!c || !c.active) return []; return Object.entries(S.table).filter(([, p]) => !(p.init && p.init.cid === c.id)).map(([uid, p]) => ({ uid, name: p.char, me: uid === UID })); }
-function awayList() { const c = S.combat; if (!c || !c.active) return []; return Object.entries(S.table).filter(([, p]) => p.init && p.init.cid === c.id && p.init.away).map(([uid, p]) => ({ uid, name: p.char, me: uid === UID })); }
+function waiting() { const c = S.combat; if (!c || !c.active) return []; return players().filter(([, p]) => !(p.init && p.init.cid === c.id)).map(([uid, p]) => ({ uid, name: p.char, me: uid === UID })); }
+function awayList() { const c = S.combat; if (!c || !c.active) return []; return players().filter(([, p]) => p.init && p.init.cid === c.id && p.init.away).map(([uid, p]) => ({ uid, name: p.char, me: uid === UID })); }
 const skipTurn = (x) => (x.npc && x.hpMax > 0 && x.hp <= 0) || (!x.npc && x.dead);
 const initKey = (x) => [-x.v, -x.dex, x.name];
 function initAfter(a, b) { const ka = initKey(a), kb = initKey(b); return ka[0] !== kb[0] ? ka[0] > kb[0] : ka[1] !== kb[1] ? ka[1] > kb[1] : ka[2].localeCompare(kb[2], 'de') > 0; }
@@ -1167,7 +1207,9 @@ function nextTurn() {
   if (skipTurn(o[ni])) return;
   const tk = typeof effTick === 'function' ? effTick(c, c.turn, o[ni].key) : { effects: c.effects, rem: c.rem, log: [] };
   let lg = clog(c, 'Runde ' + round + ': ' + o[ni].name + ' ist am Zug'); tk.log.forEach((x) => { lg = clog({ log: lg }, x); });
-  saveCombat(Object.assign({}, c, { turn: o[ni].key, turnAt: { v: o[ni].v, dex: o[ni].dex, name: o[ni].name }, round, t: Date.now(), effects: tk.effects || [], rem: tk.rem || [], log: lg }));
+  const mf = typeof mobTurnStart === 'function' ? mobTurnStart(c, o[ni].key) : null; /* Aufladung würfeln, legendäre Aktionen auffrischen */
+  saveCombat(Object.assign({}, c, mf ? { npcs: mf } : {}, { turn: o[ni].key, turnAt: { v: o[ni].v, dex: o[ni].dex, name: o[ni].name }, round, t: Date.now(), effects: tk.effects || [], rem: tk.rem || [], log: lg }));
+  if (mf && typeof mobTurnNote === 'function') mobTurnNote(c, mf, o[ni].key);
 }
 function clog(c, x) { return ((c && c.log) || []).concat([{ t: Date.now(), x }]).slice(-25); }
 function fightHtml() {
@@ -1176,20 +1218,20 @@ function fightHtml() {
   if (!c || !c.active) return '<div class="fhead"><div><h2>Kampf</h2><p class="hint" style="margin:0">' + (lead ? 'Starte einen Kampf: Alle würfeln Initiative, die App sortiert die Reihenfolge und zeigt, wer am Zug ist.' : 'Die Spielleitung startet den Kampf. Dann würfelst du hier oder auf dem Bogen deine Initiative.') + '</p></div>' + (lead ? '<button class="btn big" data-act="fightStart">Kampf beginnen</button>' : '') + '</div>';
   const o = order(), w = waiting(), cur = curEntry(); const mine = cur && cur.key === 'p:' + UID;
   let h = '<div class="fhead"><div><h2>Kampf · Runde ' + (c.round || 1) + '</h2><p class="hint" style="margin:0">' + (c.turn ? (cur ? 'Am Zug: <b>' + esc(cur.name) + '</b>' : '') : 'Alle würfeln Initiative (auf dem Bogen oder hier). Dann „Ersten Zug starten“.') + '</p></div><div class="chips">' +
-    (!c.turn ? (lead ? '<button class="btn" data-act="fightGo"' + (o.length ? '' : ' disabled') + '>Ersten Zug starten</button>' : '') : mine ? '<button class="btn big glowbtn" data-act="turnEnd">Zug beenden</button>' : lead ? '<button class="btn ghost sm" data-act="turnEnd" title="Für Gegner oder abwesende Spieler">Weiter zum Nächsten</button>' : '') +
+    (!c.turn && lead ? '<button class="btn" data-act="fightGo"' + (o.length ? '' : ' disabled') + '>Ersten Zug starten</button>' : '') +
     (lead && c.turn ? '<button class="btn ghost sm" data-act="fightReset" data-confirm="Neue Begegnung? Alle würfeln neu Initiative, Runde, Zug und Effekte werden zurückgesetzt. Besiegte Gegner verschwinden, die übrigen bleiben." title="Neuer Kampf mit denselben Teilnehmern – alle würfeln neu Initiative">Neue Begegnung</button>' : '') + (lead ? '<button class="btn ghost sm" data-act="fightEnd" data-confirm="Kampf beenden? Initiative, Gegner und Effekte werden für alle gelöscht.">Kampf beenden</button>' : '') + '</div></div>';
-  h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + x.v + '</span>' + (x.npc ? '<span class="sigil npc" aria-hidden="true">⚔</span>' : sigil({ name: x.name, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : '') + (typeof effBadges === 'function' ? effBadges(x.key, lead) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + (x.npc && lead ? '<button class="x" data-act="npcDel" data-arg="' + x.key.slice(2) + '" aria-label="Entfernen">×</button>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
+  h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + x.v + '</span>' + (x.npc ? '<span class="sigil npc" aria-hidden="true">⚔</span>' : sigil({ name: x.name, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : '') + (typeof effBadges === 'function' ? effBadges(x.key, lead) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
   if (c.log && c.log.length) h += '<details class="clog"><summary>Verlauf <small>' + c.log.length + '</small></summary><ul>' + c.log.slice().reverse().slice(0, 12).map((e) => '<li><span>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</span>' + esc(e.x) + '</li>').join('') + '</ul></details>';
   if (w.length) h += '<p class="hint">Würfelt noch: ' + w.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + '</p>';
-  if (lead && !c.turn && Object.keys(S.table || {}).length) h += '<div class="fgrp"><b>Überrascht? <small>Nachteil auf den Initiativewurf</small></b><div class="chips">' + Object.entries(S.table).map(([u, p]) => chip((c.surp || []).includes(u), esc(p.char || '?'), 'data-act="surpTog" data-arg="' + u + '"')).join('') + '</div><p class="hint">Gegner überrascht: beim Hinzufügen „überrascht“ ankreuzen.</p></div>';
+  if (lead && !c.turn && players().length) h += '<div class="fgrp"><b>Überrascht? <small>Nachteil auf den Initiativewurf</small></b><div class="chips">' + players().map(([u, p]) => chip((c.surp || []).includes(u), esc(p.char || '?'), 'data-act="surpTog" data-arg="' + u + '"')).join('') + '</div><p class="hint">Gegner überrascht: beim Hinzufügen „überrascht“ ankreuzen.</p></div>';
   const aw = awayList(); if (aw.length) h += '<p class="hint">Noch nicht im Kampf (zu weit weg): ' + aw.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + ' – sie würfeln Initiative, sobald sie eingreifen, und werden einsortiert.</p>';
   if (lead && typeof saveReqForm === 'function') h += saveReqForm();
   const rs = (c.npcs || []).filter((x) => x.reserve); if (rs.length && lead) { const gs = {}; rs.forEach((x) => { const k = x.grp || x.id; (gs[k] = gs[k] || []).push(x); }); h += '<div class="fgrp reserve"><b>Verstärkung (wartet)</b><div class="chips">' + Object.values(gs).map((g) => '<button class="btn sm ghost" data-act="npcJoin" data-arg="' + g[0].id + '"' + (g[0].grp && g.length > 1 ? ' data-grp="' + g[0].grp + '"' : '') + '>' + esc(g.length > 1 ? g.length + '× ' + (BESTIARY[g[0].mid] || [g[0].name])[0] : g[0].name) + ' greift ein</button>').join('') + '</div></div>'; }
   const ch = cur ? null : null; const meIn = !w.some((x) => x.me);
   if (typeof npcBulkBar === 'function') h += npcBulkBar();
-  if (o.length) h += '<div class="chips" style="margin:4px 0 10px"><button class="btn ghost sm" data-act="effNew">+ Effekt / Zustand mit Dauer</button>' + (lead && (c.npcs || []).some((x) => x.mid) ? '<button class="btn ghost sm" data-act="encFromFight">Gegner als Begegnung speichern</button>' : '') + '</div>';
-  h += '<div class="fctl"><div class="fgrp"><b>Deine Initiative</b><div class="chips"><button class="btn sm" data-act="initRoll">' + (S.myInit && S.myInit.away && S.myInit.cid === c.id ? 'Eingreifen: Initiative würfeln' : meIn ? 'Neu würfeln' : 'Initiative würfeln') + '</button>' + (!(S.myInit && S.myInit.away && S.myInit.cid === c.id) ? '<button class="btn ghost sm" data-act="initAway" title="Dein Held ist noch zu weit weg und greift später ein">Noch nicht dabei</button>' : '') + '<input type="number" id="initMan" placeholder="Wert" aria-label="Eigene Initiative eintragen"><button class="btn ghost sm" data-act="initSet">Eintragen</button></div></div>' +
-    (lead ? '<div class="fgrp"><b>Gegner hinzufügen</b><div class="chips"><input type="text" id="npcName" placeholder="z. B. Goblin 1" aria-label="Name"><input type="number" id="npcBonus" placeholder="Bonus" aria-label="Initiativebonus" value="0"><button class="btn ghost sm" data-act="npcAdd">Würfeln & hinzufügen</button></div></div>' + bestiaryAdder() : '') + '</div>';
+  if (o.length) h += '<div class="chips" style="margin:4px 0 10px"><button class="btn ghost sm" data-act="effNew">+ Effekt / Zustand mit Dauer</button>' + (lead ? '<button class="btn ghost sm" data-act="encOpen">+ Gegner</button>' : '') + '</div>';
+  h += '<div class="fctl">' + (dmOut(UID) ? '' : '<div class="fgrp"><b>Deine Initiative</b><div class="chips"><button class="btn sm" data-act="initRoll">' + (S.myInit && S.myInit.away && S.myInit.cid === c.id ? 'Eingreifen: Initiative würfeln' : meIn ? 'Neu würfeln' : 'Initiative würfeln') + '</button>' + (!(S.myInit && S.myInit.away && S.myInit.cid === c.id) ? '<button class="btn ghost sm" data-act="initAway" title="Dein Held ist noch zu weit weg und greift später ein">Noch nicht dabei</button>' : '') + '<input type="number" id="initMan" placeholder="Wert" aria-label="Eigene Initiative eintragen"><button class="btn ghost sm" data-act="initSet">Eintragen</button></div></div>') +
+    (lead && !o.length ? '<div class="fgrp"><b>Gegner</b><div class="chips"><button class="btn sm" data-act="encOpen">+ Gegner hinzufügen</button></div></div>' : '') + '</div>';
   return h;
 }
 function paintTurn() {
@@ -1200,10 +1242,10 @@ function paintTurn() {
   const meWaiting = waiting().some((x) => x.me); const meAway = S.myInit && S.myInit.away && S.myInit.cid === c.id;
   el.innerHTML = '<div class="wrap tb' + (mine ? ' mine' : '') + '"><span class="tbr">Runde ' + (c.round || 1) + '</span>' +
     (mine ? '<b class="tbme">Du bist am Zug!</b>' : cur ? '<span>Am Zug: <b>' + esc(cur.name) + '</b>' + (next ? ' · danach ' + esc(next.name) : '') + '</span>' : '<span>Kampf beginnt – Initiative würfeln</span>') +
-    '<span class="tbsp"></span>' + (meAway ? '<span class="tbaway">Du bist noch nicht im Kampf</span><button class="btn sm" data-act="initRoll">Eingreifen</button>' : meWaiting ? '<button class="btn sm" data-act="initRoll">Initiative würfeln</button><button class="btn sm ghost" data-act="initAway">Noch nicht dabei</button>' : '') + (mine ? '<button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>' : '') + (S.view !== 'camp' ? '<button class="link" data-act="view" data-arg="camp">Reihenfolge</button>' : '') + '</div>';
+    '<span class="tbsp"></span>' + (meAway ? '<span class="tbaway">Du bist noch nicht im Kampf</span><button class="btn sm" data-act="initRoll">Eingreifen</button>' : meWaiting ? '<button class="btn sm" data-act="initRoll">Initiative würfeln</button><button class="btn sm ghost" data-act="initAway">Noch nicht dabei</button>' : '') + (mine ? '<button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>' : cur && (!S.meta.dm || isDM()) ? '<button class="btn sm ghost" data-act="turnEnd" title="Gegner oder abwesende Spieler: weiter zum Nächsten">Weiter ▸</button>' : '') + (S.view !== 'camp' ? '<button class="link" data-act="view" data-arg="camp">Reihenfolge</button>' : '') + '</div>';
   document.body.classList.toggle('myturn', !!mine);
   if (mine && !wasMyTurn && S.chars[S.cur] && typeof turnReset === 'function') { const me = S.chars[S.cur]; setTimeout(() => { turnReset(me); if (S.chars[S.cur] === me) commit(); }, 0); }
-  if (mine && !wasMyTurn) { bannerToast('Du bist am Zug!', cur.name + ', Runde ' + (c.round || 1)); try { navigator.vibrate && navigator.vibrate([120, 60, 120]); } catch (e) {} }
+  if (mine && !wasMyTurn) { try { navigator.vibrate && navigator.vibrate([120, 60, 120]); } catch (e) {} }
   wasMyTurn = !!mine;
 }
 function bannerToast(title, text) { const m = $('#mini'); if (!m) return; const el = document.createElement('div'); el.className = 'mt big'; el.innerHTML = '<div><b>' + esc(title) + '</b><small>' + esc(text) + '</small></div>'; m.prepend(el); setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 5000); }
@@ -1290,7 +1332,7 @@ document.addEventListener('click', (ev) => {
     play: () => { S.cur = arg; S.view = 'sheet'; S.confirm = null; lsSet(); render(); window.scrollTo(0, 0); },
     edit: () => { S.cur = arg; S.view = 'build'; S.step = 0; S.confirm = null; lsSet(); render(); window.scrollTo(0, 0); },
     exportOne: () => { const c = S.chars[arg] || ch; doExport([c], fileName(c)); },
-    exportAll: () => doExport(Object.values(S.chars), 'Alle_Helden_Heldenbuch.json'),
+    exportAll: () => doExport(Object.values(S.chars), 'Heldenbuch_Sicherung.json', true),
     importText: () => openModal('import'),
     closeModal: () => { S.modal = null; $('#modal').hidden = true; },
     copyEx: async () => { const ta = $('#exText'); try { await navigator.clipboard.writeText(ta.value); t.textContent = 'Kopiert ✓'; } catch (e) { ta.focus(); ta.select(); t.textContent = 'Markiert – jetzt kopieren'; } },
