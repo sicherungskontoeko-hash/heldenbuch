@@ -13,6 +13,9 @@ Dieses Repository baut automatisch (siehe *Actions*):
 
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
 
+## Neu in Version 1.6.1
+- Regelabgleich mit SRD 5.2.1: rund 100 Monster mit den Werten von 2024 (RK, TP, Angriffe, Mehrfachangriff, Odem), 12 fehlende SRD-Zauber ergänzt, Zauberklassen und halber Schaden bei gelungenem Rettungswurf korrigiert.
+
 ## Neu in Version 1.6
 - Spielleitung: 🎲 Zufallsbegegnung (Fundort, Gruppe, Schwierigkeit), eigene Monster (Editor, Teilen/Laden), Beute nach Herausforderungsgrad, Aufladung (W6) und legendäre Aktionen/Widerstände bei Gegnern.
 - Rettungswürfe: Zauber und Fähigkeiten fragen zuerst, ob der Rettungswurf gelang – dann voller, halber oder kein Schaden; Zustände (z. B. gelähmt) hängen am Zauber und enden mit ihm.

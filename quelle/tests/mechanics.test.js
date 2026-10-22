@@ -40,10 +40,10 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
   await p.evaluate(() => { window.__q = [0.95]; click('npcRe', 'adv'); });
   await p.waitForTimeout(250);
   T('„Mit Vorteil auswerten“: zweiter W20, höherer zählt', await p.evaluate(() => S.npcA.re === 'adv' && S.npcA.nat === 20 && /Vorteil/.test(pr())), await p.evaluate(() => S.npcA));
-  await p.evaluate(() => { click('npcMiss'); S.table.u2.cond = ['Gelähmt']; window.__q = [0.6]; click('npcAtk', 'A', { j: '0' }); });
+  await p.evaluate(() => { click('npcMiss'); S.table.u2.cond = ['Gelähmt']; window.__q = [0.6]; click('npcAtk', 'A', { j: '1' }); });
   await p.waitForTimeout(250);
   T('Ziel gelähmt: Vorteil-Hinweis und Schalter „Aus 1,5 m: kritisch“', await p.evaluate(() => /Gelähmt → Vorteil/.test(pr()) && !!$('#prompt [data-act="npcCrit5"]')));
-  T('Ghul-Klauen: Zusatz „KON SG 10 oder gelähmt“ angeboten und an', await p.evaluate(() => S.npcA.rider && S.npcA.rider.dc === 10 && S.npcA.rider.conds.includes('paralyzed') && S.npcA.riderOn));
+  T('Ghul-Klaue: Zusatz „KON SG 10 oder gelähmt“ angeboten und an', await p.evaluate(() => S.npcA.rider && S.npcA.rider.dc === 10 && S.npcA.rider.conds.includes('paralyzed') && S.npcA.riderOn));
   await p.evaluate(() => { S.npcA.nat = 12; S.npcA.total = 16; S.table.u2.ac = 15; npcPrompt(); });
   T('Deckung: ohne trifft 16 gegen RK 15 …', await p.evaluate(() => /Trifft Lyra \(16 gegen RK 15\)/.test(pr())), await p.evaluate(() => pr()));
   await p.evaluate(() => click('npcCover', '2'));
@@ -56,7 +56,7 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
   await p.evaluate(() => { click('npcMiss'); S.table.u2.dodge = false; });
 
   /* ---- Treffer beim eigenen Helden ---- */
-  await p.evaluate(() => { const ch = mk({ cls: 'fig', level: 3, name: 'Mira', base: { str: 15, dex: 12, con: 14, int: 10, wis: 10, cha: 10 } }); fight(); hitPrompt({ by: 'Ghul A: Klauen', amount: 8, dtype: 'Hieb', atk: 14, nat: 10, crit: false, rider: mobRider('ghoul', 'Klauen'), t: Date.now() }); });
+  await p.evaluate(() => { const ch = mk({ cls: 'fig', level: 3, name: 'Mira', base: { str: 15, dex: 12, con: 14, int: 10, wis: 10, cha: 10 } }); fight(); hitPrompt({ by: 'Ghul A: Klaue', amount: 8, dtype: 'Hieb', atk: 14, nat: 10, crit: false, rider: mobRider('ghoul', 'Klaue'), t: Date.now() }); });
   T('Treffer mit Zusatz: Hinweis „Danach: KON SG 10 …“', await p.evaluate(() => /Danach: KON SG 10/.test(pr())));
   await p.evaluate(() => click('hitApply', '1'));
   await p.waitForTimeout(300);
@@ -67,7 +67,7 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
   await p.evaluate(() => click('condGo', 'yes'));
   T('… Zustand am Helden gesetzt und geteilt', await p.evaluate(() => cur().play.cond.includes('paralyzed') && /Gelähmt/.test(S.log[0].label)));
   /* Schild */
-  await p.evaluate(() => { const ch = mk({ cls: 'wiz', level: 3, name: 'Ilva', base: { str: 8, dex: 14, con: 14, int: 16, wis: 10, cha: 10 }, spells: ['shield'], prepared: ['shield'] }); fight(); S.combat.turn = 'n:A'; window.__ac = derive(ch, S.hb).ac; hitPrompt({ by: 'Ghul A: Klauen', amount: 7, dtype: 'Hieb', atk: window.__ac + 2, nat: 12, crit: false, t: Date.now() }); });
+  await p.evaluate(() => { const ch = mk({ cls: 'wiz', level: 3, name: 'Ilva', base: { str: 8, dex: 14, con: 14, int: 16, wis: 10, cha: 10 }, spells: ['shield'], prepared: ['shield'] }); fight(); S.combat.turn = 'n:A'; window.__ac = derive(ch, S.hb).ac; hitPrompt({ by: 'Ghul A: Klaue', amount: 7, dtype: 'Hieb', atk: window.__ac + 2, nat: 12, crit: false, t: Date.now() }); });
   T('Magier mit Schild: Knopf „Schild – wehrt ab“', await p.evaluate(() => /Schild wehrt ab/.test(pr()) && !$('#prompt [data-act="hitShield"]').disabled), await p.evaluate(() => pr()));
   await p.evaluate(() => click('hitShield'));
   T('Schild: Platz und Reaktion verbraucht, kein Schaden', await p.evaluate(() => +cur().play.slots[1] === 1 && turnSt(cur()).r === 1 && cur().play.hp === derive(cur(), S.hb).hpMax && /abgewehrt/.test(S.log[0].total)), await p.evaluate(() => [cur().play.slots, turnSt(cur()), S.log.slice(0, 2)]));

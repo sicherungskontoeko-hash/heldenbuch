@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-10-22T09:55:21+02:00
-- Revision (SHA-256 von index.html, gekürzt): f1d05762a04b6b5c
+- Zeitpunkt: 2026-10-22T10:50:58+02:00
+- Revision (SHA-256 von index.html, gekürzt): 88e7696d4276f08d
 - Node: v22.22.0 · Playwright: 1.56.0
 - Browser: Chromium 141.0.7390.37
 - System: Linux 6.18.44-fc-v140
@@ -30,7 +30,7 @@
 | Zugleisten-Fuzz bar | 0 | ran 218 bad 0  |
 | Zugleisten-Fuzz brd | 0 | ran 324 bad 0  |
 | Zugleisten-Fuzz cle | 0 | ran 400 bad 0  |
-| Zugleisten-Fuzz dru | 0 | ran 342 bad 0  |
+| Zugleisten-Fuzz dru | 0 | ran 344 bad 0  |
 | Zugleisten-Fuzz fig | 0 | ran 218 bad 0  |
 | Zugleisten-Fuzz mon | 0 | ran 254 bad 0  |
 | Zugleisten-Fuzz pal | 0 | ran 376 bad 0  |
@@ -43,8 +43,8 @@
 | Zugleisten-Fuzz bw | 0 | ran 258 bad 0  |
 | Zugleisten-Fuzz fk | 0 | ran 218 bad 0  |
 | Zugleisten-Fuzz ma | 0 | ran 292 bad 0  |
-| Online-Tisch (net.test.js) | 0 | ✔ Nach Verbindungsabbruch: Spieler verbindet neu, Würfe kommen an 7 / 7 bestanden  |
+| Online-Tisch (net.test.js) | 1 | siehe Konsole |
 | Selbst-Update Android-App (boot.test.js) | 0 | ✔ Im normalen Browser: keine Update-Logik 16 / 16 bestanden  |
-| Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js) | 0 | ✔ Handy: kein Querscrollen bei den Spielern 18 / 18 bestanden  |
+| Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js) | 1 | siehe Konsole |
 
-Gesamtergebnis: alle Suiten bestanden
+Gesamtergebnis: mindestens eine Suite fehlgeschlagen

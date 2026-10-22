@@ -374,5 +374,17 @@ const SPELL_FLAV = {
  'shapechange':'Du nimmst die Gestalt eines anderen Wesens an, eines Drachen, Riesen oder Elementars, und wechselst sie nach Belieben.',
  'storm-of-vengeance':'Ein gewaltiger Sturm zieht auf. Donner, Säureregen, Blitze und Hagel prasseln auf deine Feinde nieder.',
  'time-stop':'Die Welt erstarrt um dich herum. Nur du bewegst dich noch, für ein paar kostbare Augenblicke.',
- 'weird':'Du weckst die schlimmsten Ängste deiner Gegner, und sie sehen ihre Albträume leibhaftig vor sich.'
+ 'weird':'Du weckst die schlimmsten Ängste deiner Gegner, und sie sehen ihre Albträume leibhaftig vor sich.',
+ 'enthrall':'Deine Worte fliessen so fesselnd, dass die Zuhörer vergessen, auf ihre Umgebung zu achten.',
+ 'flame-blade':'Eine Klinge aus lodernder Flamme wächst aus deiner Faust und tanzt im Takt deines Atems.',
+ 'mind-spike':'Ein glühender Dorn bohrt sich in einen fremden Geist, und von nun an spürst du jede seiner Regungen.',
+ 'spike-growth':'Der Boden sträubt sich, und unter Gras und Laub lauern plötzlich Dornen, scharf wie Messer.',
+ 'speak-with-plants':'Blätter rascheln Antworten, Wurzeln erinnern sich, und der alte Baum erzählt, wer vorbeikam.',
+ 'vitriolic-sphere':'Eine schimmernde Kugel aus Säure zerplatzt, und was sie trifft, frisst sich noch lange weiter.',
+ 'commune-with-nature':'Du legst die Hand auf die Erde und lauschst: Das Land verrät dir, was in ihm lebt und ruht.',
+ 'circle-of-death':'Ein Ring aus kalter Leere breitet sich aus, und das Leben weicht aus allem, was er berührt.',
+ 'conjure-fey':'Ein Wesen aus Mondlicht und Dornen tritt aus dem Nichts und flüstert Albträume in fremde Ohren.',
+ 'instant-summons':'Du zerdrückst den Saphir, und das Vertraute liegt im selben Herzschlag wieder in deiner Hand.',
+ 'tsunami':'Am Horizont türmt sich eine Wand aus Wasser auf und rollt donnernd auf deine Feinde zu.',
+ 'true-polymorph':'Form ist nur ein Vorschlag: Unter deinem Wort wird das Wesen zu etwas völlig anderem.'
 };

@@ -65,9 +65,9 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
   const fits = await p.evaluate(() => { const ch = normChar(newChar({ name: 'Ilva', cls: 'wiz', level: 5, base: { str: 8, dex: 14, con: 14, int: 16, wis: 10, cha: 10 }, spells: ['fireball', 'shield', 'hold-person'], prepared: ['fireball', 'shield', 'hold-person'] })); S.chars[ch.id] = ch; S.cur = ch.id; S.meta.dmPlays = true; S.tgt = 'n:' + S.combat.npcs[0].id;
     const res = []; const chk = (n) => { const pr = document.querySelector('#prompt .pr'); const r = pr ? pr.getBoundingClientRect() : null; res.push([n, !!pr && pr.scrollWidth <= pr.clientWidth + 1 && r.right <= 391 && r.left >= -1]); orbPrompt(''); S.sv = S.sc = S.hitPend = S.npcA = null; };
     castSpell(ch, 'fireball', 3, 'slot'); chk('Feuerball'); turnReset(ch); ch.play.slots = {}; castSpell(ch, 'hold-person', 2, 'slot'); chk('Person festhalten');
-    hitPrompt({ by: 'Ghul A: Klauen', amount: 8, dtype: 'Hieb', atk: 14, nat: 12, crit: false, rider: mobRider('ghoul', 'Klauen'), t: Date.now() }); chk('Treffer mit Schild und Zusatz');
+    hitPrompt({ by: 'Ghul A: Klaue', amount: 8, dtype: 'Hieb', atk: 14, nat: 12, crit: false, rider: mobRider('ghoul', 'Klaue'), t: Date.now() }); chk('Treffer mit Schild und Zusatz');
     applyPrompt(S.tgt, 12, 'Feuerball'); chk('Schaden anwenden');
-    S.table.u2.cond = ['Liegend']; S.npcA = { name: 'Goblin: Krummsäbel', dmg: '1W6+2', dtype: 'Hieb', total: 15, nat: 11, bonus: 4, tgt: 'p:u2', rider: mobRider('ghoul', 'Klauen'), riderOn: true }; npcPrompt(); chk('Gegnerangriff mit Hinweis, Zusatz, Deckung');
+    S.table.u2.cond = ['Liegend']; S.npcA = { name: 'Goblin: Krummsäbel', dmg: '1W6+2', dtype: 'Hieb', total: 15, nat: 11, bonus: 4, tgt: 'p:u2', rider: mobRider('ghoul', 'Klaue'), riderOn: true }; npcPrompt(); chk('Gegnerangriff mit Hinweis, Zusatz, Deckung');
     return res; });
   T('Handy: alle Abfragen passen in die Breite', fits.every((x) => x[1]), fits);
   T('Handy: kein Querscrollen am Tisch', await p.evaluate(() => document.documentElement.scrollWidth <= 391));

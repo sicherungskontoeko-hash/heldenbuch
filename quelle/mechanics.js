@@ -20,7 +20,8 @@ const SPELL_COND = {
   'fear': [['frightened'], 'muss fliehen'], 'entangle': [['restrained'], ''], 'web': [['restrained'], ''], 'charm-person': [['charmed'], ''], 'charm-monster': [['charmed'], ''],
   'dominate-person': [['charmed'], 'du lenkst es'], 'dominate-monster': [['charmed'], 'du lenkst es'], 'dominate-beast': [['charmed'], 'du lenkst es'],
   'hypnotic-pattern': [['charmed', 'incapacitated'], 'Bewegungsrate 0'], 'banishment': [['incapacitated'], 'verbannt'], 'flesh-to-stone': [['restrained'], 'am Zugende erneut, nach 3 Fehlschlägen versteinert'],
-  'suggestion': [['charmed'], 'folgt dem Vorschlag'], 'geas': [['charmed'], ''], 'confusion': [[], 'handelt verwirrt'], 'eyebite': [[], 'eingeschlafen, verängstigt oder krank (du wählst)'], 'polymorph': [[], 'verwandelt']
+  'suggestion': [['charmed'], 'folgt dem Vorschlag'], 'geas': [['charmed'], ''], 'confusion': [[], 'handelt verwirrt'], 'eyebite': [[], 'eingeschlafen, verängstigt oder krank (du wählst)'], 'polymorph': [[], 'verwandelt'],
+  'enthrall': [[], '−10 auf Wahrnehmung, auch passiv'], 'true-polymorph': [[], 'verwandelt']
 };
 /* Ziel wird beim Auslösen festgehalten (o.tgt) – ein späterer Zielwechsel ändert nichts mehr */
 const tgtNpc = (k) => (typeof onlineFight === 'function' && onlineFight() && k && k.startsWith('n:') ? ((S.combat && S.combat.npcs) || []).find((x) => 'n:' + x.id === k) : null);
