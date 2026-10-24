@@ -19,6 +19,39 @@ const SKILL_DESC = {
   per: 'Andere mit Argumenten und Charme gewinnen: verhandeln, bitten, beruhigen.',
   prc: 'Bemerken, was um dich herum geschieht: ein Geräusch, einen Hinterhalt, eine versteckte Tür.'
 };
+/* Die neun Gesinnungen (SRD 5.2.1, in eigenen Worten). Gespeichert wird der deutsche Name. Reihenfolge = Raster 3×3:
+   Zeilen gut / neutral / böse, Spalten rechtschaffen / neutral / chaotisch. */
+const ALIGN = {
+  RG: { name: 'Rechtschaffen gut', d: 'Tut das Richtige, so wie es eine gerechte Gemeinschaft erwartet: hält Wort, schützt Schwache und stellt sich Unrecht ohne Zögern entgegen.', ex: 'eine Ritterin, die Unschuldige verteidigt und ihr Versprechen hält, auch wenn es sie viel kostet', cr: 'Golddrachen, Silberdrachen, Einhörner, Engel wie die Deva' },
+  NG: { name: 'Neutral gut', d: 'Tut das Beste, was möglich ist. Hält sich an Regeln, fühlt sich aber nicht an sie gebunden – wichtiger ist, wer gerade Hilfe braucht.', ex: 'ein gütiger Heiler, der jedem hilft, egal ob Bettler oder Fürst', cr: 'Sprites, Pseudodrachen, Werbären, Zentauren' },
+  CG: { name: 'Chaotisch gut', d: 'Folgt dem eigenen Gewissen und kümmert sich wenig darum, was andere erwarten. Freiheit und Güte zählen mehr als Gesetze.', ex: 'eine Rebellin, die die Steuereintreiber eines grausamen Barons überfällt und das Geld den Armen gibt', cr: 'Kupfer- und Messingdrachen, Pegasi, Baumhirten, Sturmriesen' },
+  RN: { name: 'Rechtschaffen neutral', d: 'Handelt nach Gesetz, Tradition oder einem eigenen Kodex. Lässt sich davon weder durch Mitleid noch durch Versuchung abbringen.', ex: 'ein strenger Richter, der das Gesetz anwendet, ganz gleich, wen es trifft', cr: 'Sphingen, Azer' },
+  N: { name: 'Neutral', d: 'Hält sich aus moralischen Fragen heraus und ergreift keine Partei. Tut, was gerade vernünftig scheint.', ex: 'eine Bäuerin, die vor allem ihre Ruhe und eine gute Ernte will', cr: 'Dryaden, Elementare, Dschinns, viele Druiden und einfache Leute' },
+  CN: { name: 'Chaotisch neutral', d: 'Folgt den eigenen Launen – die persönliche Freiheit steht über allem, weder Gut noch Böse binden.', ex: 'ein Glücksritter, der von Ort zu Ort zieht und von seinem Witz lebt', cr: 'Goblins, Satyrn' },
+  RB: { name: 'Rechtschaffen böse', d: 'Nimmt sich planvoll, was es will – aber innerhalb eines Kodex aus Tradition, Treue oder Ordnung.', ex: 'ein Adliger, der seine Untertanen ausbeutet und Ränke um die Macht schmiedet', cr: 'Teufel, Hobgoblins, blaue und grüne Drachen, Vampire' },
+  NB: { name: 'Neutral böse', d: 'Schert sich nicht um das Leid, das es anrichtet, solange es bekommt, was es will.', ex: 'ein Verbrecher, der raubt und mordet, wie es ihm gerade passt', cr: 'Leichname, Nachtvetteln, Grabunholde, Schreckgespenster' },
+  CB: { name: 'Chaotisch böse', d: 'Handelt mit willkürlicher Gewalt, getrieben von Hass, Rachsucht oder Blutgier.', ex: 'eine Schurkin, die nur noch Rache und Verwüstung im Sinn hat', cr: 'Dämonen, rote und schwarze Drachen, Trolle, Oger, Gnolle' }
+};
+/* Freie Eingaben aus älteren Helden erkennen („rechtschaffen gut“, „LG“, „Neutral-Gut“ …); Unbekanntes bleibt null */
+function alignKey(s) {
+  const t = String(s || '').toLowerCase().replace(/ß/g, 'ss').replace(/[^a-zäöü]+/g, ' ').trim(); if (!t) return null;
+  const ab = { rg: 'RG', lg: 'RG', ng: 'NG', cg: 'CG', rn: 'RN', ln: 'RN', n: 'N', tn: 'N', wn: 'N', cn: 'CN', rb: 'RB', le: 'RB', nb: 'NB', ne: 'NB', cb: 'CB', ce: 'CB' };
+  if (ab[t.replace(/ /g, '')]) return ab[t.replace(/ /g, '')];
+  const eth = /recht|lawful/.test(t) ? 'R' : /chaot|chaos/.test(t) ? 'C' : '';
+  const mor = /\bgut|good/.test(t) ? 'G' : /böse|boese|bose|evil/.test(t) ? 'B' : '';
+  if (!eth && !mor) return /neutral/.test(t) ? 'N' : null;
+  if (!eth && !/neutral/.test(t) && mor) return 'N' + mor;
+  const k = (eth || 'N') + (mor || 'N'); return k === 'NN' ? 'N' : k;
+}
+function alignPicker(ch) {
+  const k = alignKey(ch.alignment); const old = ch.alignment && !k ? ch.alignment : '';
+  const A = k ? ALIGN[k] : null;
+  return '<div class="fld alfld"><span>Gesinnung</span><div class="algrid" role="group" aria-label="Gesinnung">' + Object.entries(ALIGN).map(([key, a]) => '<button type="button" class="chip' + (key === k ? ' on' : '') + '" data-act="setAlign" data-arg="' + key + '" aria-pressed="' + (key === k) + '">' + a.name.replace('Rechtschaffen', 'Recht&shy;schaffen') + '</button>').join('') + '</div>' +
+    (A ? '<div class="aldesc"><p><b>' + A.name + ':</b> ' + A.d + '</p><p><b>Zum Beispiel</b> ' + A.ex + '.</p><p><b>Typisch für:</b> ' + A.cr + '.</p></div>'
+      : '<p class="hint">' + (old ? 'Bisher eingetragen: «' + esc(old) + '». Wähle eine der neun Gesinnungen – ' : 'Tippe eine Gesinnung an – ') + 'hier steht dann, was sie bedeutet.</p>') +
+    '<p class="hint">Böse Helden nur nach Absprache mit der Spielleitung. Tiere und Wesen ohne Verstand haben keine Gesinnung.</p></div>';
+}
+XA.setAlign = (t, a, path, ch) => { if (!ch || !ALIGN[a]) return; ch.alignment = ALIGN[a].name; commit(); };
 const PROP_DESC = {
   light: 'Leicht: geeignet für den Kampf mit zwei Waffen.',
   finesse: 'Finesse: Angriff und Schaden wahlweise mit STÄ oder GES.',
@@ -41,6 +74,7 @@ function chipI(on, label, attrs, dis, kind, key, name) { return '<span class="ch
 const infoRow = (l, v) => (v || v === 0 ? '<div><dt>' + l + '</dt><dd>' + v + '</dd></div>' : '');
 const infoFeats = (fl) => fl.length ? '<div class="ifeats">' + fl.map(([lv, n, t]) => '<details><summary><b>' + esc(n) + '</b>' + (lv ? '<small>Stufe ' + lv + '</small>' : '') + '</summary><p>' + esc(t) + '</p></details>').join('') + '</div>' : '';
 function infoContent(kind, key) {
+  if (kind === 'al') { const A = ALIGN[key]; if (!A) return null; return { t: A.name, sub: 'Gesinnung', more: '<p class="itx">' + A.d + '</p><h4>Zum Beispiel</h4><p class="itx">' + A.ex.charAt(0).toUpperCase() + A.ex.slice(1) + '.</p><h4>Typisch für</h4><p class="itx">' + A.cr + '.</p>' }; }
   const ch = cur(); const c = ch ? derive(ch, S.hb) : null;
   if (kind === 'cls') {
     const C = CLASSES[key]; if (!C) return null;

@@ -5,7 +5,7 @@ import base64, json, os, re, shutil, subprocess, time
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FONTS = os.path.join(ROOT, 'app', 'fonts')
 OUT = os.path.join(ROOT, 'app', 'www')
-VERSION = '1.7.0'
+VERSION = '1.7.1'
 BUILD = int(time.time())
 
 def rd(p):

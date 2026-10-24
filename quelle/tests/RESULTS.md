@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-10-24T10:15:22+02:00
-- Revision (SHA-256 von index.html, gekürzt): b8f46851c67f1169
+- Zeitpunkt: 2026-10-24T11:11:16+02:00
+- Revision (SHA-256 von index.html, gekürzt): f3116a29d8633093
 - Node: v22.22.0 · Playwright: 1.56.0
 - Browser: Chromium 141.0.7390.37
 - System: Linux 6.18.44-fc-v153
@@ -33,6 +33,7 @@
 | Gegenstände: SRD-Liste, Flüche, Ausrüstung (items.test.js) | 0 | ✔ Keine Skriptfehler 12 / 12 bestanden  |
 | Rettungswürfe der Monster (mobsaves.test.js) | 0 | ✔ Keine Skriptfehler 7 / 7 bestanden  |
 | Leistung: Zwischenspeicher, ruhige Listen, Spieltisch, Effekte (perf.test.js) | 0 | ✔ Keine Skriptfehler 18 / 18 bestanden  |
+| Gesinnung: neun Gesinnungen mit Erklärung (align.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
 | Klicktest kurz (ui.test.js) | 0 | ✔ Desktop 1280 ✔ Handy 390 (Touch)  |
 | Abnahme-Klicktest (ui-full.test.js) | 0 | ✔ Chromium Desktop 1280: 165/165 Prüfungen ✔ Chromium Handy 390 (Touch): 165/165 Prüfungen  |
 | Kombinationen Klasse×Unterklasse×Stufe (combos.test.js) | 0 | checked 1280 bad 0  |

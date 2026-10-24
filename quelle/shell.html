@@ -268,6 +268,10 @@ td{font-family:var(--f-display);color:var(--gold-hi)}
 .rs>div:first-child{display:grid}.rs small{color:var(--muted);font-size:.8rem}
 .pool{display:flex;gap:6px}.pool input{width:84px}
 .splist{display:grid;gap:5px}
+/* Gesinnung: 3×3-Raster (Zeilen gut/neutral/böse, Spalten rechtschaffen/neutral/chaotisch) mit Beschreibung */
+.alfld{margin-block:14px}.algrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-width:560px}
+.algrid .chip{border-radius:12px;padding:7px 5px;font-size:.84rem;line-height:1.2;text-align:center;white-space:normal;hyphens:manual;min-height:44px}
+.aldesc{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;background:var(--bg2);max-width:560px}.aldesc p{margin:0 0 6px;font-size:.9rem;line-height:1.45}.aldesc p:last-child{margin:0}.alfld .hint{max-width:560px}
 /* Lange Listen: nur sichtbare Einträge werden gezeichnet; Platzhalterhöhe = typische Höhe eines geschlossenen Eintrags */
 .cvl>details{content-visibility:auto;contain-intrinsic-size:auto 64px}.mobs.cvl>details{contain-intrinsic-size:auto 66px}
 @media (min-width:700px){.cvl>details{contain-intrinsic-size:auto 41px}.mobs.cvl>details{contain-intrinsic-size:auto 50px}}

@@ -13,6 +13,9 @@ Dieses Repository baut automatisch (siehe *Actions*):
 
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
 
+## Neu in Version 1.7.1
+- Gesinnung: Auswahl der neun D&D-Gesinnungen als Raster, jede mit Erklärung, Beispiel und typischen Kreaturen; ⓘ im Charakterbogen. Ältere Einträge werden erkannt oder bleiben erhalten.
+
 ## Neu in Version 1.7
 - Läuft spürbar runder: Hintergrund-Effekte brauchen nur noch einen Bruchteil der Rechenleistung, Zauberbuch und Bestiarium zeichnen nur, was sichtbar ist, der Spieltisch baut bei Meldungen der Mitspieler nur noch Geändertes neu, schnellerer Start.
 - Beim ersten Start fragt die App nach deinem Namen; am Tisch sieht man, wer welchen Helden spielt.
