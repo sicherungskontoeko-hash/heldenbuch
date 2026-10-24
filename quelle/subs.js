@@ -76,7 +76,7 @@ const NEW_SUBS = {
   [14,'Ewiger Moment','Aktion, 1× pro langer Rast: Eine Kreatur in 18 m macht einen WEI-Rettungswurf oder ist 1 Minute lang in der Zeit eingefroren (gelähmt, immun gegen Schaden; Wiederholung am Ende jedes Zuges).']],
   res:(l,c)=>[{k:'zeitsprung',n:'Zeitsprung',max:Math.max(1,c.mod.int),reset:'long'}].concat(l>=10?[{k:'schleife',n:'Zeitschleife',max:1,reset:'long'}]:[]).concat(l>=14?[{k:'moment',n:'Ewiger Moment',max:1,reset:'long'}]:[]) }
 };
-const SRD_SUB_RES = { mon:['wob'], wlk:['dol','hth'], bar:['ip'], dru:['nr','ns'], pal:['nimbus'], sor:['wings','dcomp'] };
+const SRD_SUB_RES = { mon:['wob'], wlk:['dol','hth'], bar:['ip'], dru:['nr','nrs'], pal:['nimbus'], sor:['wings','dcomp'] };
 for (const [id, nsub] of Object.entries(NEW_SUBS)) {
   const C = CLASSES[id]; if (!C || C.subs) continue;
   C.subs = [{ id: C.sub.id, name: C.sub.name, feats: C.subFeats, spells: C.sub.spells }, nsub];

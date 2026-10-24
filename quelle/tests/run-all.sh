@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export NODE_PATH="/tmp/claude-0/npmt/node_modules:$(npm root -g)${NODE_PATH:+:$NODE_PATH}"
 # Führt alle Tests aus und protokolliert Zeit, Umgebung, Revision und Exit-Codes in tests/RESULTS.md.
 # Voraussetzung: npm install (Playwright 1.56, aedes, websocket-stream) und ein Chromium für Playwright.
 cd "$(dirname "$0")/.."
@@ -36,6 +37,15 @@ run "Abläufe mit Zwischenschritt: Zustände, Reaktionen, Zusatzeffekte (mechani
 run "Aufgeräumter Spieltisch (table.test.js)" node tests/table.test.js
 run "Abfragen und Ziele: nichts verdrängt, Ziel festgehalten (flow.test.js)" node tests/flow.test.js
 run "Sicherung: alles sichern und wiederherstellen (backup.test.js)" node tests/backup.test.js
+run "Willkommen: Name beim ersten Start (welcome.test.js)" node tests/welcome.test.js
+run "Willkommen in der App (welcome.test.js app)" node tests/welcome.test.js app/Heldenbuch.html
+run "Gegnerzug: Angriffe zählen, Zug beenden (npcturn.test.js)" node tests/npcturn.test.js
+run "Monsterbilder (mobpics.test.js)" node tests/mobpics.test.js
+run "Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js)" node tests/initcall.test.js
+run "Tischhilfen: passive Werte, Rast für alle, EP nach dem Kampf (tablehelp.test.js)" node tests/tablehelp.test.js
+run "Gegenstände: SRD-Liste, Flüche, Ausrüstung (items.test.js)" node tests/items.test.js
+run "Rettungswürfe der Monster (mobsaves.test.js)" node tests/mobsaves.test.js
+run "Leistung: Zwischenspeicher, ruhige Listen, Spieltisch, Effekte (perf.test.js)" node tests/perf.test.js
 run "Klicktest kurz (ui.test.js)" bash -c "node tests/ui.test.js || (echo Wiederholung; node tests/ui.test.js)"
 run "Abnahme-Klicktest (ui-full.test.js)" node tests/ui-full.test.js
 run "Kombinationen Klasse×Unterklasse×Stufe (combos.test.js)" node tests/combos.test.js

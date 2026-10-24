@@ -11,7 +11,7 @@ const RULE_OPTS = {
 function rule(k) { if (!S.rules) { try { S.rules = JSON.parse(localStorage.getItem('hb_rules') || '{}') || {}; } catch (e) { S.rules = {}; } } const v = S.rules[k]; return v === undefined ? !!(RULE_OPTS[k] || {}).d : !!v; }
 XA.ruleT = (t, a) => { rule(a); S.rules[a] = !rule(a); try { localStorage.setItem('hb_rules', JSON.stringify(S.rules)); } catch (e) {} render(); };
 function rulesBlock() {
-  return '<section class="panel rulesp"><h2>Regeloptionen</h2><p class="hint">Standard ist D&D 2024 (SRD 5.2). Abweichungen schaltest du hier als Hausregel. Die Einstellung gilt auf diesem Gerät.</p><div class="rulelist">' +
+  return '<section class="panel rulesp"><h2>Regeloptionen</h2><p class="hint">Standard ist D&D 2024 (SRD 5.2.1). Abweichungen schaltest du hier als Hausregel. Die Einstellung gilt auf diesem Gerät.</p><div class="rulelist">' +
     Object.entries(RULE_OPTS).map(([k, o]) => '<label class="rulerow"><input type="checkbox" data-act="ruleT" data-arg="' + k + '"' + (rule(k) ? ' checked' : '') + '><span><b>' + esc(o.n) + (rule(k) === o.d ? '' : ' <em>Hausregel</em>') + '</b><small>' + esc(o.t) + '</small></span></label>').join('') + '</div></section>';
 }
 
@@ -119,7 +119,6 @@ function timePass(ch, rounds) {
   pushLog({ label: 'Zeit vergeht', total: '⌛', detail: (rounds >= 600 ? rounds / 600 + ' Stunde(n)' : rounds / 10 + ' Minute(n)') + (ended.length ? ' · beendet: ' + ended.length + ' Wirkung(en)' : '') });
 }
 function rageEnd(P, why) { if (!P.raging) return; P.raging = false; P.rageKeep = false; P.rageLeft = null; pushLog({ label: 'Kampfrausch endet', total: '✗', detail: why || '', share: true }); }
-const rageNoArmor = (c) => !c.heavyArmor;
 
 /* ---------- Zauber zentral prüfen (vor jedem Verbrauch) ---------- */
 /* Drei Stufen: block = immer verboten · fatal = Regelverstoss, blockiert im strengen Modus immer (auch ausserhalb des Kampfes)
@@ -247,7 +246,7 @@ function rageStart(ch, c) {
   pushLog({ label: 'Kampfrausch!', total: '⚔', detail: n + ' · hält bis zum Ende deines nächsten Zuges, verlängert sich durch Angriffe, erzwungene Rettungswürfe oder eine Bonusaktion', share: true });
 }
 
-/* ---------- Tiergestalt (Druide, SRD 5.2) ---------- */
+/* ---------- Tiergestalt (Druide, SRD 5.2.1) ---------- */
 const WS_FORMS = [['wolf', 2], ['boar', 2], ['giant-rat', 2], ['black-bear', 4], ['crocodile', 4], ['brown-bear', 8], ['dire-wolf', 8], ['giant-spider', 8], ['lion', 8], ['giant-eagle', 8]];
 /* Körperliche Werte und Sinne der Tierformen (SRD-Bestiarium). In Tiergestalt gelten STÄ/GES/KON der Form, deine Übungen bleiben. */
 const WS_STATS = {
@@ -329,7 +328,7 @@ function restGate(ch, kind) {
   return true;
 }
 
-/* ---------- Waffenmeisterschaften (SRD 5.2) ---------- */
+/* ---------- Waffenmeisterschaften (SRD 5.2.1) ---------- */
 function mastEff(ch, name, tgt) {
   if (!onlineFight() || !tgt || typeof effSave !== 'function') return false;
   const c = S.combat; effSave({ effects: (c.effects || []).concat([{ id: effUid(), name, src: 'p:' + UID, tgt, left: 1, at: 'start', t: Date.now() }]), log: clog(c, ch.name + ': ' + name + ' auf ' + partName(tgt)) });

@@ -1,10 +1,10 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-10-22T10:50:58+02:00
-- Revision (SHA-256 von index.html, gekürzt): 88e7696d4276f08d
+- Zeitpunkt: 2026-10-24T10:15:22+02:00
+- Revision (SHA-256 von index.html, gekürzt): b8f46851c67f1169
 - Node: v22.22.0 · Playwright: 1.56.0
 - Browser: Chromium 141.0.7390.37
-- System: Linux 6.18.44-fc-v140
+- System: Linux 6.18.44-fc-v153
 
 | Suite | Exit-Code | Ergebnis |
 |---|---|---|
@@ -24,6 +24,15 @@
 | Aufgeräumter Spieltisch (table.test.js) | 0 | ✔ Keine Skriptfehler 29 / 29 bestanden  |
 | Abfragen und Ziele: nichts verdrängt, Ziel festgehalten (flow.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Sicherung: alles sichern und wiederherstellen (backup.test.js) | 0 | ✔ Keine Skriptfehler 11 / 11 bestanden  |
+| Willkommen: Name beim ersten Start (welcome.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
+| Willkommen in der App (welcome.test.js app) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
+| Gegnerzug: Angriffe zählen, Zug beenden (npcturn.test.js) | 0 | ✔ Keine Skriptfehler 11 / 11 bestanden  |
+| Monsterbilder (mobpics.test.js) | 0 | ✔ Keine Skriptfehler 10 / 10 bestanden  |
+| Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
+| Tischhilfen: passive Werte, Rast für alle, EP nach dem Kampf (tablehelp.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
+| Gegenstände: SRD-Liste, Flüche, Ausrüstung (items.test.js) | 0 | ✔ Keine Skriptfehler 12 / 12 bestanden  |
+| Rettungswürfe der Monster (mobsaves.test.js) | 0 | ✔ Keine Skriptfehler 7 / 7 bestanden  |
+| Leistung: Zwischenspeicher, ruhige Listen, Spieltisch, Effekte (perf.test.js) | 0 | ✔ Keine Skriptfehler 18 / 18 bestanden  |
 | Klicktest kurz (ui.test.js) | 0 | ✔ Desktop 1280 ✔ Handy 390 (Touch)  |
 | Abnahme-Klicktest (ui-full.test.js) | 0 | ✔ Chromium Desktop 1280: 165/165 Prüfungen ✔ Chromium Handy 390 (Touch): 165/165 Prüfungen  |
 | Kombinationen Klasse×Unterklasse×Stufe (combos.test.js) | 0 | checked 1280 bad 0  |
@@ -43,8 +52,8 @@
 | Zugleisten-Fuzz bw | 0 | ran 258 bad 0  |
 | Zugleisten-Fuzz fk | 0 | ran 218 bad 0  |
 | Zugleisten-Fuzz ma | 0 | ran 292 bad 0  |
-| Online-Tisch (net.test.js) | 1 | siehe Konsole |
+| Online-Tisch (net.test.js) | 0 | ✔ Nach Verbindungsabbruch: Spieler verbindet neu, Würfe kommen an 7 / 7 bestanden  |
 | Selbst-Update Android-App (boot.test.js) | 0 | ✔ Im normalen Browser: keine Update-Logik 16 / 16 bestanden  |
-| Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js) | 1 | siehe Konsole |
+| Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js) | 0 | ✔ Handy: kein Querscrollen bei den Spielern 18 / 18 bestanden  |
 
-Gesamtergebnis: mindestens eine Suite fehlgeschlagen
+Gesamtergebnis: alle Suiten bestanden

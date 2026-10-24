@@ -68,3 +68,24 @@ function mobTurnNote(c, npcs, key) {
   else if (still.length) bannerToast(x.name, still.map((a) => a.name + ': W6 ' + x.rech[a.name].roll + ' – noch nicht bereit').join(', '));
   else if (F.la) bannerToast(x.name, 'Legendäre Aktionen wieder voll (' + F.la + ').');
 }
+
+/* ---- Gegnerzug: Angriffe zählen und „Zug beenden“ anbieten. Nur eine Hilfe, keine Sperre – die SL entscheidet. ---- */
+const NUMW = { ein: 1, eine: 1, einen: 1, einer: 1, zwei: 2, drei: 3, vier: 4, 'fünf': 5, sechs: 6, zweimal: 2, dreimal: 3, viermal: 4 };
+function mobAtkMax(mid) {
+  const M = BESTIARY[mid]; if (!M) return 1; const m = /Mehrfachangriff\b:?\s*([^.]*)/.exec(String(M[8] || '')); if (!m) return 1;
+  let s = m[1].replace(/\([^)]*\)/g, ' ').replace(/,\s*(einer|eine)\s+(davon|kann)[^,;]*/g, '').split(/;|\boder\b|,\s*(?=\S+\s+(?:nach|wenn|falls)\b)/)[0].trim(); if (!s) return 2;
+  let n = 0; s.split(/\s*(?:,|\bund\b|\+)\s*/).filter((p) => p.trim()).forEach((p) => { const w = p.trim().split(/\s+/)[0].toLowerCase(); const dw = /^\d+W(\d+)$/i.exec(w); n += NUMW[w] || (/^\d+$/.test(w) ? +w : dw ? +dw[1] : 1); });
+  return Math.max(1, Math.min(n, 8));
+}
+function npcTurnBox(c, cur) {
+  const x = (c.npcs || []).find((y) => y.id === cur.id); if (!x) return ''; const M = x.mid && BESTIARY[x.mid];
+  const max = M ? mobAtkMax(x.mid) : 0; const n = x.atkN || 0; const done = !!max && n >= max; const ma = M && (/Mehrfachangriff[^.]*/.exec(M[8] || '') || [])[0];
+  return '<div class="nturn' + (done ? ' done' : '') + '"><div class="nth' + (typeof mobPic === 'function' && mobPic(x.mid) ? ' wp' : '') + '">' + (typeof mobPic === 'function' ? mobPic(x.mid, 'mpicT') : '') + '<b>' + (typeof mobPic === 'function' && mobPic(x.mid) ? '' : '⚔ ') + esc(x.name) + ' ist am Zug</b><small>' + (M ? 'Angriffe ' + n + ' von ' + max + (ma && max > 1 ? ' · ' + esc(ma.replace(/^Mehrfachangriff:?\s*/, '')) : '') : 'Gegner ohne Werte: Angriffe würfelst du selbst') + '</small></div>' +
+    '<div class="chips">' + (M ? M[7].map((a, j) => '<button class="btn sm' + (done ? ' ghost' : '') + '" data-act="npcAtk" data-arg="' + x.id + '" data-j="' + j + '">' + esc(a[0]) + ' ' + sgn(a[1]) + '</button>').join('') : '') +
+    '<button class="btn sm' + (done || !M ? ' glowbtn' : ' ghost') + '" data-act="turnEnd">Zug beenden ▸</button></div>' +
+    (done ? '<p class="hint">Alle Angriffe gemacht. Noch Bewegung, Bonusaktion oder eine Fähigkeit? Sonst Zug beenden.</p>' : '') + '</div>';
+}
+function npcAtkCount(id) {
+  const c = S.combat; if (!c || c.turn !== 'n:' + id) return; /* Gelegenheitsangriffe ausserhalb des eigenen Zuges zählen nicht */
+  saveCombat(Object.assign({}, c, { npcs: (c.npcs || []).map((x) => (x.id === id ? Object.assign({}, x, { atkN: (x.atkN || 0) + 1 }) : x)), t: Date.now() }));
+}

@@ -49,7 +49,7 @@ document.addEventListener('keydown', (ev) => { const tag = (ev.target && ev.targ
 
 /* ---------- Automatisches Seitenlayout: Blöcke gleichmässig auf zwei Spalten verteilen ---------- */
 function layoutSheet() {
-  const tp = document.getElementById('top'); if (tp) document.documentElement.style.setProperty('--toph', tp.offsetHeight + 'px');
+  const tp = document.getElementById('top'); if (tp) { const th = tp.offsetHeight + 'px'; if (layoutSheet.th !== th) { document.documentElement.style.setProperty('--toph', th); layoutSheet.th = th; } }
   const sh = document.querySelector('.sheet'); if (!sh) return;
   const cols = sh.querySelector('.cols'); if (!cols) return;
   const parts = [...cols.querySelectorAll(':scope > .col')]; if (parts.length < 2) return;

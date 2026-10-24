@@ -383,7 +383,7 @@ function derive(ch, hb) {
   const att = [];
   const isMonk = !!lv('mon') && ar.type === 'none' && !ch.shield; c.martialArts = isMonk;
   const unarmedAb = isMonk && c.mod.dex > c.mod.str ? 'dex' : 'str';
-  att.push({ name: 'Waffenloser Schlag', ab: unarmedAb, die: isMonk ? '1' + maDie : '', atkParts: [AB_K[unarmedAb] + ' ' + sgn(c.mod[unarmedAb]), 'Übung ' + sgn(pb)].concat(+ch.misc.atk ? ['Sonstiges ' + sgn(+ch.misc.atk)] : []), dmgParts: isMonk ? ['1' + maDie, AB_K[unarmedAb] + ' ' + sgn(c.mod[unarmedAb])] : ['1 + STÄ (mind. 1)'], dmod: isMonk ? c.mod[unarmedAb] : Math.max(1, 1 + c.mod.str), gwf: false, light: false, finesse: false, ranged: false, atk: c.mod[unarmedAb] + pb + (+ch.misc.atk || 0), dmg: isMonk ? '1' + maDie + sgn(c.mod[unarmedAb]).replace('+0', '').replace('−0', '') : String(Math.max(1, 1 + c.mod.str)), dtype: 'Wucht', props: '', melee: true, prof: true });
+  att.push({ name: 'Waffenloser Schlag', ab: unarmedAb, die: isMonk ? '1' + maDie : '', atkParts: [AB_K[unarmedAb] + ' ' + sgn(c.mod[unarmedAb]), 'Übung ' + sgn(pb)].concat(+ch.misc.atk ? ['Sonstiges ' + sgn(+ch.misc.atk)] : []), dmgParts: isMonk ? ['1' + maDie, AB_K[unarmedAb] + ' ' + sgn(c.mod[unarmedAb])] : ['1 + STÄ ' + sgn(c.mod.str)], dmod: isMonk ? c.mod[unarmedAb] : Math.max(0, 1 + c.mod.str), gwf: false, light: false, finesse: false, ranged: false, atk: c.mod[unarmedAb] + pb + (+ch.misc.atk || 0), dmg: isMonk ? '1' + maDie + sgn(c.mod[unarmedAb]).replace('+0', '').replace('−0', '') : String(Math.max(1, 1 + c.mod.str)), dtype: 'Wucht', props: '', melee: true, prof: true });
   const masteryAny = classList.some((e) => e.C.mastery);
   const thrownAtt = []; const shillOn = !!((ch.play || {}).fx || {}).shill; const shillAb = ((c.extraSpells || []).find((e) => e.id === 'shillelagh') || {}).ab || (lv('dru') ? 'wis' : lv('wlk') ? 'cha' : 'wis');
   (ch.weapons || []).forEach((w, i) => {
@@ -489,10 +489,12 @@ function getSpell(id, hb) {
   if (id.startsWith('hb:')) { const h = (hb || {})[id.slice(3)]; return h && h.kind === 'spell' ? { id, name: h.name, en: 'Hausregel', lvl: +h.lvl || 0, school: h.school || 'evo', classes: h.classes || [], time: h.time || 'Aktion', range: h.range || '—', comp: h.comp || '—', dur: h.dur || 'Sofort', text: h.text || '', conc: !!h.conc, ritual: !!h.ritual, home: true } : null; }
   return SPELLS[id] || null;
 }
+/* Sortierte Liste aller Zauber; wird pro Zustand der Hausregel-Zauber nur einmal gebaut (frühere Fassung sortierte bei jedem Aufruf neu) */
+let ALLSP = { key: null, list: [] };
 function allSpells(hb) {
-  const out = Object.values(SPELLS).slice();
-  for (const h of Object.values(hb || {})) if (h.kind === 'spell') out.push(getSpell('hb:' + h.id, hb));
-  return out.sort((a, b) => a.lvl - b.lvl || a.name.localeCompare(b.name, 'de'));
+  const hs = Object.values(hb || {}).filter((h) => h.kind === 'spell'); const key = Object.keys(SPELLS).length + '|' + (hs.length ? JSON.stringify(hs) : '');
+  if (ALLSP.key !== key) { const out = Object.values(SPELLS).concat(hs.map((h) => getSpell('hb:' + h.id, hb))); ALLSP = { key, list: out.sort((a, b) => a.lvl - b.lvl || COLL_DE.compare(a.name, b.name)) }; }
+  return ALLSP.list.slice();
 }
 function spellList(clsId, hb, secrets) {
   if (clsId === 'any') return allSpells(hb);

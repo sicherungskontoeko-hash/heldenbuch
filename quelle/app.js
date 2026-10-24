@@ -1,7 +1,11 @@
 /* ==== Heldenbuch – Oberfläche ==== */
 const S = { chars: {}, hb: {}, cur: null, view: 'heroes', step: 0, mode: 'normal', log: [], sf: { q: '', lvl: 'all', cls: 'all' }, hbEdit: null, confirm: null, open: {}, store: 'local', saving: '', camp: '', share: true, table: {}, campErr: '', combat: null, myInit: null, logOpen: false, logFilter: 'all', npcRoll: false, meta: { dm: null, mercy: {} }, mercyQ: [] };
+/* Eigene Initiative merken: übersteht Neuladen und App-Neustart mitten im Kampf (sonst fiele der Held aus der Reihenfolge) */
+(() => { let mi = null; try { const o = JSON.parse(localStorage.getItem('heldenbuch_myinit') || 'null'); if (o && o.camp && o.v) mi = o; } catch (e) {}
+  Object.defineProperty(S, 'myInit', { configurable: true, enumerable: true, get: () => (mi && mi.camp === S.camp ? mi.v : null), set: (v) => { mi = v ? { camp: S.camp, v } : null; try { localStorage.setItem('heldenbuch_myinit', JSON.stringify(mi)); } catch (e) {} } }); })();
 const $ = (s, r = document) => r.querySelector(s);
-const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }; const ESC_RE = /[&<>"]/g;
+const esc = (s) => { s = String(s ?? ''); return ESC_RE.test(s) ? (ESC_RE.lastIndex = 0, s.replace(ESC_RE, (m) => ESC_MAP[m])) : s; };
 const cur = () => S.chars[S.cur];
 const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
 function setP(o, p, v) { const ks = p.split('.'); let t = o; ks.slice(0, -1).forEach((k) => { if (t[k] == null || typeof t[k] !== 'object') t[k] = {}; t = t[k]; }); t[ks[ks.length - 1]] = v; }
@@ -418,8 +422,8 @@ const spellName = (id) => (getSpell(id, S.hb) || { name: id }).name;
 const HUE = { bar:'#C8553D', brd:'#C77DBA', cle:'#E8C66A', dru:'#7FA65A', fig:'#B8875A', mon:'#5FA8A0', pal:'#E2AE52', ran:'#6E9F6A', rog:'#8C8FA8', sor:'#D9603B', wlk:'#9A6BD1', wiz:'#5B8FD9' };
 function sigil(ch, extra) {
   const pt = ch.portrait || '';
-  if (pt === 'img' && ch.portraitImg) return '<span class="sigil art" style="background-image:url(' + ch.portraitImg + ')"' + (extra || '') + ' aria-hidden="true"></span>';
-  if (pt.startsWith('art:') && ART[pt.slice(4)]) return '<span class="sigil art" style="background-image:url(' + ART[pt.slice(4)] + ')"' + (extra || '') + ' aria-hidden="true"></span>';
+  if (pt === 'img' && ch.portraitImg) return '<span class="sigil art" style="background-image:url(' + imgUrl(ch.portraitImg) + ')"' + (extra || '') + ' aria-hidden="true"></span>';
+  if (pt.startsWith('art:') && ART[pt.slice(4)]) return '<span class="sigil art" style="background-image:url(' + imgUrl(ART[pt.slice(4)]) + ')"' + (extra || '') + ' aria-hidden="true"></span>';
   if (pt === 'ini' || !CREST[ch.cls]) { const ini = (ch.name || '?').replace(/^Beispiel:\s*/, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '?';
     return '<span class="sigil" style="--h:' + (HUE[ch.cls] || 'var(--gold)') + '"' + (extra || '') + ' aria-hidden="true">' + esc(ini) + '</span>'; }
   return '<span class="sigil crest" style="--h:' + (HUE[ch.cls] || 'var(--gold)') + '"' + (extra || '') + ' aria-hidden="true">' + crestSvg(ch.cls) + '</span>';
@@ -465,9 +469,10 @@ function renderHeroes() {
 function exportData(list, full) { const d = { heldenbuch: 1, exportiert: new Date().toISOString(), chars: list, hb: Object.values(S.hb) }; if (full) d.extra = backupExtras(); return JSON.stringify(d, null, 2); }
 /* „Alles sichern“: neben Helden und Hausregeln auch eigene Monster, gespeicherte Begegnungen und SL-Notizen (liegen sonst nur im Browser) */
 function backupExtras() { const notes = {}; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.indexOf('heldenbuch_dm_') === 0 && localStorage.getItem(k)) notes[k.slice(14)] = localStorage.getItem(k); } } catch (e) {}
-  return { mobs: typeof ownMobs === 'function' ? ownMobs() : [], enc: typeof encLoad === 'function' ? encLoad() : [], dmNotes: notes }; }
+  return { mobs: typeof ownMobs === 'function' ? ownMobs() : [], enc: typeof encLoad === 'function' ? encLoad() : [], dmNotes: notes, player: typeof myName === 'function' ? myName() : '' }; }
 function restoreExtras(x) {
   if (!x || typeof x !== 'object') return []; const done = [];
+  if (typeof x.player === 'string' && x.player.trim() && typeof myName === 'function' && !myName()) { setMyName(x.player.trim().slice(0, 24)); done.push('dein Name'); }
   if (Array.isArray(x.mobs) && x.mobs.length && typeof ownMobsStore === 'function') { const list = ownMobs(); let n = 0; x.mobs.forEach((o) => { if (!o || !o.id || !o.name || !CR_XP[o.cr]) return; const i = list.findIndex((y) => y.id === o.id); if (i >= 0) list[i] = o; else list.push(o); n++; }); ownMobsStore(list); ownMobsLoad(); if (n) done.push(n + ' eigene Monster'); }
   if (Array.isArray(x.enc) && x.enc.length && typeof encStore === 'function') { const list = encLoad(); let n = 0; x.enc.forEach((e) => { if (!e || !e.id || !Array.isArray(e.mobs) || list.some((y) => y.id === e.id)) return; list.push(e); n++; }); encStore(list.slice(0, 60)); if (n) done.push(n + ' Begegnungen'); }
   if (x.dmNotes && typeof x.dmNotes === 'object') { let n = 0; Object.entries(x.dmNotes).forEach(([room, txt]) => { if (typeof txt !== 'string' || !txt) return; try { const k = 'heldenbuch_dm_' + room; const cur0 = localStorage.getItem(k) || ''; if (cur0 === txt) return; localStorage.setItem(k, cur0 ? cur0 + '\n\n— aus der Sicherung —\n' + txt : txt); n++; } catch (e) {} }); if (n) done.push('SL-Notizen (' + n + ' Runde' + (n > 1 ? 'n' : '') + ')'); }
@@ -776,7 +781,7 @@ function spellBlock(c) {
   for (const info of sc.classes || []) { const t = sc.classes.length > 1 ? info.name : ''; info.always.forEach((id) => { if (!seen.has(id)) { seen.add(id); all.push({ id, s: getSpell(id, S.hb), tag: (t ? t + ' · ' : '') + 'immer' }); } }); info.cantrips.concat(info.prepared).forEach((id) => { if (!seen.has(id)) { seen.add(id); all.push({ id, s: getSpell(id, S.hb), tag: t }); } }); }
   c.extraSpells.forEach((e) => { if (!seen.has(e.id)) { seen.add(e.id); all.push({ id: e.id, s: getSpell(e.id, S.hb), tag: e.src + ' · SG ' + e.dc, extra: true }); } });
   for (let k = all.length - 1; k >= 0; k--) if (!all[k].s) all.splice(k, 1);
-  all.sort((a, b) => a.s.lvl - b.s.lvl || a.s.name.localeCompare(b.s.name, 'de'));
+  all.sort((a, b) => a.s.lvl - b.s.lvl || cmpDe(a.s.name, b.s.name));
   let lv = -1;
   h += '<div class="splist">';
   for (const x of all) {
@@ -965,7 +970,7 @@ function renderSpellBook() {
   return '<div class="book"><div class="filters"><input type="search" id="sq" value="' + esc(f.q) + '" placeholder="Zauber suchen (deutsch oder englisch) …" aria-label="Suche">' +
     '<select id="sl">' + [['all', 'Alle Grade'], ['0', 'Zaubertricks']].concat([1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => [String(g), 'Grad ' + g])).map(([v, l]) => '<option value="' + v + '"' + (f.lvl === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>' +
     '<select id="sc"><option value="all">Alle Klassen</option>' + Object.entries(CLASSES).filter(([, C]) => C.caster).map(([k, C]) => '<option value="' + k + '"' + (f.cls === k ? ' selected' : '') + '>' + C.name + '</option>').join('') + '</select></div>' +
-    '<p class="hint">' + list.length + ' Zauber · Auswahl aus dem SRD 5.2, eigene Zauber über „Hausregeln“.</p><div class="splist">' + list.map((s) => spellCard(s, s.home ? 'Hausregel' : s.classes.map((k) => (CLASSES[k] || {}).name).filter(Boolean).join(', '), false)).join('') + '</div></div>';
+    '<p class="hint">' + list.length + ' Zauber · Auswahl aus dem SRD 5.2.1, eigene Zauber über „Hausregeln“.</p><div class="splist cvl">' + list.map((s) => spellCard(s, s.home ? 'Hausregel' : s.classes.map((k) => (CLASSES[k] || {}).name).filter(Boolean).join(', '), false)).join('') + '</div></div>';
 }
 
 /* ---------- Hausregeln ---------- */
@@ -973,7 +978,7 @@ const HB_KIND = { feature: 'Merkmal / Fähigkeit', item: 'Magischer Gegenstand',
 function renderHB() {
   const e = S.hbEdit;
   let h = '<div class="hbwrap"><section class="panel"><h2>Hausregeln</h2><p class="hint">Hier trägst du eigene Inhalte ein – z. B. die Äthermaschine deines Paladins, ein Reittier-Merkmal oder Talente aus deinen Büchern in eigenen Worten. Zahlen wie RK oder TP pro Stufe rechnet die App automatisch mit ein, sobald du den Eintrag unter Erstellen → Ausrüstung anhakst. Zauber erscheinen direkt in den Zauberlisten der gewählten Klassen.</p>';
-  const list = Object.values(S.hb).sort((a, b) => a.name.localeCompare(b.name, 'de'));
+  const list = Object.values(S.hb).sort((a, b) => cmpDe(a.name, b.name));
   h += list.length ? '<div class="hblist">' + list.map((x) => '<div class="hbi"><div><b>' + esc(x.name) + '</b><small>' + HB_KIND[x.kind] + (x.kind === 'spell' ? ' · Grad ' + (x.lvl || 0) : bonusText(x)) + '</small></div><button class="btn sm ghost" data-act="hbEdit" data-arg="' + x.id + '">Bearbeiten</button></div>').join('') + '</div>' : '<p class="empty">Noch keine Einträge.</p>';
   h += '<div class="chips">' + Object.entries(HB_KIND).map(([k, l]) => '<button class="btn sm" data-act="hbNew" data-arg="' + k + '">+ ' + l + '</button>').join('') + '</div></section>';
   if (e) {
@@ -999,7 +1004,7 @@ function saveCampPref() { try { localStorage.setItem('heldenbuch_camp', JSON.str
 function myRolls() { return S.log.filter((e) => (e.sides || e.share) && !e.preview).slice(0, 30).map((e) => ({ label: e.label, total: e.total, detail: e.detail, crit: !!e.crit, fumble: !!e.fumble, t: e.t, secret: !!e.secret, sides: e.sides || 0, nat: e.nat || 0, dset: e.dset || '' })); }
 function meDoc() {
   const ch = cur(); let c = null; try { c = derive(ch, S.hb); } catch (e) {}
-  return { char: ch.name.replace(/^Beispiel:\s*/, ''), cls: ch.cls, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: ch.play.hp ?? (c ? c.hpMax : 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0, dodge: !!(ch.play.fx || {}).dodge,
+  return { char: ch.name.replace(/^Beispiel:\s*/, ''), pl: typeof myName === 'function' ? myName() : '', cls: ch.cls, pas: c ? [c.passive, 10 + c.skills.ins.val, 10 + c.skills.inv.val] : null, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: ch.play.hp ?? (c ? c.hpMax : 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0, dodge: !!(ch.play.fx || {}).dodge,
     cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, dice: ch.dice || '', diceAt: ch.diceAt || 0, t: Date.now() };
 }
 function queueMe() { if (!S.camp || !DB || !cur()) return; clearTimeout(meTimer); meTimer = setTimeout(writeMe, 250); }
@@ -1041,11 +1046,6 @@ function tableRolls() {
   return all.sort((a, b) => b.t - a.t);
 }
 function ago(t) { const s = Math.max(0, Math.round((Date.now() - t) / 1000)); return s < 45 ? 'gerade eben' : s < 3600 ? 'vor ' + Math.max(1, Math.round(s / 60)) + ' Min.' : s < 86400 ? 'vor ' + Math.round(s / 3600) + ' Std.' : 'vor ' + Math.round(s / 86400) + ' Tg.'; }
-function tableLogHtml(n) {
-  const r = tableRolls().slice(0, n || 40);
-  if (!r.length) return '<li class="empty">Noch keine Würfe am Tisch. Sobald jemand würfelt, erscheint es hier.</li>';
-  return r.map((x) => '<li class="' + (x.me ? 'me' : '') + '">' + sigil({ name: x.who, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg }) + '<div><span><b class="who">' + esc(x.who) + '</b> · ' + esc(x.label) + '</span><small>' + esc(x.detail) + ' · ' + ago(x.t) + '</small></div><b class="tot' + (x.crit ? ' crit' : x.fumble ? ' fum' : '') + '">' + esc(x.total) + '</b></li>').join('');
-}
 function miniToast(p, r) {
   const m = $('#mini'); if (!m) return;
   const el = document.createElement('div'); el.className = 'mt';
@@ -1062,12 +1062,12 @@ function campStatus() {
   return '<p class="cstat ok">● Verbunden' + (!S.share ? ' – du würfelst verdeckt' : S.secret ? ' – nur die Spielleitung sieht deine Würfe' : ' – deine Würfe werden geteilt') + '</p>';
 }
 function partyHtml() {
-  const ps = players().sort((a, b) => (a[1].char || '').localeCompare(b[1].char || '', 'de')); const dmP = S.meta.dm && S.table[S.meta.dm];
-  const dmLine = dmP && dmOut(S.meta.dm) ? '<p class="hint pmdm">Spielleitung: <b>' + esc(dmP.char || '?') + '</b>' + (S.meta.dm === UID ? ' (du)' : '') + '</p>' : '';
+  const ps = players().sort((a, b) => cmpDe(a[1].char || '', b[1].char || '')); const dmP = S.meta.dm && S.table[S.meta.dm];
+  const dmLine = dmP && dmOut(S.meta.dm) ? '<p class="hint pmdm">Spielleitung: <b>' + esc(dmP.pl || dmP.char || '?') + '</b>' + (S.meta.dm === UID ? ' (du)' : '') + '</p>' : '';
   if (!ps.length) return dmLine + '<p class="empty">Noch niemand am Tisch.</p>';
   return dmLine + '<div class="party">' + ps.map(([uid, p]) => { const pct = p.hpMax ? Math.max(0, Math.min(100, (p.hp / p.hpMax) * 100)) : 0;
-    return '<div class="pm' + (uid === UID ? ' me' : '') + '">' + psig(p) + '<div class="pmb"><b>' + esc(p.char) + (uid === UID ? ' <small>(du)</small>' : '') + '</b><small>' + esc(p.clsName) + ' ' + esc(p.level) + ' · ' + esc(p.species) + '</small>' +
-      '<div class="pmhp"><span>TP ' + esc(p.hp) + '/' + esc(p.hpMax) + (p.temp ? ' +' + esc(p.temp) : '') + '</span><span>RK ' + esc(p.ac) + '</span></div><div class="hpbar"><i style="width:' + pct + '%"></i></div>' +
+    return '<div class="pm' + (uid === UID ? ' me' : '') + '">' + psig(p) + '<div class="pmb"><b>' + esc(p.char) + plLabel(p) + (uid === UID ? ' <small>(du)</small>' : '') + '</b><small>' + esc(p.clsName) + ' ' + esc(p.level) + ' · ' + esc(p.species) + '</small>' +
+      (p.pas && (isDM() || !S.meta.dm) ? '<small class="pmpas" title="Passive Werte">Wahrn. <b>' + esc(p.pas[0]) + '</b> · Motiv <b>' + esc(p.pas[1]) + '</b> · Nachf. <b>' + esc(p.pas[2]) + '</b></small>' : '') + '<div class="pmhp"><span>TP ' + esc(p.hp) + '/' + esc(p.hpMax) + (p.temp ? ' +' + esc(p.temp) : '') + '</span><span>RK ' + esc(p.ac) + '</span></div><div class="hpbar"><i style="width:' + pct + '%"></i></div>' +
       (p.cond && p.cond.length ? '<div class="pmc">' + p.cond.map((c) => '<span>' + esc(c) + '</span>').join('') + '</div>' : '') +
       (uid === S.meta.dm ? '<div class="pmc dm"><span>Spielleitung</span></div>' : '') +
       (p.dead ? '<div class="pmdead"><b>Gefallen' + (p.deathFinal ? ' – Tod bestätigt' : ' – wartet auf Gnade') + '</b>' + (isDM() ? '<div class="chips"><button class="btn sm" data-act="mercy" data-arg="' + uid + '">Gnade zeigen</button>' + (p.deathFinal ? '' : '<button class="btn sm ghost" data-act="doom" data-arg="' + uid + '">Tod bestätigen</button>') + '</div>' : '') + '</div>' : '') + '</div></div>'; }).join('') + '</div>';
@@ -1079,7 +1079,7 @@ function renderCamp() {
       '<section class="panel"><h2>Kampagne beitreten</h2><p class="hint">Gib einen Namen ein, den alle in deiner Gruppe gleich schreiben, z. B. <b>schatten-von-valdris</b>. Wer zuerst beitritt, eröffnet den Tisch.</p><p class="hint">Datenschutz: Die Tischdaten liegen im Speicher dieser geteilten Seite. Wer den Link zur Seite und den Kampagnennamen kennt, kann mitlesen – wähle einen schwer erratbaren Namen (z. B. mit angehängten Zufallszeichen) und schreib nichts Vertrauliches in den Tisch.</p><div class="row"><label class="fld"><span>Kampagnenname</span><input type="text" id="campCode" placeholder="z. B. schatten-von-valdris" autocomplete="off"></label></div><div class="chips"><button class="btn big" data-act="campJoin">Beitreten</button></div>' +
       '<h3>So holst du deine Mitspieler dazu</h3><ol class="steps2"><li>Öffne oben rechts im Heldenbuch das Menü <b>Teilen</b>.</li><li>Lade jeden Mitspieler per E-Mail als <b>Bearbeiter</b> ein. Nur dann dürfen ihre Würfe am Tisch erscheinen.</li><li>Alle öffnen das Heldenbuch, legen ihren Helden an und treten mit demselben Namen bei.</li></ol><p class="hint">Den Link und den Kampagnennamen kannst du danach per WhatsApp verschicken.</p><p class="hint">Jeder sieht nur seine eigenen Helden. Am Tisch geteilt werden nur Name, Klasse, TP, RK, Zustände und die Würfe.</p></section></div>';
   }
-  return '<div class="camp"><header class="shead"><div><h1>' + esc(S.camp) + '</h1><div id="campStat">' + campStatus() + '</div><div id="dmBox" class="dmbox">' + dmHtml() + '</div></div><div class="sctl">' + chip(S.share, !S.share ? 'Verdeckt würfeln' : S.secret ? 'Nur Spielleitung sieht Würfe' : 'Würfe teilen: an', 'data-act="campShare" title="Antippen zum Wechseln: alle sehen – nur die Spielleitung sieht – niemand sieht"') + '<button class="btn ghost" data-act="view" data-arg="sheet">Zum Bogen</button><button class="btn ghost" data-act="campLeave">Verlassen</button></div></header>' +
+  return '<div class="camp"><header class="shead"><div><h1>' + esc(S.camp) + '</h1><div id="campStat">' + campStatus() + '</div>' + myNameLine() + '<div id="dmBox" class="dmbox">' + dmHtml() + '</div></div><div class="sctl">' + chip(S.share, !S.share ? 'Verdeckt würfeln' : S.secret ? 'Nur Spielleitung sieht Würfe' : 'Würfe teilen: an', 'data-act="campShare" title="Antippen zum Wechseln: alle sehen – nur die Spielleitung sieht – niemand sieht"') + '<button class="btn ghost" data-act="view" data-arg="sheet">Zum Bogen</button><button class="btn ghost" data-act="campLeave">Verlassen</button></div></header>' +
     '<div class="invbar"><span class="hint" style="margin:0">Mitspieler einladen:</span>' + inviteHtml() + '</div>' +
     '<section class="blk fight" id="fightBox">' + fightHtml() + '</section>' + '<div id="dmTools">' + dmTools() + '</div>' +
     '<div class="cols"><section class="blk"><h2>Die Gruppe</h2><div id="partyBox">' + partyHtml() + '</div></section><section class="blk"><h2>Würfe am Tisch</h2><div id="tableBox">' + tableBox(12) + '</div></section></div></div>';
@@ -1098,15 +1098,18 @@ function rollItems(r) {
   if (!r.length) return '<li class="empty">Noch keine Würfe am Tisch. Sobald jemand würfelt, erscheint es hier.</li>';
   return r.map((x) => '<li class="' + (x.me ? 'me' : '') + '">' + sigil({ name: x.who, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg }) + '<div><span><b class="who">' + esc(x.who) + '</b> · ' + esc(x.label) + '</span><small>' + esc(x.detail) + ' · ' + ago(x.t) + '</small></div><b class="tot' + (x.crit ? ' crit' : x.fumble ? ' fum' : '') + '">' + esc(x.total) + '</b></li>').join('');
 }
+/* Ein Kasten wird nur neu aufgebaut, wenn sich sein Inhalt wirklich geändert hat (jede Meldung eines Mitspielers löst paintCamp aus) */
+function boxHtml(el, h) { if (el._hb === h) return false; el.innerHTML = h; el._hb = h; return true; }
 function paintCamp() {
-  applyTheme();
-  const dmb = $('#dmBox'); if (dmb) dmb.innerHTML = dmHtml();
-  const dmt = $('#dmTools'); if (dmt) { const ae = document.activeElement; if (!(ae && dmt.contains(ae) && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT'))) dmt.innerHTML = dmTools(); }
+  applyTheme(); let chg = false;
+  const dmb = $('#dmBox'); if (dmb) chg = boxHtml(dmb, dmHtml()) || chg;
+  const dmt = $('#dmTools'); if (dmt) { const ae = document.activeElement; if (!(ae && dmt.contains(ae) && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT'))) chg = boxHtml(dmt, dmTools()) || chg; }
   checkMercy();
-  const b = $('#partyBox'); if (b) b.innerHTML = partyHtml();
-  const c = $('#campStat'); if (c) c.innerHTML = campStatus();
-  const t = $('#tableBox'); if (t) t.innerHTML = tableBox(S.view === 'camp' ? 12 : 6);
-  const f = $('#fightBox'); if (f) { const ae = document.activeElement; const typing = ae && f.contains(ae) && ((ae.tagName === 'INPUT' && ae.value) || ae.tagName === 'SELECT'); if (!typing) f.innerHTML = fightHtml(); }
+  const b = $('#partyBox'); if (b) chg = boxHtml(b, partyHtml()) || chg;
+  const c = $('#campStat'); if (c) chg = boxHtml(c, campStatus()) || chg;
+  const t = $('#tableBox'); if (t) chg = boxHtml(t, tableBox(S.view === 'camp' ? 12 : 6)) || chg;
+  const f = $('#fightBox'); if (f) { const ae = document.activeElement; const typing = ae && f.contains(ae) && ((ae.tagName === 'INPUT' && ae.value) || ae.tagName === 'SELECT'); if (!typing) chg = boxHtml(f, fightHtml()) || chg; }
+  if (chg && typeof addHelp === 'function') { try { addHelp(); } catch (e) {} }
   paintTurn();
   if (typeof effSyncMine === 'function') effSyncMine();
 }
@@ -1154,7 +1157,7 @@ function dmHtml() {
   if (!S.camp) return '';
   const dm = S.meta.dm, p = dm && S.table[dm];
   if (isDM()) return '<span class="dmlbl">Du leitest die Runde</span> <button class="link" data-act="dmDrop">abgeben</button> · <label class="chk dmplay" title="Nur wenn du als Spielleitung auch einen eigenen Helden im Kampf führst"><input type="checkbox" id="dmPlays"' + (S.meta.dmPlays ? ' checked' : '') + '> Ich spiele selbst mit</label>';
-  return '<span class="dmlbl">Spielleitung: ' + (dm ? esc(p ? p.char : 'unbekannt') : 'noch niemand') + '</span> <button class="link" data-act="dmTake">' + (dm ? 'übernehmen' : 'Ich leite die Runde') + '</button>';
+  return '<span class="dmlbl">Spielleitung: ' + (dm ? esc(p ? (p.pl || p.char) : 'unbekannt') : 'noch niemand') + '</span> <button class="link" data-act="dmTake">' + (dm ? 'übernehmen' : 'Ich leite die Runde') + '</button>';
 }
 function fallenHtml(ch, c) {
   const P = ch.play; const inCamp = !!S.camp;
@@ -1176,7 +1179,7 @@ function subCombat() {
     const pend = S.combatPend; if (pend && d && d.w && d.w !== UID && (+d.rev || 0) <= (+pend.ours.rev || 0) && Date.now() - pend.at < 15000) { S.combatPend = null; const merged = mergeCombat(pend.base, pend.ours, d); if (combatSig(merged) !== combatSig(d)) { S.combat = d; saveCombat(merged); return; } }
     if (pend && Date.now() - pend.at >= 15000) S.combatPend = null;
     S.combat = d; if (typeof hitCheck === 'function') setTimeout(hitCheck, 0);
-    if (S.combat && S.combat.active && (!prev || !prev.active || prev.id !== S.combat.id)) { if (!S.myInit || S.myInit.cid !== S.combat.id) bannerToast('Kampf beginnt!', 'Würfelt Initiative.'); }
+    if (S.combat && S.combat.active && (!prev || !prev.active || prev.id !== S.combat.id)) { if (!S.myInit || S.myInit.cid !== S.combat.id) { if (!(typeof initCall === 'function' && initCall())) bannerToast('Kampf beginnt!', 'Würfelt Initiative.'); } }
     paintCamp(); }, () => {}); } catch (e) { combatUnsub = null; }
 }
 async function saveCombat(c) {
@@ -1190,13 +1193,14 @@ function order() {
   const list = [];
   for (const [uid, p] of players()) if (p.init && p.init.cid === c.id && !p.init.away) list.push({ key: 'p:' + uid, name: p.char, cls: p.cls, portrait: p.portrait, pimg: p.pimg, v: +p.init.v, dex: +p.dex || 0, me: uid === UID, hp: p.hp, hpMax: p.hpMax, dead: !!p.dead });
   for (const n of c.npcs || []) if (!n.reserve) list.push({ key: 'n:' + n.id, id: n.id, name: n.name, cls: 'npc', v: +n.v, dex: +n.dex || 0, npc: true, ally: !!n.ally, hp: n.hp, hpMax: n.hpMax, ac: n.ac, mid: n.mid, cond: n.cond || [], note: n.note || '' });
-  return list.sort((a, b) => b.v - a.v || b.dex - a.dex || a.name.localeCompare(b.name, 'de'));
+  return list.sort((a, b) => b.v - a.v || b.dex - a.dex || cmpDe(a.name, b.name));
 }
-function waiting() { const c = S.combat; if (!c || !c.active) return []; return players().filter(([, p]) => !(p.init && p.init.cid === c.id)).map(([uid, p]) => ({ uid, name: p.char, me: uid === UID })); }
-function awayList() { const c = S.combat; if (!c || !c.active) return []; return players().filter(([, p]) => p.init && p.init.cid === c.id && p.init.away).map(([uid, p]) => ({ uid, name: p.char, me: uid === UID })); }
+const notIn = (uid, p) => { const c = S.combat; return !!(c && c.inv && !c.inv.includes(uid) && !(p && p.init && p.init.cid === c.id && !p.init.away)); }; /* nicht ausgewählt: wie „noch nicht dabei“, bis er eingreift */
+function waiting() { const c = S.combat; if (!c || !c.active) return []; return players().filter(([u, p]) => !(p.init && p.init.cid === c.id) && !notIn(u, p)).map(([uid, p]) => ({ uid, name: p.char, me: uid === UID })); }
+function awayList() { const c = S.combat; if (!c || !c.active) return []; return players().filter(([u, p]) => (p.init && p.init.cid === c.id && p.init.away) || notIn(u, p)).map(([uid, p]) => ({ uid, name: p.char, me: uid === UID })); }
 const skipTurn = (x) => (x.npc && x.hpMax > 0 && x.hp <= 0) || (!x.npc && x.dead);
 const initKey = (x) => [-x.v, -x.dex, x.name];
-function initAfter(a, b) { const ka = initKey(a), kb = initKey(b); return ka[0] !== kb[0] ? ka[0] > kb[0] : ka[1] !== kb[1] ? ka[1] > kb[1] : ka[2].localeCompare(kb[2], 'de') > 0; }
+function initAfter(a, b) { const ka = initKey(a), kb = initKey(b); return ka[0] !== kb[0] ? ka[0] > kb[0] : ka[1] !== kb[1] ? ka[1] > kb[1] : cmpDe(ka[2], kb[2]) > 0; }
 function curEntry() { const o = order(); return o.find((x) => x.key === (S.combat && S.combat.turn)) || null; }
 function nextTurn() {
   const c = S.combat; const o = order(); if (!o.length) return;
@@ -1208,29 +1212,32 @@ function nextTurn() {
   const tk = typeof effTick === 'function' ? effTick(c, c.turn, o[ni].key) : { effects: c.effects, rem: c.rem, log: [] };
   let lg = clog(c, 'Runde ' + round + ': ' + o[ni].name + ' ist am Zug'); tk.log.forEach((x) => { lg = clog({ log: lg }, x); });
   const mf = typeof mobTurnStart === 'function' ? mobTurnStart(c, o[ni].key) : null; /* Aufladung würfeln, legendäre Aktionen auffrischen */
-  saveCombat(Object.assign({}, c, mf ? { npcs: mf } : {}, { turn: o[ni].key, turnAt: { v: o[ni].v, dex: o[ni].dex, name: o[ni].name }, round, t: Date.now(), effects: tk.effects || [], rem: tk.rem || [], log: lg }));
+  const nk = o[ni].key; const npcs0 = (mf || c.npcs || []).map((x) => ('n:' + x.id === nk && x.atkN ? Object.assign({}, x, { atkN: 0 }) : x)); /* neuer Zug: Angriffe wieder bei 0 */
+  saveCombat(Object.assign({}, c, { npcs: npcs0 }, { turn: o[ni].key, turnAt: { v: o[ni].v, dex: o[ni].dex, name: o[ni].name }, round, t: Date.now(), effects: tk.effects || [], rem: tk.rem || [], log: lg }));
   if (mf && typeof mobTurnNote === 'function') mobTurnNote(c, mf, o[ni].key);
 }
 function clog(c, x) { return ((c && c.log) || []).concat([{ t: Date.now(), x }]).slice(-25); }
 function fightHtml() {
   const c = S.combat;
   const lead = !S.meta.dm || isDM();
-  if (!c || !c.active) return '<div class="fhead"><div><h2>Kampf</h2><p class="hint" style="margin:0">' + (lead ? 'Starte einen Kampf: Alle würfeln Initiative, die App sortiert die Reihenfolge und zeigt, wer am Zug ist.' : 'Die Spielleitung startet den Kampf. Dann würfelst du hier oder auf dem Bogen deine Initiative.') + '</p></div>' + (lead ? '<button class="btn big" data-act="fightStart">Kampf beginnen</button>' : '') + '</div>';
+  if (!c || !c.active) return '<div class="fhead"><div><h2>Kampf</h2><p class="hint" style="margin:0">' + (lead ? 'Starte einen Kampf: Alle würfeln Initiative, die App sortiert die Reihenfolge und zeigt, wer am Zug ist.' : 'Die Spielleitung startet den Kampf. Dann würfelst du hier oder auf dem Bogen deine Initiative.') + '</p></div>' + (lead && typeof fightDoneBox === 'function' ? fightDoneBox() : '') + (lead ? '<div class="chips"><button class="btn big" data-act="fightStart">Kampf beginnen</button>' + (players().length > 1 ? '<button class="btn ghost sm" data-act="fightPick">Nur einige …</button>' : '') + '</div>' : '') + '</div>';
   const o = order(), w = waiting(), cur = curEntry(); const mine = cur && cur.key === 'p:' + UID;
   let h = '<div class="fhead"><div><h2>Kampf · Runde ' + (c.round || 1) + '</h2><p class="hint" style="margin:0">' + (c.turn ? (cur ? 'Am Zug: <b>' + esc(cur.name) + '</b>' : '') : 'Alle würfeln Initiative (auf dem Bogen oder hier). Dann „Ersten Zug starten“.') + '</p></div><div class="chips">' +
     (!c.turn && lead ? '<button class="btn" data-act="fightGo"' + (o.length ? '' : ' disabled') + '>Ersten Zug starten</button>' : '') +
     (lead && c.turn ? '<button class="btn ghost sm" data-act="fightReset" data-confirm="Neue Begegnung? Alle würfeln neu Initiative, Runde, Zug und Effekte werden zurückgesetzt. Besiegte Gegner verschwinden, die übrigen bleiben." title="Neuer Kampf mit denselben Teilnehmern – alle würfeln neu Initiative">Neue Begegnung</button>' : '') + (lead ? '<button class="btn ghost sm" data-act="fightEnd" data-confirm="Kampf beenden? Initiative, Gegner und Effekte werden für alle gelöscht.">Kampf beenden</button>' : '') + '</div></div>';
-  h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + x.v + '</span>' + (x.npc ? '<span class="sigil npc" aria-hidden="true">⚔</span>' : sigil({ name: x.name, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : '') + (typeof effBadges === 'function' ? effBadges(x.key, lead) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
+  if (lead && cur && cur.npc && typeof npcTurnBox === 'function') h += npcTurnBox(c, cur);
+  h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + x.v + '</span>' + (x.npc ? ((typeof mobPic === 'function' && mobPic(x.mid, 'sigil npc pic')) || '<span class="sigil npc" aria-hidden="true">⚔</span>') : sigil({ name: x.name, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : '') + (typeof effBadges === 'function' ? effBadges(x.key, lead) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
   if (c.log && c.log.length) h += '<details class="clog"><summary>Verlauf <small>' + c.log.length + '</small></summary><ul>' + c.log.slice().reverse().slice(0, 12).map((e) => '<li><span>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</span>' + esc(e.x) + '</li>').join('') + '</ul></details>';
   if (w.length) h += '<p class="hint">Würfelt noch: ' + w.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + '</p>';
   if (lead && !c.turn && players().length) h += '<div class="fgrp"><b>Überrascht? <small>Nachteil auf den Initiativewurf</small></b><div class="chips">' + players().map(([u, p]) => chip((c.surp || []).includes(u), esc(p.char || '?'), 'data-act="surpTog" data-arg="' + u + '"')).join('') + '</div><p class="hint">Gegner überrascht: beim Hinzufügen „überrascht“ ankreuzen.</p></div>';
   const aw = awayList(); if (aw.length) h += '<p class="hint">Noch nicht im Kampf (zu weit weg): ' + aw.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + ' – sie würfeln Initiative, sobald sie eingreifen, und werden einsortiert.</p>';
   if (lead && typeof saveReqForm === 'function') h += saveReqForm();
   const rs = (c.npcs || []).filter((x) => x.reserve); if (rs.length && lead) { const gs = {}; rs.forEach((x) => { const k = x.grp || x.id; (gs[k] = gs[k] || []).push(x); }); h += '<div class="fgrp reserve"><b>Verstärkung (wartet)</b><div class="chips">' + Object.values(gs).map((g) => '<button class="btn sm ghost" data-act="npcJoin" data-arg="' + g[0].id + '"' + (g[0].grp && g.length > 1 ? ' data-grp="' + g[0].grp + '"' : '') + '>' + esc(g.length > 1 ? g.length + '× ' + (BESTIARY[g[0].mid] || [g[0].name])[0] : g[0].name) + ' greift ein</button>').join('') + '</div></div>'; }
-  const ch = cur ? null : null; const meIn = !w.some((x) => x.me);
+  const meIn = !w.some((x) => x.me);
   if (typeof npcBulkBar === 'function') h += npcBulkBar();
   if (o.length) h += '<div class="chips" style="margin:4px 0 10px"><button class="btn ghost sm" data-act="effNew">+ Effekt / Zustand mit Dauer</button>' + (lead ? '<button class="btn ghost sm" data-act="encOpen">+ Gegner</button>' : '') + '</div>';
-  h += '<div class="fctl">' + (dmOut(UID) ? '' : '<div class="fgrp"><b>Deine Initiative</b><div class="chips"><button class="btn sm" data-act="initRoll">' + (S.myInit && S.myInit.away && S.myInit.cid === c.id ? 'Eingreifen: Initiative würfeln' : meIn ? 'Neu würfeln' : 'Initiative würfeln') + '</button>' + (!(S.myInit && S.myInit.away && S.myInit.cid === c.id) ? '<button class="btn ghost sm" data-act="initAway" title="Dein Held ist noch zu weit weg und greift später ein">Noch nicht dabei</button>' : '') + '<input type="number" id="initMan" placeholder="Wert" aria-label="Eigene Initiative eintragen"><button class="btn ghost sm" data-act="initSet">Eintragen</button></div></div>') +
+  const initDone = c.turn && meIn && !(S.myInit && S.myInit.away && S.myInit.cid === c.id) && !(typeof notIn === 'function' && notIn(UID, S.table[UID]) && !(S.myInit && S.myInit.cid === c.id)); /* Kampf läuft und Initiative steht: kein „Neu würfeln“ mehr */
+  h += '<div class="fctl">' + (dmOut(UID) || initDone ? '' : '<div class="fgrp"><b>Deine Initiative</b><div class="chips"><button class="btn sm" data-act="initRoll">' + ((S.myInit && S.myInit.away && S.myInit.cid === c.id) || (notIn(UID, S.table[UID]) && !(S.myInit && S.myInit.cid === c.id)) ? 'Eingreifen: Initiative würfeln' : meIn ? 'Neu würfeln' : 'Initiative würfeln') + '</button>' + (!(S.myInit && S.myInit.away && S.myInit.cid === c.id) ? '<button class="btn ghost sm" data-act="initAway" title="Dein Held ist noch zu weit weg und greift später ein">Noch nicht dabei</button>' : '') + '<input type="number" id="initMan" placeholder="Wert" aria-label="Eigene Initiative eintragen"><button class="btn ghost sm" data-act="initSet">Eintragen</button></div></div>') +
     (lead && !o.length ? '<div class="fgrp"><b>Gegner</b><div class="chips"><button class="btn sm" data-act="encOpen">+ Gegner hinzufügen</button></div></div>' : '') + '</div>';
   return h;
 }
@@ -1239,7 +1246,7 @@ function paintTurn() {
   const c = S.combat; if (!S.camp || !c || !c.active) { el.innerHTML = ''; document.body.classList.remove('myturn'); wasMyTurn = false; return; }
   const o = order(), cur = curEntry(); const mine = cur && cur.key === 'p:' + UID;
   let next = null; if (cur) { const i = o.findIndex((x) => x.key === cur.key); next = o[(i + 1) % o.length]; }
-  const meWaiting = waiting().some((x) => x.me); const meAway = S.myInit && S.myInit.away && S.myInit.cid === c.id;
+  const meWaiting = waiting().some((x) => x.me); const meAway = (S.myInit && S.myInit.away && S.myInit.cid === c.id) || (notIn(UID, S.table[UID]) && !(S.myInit && S.myInit.cid === c.id && !S.myInit.away));
   el.innerHTML = '<div class="wrap tb' + (mine ? ' mine' : '') + '"><span class="tbr">Runde ' + (c.round || 1) + '</span>' +
     (mine ? '<b class="tbme">Du bist am Zug!</b>' : cur ? '<span>Am Zug: <b>' + esc(cur.name) + '</b>' + (next ? ' · danach ' + esc(next.name) : '') + '</span>' : '<span>Kampf beginnt – Initiative würfeln</span>') +
     '<span class="tbsp"></span>' + (meAway ? '<span class="tbaway">Du bist noch nicht im Kampf</span><button class="btn sm" data-act="initRoll">Eingreifen</button>' : meWaiting ? '<button class="btn sm" data-act="initRoll">Initiative würfeln</button><button class="btn sm ghost" data-act="initAway">Noch nicht dabei</button>' : '') + (mine ? '<button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>' : cur && (!S.meta.dm || isDM()) ? '<button class="btn sm ghost" data-act="turnEnd" title="Gegner oder abwesende Spieler: weiter zum Nächsten">Weiter ▸</button>' : '') + (S.view !== 'camp' ? '<button class="link" data-act="view" data-arg="camp">Reihenfolge</button>' : '') + '</div>';
@@ -1286,16 +1293,48 @@ function goWarn(c, w) {
 
 /* ---------- Render ---------- */
 let rendering = false;
-function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } }
+/* Reihenfolge: erst alles einfügen (Hilfe-Knöpfe), dann einmal messen (Seitenlayout) – so rechnet der Browser das Layout nur einmal */
+function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } }
+/* Lange Listen (Zauber, Bestiarium) zeichnet der Browser nur, soweit sie sichtbar sind (content-visibility). Damit beim
+   Neuzeichnen nichts springt, bekommen die neuen Einträge die Höhen der alten mit – die Seite liegt danach exakt gleich. */
+const cvKey = (el) => { const b = el.querySelector('summary b'); return b ? b.textContent : ''; };
+function cvKeep(v) {
+  const items = v.querySelectorAll('.cvl>details'); if (!items.length) return null;
+  const cs = getComputedStyle(items[0]); const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0) + (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+  return Array.prototype.map.call(items, (el) => [cvKey(el), Math.max(0, el.getBoundingClientRect().height - pad)]);
+}
+function cvApply(v, keep) {
+  const items = v.querySelectorAll('.cvl>details'); if (items.length !== keep.length) return;
+  for (let i = 0; i < items.length; i++) if (cvKey(items[i]) === keep[i][0]) items[i].style.containIntrinsicSize = 'auto ' + keep[i][1] + 'px';
+}
+/* Zusätzlich: den obersten sichtbaren Eintrag festhalten. Zeichnet der Browser im nächsten Bild weitere Einträge mit ihrer
+   echten Höhe, rückt ein ResizeObserver (läuft vor dem Malen) die Seite sofort zurück – man sieht keinen Sprung. */
+function cvAnchor(v) {
+  const items = v.querySelectorAll('.cvl>details'); if (!items.length) return null;
+  let i = items.length - 1; for (let k = 0; k < items.length; k++) if (items[k].getBoundingClientRect().bottom > 0) { i = k; break; }
+  return { i, k: cvKey(items[i]), top: items[i].getBoundingClientRect().top };
+}
+function cvFix(v, a) {
+  const el = v.querySelectorAll('.cvl>details')[a.i]; if (!el || cvKey(el) !== a.k) return false;
+  const d = el.getBoundingClientRect().top - a.top; if (Math.abs(d) >= 0.5) window.scrollBy(0, d); return true;
+}
+let cvRO = null; const cvStop = () => { if (cvRO) { cvRO.disconnect(); cvRO = null; } };
+function cvHold(v, a) {
+  cvStop(); if (!cvFix(v, a) || typeof ResizeObserver !== 'function') return;
+  const ro = new ResizeObserver(() => { if (cvRO === ro) cvFix(v, a); }); cvRO = ro; v.querySelectorAll('.cvl').forEach((l) => ro.observe(l));
+  let n = 0; const step = () => { if (cvRO !== ro) return; if (++n < 3) requestAnimationFrame(step); else cvStop(); }; requestAnimationFrame(step);
+}
+/* Wer selbst scrollt, hat Vorrang */
+['wheel', 'touchmove', 'keydown'].forEach((t) => window.addEventListener(t, cvStop, { passive: true }));
 function render0() {
   applyTheme();
   if (!cur()) { let first = false; try { first = !localStorage.getItem('hb_sample_done') && !Object.keys(S.chars).length; } catch (e) {} if (first) { const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; try { localStorage.setItem('hb_sample_done', '1'); } catch (e) {} } else { S.cur = Object.keys(S.chars)[0] || null; } }
   renderTop();
   const v = $('#view'); const y = window.scrollY;
   if (!cur() && (S.view === 'sheet' || S.view === 'build')) { v.innerHTML = noHeroView(); window.scrollTo(0, y); return; }
-  const c = cur() ? derive(cur(), S.hb) : null;
+  const c = cur() ? derive(cur(), S.hb) : null; cvStop(); const keep = y > 0 ? cvKeep(v) : null; const anc = keep ? cvAnchor(v) : null;
   v.innerHTML = S.view === 'camp' ? renderCamp() : S.view === 'heroes' ? renderHeroes() : S.view === 'build' ? renderBuild(c) : S.view === 'spells' ? renderSpellBook() : S.view === 'hb' ? renderHB() : S.view === 'mobs' ? '<div class="camp">' + bestiaryView() + '</div>' : S.view === 'help' ? helpView() : renderSheet(c);
-  window.scrollTo(0, y);
+  if (keep) cvApply(v, keep); window.scrollTo(0, y); if (anc) cvHold(v, anc);
 }
 function commit(rerender = true) { const ch = cur(); if (ch) { ch.updated = Date.now(); persist('c', ch.id); } queueMe(); if (rerender) render(); }
 function noHeroView() { return '<div class="camp"><div class="hero-intro banner" style="' + bannerStyle('paladin') + '"><h1>Noch kein Held</h1><p>Du hast im Moment keinen Helden. Erschaffe einen neuen oder lade einen gesicherten Helden.</p><div class="chips"><button class="btn big" data-act="newChar">Neuen Helden erschaffen</button><button class="btn ghost" data-act="loadSample">Beispielheld ansehen</button><button class="btn ghost" data-act="view" data-arg="heroes">Zu den Helden</button></div></div></div>'; }
@@ -1377,15 +1416,15 @@ document.addEventListener('click', (ev) => {
     selfMercy: () => { const P = ch.play; P.dead = false; P.deathFinal = false; P.hp = 1; P.ds = [0, 0]; pushLog({ label: 'Gnade', total: '✓', detail: ch.name + ' kehrt mit 1 TP zurück' }); commit(); },
     logOpen: () => { S.logOpen = !S.logOpen; paintCamp(); },
     logFilter: () => { S.logFilter = arg; paintCamp(); },
-    fightStart: () => { S.myInit = null; saveCombat({ id: 'k' + Date.now().toString(36), active: true, round: 1, turn: null, npcs: [], t: Date.now() }); },
+    fightStart: () => { S.myInit = null; const inv = S.modal === 'fightpick' && Array.isArray(S.fightInv) ? S.fightInv.slice() : null; if (S.modal === 'fightpick') { S.modal = null; $('#modal').hidden = true; } saveCombat(Object.assign({ id: 'k' + Date.now().toString(36), active: true, round: 1, turn: null, npcs: [], t: Date.now() }, inv ? { inv } : {})); setTimeout(() => { if (typeof initCall === 'function') initCall(); }, 300); },
     fightGo: () => { const o = order().filter((x) => !skipTurn(x)); if (o.length) saveCombat(Object.assign({}, S.combat, { turn: o[0].key, turnAt: { v: o[0].v, dex: o[0].dex, name: o[0].name }, round: 1, t: Date.now(), log: clog(S.combat, 'Kampf beginnt – Runde 1: ' + o[0].name + ' ist am Zug') })); },
     fightReset: () => { const c = S.combat; if (!c) return; const gr = {}; const npcs = (c.npcs || []).filter((x) => !(x.hpMax > 0 && x.hp <= 0)).map((x) => { const r = x.grp ? (gr[x.grp] = gr[x.grp] || 1 + Math.floor(rnd() * 20)) : 1 + Math.floor(rnd() * 20); return Object.assign({}, x, { v: r + (+x.dex || 0) }); }); S.myInit = null; queueMe();
       saveCombat({ id: 'k' + Date.now().toString(36), active: true, round: 1, turn: null, npcs, t: Date.now(), effects: [], rem: [], log: [{ t: Date.now(), x: 'Neue Begegnung – alle würfeln neu Initiative, besiegte Gegner entfernt' }] }); },
     fightEnd: () => { saveCombat({ id: '', active: false, t: Date.now() }); S.myInit = null; queueMe(); },
     turnEnd: () => { nextTurn(); if (typeof turnReset === 'function') { turnReset(ch, true); commit(); } },
-    initRoll: () => { const c = derive(ch, S.hb); if (!S.combat || !S.combat.active) return; d20(c.init, 'Initiative', { kind: 'init' }); },
+    initRoll: () => { const c = derive(ch, S.hb); if (!S.combat || !S.combat.active) return; if (S.modal === 'initcall') { S.modal = null; $('#modal').hidden = true; } d20(c.init, 'Initiative', { kind: 'init' }); },
     surpTog: () => { const c = S.combat; if (!c) return; const sp = (c.surp || []).slice(); const i = sp.indexOf(arg); if (i >= 0) sp.splice(i, 1); else sp.push(arg); saveCombat(Object.assign({}, c, { surp: sp, t: Date.now() })); },
-    initAway: () => { if (!S.combat || !S.combat.active) return; S.myInit = { cid: S.combat.id, away: true }; queueMe(); pushLog({ label: 'Noch nicht im Kampf', total: '…', detail: ch.name + ' ist noch zu weit weg und greift später ein.', share: true }); setTimeout(paintCamp, 50); },
+    initAway: () => { if (!S.combat || !S.combat.active) return; if (S.modal === 'initcall') { S.modal = null; $('#modal').hidden = true; } S.myInit = { cid: S.combat.id, away: true }; queueMe(); pushLog({ label: 'Noch nicht im Kampf', total: '…', detail: ch.name + ' ist noch zu weit weg und greift später ein.', share: true }); setTimeout(paintCamp, 50); },
     initSet: () => { const v = $('#initMan').value; if (v === '' || !S.combat) { $('#initMan').focus(); return; } setMyInit(+v); pushLog({ label: 'Initiative (eingetragen)', total: +v, detail: 'von Hand', share: true }); },
     npcAdd: () => { const n = ($('#npcName').value || '').trim() || 'Gegner'; const b = +$('#npcBonus').value || 0; const r = 1 + Math.floor(rnd() * 20); const c = S.combat; if (!c) return;
       saveCombat(Object.assign({}, c, { npcs: (c.npcs || []).concat([{ id: Math.random().toString(36).slice(2, 8), name: n, v: r + b, dex: b }]), t: Date.now(), log: clog(c, n + ' tritt dem Kampf bei (Initiative ' + (r + b) + ')') })); pushLog({ label: n + ': Initiative', total: r + b, detail: 'W20 ' + r + ' ' + sgn(b), sides: 20, nat: r }); },
@@ -1465,8 +1504,8 @@ document.addEventListener('change', (ev) => {
 });
 
 document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.id === 'campCode') { e.preventDefault(); const v = e.target.value.trim(); if (v) joinCamp(v); } });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#modal').hidden) { $('#modal').hidden = true; S.modal = null; } });
-document.addEventListener('click', (e) => { if (e.target.id === 'modal') { e.target.hidden = true; S.modal = null; } });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#modal').hidden && S.modal !== 'welcome') { $('#modal').hidden = true; S.modal = null; } });
+document.addEventListener('click', (e) => { if (e.target.id === 'modal' && S.modal !== 'welcome') { e.target.hidden = true; S.modal = null; } });
 function embers() { applyTheme(); if (!FX) startFx(); }
 
 /* ---------- Start ---------- */
@@ -1476,6 +1515,7 @@ function embers() { applyTheme(); if (!FX) startFx(); }
   if (!S.chars[S.cur]) S.cur = Object.keys(S.chars)[0] || null;
   try { const cp = JSON.parse(localStorage.getItem('heldenbuch_camp') || 'null'); if (cp) { S.camp = cp.code || ''; S.share = cp.share !== false; S.secret = !!cp.secret; } } catch (e) {}
   render();
+  if (typeof welcomeNeeded === 'function' && welcomeNeeded()) welcomeOpen();
   embers();
   connectDb();
 })();

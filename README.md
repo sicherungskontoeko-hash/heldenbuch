@@ -1,6 +1,6 @@
 # Heldenbuch
 
-Deutsches D&D-Charakterbuch (SRD 5.2) mit Charaktererstellung, Bogen, Würfeln und gemeinsamem Online-Tisch.
+Deutsches D&D-Charakterbuch (SRD 5.2.1) mit Charaktererstellung, Bogen, Würfeln und gemeinsamem Online-Tisch.
 
 Dieses Repository baut automatisch (siehe *Actions*):
 
@@ -12,6 +12,15 @@ Dieses Repository baut automatisch (siehe *Actions*):
 **Downloads:** https://github.com/sicherungskontoeko-hash/heldenbuch/releases/latest
 
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
+
+## Neu in Version 1.7
+- Läuft spürbar runder: Hintergrund-Effekte brauchen nur noch einen Bruchteil der Rechenleistung, Zauberbuch und Bestiarium zeichnen nur, was sichtbar ist, der Spieltisch baut bei Meldungen der Mitspieler nur noch Geändertes neu, schnellerer Start.
+- Beim ersten Start fragt die App nach deinem Namen; am Tisch sieht man, wer welchen Helden spielt.
+- Kampfstart: Die Spielleitung wählt, wer mitkämpft – bei den Betroffenen erscheint gross „Kampf!“ mit dem Knopf „Initiative würfeln“. Die eigene Initiative übersteht Neuladen.
+- Gegnerzug: Angriffe werden gezählt (Mehrfachangriff), „Zug beenden“ für Gegner; Monsterbilder im Bestiarium und am Tisch; Rettungswürfe der Monster aus dem SRD, Sammel-Rettungswurf mit Attribut.
+- Tischhilfen: passive Werte der Gruppe für die Spielleitung, EP nach dem Kampf mit einem Tipp verteilen; „Rast für alle“ klappt auch, wenn die Spielleitung nicht mitspielt.
+- Rund 200 magische Gegenstände aus dem SRD (gewöhnlich bis Artefakt, Einstimmung, Flüche) und 124 Ausrüstungsvorlagen mit Gewicht und Preis.
+- Grosse Durchsicht aller Regeln und Texte (Klassen, Zauber, Monster, Gegenstände) nach SRD 5.2.1.
 
 ## Neu in Version 1.6.1
 - Regelabgleich mit SRD 5.2.1: rund 100 Monster mit den Werten von 2024 (RK, TP, Angriffe, Mehrfachangriff, Odem), 12 fehlende SRD-Zauber ergänzt, Zauberklassen und halber Schaden bei gelungenem Rettungswurf korrigiert.

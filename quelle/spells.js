@@ -1,4 +1,4 @@
-/* ---------- Zauber (Auswahl aus dem SRD 5.2, eigene deutsche Kurzfassung) ----------
+/* ---------- Zauber (Auswahl aus dem SRD 5.2.1, eigene deutsche Kurzfassung) ----------
    id: [Name, Originalname, Grad, Schule, Klassen, Zeitaufwand, Reichweite, Komponenten, Dauer, Kurztext, Flags(K=Konz,R=Ritual)] */
 const SCHOOL = {abj:'Bannmagie',con:'Beschwörung',div:'Erkenntnismagie',enc:'Verzauberung',evo:'Hervorrufung',ill:'Illusion',nec:'Nekromantie',trs:'Verwandlung'};
 const SPELL_RAW = {
@@ -119,7 +119,7 @@ const SPELL_RAW = {
  'remove-curse':['Fluch brechen','Remove Curse',3,'abj','cle pal wlk wiz','Aktion','Berührung','V, G','Sofort','Beendet alle Flüche; löst die Einstimmung an verfluchte Gegenstände.'],
  'revivify':['Wiederbeleben','Revivify',3,'nec','cle dru pal ran','Aktion','Berührung','V, G, M (Diamant 300 GM)','Sofort','Eine Kreatur, die vor höchstens 1 Minute starb, kehrt mit 1 TP zurück.'],
  'speak-with-dead':['Mit Toten sprechen','Speak with Dead',3,'nec','brd cle wiz','Aktion','3 m','V, G, M','10 Minuten','Ein Leichnam beantwortet fünf Fragen.'],
- 'spirit-guardians':['Geisterwächter','Spirit Guardians',3,'con','cle','Aktion','Selbst','V, G, M','10 Minuten','4,5-m-Aura: Feinde haben halbe Bewegung; WEI-Rettungswurf gegen 3W8 gleissenden oder nekrotischen Schaden. +1W8 pro höherem Grad.','K'],
+ 'spirit-guardians':['Geisterwächter','Spirit Guardians',3,'con','cle','Aktion','Selbst','V, G, M','10 Minuten','4,5-m-Aura: Feinde haben halbe Bewegung; wer sie betritt oder dort seinen Zug beendet, WEI-Rettungswurf gegen 3W8 gleissenden oder nekrotischen Schaden (halb bei Erfolg). +1W8 pro höherem Grad.','K'],
  'stinking-cloud':['Stinkende Wolke','Stinking Cloud',3,'con','brd sor wiz','Aktion','27 m','V, G, M','1 Minute','6-m-Kugel: KON-Rettungswurf oder vergiftet und ohne Aktion.','K'],
  'tongues':['Zungen','Tongues',3,'div','brd cle sor wlk wiz','Aktion','Berührung','V, M','1 Stunde','Das Ziel versteht und spricht jede Sprache.'],
  'vampiric-touch':['Vampirgriff','Vampiric Touch',3,'nec','sor wlk wiz','Aktion','Selbst','V, G','1 Minute','Nahkampf-Zauberangriff mit 3W6 nekrotischem Schaden; du heilst die Hälfte; jeden Zug wiederholbar. +1W6 pro höherem Grad.','K'],
@@ -174,7 +174,7 @@ const SPELL_RAW = {
 const SPELLS = {};
 for (const [id,a] of Object.entries(SPELL_RAW)) SPELLS[id] = { id, name:a[0], en:a[1], lvl:a[2], school:a[3], classes:a[4].split(' '), time:a[5], range:a[6], comp:a[7], dur:a[8], text:a[9], conc:(a[10]||'').includes('K'), ritual:(a[10]||'').includes('R') };
 
-/* Materialkomponenten (SRD 5.2, deutsch). $ = hat einen Mindestwert, ! = wird verbraucht */
+/* Materialkomponenten (SRD 5.2.1, deutsch). $ = hat einen Mindestwert, ! = wird verbraucht */
 const MAT = {
  'dancing-lights':'ein Stück Phosphor', 'light':'ein Glühwürmchen oder etwas phosphoreszierendes Moos', 'mending':'zwei Magnetsteine', 'message':'ein Stück Kupferdraht',
  'minor-illusion':'ein Stück Vlies', 'shillelagh':'ein Mistelzweig', 'true-strike':'eine Waffe, mit der du geübt bist und die mindestens 1 KM wert ist$',

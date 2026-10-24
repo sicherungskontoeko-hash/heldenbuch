@@ -5,7 +5,7 @@ import base64, json, os, re, shutil, subprocess, time
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FONTS = os.path.join(ROOT, 'app', 'fonts')
 OUT = os.path.join(ROOT, 'app', 'www')
-VERSION = '1.6.1'
+VERSION = '1.7.0'
 BUILD = int(time.time())
 
 def rd(p):
@@ -37,14 +37,17 @@ head_extra = ('<link rel="icon" href="%s">\n<meta name="apple-mobile-web-app-cap
               '<meta name="description" content="Deutsches D&amp;D-Heldenbuch: Charaktere erschaffen, Bogen, Würfel und gemeinsamer Tisch.">\n') % fav
 shell = shell.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n' + head_extra, 1)
 
-scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'spelldata.js', 'calc.js', 'hbclasses.js', 'subs.js', 'subs2.js', 'flavor.js', 'pics.js', 'assets.js', 'crests.js', 'extra.js', 'scenes.js', 'theme.js', 'theme-fx.js', 'turn.js', 'effects.js', 'rules.js', 'search.js', 'encounter.js', 'monsters2.js', 'randenc.js', 'mobfx.js', 'mobedit.js', 'loot.js', 'explain.js', 'ux.js', 'help.js', 'spellflav.js', 'info.js', 'dice3d.js', 'levelup.js', 'savedmg.js', 'mechanics.js', 'app.js']
-js = '\n'.join(rd(s) for s in scripts)
+scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'spelldata.js', 'calc.js', 'hbclasses.js', 'subs.js', 'subs2.js', 'flavor.js', 'pics.js', 'assets.js', 'crests.js', 'extra.js', 'items2.js', 'scenes.js', 'theme.js', 'theme-fx.js', 'turn.js', 'effects.js', 'rules.js', 'search.js', 'encounter.js', 'monsters2.js', 'randenc.js', 'mobfx.js', 'mobedit.js', 'loot.js', 'explain.js', 'ux.js', 'help.js', 'spellflav.js', 'info.js', 'dice3d.js', 'levelup.js', 'savedmg.js', 'mechanics.js', 'welcome.js', 'mobsaves.js', 'mobpics.js', 'initcall.js', 'app.js']
+# Reine Bilddateien als eigene <script>-Blöcke zuerst (nur Latin-1-Zeichen: der Browser liest sie platzsparend, der Programmcode wird schneller übersetzt)
+ASSETS = ['scenes.js', 'pics.js', 'assets.js', 'mobpics.js']
+asset_js = ''.join('<script>\n' + rd(s) + '\n</script>' for s in ASSETS)
+js = '\n'.join(rd(s) for s in scripts if s not in ASSETS)
 js = js.replace("const APP_URL = 'https://claude.ai/artifact/TKockfJH2cR2kDJKqb1CCK';", "const APP_URL = '';")
 boot = rd('appboot.js').replace('__HB_BUILD__', str(BUILD)).replace('__HB_VERSION__', VERSION)
 m = re.search(r'<meta charset="[^"]*">', shell, re.I)
 assert m, 'meta charset fehlt'
 shell = shell[:m.end()] + '\n<script>\n' + boot + '</script>' + shell[m.end():]
-single = shell + '<script>\n' + js + '\n</script>\n<!--HB_END-->\n'
+single = shell + asset_js + '<script>\n' + js + '\n</script>\n<!--HB_END-->\n'
 pwa = single.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">', 1)
 
 if os.path.exists(OUT):

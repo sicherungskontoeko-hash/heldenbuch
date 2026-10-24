@@ -1,5 +1,5 @@
 /* ---------- Zufallsbegegnung auf Knopfdruck ----------
-   Fundort + Gruppe (Anzahl/Stufen) + Schwierigkeit → ausgewogene Begegnung nach dem EP-Budget (SRD 5.2).
+   Fundort + Gruppe (Anzahl/Stufen) + Schwierigkeit → ausgewogene Begegnung nach dem EP-Budget (SRD 5.2.1).
    Vorlagen: Einzelgegner, Rudel gleicher Art, Anführer mit Gefolge, gemischte Gruppe. Ergebnis landet im Begegnungsplaner. */
 const ER_DIFF = ['Niedrig', 'Moderat', 'Hoch'];
 /* ✦ kurze Szenen-Aufhänger je Fundort */

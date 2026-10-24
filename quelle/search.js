@@ -21,7 +21,7 @@ const RULES = [
   ['Ritual', 'Ein Zauber mit Ritual-Kennzeichen kann 10 Minuten länger gewirkt werden und verbraucht dann keinen Zauberplatz (er muss vorbereitet sein, ausser beim Magier).']
 ];
 const SRCH_CAT = { spell: 'Zauber', feat: 'Talent', cls: 'Klasse', sub: 'Unterklasse', feature: 'Klassenmerkmal', species: 'Spezies', item: 'Gegenstand', weapon: 'Waffe', armor: 'Rüstung', cond: 'Zustand', rule: 'Regel', monster: 'Monster', inv: 'Anrufung', option: 'Klassenoption', bg: 'Hintergrund', mastery: 'Meisterschaft', action: 'Aktion', home: 'Hausregel' };
-const SRC_DE = { srd: 'SRD 5.2', phb: 'Spielerhandbuch 2024 (nicht SRD)', eigen: '✦ eigene Erfindung', haus: 'Hausregel' };
+const SRC_DE = { srd: 'SRD 5.2.1', phb: 'Spielerhandbuch 2024 (nicht SRD)', eigen: '✦ eigene Erfindung', haus: 'Hausregel' };
 const fold = (s) => String(s || '').toLowerCase().replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ß/g, 'ss').normalize('NFD').replace(/[̀-ͯ]/g, '');
 let SRCH_IDX = null;
 function srchIndex() {
@@ -63,14 +63,14 @@ function srchRun(q, cat, src) {
     if (!ok) continue; if (!words.length) score = 1;
     out.push([score, e]);
   }
-  return out.sort((a, b) => b[0] - a[0] || a[1].name.localeCompare(b[1].name, 'de')).slice(0, 60).map((x) => x[1]);
+  return out.sort((a, b) => b[0] - a[0] || cmpDe(a[1].name, b[1].name)).slice(0, 60).map((x) => x[1]);
 }
 function openSearch() {
   S.sq = S.sq || { q: '', cat: '', src: '' };
   const m = $('#modal'); S.modal = 'search';
   m.innerHTML = '<div class="dlg srchdlg" role="dialog" aria-modal="true" aria-label="Suche"><div class="srchtop"><input type="search" id="srchQ" placeholder="Zauber, Talent, Fähigkeit, Gegenstand, Regel, Monster …" value="' + esc(S.sq.q) + '" autocomplete="off" aria-label="Suchbegriff"><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
     '<div class="chips srchcats">' + [['', 'Alles']].concat(Object.entries(SRCH_CAT).filter(([k]) => k !== 'option')).map(([k, l]) => chip(S.sq.cat === k, l, 'data-act="srchCat" data-arg="' + k + '"')).join('') + '</div>' +
-    '<div class="chips srchcats">' + [['', 'Alle Quellen'], ['srd', 'SRD 5.2'], ['eigen', '✦ eigene'], ['haus', 'Hausregeln']].map(([k, l]) => chip(S.sq.src === k, l, 'data-act="srchSrc" data-arg="' + k + '"')).join('') + '</div>' +
+    '<div class="chips srchcats">' + [['', 'Alle Quellen'], ['srd', 'SRD 5.2.1'], ['eigen', '✦ eigene'], ['haus', 'Hausregeln']].map(([k, l]) => chip(S.sq.src === k, l, 'data-act="srchSrc" data-arg="' + k + '"')).join('') + '</div>' +
     '<div id="srchRes" class="srchres"></div></div>';
   m.hidden = false; srchPaint(); const i = $('#srchQ'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
 }

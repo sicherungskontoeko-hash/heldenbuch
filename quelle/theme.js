@@ -48,16 +48,24 @@ const THEMES = {
     css += 'html[data-theme=\"' + k + '\"]{' + v.join(';') + '}';
   }
   css += 'html[data-theme="lustig"] h1,html[data-theme="lustig"] h2{letter-spacing:.01em}html[data-theme="romantisch"] h1,html[data-theme="romantisch"] h2,html[data-theme="romantisch"] h3{font-weight:700;letter-spacing:.02em}html[data-theme="blutig"] h1,html[data-theme="blutig"] h2{letter-spacing:.04em}';
-  css += ':root{' + Object.keys(THEME_SCENES).map((k) => '--scene-' + k + ':url(' + THEME_SCENES[k].img + ')').join(';') + '}' + Object.keys(THEME_SCENES).map((k) => '.tsw[data-arg="' + k + '"]{--simg:var(--scene-' + k + ')}').join('');
+  css += Object.keys(THEME_SCENES).map((k) => '.tsw[data-arg="' + k + '"]{--simg:var(--scene-' + k + ')}').join('');
   const st = document.createElement('style'); st.id = 'themeCss'; st.textContent = css; document.head.appendChild(st);
 })();
+/* Die Hintergrundbilder (zusammen 1,7 MB) kommen erst ins CSS, wenn sie gebraucht werden: das aktive Thema sofort,
+   alle anderen erst, wenn die Themenauswahl offen ist. Das spart beim Start viel Arbeit. */
+const SCENE_ON = {};
+function sceneVars(keys) {
+  const add = keys.filter((k) => !SCENE_ON[k] && THEME_SCENES[k] && THEME_SCENES[k].img); if (!add.length) return;
+  let st = document.getElementById('sceneCss'); if (!st) { st = document.createElement('style'); st.id = 'sceneCss'; document.head.appendChild(st); }
+  add.forEach((k) => { SCENE_ON[k] = 1; }); st.appendChild(document.createTextNode(':root{' + add.map((k) => '--scene-' + k + ':url(' + THEME_SCENES[k].img + ')').join(';') + '}'));
+}
 function themeOwn() { try { return localStorage.getItem('hb_theme') || 'warm'; } catch (e) { return 'warm'; } }
 function themeFollow() { try { return localStorage.getItem('hb_theme_follow') !== '0'; } catch (e) { return true; } }
 function themeNow() { const m = typeof S !== 'undefined' && S.camp && S.meta && S.meta.theme; if (m && THEMES[m] && themeFollow()) return m; const o = themeOwn(); return THEMES[o] ? o : 'warm'; }
 function ensureScene() { let el = document.getElementById('scene'); if (el) return el; el = document.createElement('div'); el.id = 'scene'; el.setAttribute('aria-hidden', 'true'); const ref = document.getElementById('embers'); if (ref && ref.parentNode) ref.parentNode.insertBefore(el, ref); else if (document.body) document.body.prepend(el); return el; }
 function applyTheme() {
   const t = themeNow(); const html = document.documentElement;
-  ensureScene();
+  sceneVars([t]); ensureScene();
   if (html.getAttribute('data-theme') === t) return;
   html.setAttribute('data-theme', t);
   const mc = document.querySelector('meta[name=\"theme-color\"]'); if (mc) mc.setAttribute('content', THEMES[t].c.bg);
@@ -65,8 +73,15 @@ function applyTheme() {
 }
 function setTheme(k, fromDm) { try { localStorage.setItem('hb_theme', k); if (!fromDm && typeof S !== 'undefined' && S.camp && S.meta && S.meta.theme && S.meta.theme !== k) localStorage.setItem('hb_theme_follow', '0'); } catch (e) {} applyTheme(); }
 
-/* ---------- Hintergrund-Effekte ---------- */
+/* ---------- Hintergrund-Effekte ----------
+   Leistung: Leuchtpunkte und Nebel kommen aus vorgezeichneten Bildchen (statt jedes Bild neue Verläufe zu bauen),
+   Farben werden über die Deckkraft gesetzt (keine neuen Farbtexte je Teilchen), höchstens etwa 60 Bilder pro Sekunde
+   (auch auf 90/120-Hz-Bildschirmen), Bewegung nach verstrichener Zeit – sieht also überall gleich aus.
+   Weiche Effekte (Glut, Funken, Nebel) brauchen keine doppelte Pixeldichte: sie sind ohnehin unscharf, so muss pro Bild
+   nur ein Viertel der Fläche gezeichnet werden. Der langsame Nebel kommt mit 30 Bildern pro Sekunde aus. */
 let FX = null;
+const FX_GLOW = {};
+function fxGlow(c, s) { const k = c + '|' + s; let g = FX_GLOW[k]; if (g) return g; g = document.createElement('canvas'); g.width = g.height = s; const x = g.getContext('2d'); const h = s / 2; const gr = x.createRadialGradient(h, h, 0, h, h, h); gr.addColorStop(0, 'rgba(' + c + ',1)'); gr.addColorStop(1, 'rgba(' + c + ',0)'); x.fillStyle = gr; x.fillRect(0, 0, s, s); return (FX_GLOW[k] = g); }
 function startFx() {
   const cv = document.getElementById('embers'); if (!cv || !cv.getContext) return;
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
@@ -75,13 +90,15 @@ function startFx() {
   ctx.clearRect(0, 0, cv.width, cv.height);
   if (reduce) return;
   const cfg = THEMES[themeNow()].fx; const run = { stop: false }; FX = run;
-  let W, H, dpr; const P = [];
-  const size = () => { dpr = Math.min(2, window.devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  const lvl = typeof fxLevel === 'function' ? fxLevel() : 'stark';
+  if (lvl === 'aus') { cv.width = cv.height = 0; run.size = () => {}; return; }
+  let W, H, dpr; const P = []; const soft = ['rise', 'spark', 'fog'].includes(cfg.mode); const minDt = cfg.mode === 'fog' ? 30 : 13;
+  const size = () => { dpr = soft ? 1 : Math.min(2, window.devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
   size(); if (!startFx.bound) { window.addEventListener('resize', () => { if (FX && FX.size) FX.size(); }); startFx.bound = true; } run.size = size;
-  const lvl = typeof fxLevel === 'function' ? fxLevel() : 'stark'; if (lvl === 'aus') return;
   const strong = lvl === 'stark'; const BIG = strong ? (cfg.big || 1) : 1;
   const N = Math.round(Math.min(cfg.n, (W * H) / 32000 * (cfg.n / 46)) * (strong ? 1 : 0.4));
-  const extra = []; let wind = 0, windT = 0; const RUNE = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ✶✧';
+  const extra = []; let wind = 0, windT = 0;
+  const rgb = {}; const solid = (c) => rgb[c] || (rgb[c] = 'rgb(' + c + ')');
   run.burst = (colors, n, shape) => { for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, sp = 2 + Math.random() * 7; extra.push({ x: W / 2 + (Math.random() - 0.5) * 60, y: H * 0.45 + (Math.random() - 0.5) * 40, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 2, r: 2 + Math.random() * 4, c: colors[Math.floor(Math.random() * colors.length)], life: 1, shape, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.3 }); } };
   const col = () => cfg.colors[Math.floor(Math.random() * cfg.colors.length)];
   const spawn = (p, init) => {
@@ -91,50 +108,50 @@ function startFx() {
     else if (m === 'snow') { p.y = init ? Math.random() * H : -10; p.r = 0.8 + Math.random() * 2.2; p.vy = 0.3 + Math.random() * 0.8; p.vx = (Math.random() - 0.5) * 0.3; p.a = 0.35 + Math.random() * 0.5; }
     else if (m === 'petal') { p.y = init ? Math.random() * H : -20; p.r = 4 + Math.random() * 4; p.vy = 0.35 + Math.random() * 0.6; p.vx = 0.2 + Math.random() * 0.4; p.a = 0.35 + Math.random() * 0.4; p.rot = Math.random() * 6.28; p.vr = (Math.random() - 0.5) * 0.04; }
     else if (m === 'confetti') { p.y = init ? Math.random() * H : -20; p.r = 3 + Math.random() * 4; p.vy = 0.6 + Math.random() * 1.1; p.vx = (Math.random() - 0.5) * 0.6; p.a = 0.55 + Math.random() * 0.35; p.rot = Math.random() * 6.28; p.vr = (Math.random() - 0.5) * 0.15; }
-    else if (m === 'drop') { p.y = init ? Math.random() * H : -30; p.r = 1.6 + Math.random() * 2; p.vy = 0.8 + Math.random() * 1.6; p.vx = 0; p.a = 0.3 + Math.random() * 0.35; }
     else if (m === 'fog') { p.y = Math.random() * H; p.x = init ? Math.random() * W : -300; p.r = 120 + Math.random() * 220; p.vx = 0.08 + Math.random() * 0.25; p.vy = (Math.random() - 0.5) * 0.05; p.a = (0.035 + Math.random() * 0.05) * (BIG > 1 ? 1.9 : 1); }
     else if (m === 'stars') { p.y = Math.random() * H; p.r = 0.5 + Math.random() * 1.6; p.vx = (Math.random() - 0.5) * 0.04; p.vy = (Math.random() - 0.5) * 0.04; p.a = 0.2 + Math.random() * 0.6; p.sp = 0.01 + Math.random() * 0.04; }
     else if (m === 'sand') { p.y = Math.random() * H; p.x = init ? Math.random() * W : -10; p.r = 0.5 + Math.random() * 1.2; p.vx = 1.2 + Math.random() * 2.4; p.vy = 0.1 + Math.random() * 0.25; p.a = 0.12 + Math.random() * 0.3; }
-    if (m !== 'fog') p.r *= BIG; p.heart = cfg.hearts && Math.random() < cfg.hearts; p.rune = cfg.runes && Math.random() < cfg.runes ? RUNE[Math.floor(Math.random() * RUNE.length)] : ''; if (p.rune) { p.r = 9 + Math.random() * 10; p.a = 0.12 + Math.random() * 0.25; }
+    if (m !== 'fog') p.r *= BIG; p.heart = cfg.hearts && Math.random() < cfg.hearts; p.rgb = solid(p.c);
     return p;
   };
   for (let i = 0; i < N; i++) P.push(spawn({}, true));
-  const splats = [];
   const heart = (x, y, r) => { ctx.beginPath(); ctx.moveTo(x, y + r * 0.35); ctx.bezierCurveTo(x - r * 1.2, y - r * 0.5, x - r * 0.4, y - r * 1.3, x, y - r * 0.45); ctx.bezierCurveTo(x + r * 0.4, y - r * 1.3, x + r * 1.2, y - r * 0.5, x, y + r * 0.35); ctx.fill(); };
-  const tick = () => {
+  /* gedreht zeichnen ohne save/restore: Matrix direkt setzen */
+  const turn = (x, y, a, sy) => { const c = Math.cos(a) * dpr, s = Math.sin(a) * dpr; ctx.setTransform(c, s, -s * sy, c * sy, x * dpr, y * dpr); };
+  let last = 0;
+  const tick = (now) => {
     if (run.stop) return;
-    if (!document.hidden) {
-      ctx.clearRect(0, 0, W, H); const m = cfg.mode;
-      if (cfg.gust && strong) { windT -= 1; if (windT <= 0) { wind = Math.random() < 0.3 ? 3 + Math.random() * 4 : 0; windT = 200 + Math.random() * 400; } }
-      for (let i = splats.length - 1; i >= 0; i--) { const sp = splats[i]; sp.a -= 0.004; if (sp.a <= 0) { splats.splice(i, 1); continue; } ctx.fillStyle = 'rgba(' + sp.c + ',' + sp.a + ')'; ctx.beginPath(); ctx.ellipse(sp.x, sp.y, sp.r * 2.2, sp.r * 0.7, 0, 0, 6.283); ctx.fill(); }
-      for (const p of P) {
-        p.t += 0.02;
-        if (m === 'rise' || m === 'spark') { p.y -= p.vy; p.x += p.vx + Math.sin(p.t) * 0.15; if (p.y < -10) spawn(p);
-          const fl = p.a * (0.7 + 0.3 * Math.sin(p.t * 3)); const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4); g.addColorStop(0, 'rgba(' + p.c + ',' + fl + ')'); g.addColorStop(1, 'rgba(' + p.c + ',0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 4, 0, 6.283); ctx.fill(); }
-        else if (m === 'snow') { p.y += p.vy; p.x += p.vx + Math.sin(p.t) * 0.3 + wind * (0.5 + p.r / 4); if (p.x > W + 20) p.x = -10; if (p.y > H + 10) spawn(p); ctx.fillStyle = 'rgba(' + p.c + ',' + p.a + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill(); }
-        else if (m === 'petal' || m === 'confetti') { p.y += p.vy; p.x += p.vx + Math.sin(p.t) * (m === 'petal' ? 0.6 : 0.3); p.rot += p.vr; if (p.y > H + 20 || p.x > W + 30) spawn(p);
-          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = 'rgba(' + p.c + ',' + p.a + ')';
-          if (m === 'petal') { if (p.heart) heart(0, 0, p.r); else { ctx.beginPath(); ctx.ellipse(0, 0, p.r, p.r * 0.55, 0, 0, 6.283); ctx.fill(); } } else { ctx.scale(1, Math.abs(Math.cos(p.t * 2))); ctx.fillRect(-p.r / 2, -p.r, p.r, p.r * 2); }
-          ctx.restore(); }
-        else if (m === 'drop') { p.y += p.vy; p.vy *= 1.006; if (p.y > H - 4) { if (cfg.splat && strong && splats.length < 60) splats.push({ x: p.x, y: H - 3 - Math.random() * 6, r: p.r * 1.6, c: p.c, a: 0.5 }); spawn(p); } ctx.fillStyle = 'rgba(' + p.c + ',' + p.a + ')'; ctx.beginPath(); ctx.moveTo(p.x, p.y - p.r * 4); ctx.quadraticCurveTo(p.x + p.r, p.y, p.x, p.y + p.r); ctx.quadraticCurveTo(p.x - p.r, p.y, p.x, p.y - p.r * 4); ctx.fill(); }
-        else if (m === 'fog') { p.x += p.vx; p.y += p.vy; if (p.x - p.r > W) spawn(p); const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r); g.addColorStop(0, 'rgba(' + p.c + ',' + p.a + ')'); g.addColorStop(1, 'rgba(' + p.c + ',0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill(); }
-        else if (m === 'stars' && p.rune) { p.y -= 0.12; p.x += Math.sin(p.t) * 0.2; if (p.y < -20) { p.y = H + 20; p.x = Math.random() * W; } ctx.fillStyle = 'rgba(' + p.c + ',' + (p.a * (0.6 + 0.4 * Math.sin(p.t * 1.5))) + ')'; ctx.font = p.r + 'px serif'; ctx.fillText(p.rune, p.x, p.y); }
-        else if (m === 'stars') { p.x += p.vx; p.y += p.vy; const a = p.a * (0.35 + 0.65 * Math.abs(Math.sin(p.t * p.sp * 50))); ctx.fillStyle = 'rgba(' + p.c + ',' + a + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill(); if (p.r > 1.7 && a > 0.55) { ctx.strokeStyle = 'rgba(' + p.c + ',' + a * 0.6 + ')'; ctx.lineWidth = 0.6; ctx.beginPath(); ctx.moveTo(p.x - 5, p.y); ctx.lineTo(p.x + 5, p.y); ctx.moveTo(p.x, p.y - 5); ctx.lineTo(p.x, p.y + 5); ctx.stroke(); } }
-        else if (m === 'sand') { p.x += p.vx; p.y += p.vy + Math.sin(p.t) * 0.2; if (p.x > W + 10 || p.y > H + 10) spawn(p); ctx.fillStyle = 'rgba(' + p.c + ',' + p.a + ')'; ctx.fillRect(p.x, p.y, p.r * 3, p.r * 0.8); }
-      }
-      for (let i = extra.length - 1; i >= 0; i--) { const q = extra[i]; q.x += q.vx; q.y += q.vy; q.vy += q.shape === 'snow' ? 0.02 : 0.18; q.vx *= 0.985; q.rot += q.vr; q.life -= 0.012; if (q.life <= 0 || q.y > H + 20) { extra.splice(i, 1); continue; }
-        ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.rot); ctx.fillStyle = 'rgba(' + q.c + ',' + Math.min(1, q.life * 1.4) + ')';
-        if (q.shape === 'confetti') ctx.fillRect(-q.r / 2, -q.r, q.r, q.r * 2); else if (q.shape === 'heart') heart(0, 0, q.r * 1.6); else if (q.shape === 'drop') { ctx.beginPath(); ctx.ellipse(0, 0, q.r, q.r * 1.7, 0, 0, 6.283); ctx.fill(); } else { const g = ctx.createRadialGradient(0, 0, 0, 0, 0, q.r * 3); g.addColorStop(0, 'rgba(' + q.c + ',' + q.life + ')'); g.addColorStop(1, 'rgba(' + q.c + ',0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, q.r * 3, 0, 6.283); ctx.fill(); }
-        ctx.restore(); }
-    }
     requestAnimationFrame(tick);
+    if (document.hidden) { last = 0; return; }
+    const el = last ? now - last : 16.7; if (last && el < (extra.length ? 13 : minDt)) return; last = now;
+    const k = Math.min(3, el / 16.7); const m = cfg.mode;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = 1; ctx.clearRect(0, 0, W, H);
+    if (cfg.gust && strong) { windT -= k; if (windT <= 0) { wind = Math.random() < 0.3 ? 3 + Math.random() * 4 : 0; windT = 200 + Math.random() * 400; } }
+    for (const p of P) {
+      p.t += 0.02 * k;
+      if (m === 'rise' || m === 'spark') { p.y -= p.vy * k; p.x += (p.vx + Math.sin(p.t) * 0.15) * k; if (p.y < -10) spawn(p);
+        const R = p.r * 4; ctx.globalAlpha = p.a * (0.7 + 0.3 * Math.sin(p.t * 3)); ctx.drawImage(fxGlow(p.c, 64), p.x - R, p.y - R, R * 2, R * 2); }
+      else if (m === 'snow') { p.y += p.vy * k; p.x += (p.vx + Math.sin(p.t) * 0.3 + wind * (0.5 + p.r / 4)) * k; if (p.x > W + 20) p.x = -10; if (p.y > H + 10) spawn(p); ctx.globalAlpha = p.a; ctx.fillStyle = p.rgb; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill(); }
+      else if (m === 'petal' || m === 'confetti') { p.y += p.vy * k; p.x += (p.vx + Math.sin(p.t) * (m === 'petal' ? 0.6 : 0.3)) * k; p.rot += p.vr * k; if (p.y > H + 20 || p.x > W + 30) spawn(p);
+        ctx.globalAlpha = p.a; ctx.fillStyle = p.rgb;
+        if (m === 'petal') { turn(p.x, p.y, p.rot, 1); if (p.heart) heart(0, 0, p.r); else { ctx.beginPath(); ctx.ellipse(0, 0, p.r, p.r * 0.55, 0, 0, 6.283); ctx.fill(); } } else { turn(p.x, p.y, p.rot, Math.abs(Math.cos(p.t * 2))); ctx.fillRect(-p.r / 2, -p.r, p.r, p.r * 2); } }
+      else if (m === 'fog') { p.x += p.vx * k; p.y += p.vy * k; if (p.x - p.r > W) spawn(p); ctx.globalAlpha = p.a; ctx.drawImage(fxGlow(p.c, 256), p.x - p.r, p.y - p.r, p.r * 2, p.r * 2); }
+      else if (m === 'stars') { p.x += p.vx * k; p.y += p.vy * k; const a = p.a * (0.35 + 0.65 * Math.abs(Math.sin(p.t * p.sp * 50))); ctx.globalAlpha = a; ctx.fillStyle = p.rgb; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill(); if (p.r > 1.7 && a > 0.55) { ctx.globalAlpha = a * 0.6; ctx.strokeStyle = p.rgb; ctx.lineWidth = 0.6; ctx.beginPath(); ctx.moveTo(p.x - 5, p.y); ctx.lineTo(p.x + 5, p.y); ctx.moveTo(p.x, p.y - 5); ctx.lineTo(p.x, p.y + 5); ctx.stroke(); } }
+      else if (m === 'sand') { p.x += p.vx * k; p.y += (p.vy + Math.sin(p.t) * 0.2) * k; if (p.x > W + 10 || p.y > H + 10) spawn(p); ctx.globalAlpha = p.a; ctx.fillStyle = p.rgb; ctx.fillRect(p.x, p.y, p.r * 3, p.r * 0.8); }
+    }
+    if (m === 'petal' || m === 'confetti') ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    for (let i = extra.length - 1; i >= 0; i--) { const q = extra[i]; q.x += q.vx * k; q.y += q.vy * k; q.vy += (q.shape === 'snow' ? 0.02 : 0.18) * k; q.vx *= Math.pow(0.985, k); q.rot += q.vr * k; q.life -= 0.012 * k; if (q.life <= 0 || q.y > H + 20) { extra.splice(i, 1); continue; }
+      if (q.shape !== 'confetti' && q.shape !== 'heart') { const R = q.r * 3; ctx.globalAlpha = Math.min(1, q.life); ctx.drawImage(fxGlow(q.c, 64), q.x - R, q.y - R, R * 2, R * 2); continue; }
+      turn(q.x, q.y, q.rot, 1); ctx.globalAlpha = Math.min(1, q.life * 1.4); ctx.fillStyle = solid(q.c);
+      if (q.shape === 'confetti') ctx.fillRect(-q.r / 2, -q.r, q.r, q.r * 2); else heart(0, 0, q.r * 1.6);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
   };
   requestAnimationFrame(tick);
 }
 
 /* ---------- Auswahl ---------- */
 function themeSwatches() {
-  const cur = themeNow();
+  const cur = themeNow(); sceneVars(Object.keys(THEMES));
   return '<div class=\"tswatch\">' + Object.entries(THEMES).map(([k, t]) => { const s = THEME_SCENES[k] || {}; return '<button class=\"tsw' + (cur === k ? ' on' : '') + '\" data-act=\"theme\" data-arg=\"' + k + '\" style=\"--sa:' + t.c.bg + ';--sb:' + t.c.raised + ';--sc:' + t.c.gold + ';--sd:' + t.c['gold-hi'] + ';--sf:' + t.font.replace(/"/g, "'") + '\"><i></i><b>' + t.name + '</b><small>' + t.desc + '</small></button>'; }).join('') + '</div>';
 }
 function themeBlock() {

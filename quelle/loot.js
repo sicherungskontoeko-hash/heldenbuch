@@ -63,6 +63,19 @@ Object.assign(XA, {
 });
 /* Gegner merken, bevor ein Kampf beendet wird (danach sind sie weg) */
 document.addEventListener('click', (ev) => { const t = ev.target && ev.target.closest && ev.target.closest('[data-act="fightEnd"]'); if (!t || !S.combat || !S.combat.active) return;
-  const l = (S.combat.npcs || []).filter((x) => !x.ally && !x.reserve); if (l.length) { const dead = l.filter((x) => x.hpMax > 0 && x.hp <= 0); S.lastFoes = (dead.length ? dead : l).map((x) => ({ mid: x.mid, hp: x.hp, hpMax: x.hpMax })); } }, true);
+  const l = (S.combat.npcs || []).filter((x) => !x.ally && !x.reserve); if (l.length) { const dead = l.filter((x) => x.hpMax > 0 && x.hp <= 0); S.lastFoes = (dead.length ? dead : l).map((x) => ({ mid: x.mid, hp: x.hp, hpMax: x.hpMax }));
+    const xp = dead.reduce((s2, x) => s2 + (CR_XP[(BESTIARY[x.mid] || [])[1]] || 0), 0); const cnt = {}; dead.forEach((x) => { const n = (BESTIARY[x.mid] || [x.name || '?'])[0]; cnt[n] = (cnt[n] || 0) + 1; });
+    S.fightDone = dead.length ? { xp, n: dead.length, names: Object.entries(cnt).map(([n, k]) => (k > 1 ? k + '× ' : '') + n).join(', '), t: Date.now() } : null; } }, true);
+/* Nach dem Kampf: besiegte Gegner und ihre EP direkt vorschlagen */
+function fightDoneBox() {
+  const F = S.fightDone; if (!F || Date.now() - F.t > 3 * 3600e3) return ''; const nh = lootHeroes(); const per = Math.floor(F.xp / nh);
+  return '<div class="fdone"><div><b>Kampf vorbei: ' + F.n + ' Gegner besiegt</b><small>' + esc(F.names) + ' · ' + F.xp.toLocaleString('de-CH') + ' EP' + (nh > 1 ? ' (' + per.toLocaleString('de-CH') + ' je Held)' : '') + '</small></div>' +
+    '<div class="chips"><button class="btn sm" data-act="fdXp">EP verteilen</button><button class="btn sm ghost" data-act="lootRoll">🎲 Beute würfeln</button><button class="x" data-act="fdClose" aria-label="Schliessen">×</button></div></div>';
+}
+Object.assign(XA, {
+  fdXp: () => { const F = S.fightDone; if (!F) return; const nh = lootHeroes(); S.gPre = Object.assign({}, S.gPre || {}, { to: 'all', xp: Math.floor(F.xp / nh) || '', text: (S.gPre && S.gPre.text) || 'Sieg über ' + F.names }); S.fightDone = null; paintCamp(true);
+    setTimeout(() => { const b = $('[data-act="gift"]'); if (b) { b.scrollIntoView({ block: 'center', behavior: 'smooth' }); b.classList.add('glowbtn'); setTimeout(() => b.classList.remove('glowbtn'), 2400); } }, 60); },
+  fdClose: () => { S.fightDone = null; paintCamp(true); }
+});
 /* Nach dem Verteilen: Vorbelegung und Beute leeren */
 const _gift0 = XA.gift; XA.gift = function () { const r = _gift0.apply(this, arguments); S.gPre = null; S.loot = null; S.lootSel = null; return r; };

@@ -1,5 +1,4 @@
 /* ==== Stimmungen: kräftige Verzierungen, Licht-Ebenen und Reaktionen auf kritische Würfe ==== */
-const SVGU = (s) => 'url("data:image/svg+xml,' + encodeURIComponent(s) + '")';
 const CARDS = '.panel,.blk,.hero,.comp,.mob,.dlg,.summary,.themep';
 (function themeFxCss() {
   const T = (k) => 'html[data-theme="' + k + '"]:not([data-fx="dezent"])';

@@ -268,6 +268,9 @@ td{font-family:var(--f-display);color:var(--gold-hi)}
 .rs>div:first-child{display:grid}.rs small{color:var(--muted);font-size:.8rem}
 .pool{display:flex;gap:6px}.pool input{width:84px}
 .splist{display:grid;gap:5px}
+/* Lange Listen: nur sichtbare Einträge werden gezeichnet; Platzhalterhöhe = typische Höhe eines geschlossenen Eintrags */
+.cvl>details{content-visibility:auto;contain-intrinsic-size:auto 64px}.mobs.cvl>details{contain-intrinsic-size:auto 66px}
+@media (min-width:700px){.cvl>details{contain-intrinsic-size:auto 41px}.mobs.cvl>details{contain-intrinsic-size:auto 50px}}
 .splist h4{margin-top:12px}
 .spell{border:1px solid var(--line);border-radius:10px;background:var(--bg2)}
 .spell[open]{border-color:var(--line2)}
@@ -326,6 +329,7 @@ td{font-family:var(--f-display);color:var(--gold-hi)}
 .tb{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding-block:7px;border-top:1px solid var(--line);font-size:.93rem}
 .tbr{font-family:var(--f-display);color:var(--gold);letter-spacing:.06em}
 .tbsp{flex:1}
+@media (max-width:600px){.tb{flex-wrap:nowrap;gap:8px;padding-block:5px;font-size:.86rem}.tb .tbr{font-size:.74rem;white-space:nowrap}.tb>span:nth-child(2){flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tb .tbsp{display:none}.tb .btn{flex:none}.tb .tbme{white-space:nowrap;font-size:.95rem}.tb>.link{display:none}.tb .tbaway{display:none}}
 .tb.mine{background:linear-gradient(90deg,rgba(var(--gold-rgb),.22),rgba(var(--ember-rgb),.12) 60%,transparent)}
 .tbme{font-family:var(--f-display);color:var(--gold-hi);font-size:1.05rem;text-shadow:0 0 14px rgba(var(--gold-rgb),.6)}
 .glowbtn{animation:glowpulse 1.6s ease-in-out infinite}
@@ -426,6 +430,13 @@ body.myturn::after{content:"";position:fixed;inset:0;pointer-events:none;z-index
 /* Dialog */
 #modal{position:fixed;inset:0;z-index:40;background:rgba(var(--deep-rgb),.72);display:grid;place-items:center;padding:20px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px))}
 .dlg{background:linear-gradient(180deg,var(--raised),var(--surface));border:1px solid var(--line2);border-radius:18px;padding:22px;width:min(560px,100%);display:grid;gap:12px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.plname{opacity:.65;font-weight:400}.mename{margin:4px 0 0}.dlg.welcome{width:min(440px,100%)}
+.nturn{border:1px solid rgba(var(--wine-rgb),.45);border-radius:14px;padding:10px 12px;margin:8px 0 10px;display:grid;gap:8px;background:rgba(var(--wine-rgb),.08)}.nturn .nth{display:grid;gap:2px}.nturn small{opacity:.75}.nturn.done{border-color:var(--line2)}.nturn .hint{margin:0}
+.mob summary .mpic{width:54px;height:42px;object-fit:contain;border-radius:8px;background:#f1e3c6;align-self:center;flex:none}.mob.haspic summary{align-items:center}.mob .mpicL{float:right;width:140px;max-width:42%;height:auto;border-radius:10px;margin:6px 0 6px 10px;background:#f1e3c6}.order img.sigil.npc.pic{object-fit:cover;padding:0;background:#f1e3c6}.mpicD{width:64px;height:50px;object-fit:contain;border-radius:8px;background:#f1e3c6;margin-right:10px}.dph .mpicD+h3{margin-right:auto}.nturn .nth.wp{grid-template-columns:auto 1fr;column-gap:10px;align-items:center}.nturn .nth .mpicT{grid-row:span 2;width:58px;height:46px;object-fit:contain;border-radius:8px;background:#f1e3c6}.mob .atks{clear:none}
+.dlg.initcall{justify-items:center;text-align:center;width:min(380px,100%);border-color:rgba(var(--gold-rgb),.55);box-shadow:var(--glow),0 30px 80px rgba(0,0,0,.6)}.initcall .icx{font-size:2.6rem;line-height:1;color:var(--gold-hi)}.initcall h2{margin:0;font-size:1.9rem;letter-spacing:.06em}.initcall p{margin:0}.initcall .btn.big{width:100%;font-size:1.15rem;padding:16px}.initcall .chips{justify-content:center;gap:18px}
+.pmpas{display:block;font-size:.76rem;color:var(--muted);margin:2px 0}.pmpas b{color:var(--gold-hi);font-weight:700}.fdone{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;border:1px solid rgba(var(--gold-rgb),.4);border-radius:14px;padding:10px 12px;margin:8px 0;background:rgba(var(--gold-rgb),.07)}.fdone>div:first-child{display:grid;gap:2px}.fdone small{color:var(--muted)}
+.msaves{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:6px 0}.msaves>span{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:4px}.msaves .rb{min-width:0;padding:3px 7px;font-size:.78rem}
+.curse{color:var(--wine-hi,#e06a6a);font-weight:700}
 .dlg textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem;min-height:180px}
 .dlg .chips{justify-content:flex-end}
 /* Nachschlagen & Hausregeln */
@@ -460,7 +471,7 @@ h4 small{font-family:var(--f-body);font-weight:400;font-size:.75rem}
 .ho{border-bottom:1px solid var(--line);padding:8px 0}.ho summary{cursor:pointer;display:flex;gap:10px;align-items:center}.ho summary small{color:var(--muted);margin-left:auto}
 .mobs{display:grid;gap:6px}.mob{border:1px solid var(--line);background:var(--bg2);border-radius:12px;padding:8px 12px}.mob summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}.mob summary small{color:var(--muted)}.mob p{color:var(--muted);margin:.5em 0 0}
 .nhp{font-size:.82rem;color:var(--muted);white-space:nowrap}.nhp.dead{color:var(--wine);text-decoration:line-through}.nst{font-size:.8rem;color:var(--muted);font-style:italic}
-.nctl{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-left:auto}.order li{flex-wrap:wrap}
+.nctl{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-left:auto}.nctl input[type=number]{width:84px;flex:none;text-align:center}.order li{flex-wrap:wrap}
 .chk{display:flex;align-items:center;gap:4px;font-size:.85rem;color:var(--muted)}.fgrp .chk input{width:auto}.fgrp #mobN{width:64px}.fgrp #mobSel{max-width:320px}
 .dmgrid .fgrp{align-content:start}.dmgrid input,.dmgrid input[type=text],.dmgrid select{width:100%}.dmgrid .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
 @media print{
@@ -955,7 +966,7 @@ body:has(#modal:not([hidden])) #undoBar,body:has(#prompt:not([hidden])) #undoBar
 <div id="top"></div>
 <nav id="bnav" aria-label="Hauptnavigation"></nav>
 <main id="view" class="wrap"></main>
-<p class="foot wrap">Regeln nach dem System Reference Document 5.2 von Wizards of the Coast, lizenziert unter CC-BY-4.0 (creativecommons.org/licenses/by/4.0). Deutsche Kurzfassungen in eigenen Worten. Kein offizielles Produkt von Wizards of the Coast.</p>
+<p class="foot wrap">Regeln nach dem System Reference Document 5.2.1 von Wizards of the Coast, lizenziert unter CC-BY-4.0 (creativecommons.org/licenses/by/4.0). Deutsche Kurzfassungen in eigenen Worten. Kein offizielles Produkt von Wizards of the Coast.</p>
 <div id="toast" hidden aria-live="polite"></div>
 <div id="modal" hidden></div>
 <div id="mini" aria-live="polite"></div>

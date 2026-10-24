@@ -1,6 +1,19 @@
-/* ==== Regeldaten: basiert auf dem SRD 5.2 (CC-BY-4.0), deutsch in eigenen Worten zusammengefasst ==== */
+/* ==== Regeldaten: basiert auf dem SRD 5.2.1 (CC-BY-4.0), deutsch in eigenen Worten zusammengefasst ==== */
 /* Würfelzufall: kryptografischer Zufall des Geräts (fairer als Math.random) */
 const NATIVE_RANDOM = Math.random;
+/* Deutsche Sortierung: ein Collator für alles (gleiche Reihenfolge wie localeCompare(…, 'de'), aber viel schneller) */
+const COLL_DE = new Intl.Collator('de'); const cmpDe = (a, b) => COLL_DE.compare(a, b);
+/* Eingebettete Bilder (Monster, Banner, Porträts) einmal in kurze blob:-Adressen umwandeln: so muss der Browser beim
+   Neuzeichnen nicht jedes Mal hunderte Kilobyte Text lesen und das Bild neu dekodieren. Wo blob: nicht erlaubt ist
+   (Prüfung beim Start), bleibt alles wie bisher. */
+let BLOB_OK = false; const BLOB_URL = new Map();
+(function blobTest() { try { const s = atob('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'); const a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); const im = new Image(); im.onload = () => { BLOB_OK = true; }; im.src = URL.createObjectURL(new Blob([a], { type: 'image/gif' })); } catch (e) {} })();
+function imgUrl(d) {
+  if (!BLOB_OK || typeof d !== 'string' || d.length < 3000 || d.slice(0, 5) !== 'data:') return d;
+  let u = BLOB_URL.get(d); if (u) return u;
+  try { const i = d.indexOf(','); const bin = atob(d.slice(i + 1)); const a = new Uint8Array(bin.length); for (let k = 0; k < bin.length; k++) a[k] = bin.charCodeAt(k); u = URL.createObjectURL(new Blob([a], { type: d.slice(5, d.indexOf(';')) })); } catch (e) { u = d; }
+  BLOB_URL.set(d, u); return u;
+}
 const rnd = (() => { const c = typeof crypto !== 'undefined' && crypto.getRandomValues ? crypto : null; const b = new Uint32Array(1); return () => { if (!c || Math.random !== NATIVE_RANDOM) return Math.random(); c.getRandomValues(b); return b[0] / 4294967296; }; })();
 const AB = ['str','dex','con','int','wis','cha'];
 const AB_DE = {str:'Stärke',dex:'Geschicklichkeit',con:'Konstitution',int:'Intelligenz',wis:'Weisheit',cha:'Charisma'};
@@ -86,7 +99,7 @@ const CLASSES = {
   order:{ key:'divineOrder', label:'Göttliche Ordnung', opts:{ protector:['Beschützer','Übung mit Kriegswaffen und schwerer Rüstung.'], thaumaturge:['Thaumaturg','Ein zusätzlicher Zaubertrick; WEI-Mod (mind. +1) zusätzlich auf Arkane Kunde und Religion.'] } },
   sub:{ id:'life', name:'Domäne des Lebens', lv:[3,6,17],
    spells:{3:['aid','bless','cure-wounds','lesser-restoration'],5:['mass-healing-word','revivify'],7:['aura-of-life','death-ward'],9:['greater-restoration','mass-cure-wounds']} },
-  table:(l)=>[['Göttliche Macht fokussieren',step(2,[[6,3],[18,4]])(l)+'×'],['Göttlicher Funke',step(1,[[7,2],[13,3],[18,4]])(l)+'W8']],
+  table:(l)=>[['Göttliche Macht fokussieren',l>=2?step(2,[[6,3],[18,4]])(l)+'×':'—'],['Göttlicher Funke',l>=2?step(1,[[7,2],[13,3],[18,4]])(l)+'W8':'—']],
   res:(l,c)=> l>=2?[{k:'cd',n:'Göttliche Macht fokussieren',max:step(2,[[6,3],[18,4]])(l),reset:'long',note:'1 Nutzung zurück bei kurzer Rast'}].concat(l>=10?[{k:'di',n:'Göttliches Eingreifen',max:1,reset:'long'}]:[]):[],
   feats:[
    [1,'Zauberwirken','Weisheit ist dein Zauberattribut. Ein heiliges Symbol dient als Fokus.'],
@@ -110,7 +123,7 @@ const CLASSES = {
   order:{ key:'primalOrder', label:'Ursprüngliche Ordnung', opts:{ magician:['Magier','Ein zusätzlicher Zaubertrick; WEI-Mod (mind. +1) zusätzlich auf Arkane Kunde und Naturkunde.'], warden:['Wächter','Übung mit Kriegswaffen und mittelschwerer Rüstung.'] } },
   sub:{ id:'land', name:'Zirkel des Landes', lv:[3,6,10,14] },
   table:(l)=>[['Tiergestalt',(l>=2?step(2,[[6,3],[17,4]])(l)+'×':'—')],['Max. HG',l>=8?'1':l>=4?'1/2':l>=2?'1/4':'—']],
-  res:(l,c)=> l>=2?[{k:'ws',n:'Tiergestalt',max:step(2,[[6,3],[17,4]])(l),reset:'long',note:'1 Nutzung zurück bei kurzer Rast'}].concat(l>=5?[{k:'wr',n:'Wildes Wiederaufleben (Tiergestalt → Platz)',max:1,reset:'long'}]:[]).concat(l>=6?[{k:'nr',n:'Natürliche Erholung',max:1,reset:'long'}]:[]).concat(l>=14?[{k:'ns',n:'Heiligtum der Natur',max:1,reset:'long'}]:[]):[],
+  res:(l,c)=> l>=2?[{k:'ws',n:'Tiergestalt',max:step(2,[[6,3],[17,4]])(l),reset:'long',note:'1 Nutzung zurück bei kurzer Rast'}].concat(l>=5?[{k:'wr',n:'Wildes Wiederaufleben (Tiergestalt → Platz)',max:1,reset:'long'}]:[]).concat(l>=6?[{k:'nr',n:'Natürliche Erholung (Plätze)',max:1,reset:'long'},{k:'nrs',n:'Kreiszauber ohne Platz',max:1,reset:'long'}]:[]):[],
   feats:[
    [1,'Zauberwirken','Weisheit ist dein Zauberattribut. Ein Druidenfokus dient als Fokus.'],
    [1,'Druidisch','Du kennst die Geheimsprache der Druiden. Mit Tieren sprechen ist immer vorbereitet.'],
@@ -126,14 +139,14 @@ const CLASSES = {
   subFeats:[
    [3,'Kreiszauber','Wähle eine Landschaft (Trocken, Polar, Gemässigt, Tropisch); ihre Zauber sind immer vorbereitet.'],
    [3,'Hilfe des Landes','Gib eine Tiergestalt aus: In einer 3-m-Kugel bis 18 m erleiden Feinde 2W6 nekrotischen Schaden (KON-Rettungswurf halbiert), eine Kreatur heilt 2W6 (3W6 ab 10, 4W6 ab 14).'],
-   [6,'Natürliche Erholung','Einmal pro langer Rast stellst du bei einer kurzen Rast Zauberplätze wieder her (Gesamtgrad bis zur halben Stufe, aufgerundet, keiner ab Grad 6).'],
+   [6,'Natürliche Erholung','Einen deiner Kreiszauber ab Grad 1 kannst du 1× pro langer Rast ohne Zauberplatz wirken. Ausserdem stellst du 1× pro langer Rast bei einer kurzen Rast Zauberplätze wieder her (Gesamtgrad bis zur halben Stufe, aufgerundet, keiner ab Grad 6).'],
    [10,'Schutz der Natur','Immun gegen vergiftet; Resistenz gegen eine Schadensart deiner Landschaft.'],
-   [14,'Heiligtum der Natur','Magieaktion: Ein 4,5-m-Würfel aus Geisterbäumen gewährt Verbündeten halbe Deckung und Resistenz deiner Landschaft (1 Minute, 1× pro langer Rast oder gegen eine Tiergestalt).']
+   [14,'Heiligtum der Natur','Magieaktion, gib eine Tiergestalt aus: Ein 4,5-m-Würfel aus Geisterbäumen erscheint in 36 m (1 Minute). Du und Verbündete darin habt halbe Deckung, Verbündete auch die Resistenz deines Schutzes der Natur. Als Bonusaktion verschiebst du den Würfel um bis zu 18 m.']
   ]},
  fig:{ name:'Kämpfer', hd:10, prim:['str','dex'], saves:['str','con'], skillN:2, skills:['acr','ani','ath','his','ins','itm','per','prc','sur'], armor:['light','medium','heavy','shield'], weapons:'martial',
   mastery: step(3,[[4,4],[10,5],[16,6]]), fightingStyle:1, asi:[4,6,8,12,14,16],
   sub:{ id:'champion', name:'Champion', lv:[3,7,10,15,18] },
-  table:(l)=>[['Zweiter Atem',step(2,[[4,3],[10,4]])(l)+'×'],['Angriffe',step(1,[[5,2],[11,3],[20,4]])(l)],['Waffenmeisterschaften',step(3,[[4,4],[10,5],[16,6]])(l)]],
+  table:(l)=>[['Zweiter Atem',step(2,[[4,3],[10,4]])(l)+'×'],['Tatendrang',l>=17?'2×':l>=2?'1×':'—'],['Unbeugsam',l>=17?'3×':l>=13?'2×':l>=9?'1×':'—'],['Angriffe',step(1,[[5,2],[11,3],[20,4]])(l)],['Waffenmeisterschaften',step(3,[[4,4],[10,5],[16,6]])(l)]],
   res:(l,c)=>{ const r=[{k:'sw',n:'Zweiter Atem (1W10+'+l+')',max:step(2,[[4,3],[10,4]])(l),reset:'long',note:'1 Nutzung zurück bei kurzer Rast'}];
     if(l>=2) r.push({k:'as',n:'Tatendrang',max:l>=17?2:1,reset:'short'});
     if(l>=9) r.push({k:'ind',n:'Unbeugsam',max:step(1,[[13,2],[17,3]])(l),reset:'long'}); return r; },
@@ -185,7 +198,7 @@ const CLASSES = {
    [20,'Körper und Geist','Geschicklichkeit und Weisheit +4, Maximum 25.']
   ],
   subFeats:[
-   [3,'Technik der offenen Hand','Triffst du mit Schlaghagel, wähle: Das Ziel kann bis zu deinem nächsten Zug keine Reaktionen nutzen, oder es wird bei misslungenem STÄ-Rettungswurf 4,5 m weggestossen, oder es fällt bei misslungenem GES-Rettungswurf hin.'],
+   [3,'Technik der offenen Hand','Triffst du mit Schlaghagel, wähle: Das Ziel kann bis zum Beginn seines nächsten Zuges keine Gelegenheitsangriffe machen, oder es wird bei misslungenem STÄ-Rettungswurf 4,5 m weggestossen, oder es fällt bei misslungenem GES-Rettungswurf hin.'],
    [6,'Ganzheit des Körpers','Bonusaktion: Heile Kampfkunstwürfel + WEI-Mod TP. Nutzungen = WEI-Mod pro langer Rast.'],
    [11,'Flinker Schritt','Nutzt du eine andere Bonusaktion, darfst du zusätzlich Schritt des Windes einsetzen.'],
    [17,'Bebende Handfläche','Für 3 Fokuspunkte bei einem Treffer setzt du tödliche Schwingungen frei. Später kannst du sie auslösen: KON-Rettungswurf, 10W12 Energieschaden, bei Erfolg die Hälfte.']
@@ -278,7 +291,7 @@ const CLASSES = {
   ],
   subFeats:[
    [3,'Schnelle Finger','Bonusaktion: Fingerfertigkeit, Diebeswerkzeug oder Gegenstand benutzen.'],
-   [3,'Fassadenkletterer','Klettern mit voller Bewegungsrate; Sprünge weiter um GES-Mod × 30 cm.'],
+   [3,'Fassadenkletterer','Kletterbewegung gleich deiner Bewegungsrate. Deine Sprungweite bestimmst du mit Geschicklichkeit statt Stärke.'],
    [9,'Meisterhafte Heimlichkeit','Neuer Gerissener Schlag: Heimlicher Angriff (1W6) – du bleibst nach dem Angriff verborgen, wenn du Deckung hast.'],
    [13,'Magische Gegenstände nutzen','Bis zu vier Einstimmungen; Schriftrollen mit INT wirken; verbrauchst du eine Ladung, würfle 1W6 – bei einer 6 bleibt sie erhalten.'],
    [17,'Diebesreflexe','In der ersten Kampfrunde zwei Züge (zweiter bei Initiative − 10).']
@@ -292,7 +305,7 @@ const CLASSES = {
   feats:[
    [1,'Zauberwirken','Charisma ist dein Zauberattribut. Ein arkaner Fokus dient als Fokus.'],
    [1,'Angeborene Zauberei','Bonusaktion, 1 Minute: Zauber-SG +1 und Vorteil auf Zauberangriffe. 2× pro langer Rast.'],
-   [2,'Quelle der Magie','Zaubereipunkte = Stufe. Als Bonusaktion wandelst du Punkte in Zauberplätze um oder Zauberplätze in Punkte (ein Platz bringt so viele Punkte, wie sein Grad beträgt).'],
+   [2,'Quelle der Magie','Zaubereipunkte = Stufe. Als Bonusaktion wandelst du Punkte in Zauberplätze um (bis Grad 5). Ohne Aktion wandelst du einen Zauberplatz in so viele Punkte um, wie sein Grad beträgt.'],
    [2,'Metamagie','Zwei Optionen (4 ab Stufe 10, 6 ab 17), z. B. Vorsichtiger, Weitreichender, Ermächtigter, Verlängerter, Gesteigerter, Beschleunigter, Feinsinniger, Verwandelter, Gesuchter und Verdoppelter Zauber.'],
    [5,'Zauberische Erneuerung','Bei einer kurzen Rast bis zur halben Stufe Zaubereipunkte zurück, 1× pro langer Rast.'],
    [7,'Zaubereiverkörperung','Ohne Nutzungen kannst du Angeborene Zauberei für 2 Zaubereipunkte aktivieren; währenddessen zwei Metamagien pro Zauber.'],
@@ -325,13 +338,13 @@ const CLASSES = {
    [3,'Unhold-Zauber','Immer vorbereitet: Brennende Hände, Befehl, Sengender Strahl, Einflüsterung (ab 5: Feuerball, Stinkende Wolke; ab 7: Feuerschild, Feuerwand; ab 9: Geas, Insektenplage).'],
    [6,'Glück des Dunklen','+1W10 auf einen Attributs- oder Rettungswurf (CHA-Mod pro langer Rast).'],
    [10,'Unholde Widerstandskraft','Nach jeder Rast: Resistenz gegen eine Schadensart deiner Wahl (ausser Energie).'],
-   [14,'Durch die Hölle schleudern','Bei einem Treffer: Das Ziel verschwindet bis zum Ende deines nächsten Zuges und erleidet 8W10 psychischen Schaden (CHA-RW verhindert). 1× pro langer Rast.']
+   [14,'Durch die Hölle schleudern','Bei einem Treffer: Das Ziel verschwindet bis zum Ende deines nächsten Zuges, ist kampfunfähig und erleidet 8W10 psychischen Schaden, ausser es ist ein Unhold (CHA-RW verhindert). 1× pro langer Rast oder für einen Paktplatz.']
   ]},
  wiz:{ name:'Magier', hd:6, prim:['int'], saves:['int','wis'], skillN:2, skills:['arc','his','ins','inv','med','nat','rel'], armor:[], weapons:'simple',
   caster:'full', ability:'int', cantrips:step(3,[[4,4],[10,5]]), prepared:PREP_WIZ, asi:[4,8,12,16],
   expertise:[[2,1]], expertiseFrom:['arc','his','inv','med','nat','rel'],
   sub:{ id:'evoker', name:'Hervorrufer', lv:[3,6,10,14] },
-  table:(l)=>[['Zauber im Buch',6+2*(l-1)],['Arkane Erholung','Grade bis '+Math.ceil(l/2)]],
+  table:(l)=>[['Zauber im Buch',6+2*(l-1)],['Arkane Erholung','Gesamtgrad '+Math.ceil(l/2)]],
   res:(l,c)=>[{k:'ar',n:'Arkane Erholung',max:1,reset:'long'}],
   feats:[
    [1,'Zauberwirken','Intelligenz ist dein Zauberattribut. Dein Zauberbuch enthält 6 Grad-1-Zauber, pro Stufe kommen 2 hinzu.'],
@@ -375,7 +388,10 @@ const INVOCATIONS = {
  depths:['Gabe der Tiefe','Unterwasser atmen, Schwimmbewegung = Bewegung, 1× Wasseratmung ohne Platz. (ab Stufe 5)',5],
  myriad:['Herr der unzähligen Gestalten','Selbstverwandlung beliebig oft ohne Zauberplatz. (ab Stufe 5)',5],
  grave:['Flüstern des Grabes','Mit Toten sprechen ohne Zauberplatz. (ab Stufe 7)',7],
- witchsight:['Hexensicht','Du siehst die wahre Gestalt von Gestaltwandlern und Illusionen in 9 m. (ab Stufe 15)',15],
+ witchsight:['Hexensicht','Wahrsicht 9 m. (ab Stufe 15; Quelle: Spielerhandbuch 2024, nicht im SRD)',15],
+ protectors:['Gabe der Beschützer','Wer seinen Namen in dein Buch der Schatten schreibt und auf 0 TP fällt, hat stattdessen 1 TP – 1× pro langer Rast. (ab Stufe 9, Pakt des Buches)',9],
+ chainmaster:['Bindung des Kettenmeisters','Dein Vertrauter erhält Flug- oder Schwimmbewegung 12 m, greift auf Befehl als Bonusaktion an, kann nekrotischen oder gleissenden Schaden machen und nutzt deinen Zauber-SG; per Reaktion gibst du ihm Resistenz gegen einen Treffer. (ab Stufe 5, Pakt der Kette)',5],
+ visions:['Visionen ferner Reiche','Arkanes Auge ohne Zauberplatz beliebig oft. (ab Stufe 9)',9],
  smite:['Schauerlicher Schlag','Triffst du mit der Paktwaffe, kannst du einen Paktplatz ausgeben: +1W8 Energieschaden plus 1W8 pro Platzgrad, und du kannst das Ziel umwerfen. (ab Stufe 5)',5],
  gaze:['Blick zweier Geister','Bonusaktion: Durch die Sinne einer willigen Kreatur wahrnehmen. (ab Stufe 5)',5],
  lessons:['Lehren der Ersten','Du erhältst ein Herkunftstalent deiner Wahl. (ab Stufe 2)',2]
@@ -454,7 +470,7 @@ const FEATS = {
  'boon-night':{ name:'Gabe des Nachtgeistes', cat:'epic', text:'+1 auf ein Attribut (max. 30). Im Dämmerlicht und Dunkel Bonusaktion unsichtbar; Resistenz gegen alle Schadensarten ausser psychisch und gleissend.', plus:AB, cap30:true },
  'boon-truesight':{ name:'Gabe der Wahrsicht', cat:'epic', text:'+1 auf ein Attribut (max. 30). Wahrsicht 18 m.', plus:AB, cap30:true }
 };
-/* Zäh: offizielles Herkunftstalent (PHB 2024), nicht im SRD 5.2 – Wirkung in eigenen Worten, als Quelle gekennzeichnet */
+/* Zäh: offizielles Herkunftstalent (PHB 2024), nicht im SRD 5.2.1 – Wirkung in eigenen Worten, als Quelle gekennzeichnet */
 FEATS.tough.src = 'phb'; delete FEATS.tough.home; FEATS.tough.text = 'Dein TP-Maximum steigt um 2 pro Charakterstufe – auch rückwirkend und bei jedem weiteren Stufenaufstieg. (Quelle: Spielerhandbuch 2024, nicht im SRD)';
 
 /* ---------- Rüstungen ---------- */
@@ -529,7 +545,7 @@ const WEAPONS = {
 };
 const PROP_DE = {light:'Leicht',finesse:'Finesse',thrown:'Wurfwaffe',two:'Zweihändig',versatile:'Vielseitig',heavy:'Schwer',reach:'Reichweite',ammo:'Munition',loading:'Laden'};
 
-/* ---------- Zustände (SRD 5.2, eigene Kurzfassung) ---------- */
+/* ---------- Zustände (SRD 5.2.1, eigene Kurzfassung) ---------- */
 const COND = {
  blinded:{ name:'Blind', text:'Du siehst nichts und scheiterst an Proben, die Sicht erfordern. Deine Angriffe haben Nachteil, Angriffe gegen dich Vorteil.', fx:{atk:'dis'}, auto:'Nachteil auf deine Angriffe' },
  charmed:{ name:'Bezaubert', text:'Du kannst den Bezauberer nicht angreifen oder ihm mit Fähigkeiten schaden. Er hat Vorteil bei sozialen Proben gegen dich.' },
