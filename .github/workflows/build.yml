@@ -91,7 +91,20 @@ jobs:
     name: Download-Seite (Release)
     needs: [android, desktop]
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.ver.outputs.tag }}
     steps:
+      # Versionsnummer aus package.json (z. B. 1.8.0 → v1.8.<Laufnummer>), damit Release und App übereinstimmen
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: package.json
+          sparse-checkout-cone-mode: false
+      - id: ver
+        name: Version lesen
+        run: |
+          V=$(node -p "require('./package.json').version.split('.').slice(0, 2).join('.')")
+          echo "tag=v$V.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "name=Heldenbuch $V.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
       - uses: actions/download-artifact@v4
         with:
           path: dl
@@ -99,8 +112,8 @@ jobs:
           merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.7.${{ github.run_number }}
-          name: Heldenbuch 1.7.${{ github.run_number }}
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: ${{ steps.ver.outputs.name }}
           body: |
             **Android:** Heldenbuch.apk herunterladen und öffnen (Installation aus unbekannten Quellen erlauben).
             **Windows:** Heldenbuch-Setup-….exe (Installer) oder Heldenbuch-Portable-….exe (ohne Installation).
@@ -127,6 +140,6 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
       - name: Zum Release hinzufügen
-        run: gh release upload "v1.7.${{ github.run_number }}" dist/*.dmg --clobber
+        run: gh release upload "${{ needs.release.outputs.tag }}" dist/*.dmg --clobber
         env:
           GH_TOKEN: ${{ github.token }}
