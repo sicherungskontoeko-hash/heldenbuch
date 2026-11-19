@@ -5,7 +5,7 @@ import base64, json, os, re, shutil, subprocess, time
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FONTS = os.path.join(ROOT, 'app', 'fonts')
 OUT = os.path.join(ROOT, 'app', 'www')
-VERSION = '1.7.1'
+VERSION = '1.8'
 BUILD = int(time.time())
 
 def rd(p):
@@ -37,7 +37,7 @@ head_extra = ('<link rel="icon" href="%s">\n<meta name="apple-mobile-web-app-cap
               '<meta name="description" content="Deutsches D&amp;D-Heldenbuch: Charaktere erschaffen, Bogen, Würfel und gemeinsamer Tisch.">\n') % fav
 shell = shell.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n' + head_extra, 1)
 
-scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'spelldata.js', 'calc.js', 'hbclasses.js', 'subs.js', 'subs2.js', 'flavor.js', 'pics.js', 'assets.js', 'crests.js', 'extra.js', 'items2.js', 'scenes.js', 'theme.js', 'theme-fx.js', 'turn.js', 'effects.js', 'rules.js', 'search.js', 'encounter.js', 'monsters2.js', 'randenc.js', 'mobfx.js', 'mobedit.js', 'loot.js', 'explain.js', 'ux.js', 'help.js', 'spellflav.js', 'info.js', 'dice3d.js', 'levelup.js', 'savedmg.js', 'mechanics.js', 'welcome.js', 'mobsaves.js', 'mobpics.js', 'initcall.js', 'app.js']
+scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'spelldata.js', 'calc.js', 'hbclasses.js', 'subs.js', 'subs2.js', 'flavor.js', 'pics.js', 'assets.js', 'crests.js', 'extra.js', 'items2.js', 'scenes.js', 'theme.js', 'theme-fx.js', 'turn.js', 'effects.js', 'rules.js', 'search.js', 'encounter.js', 'monsters2.js', 'randenc.js', 'mobfx.js', 'mobedit.js', 'loot.js', 'explain.js', 'ux.js', 'help.js', 'spellflav.js', 'info.js', 'dice3d.js', 'levelup.js', 'savedmg.js', 'mechanics.js', 'welcome.js', 'mobsaves.js', 'mobpics.js', 'initcall.js', 'adv-machtader.js', 'adventure.js', 'app.js']
 # Reine Bilddateien als eigene <script>-Blöcke zuerst (nur Latin-1-Zeichen: der Browser liest sie platzsparend, der Programmcode wird schneller übersetzt)
 ASSETS = ['scenes.js', 'pics.js', 'assets.js', 'mobpics.js']
 asset_js = ''.join('<script>\n' + rd(s) + '\n</script>' for s in ASSETS)

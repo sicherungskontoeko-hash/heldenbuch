@@ -433,7 +433,7 @@ const LOGO = '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-
 function renderTop() {
   const ch = cur();
   const tabs = [['heroes', 'Helden'], ['sheet', 'Bogen'], ['build', 'Erschaffen'], ['camp', 'Tisch'], ['spells', 'Zauberbuch']];
-  const more = [['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe']]; const moreOn = more.some(([k]) => S.view === k);
+  const more = [['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe']]; const moreOn = more.some(([k]) => S.view === k);
   $('#top').innerHTML = '<div class="wrap"><div class="bar"><button class="brand" data-act="view" data-arg="heroes">' + LOGO + 'Heldenbuch</button>' +
     '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') +
       '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '</div></details></nav>' +
@@ -469,13 +469,16 @@ function renderHeroes() {
 function exportData(list, full) { const d = { heldenbuch: 1, exportiert: new Date().toISOString(), chars: list, hb: Object.values(S.hb) }; if (full) d.extra = backupExtras(); return JSON.stringify(d, null, 2); }
 /* „Alles sichern“: neben Helden und Hausregeln auch eigene Monster, gespeicherte Begegnungen und SL-Notizen (liegen sonst nur im Browser) */
 function backupExtras() { const notes = {}; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.indexOf('heldenbuch_dm_') === 0 && localStorage.getItem(k)) notes[k.slice(14)] = localStorage.getItem(k); } } catch (e) {}
-  return { mobs: typeof ownMobs === 'function' ? ownMobs() : [], enc: typeof encLoad === 'function' ? encLoad() : [], dmNotes: notes, player: typeof myName === 'function' ? myName() : '' }; }
+  const ad = typeof advDb === 'function' ? advDb() : null;
+  return { mobs: typeof ownMobs === 'function' ? ownMobs() : [], enc: typeof encLoad === 'function' ? encLoad() : [], dmNotes: notes, player: typeof myName === 'function' ? myName() : '', adv: ad ? ad.list : [], advSt: ad ? ad.st : {} }; }
 function restoreExtras(x) {
   if (!x || typeof x !== 'object') return []; const done = [];
   if (typeof x.player === 'string' && x.player.trim() && typeof myName === 'function' && !myName()) { setMyName(x.player.trim().slice(0, 24)); done.push('dein Name'); }
   if (Array.isArray(x.mobs) && x.mobs.length && typeof ownMobsStore === 'function') { const list = ownMobs(); let n = 0; x.mobs.forEach((o) => { if (!o || !o.id || !o.name || !CR_XP[o.cr]) return; const i = list.findIndex((y) => y.id === o.id); if (i >= 0) list[i] = o; else list.push(o); n++; }); ownMobsStore(list); ownMobsLoad(); if (n) done.push(n + ' eigene Monster'); }
   if (Array.isArray(x.enc) && x.enc.length && typeof encStore === 'function') { const list = encLoad(); let n = 0; x.enc.forEach((e) => { if (!e || !e.id || !Array.isArray(e.mobs) || list.some((y) => y.id === e.id)) return; list.push(e); n++; }); encStore(list.slice(0, 60)); if (n) done.push(n + ' Begegnungen'); }
   if (x.dmNotes && typeof x.dmNotes === 'object') { let n = 0; Object.entries(x.dmNotes).forEach(([room, txt]) => { if (typeof txt !== 'string' || !txt) return; try { const k = 'heldenbuch_dm_' + room; const cur0 = localStorage.getItem(k) || ''; if (cur0 === txt) return; localStorage.setItem(k, cur0 ? cur0 + '\n\n— aus der Sicherung —\n' + txt : txt); n++; } catch (e) {} }); if (n) done.push('SL-Notizen (' + n + ' Runde' + (n > 1 ? 'n' : '') + ')'); }
+  if (Array.isArray(x.adv) && x.adv.length && typeof advImport === 'function') { const n = advImport(x.adv); if (n) done.push(n === 1 ? 'das Abenteuer „' + String((x.adv.find((a) => a && a.title) || {}).title || '').slice(0, 40) + '“' : n + ' Abenteuer'); }
+  if (x.advSt && typeof x.advSt === 'object' && typeof advDb === 'function') { const d = advDb(); let n = 0; Object.entries(x.advSt).forEach(([id, st]) => { if (!st || typeof st !== 'object' || !/^[a-z0-9-]{1,40}$/.test(id)) return; if (d.st[id] && (+d.st[id].t || 0) >= (+st.t || 0)) return; d.st[id] = st; n++; }); if (n) { advSave(d); done.push('Abenteuer-Fortschritt'); } }
   return done;
 }
 function backupLine(n) {
@@ -502,8 +505,9 @@ function importJson(text) {
   let last = null;
   const notes = []; list.forEach((c) => { const n = normChar(JSON.parse(JSON.stringify(c))); notes.push(...cleanRefs(n)); if (typeof n.id !== 'string' || !n.id || S.chars[n.id]) n.id = freshId(); S.chars[n.id] = n; persist('c', n.id); last = n.id; }); if (notes.length) bannerToast('Beim Laden bereinigt', notes.join(' · '));
   const ex = restoreExtras(d.extra);
-  if (last) S.cur = last; S.view = 'heroes'; S.modal = null; render();
-  pushLog({ label: 'Geladen', total: list.length, detail: (list.length === 1 ? '„' + list[0].name + '“ ist jetzt in deinen Helden' : list.length + ' Helden importiert') + (ex.length ? ' · dazu ' + ex.join(', ') : '') });
+  const advOnly = !list.length && d.extra && Array.isArray(d.extra.adv) && d.extra.adv.some((a) => typeof advGet === 'function' && a && advGet(a.id));
+  if (last) S.cur = last; S.view = advOnly ? 'adv' : 'heroes'; if (advOnly) S.adv = d.extra.adv.find((a) => a && advGet(a.id)).id; S.modal = null; render();
+  pushLog({ label: 'Geladen', total: list.length || '✓', detail: !list.length ? 'Geladen: ' + (ex.join(', ') || 'nichts Neues') : (list.length === 1 ? '„' + list[0].name + '“ ist jetzt in deinen Helden' : list.length + ' Helden importiert') + (ex.length ? ' · dazu ' + ex.join(', ') : '') });
 }
 function openModal(kind, data) {
   S.modal = kind; const m = $('#modal');
@@ -1333,7 +1337,7 @@ function render0() {
   const v = $('#view'); const y = window.scrollY;
   if (!cur() && (S.view === 'sheet' || S.view === 'build')) { v.innerHTML = noHeroView(); window.scrollTo(0, y); return; }
   const c = cur() ? derive(cur(), S.hb) : null; cvStop(); const keep = y > 0 ? cvKeep(v) : null; const anc = keep ? cvAnchor(v) : null;
-  v.innerHTML = S.view === 'camp' ? renderCamp() : S.view === 'heroes' ? renderHeroes() : S.view === 'build' ? renderBuild(c) : S.view === 'spells' ? renderSpellBook() : S.view === 'hb' ? renderHB() : S.view === 'mobs' ? '<div class="camp">' + bestiaryView() + '</div>' : S.view === 'help' ? helpView() : renderSheet(c);
+  v.innerHTML = S.view === 'camp' ? renderCamp() : S.view === 'heroes' ? renderHeroes() : S.view === 'build' ? renderBuild(c) : S.view === 'spells' ? renderSpellBook() : S.view === 'hb' ? renderHB() : S.view === 'mobs' ? '<div class="camp">' + bestiaryView() + '</div>' : S.view === 'adv' && typeof renderAdv === 'function' ? renderAdv() : S.view === 'help' ? helpView() : renderSheet(c);
   if (keep) cvApply(v, keep); window.scrollTo(0, y); if (anc) cvHold(v, anc);
 }
 function commit(rerender = true) { const ch = cur(); if (ch) { ch.updated = Date.now(); persist('c', ch.id); } queueMe(); if (rerender) render(); }

@@ -47,6 +47,7 @@ run "Gegenstände: SRD-Liste, Flüche, Ausrüstung (items.test.js)" node tests/i
 run "Rettungswürfe der Monster (mobsaves.test.js)" node tests/mobsaves.test.js
 run "Leistung: Zwischenspeicher, ruhige Listen, Spieltisch, Effekte (perf.test.js)" node tests/perf.test.js
 run "Gesinnung: neun Gesinnungen mit Erklärung (align.test.js)" node tests/align.test.js
+run "Abenteuer: Machtader, Kampf auf Knopfdruck, Entscheidungen, Laden (adventure.test.js)" node tests/adventure.test.js
 run "Klicktest kurz (ui.test.js)" bash -c "node tests/ui.test.js || (echo Wiederholung; node tests/ui.test.js)"
 run "Abnahme-Klicktest (ui-full.test.js)" node tests/ui-full.test.js
 run "Kombinationen Klasse×Unterklasse×Stufe (combos.test.js)" node tests/combos.test.js
