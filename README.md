@@ -13,6 +13,13 @@ Dieses Repository baut automatisch (siehe *Actions*):
 
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
 
+## Neu in Version 1.8
+- Abenteuer (Mehr → Abenteuer): fertige Abenteuer Kapitel für Kapitel leiten, mit farbigen Kästen für Vorlesetext, Spielleitung, Proben, Kämpfe, Beute und Entscheidungen.
+- Eingebaut: „Die Machtader“, ein Eintagesabenteuer für fünf Helden (Stufe 3, 5 und 11) mit 18 Kreaturen, Figuren und allen Kämpfen.
+- Ein Knopf je Aufgabe: Kampf beginnen (Gegner mit Initiative, Verstärkung wartet), Vorlesetext als Handout teilen, Beute ins Formular, Gegenstände vergeben.
+- Entscheidungen der Gruppe festhalten; spätere Kapitel zeigen, was sie verändern. Fortschritt kommt mit „Alles sichern“ mit.
+- Weitere Abenteuer lassen sich als Datei laden (wie eine Sicherung).
+
 ## Neu in Version 1.7.1
 - Gesinnung: Auswahl der neun D&D-Gesinnungen als Raster, jede mit Erklärung, Beispiel und typischen Kreaturen; ⓘ im Charakterbogen. Ältere Einträge werden erkannt oder bleiben erhalten.
 
