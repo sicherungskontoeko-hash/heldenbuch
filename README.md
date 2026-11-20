@@ -13,6 +13,12 @@ Dieses Repository baut automatisch (siehe *Actions*):
 
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
 
+## Neu in Version 1.9
+- Neues eingebautes Abenteuer: „Das Wirtshaus zum letzten Krug“, ein lustiges Eintagesabenteuer für fünf Helden der Stufe 4 (Aufstieg auf 5 möglich), von etwa 14 bis 22 Uhr. Ein Wirtshaus retten, im Dungeon-Markt einkaufen, Hoflieferant werden und an der Königshochzeit ein Phönixei aus der Torte tauschen.
+- 29 eigene Gegenstände (Waffen, Rüstungen, Kuriositäten mit Fähigkeiten). Sie erscheinen nur in den Auswahllisten, solange das Abenteuer aktiv ist; Helden, die sie haben, behalten sie immer.
+- Neue Kästen im Abenteuer: Rollenspiel-Notizen je Figur, Zähler mit + und − (Sternepunkte, Verdacht, Hitze) und Zufallstabellen mit Würfelknopf.
+- Reiter „Gegenstände“ im Abenteuer mit Fundort und „Geben“; unter „Kreaturen“ stehen jetzt auch die SRD-Monster des Abenteuers.
+
 ## Neu in Version 1.8
 - Abenteuer (Mehr → Abenteuer): fertige Abenteuer Kapitel für Kapitel leiten, mit farbigen Kästen für Vorlesetext, Spielleitung, Proben, Kämpfe, Beute und Entscheidungen.
 - Eingebaut: „Die Machtader“, ein Eintagesabenteuer für fünf Helden (Stufe 3, 5 und 11) mit 18 Kreaturen, Figuren und allen Kämpfen.
