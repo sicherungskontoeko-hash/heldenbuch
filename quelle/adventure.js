@@ -1,16 +1,19 @@
 /* ---------- Abenteuer: fertige Abenteuer am Tisch leiten ----------
    Kapitel und Szenen mit Vorlesetext, Hinweisen für die Spielleitung, Proben, Kämpfen und Beute.
    Kampf starten, Vorlesetext als Handout teilen und Beute ins Formular „Beute & Erfahrung verteilen“ – je ein Knopf.
-   Eingebaut: „Die Machtader“ (adv-machtader.js). Weitere Abenteuer kommen per Datei (Feld extra.adv) dazu.
-   Gespeichert in localStorage „hb_adv“: { list: [geladene Abenteuer], st: { <id>: { tab, ch, sc, flags, choice, t } }, last }
+   Eingebaut: „Die Machtader“ (adv-machtader.js) und „Das Wirtshaus zum letzten Krug“ (adv-krug.js). Weitere Abenteuer kommen per Datei (Feld extra.adv) dazu.
+   Gespeichert in localStorage „hb_adv“: { list: [geladene Abenteuer], st: { <id>: { tab, ch, sc, flags, choice, cnt, on, t } }, last }
+   Gegenstände eines Abenteuers (Feld items, Schlüssel „<id>-…“) stehen immer in MAGIC_ITEMS, damit Helden sie behalten.
+   In den Auswahllisten erscheinen sie nur, solange das Abenteuer aktiv ist (st.on).
    Monster eines Abenteuers werden beim ersten Kampf als eigene Monster („u-…“) ins Bestiarium gelegt. */
 const ADV_KEY = 'hb_adv';
-const ADV_BUILTIN = typeof ADV_MACHTADER !== 'undefined' ? [ADV_MACHTADER] : [];
+const ADV_BUILTIN = [typeof ADV_MACHTADER !== 'undefined' && ADV_MACHTADER, typeof ADV_KRUG !== 'undefined' && ADV_KRUG].filter(Boolean);
 function advDb() {
   try { const d = JSON.parse(localStorage.getItem(ADV_KEY) || '{}') || {}; return { list: Array.isArray(d.list) ? d.list : [], st: d.st && typeof d.st === 'object' ? d.st : {}, last: d.last || '' }; }
   catch (e) { return { list: [], st: {}, last: '' }; }
 }
-function advSave(d) { try { localStorage.setItem(ADV_KEY, JSON.stringify(d)); return true; } catch (e) { bannerToast('Nicht gespeichert', 'Der Speicher dieses Browsers ist voll oder nicht verfügbar.'); return false; } }
+let ADV_ON_C = null;
+function advSave(d) { ADV_ON_C = null; try { localStorage.setItem(ADV_KEY, JSON.stringify(d)); return true; } catch (e) { bannerToast('Nicht gespeichert', 'Der Speicher dieses Browsers ist voll oder nicht verfügbar.'); return false; } }
 const advNewer = (a, b) => (+a.ver || 0) >= (+b.ver || 0);
 function advAll() { const own = advDb().list; return ADV_BUILTIN.filter((b) => !own.some((o) => o.id === b.id && advNewer(o, b))).concat(own); }
 function advGet(id) { return advAll().find((a) => a.id === id) || null; }
@@ -27,16 +30,47 @@ function advImport(list) {
     if (ADV_BUILTIN.some((b) => b.id === a.id && advNewer(b, a))) { d.list = d.list.filter((x) => x.id !== a.id); return; }
     const i = d.list.findIndex((x) => x.id === a.id); if (i >= 0) d.list[i] = a; else d.list.push(a);
   });
-  if (n) advSave(d); return n;
+  if (n) { advSave(d); advItemsInstall(); } return n;
 }
-const ADV_ST0 = () => ({ tab: 'ov', ch: '', sc: '', flags: {}, choice: {} });
-function advSt(id) { const s = Object.assign(ADV_ST0(), advDb().st[id] || {}); if (!s.flags || typeof s.flags !== 'object') s.flags = {}; if (!s.choice || typeof s.choice !== 'object') s.choice = {}; return s; }
-function advSetSt(id, fn) { const d = advDb(); const s = Object.assign(ADV_ST0(), d.st[id] || {}); s.flags = Object.assign({}, s.flags); s.choice = Object.assign({}, s.choice); fn(s); s.t = Date.now(); d.st[id] = s; d.last = id; advSave(d); }
+/* ---------- Gegenstände der Abenteuer ----------
+   Nur bekannte Felder mit passendem Typ, Schlüssel mit dem Präfix des Abenteuers – eine Datei kann so keine SRD-Gegenstände überschreiben. */
+const ADV_IT_NUM = ['wpn', 'arm', 'shd', 'ac', 'save', 'dc', 'atk', 'acBare', 'kg', 'init', 'speed'];
+const ADV_IT_STR = ['name', 'r', 'text', 'extra', 'extraT', 'drink'];
+function advItemClean(x, id) {
+  if (!x || typeof x !== 'object' || typeof x.name !== 'string' || !x.name.trim()) return null; const o = { adv: id };
+  ADV_IT_STR.forEach((k) => { if (typeof x[k] === 'string' && x[k]) o[k] = x[k].slice(0, k === 'text' ? 1200 : 80); });
+  ADV_IT_NUM.forEach((k) => { if (Number.isFinite(+x[k]) && +x[k]) o[k] = Math.max(-5, Math.min(k === 'kg' ? 500 : 5, +x[k])); });
+  ['att', 'cons', 'curse'].forEach((k) => { if (x[k]) o[k] = true; });
+  if (!ITEM_RAR.includes(o.r)) o.r = 'variabel';
+  if (o.drink && !/^\d+W\d+(\+\d+)?$/.test(o.drink)) delete o.drink; if (o.extra && !/^\d+W\d+(\+\d+)?$/.test(o.extra)) { delete o.extra; delete o.extraT; }
+  if (x.use && typeof x.use === 'object' && +x.use.n > 0) o.use = { n: Math.min(10, Math.floor(+x.use.n)), reset: x.use.reset === 'short' ? 'short' : 'long', name: String(x.use.name || o.name).slice(0, 80) };
+  if (x.set && typeof x.set === 'object') { const st = {}; Object.entries(x.set).forEach(([k, v]) => { if (['str', 'dex', 'con', 'int', 'wis', 'cha'].includes(k) && +v >= 1 && +v <= 30) st[k] = Math.floor(+v); }); if (Object.keys(st).length) o.set = st; }
+  return o;
+}
+function advItemsInstall() {
+  if (typeof MAGIC_ITEMS === 'undefined') return 0; let n = 0;
+  advAll().forEach((A) => { if (!A.items || typeof A.items !== 'object') return;
+    Object.entries(A.items).forEach(([k, x]) => { if (typeof k !== 'string' || k.indexOf(A.id + '-') !== 0 || (MAGIC_ITEMS[k] && MAGIC_ITEMS[k].adv !== A.id)) return; const o = advItemClean(x, A.id); if (o) { MAGIC_ITEMS[k] = o; n++; } }); });
+  return n;
+}
+/* Aktive Abenteuer: deren Gegenstände zeigen die Auswahllisten (Bogen, Beute-Formular, Zufallsbeute, Suche) */
+function advActiveIds() { if (!ADV_ON_C) { const st = advDb().st; ADV_ON_C = Object.keys(st).filter((id) => st[id] && st[id].on); } return ADV_ON_C; }
+function advSetOn(id, on) {
+  const d = advDb(); const s = Object.assign(ADV_ST0(), d.st[id] || {}); if (!!s.on === !!on) return false; s.on = !!on; s.t = Date.now(); d.st[id] = s; advSave(d);
+  if (typeof SRCH_IDX !== 'undefined') SRCH_IDX = null; return true;
+}
+const advItemCount = (A) => Object.keys(A.items || {}).filter((k) => MAGIC_ITEMS[k] && MAGIC_ITEMS[k].adv === A.id).length;
+advItemsInstall();
+const ADV_ST0 = () => ({ tab: 'ov', ch: '', sc: '', flags: {}, choice: {}, cnt: {} });
+function advSt(id) { const s = Object.assign(ADV_ST0(), advDb().st[id] || {}); ['flags', 'choice', 'cnt'].forEach((k) => { if (!s[k] || typeof s[k] !== 'object') s[k] = {}; }); return s; }
+function advSetSt(id, fn) { const d = advDb(); const s = Object.assign(ADV_ST0(), d.st[id] || {}); s.flags = Object.assign({}, s.flags); s.choice = Object.assign({}, s.choice); s.cnt = Object.assign({}, s.cnt); fn(s); s.t = Date.now(); d.st[id] = s; d.last = id; advSave(d); }
 
 if (typeof HELP !== 'undefined') HELP.abenteuer = ['Abenteuer leiten', [
-  'Unter „Mehr → Abenteuer“ liegen fertige Abenteuer. Eingebaut ist „Die Machtader“ (fünf Helden, Stufe 3, 5 und 11). Weitere lädst du wie eine Sicherung über „Helden aus Datei laden“.',
+  'Unter „Mehr → Abenteuer“ liegen fertige Abenteuer. Eingebaut sind „Die Machtader“ (fünf Helden, Stufe 3, 5 und 11) und „Das Wirtshaus zum letzten Krug“ (lustig, fünf Helden, Stufe 4). Weitere lädst du wie eine Sicherung über „Helden aus Datei laden“.',
   'Jede Szene hat farbige Kästen: Vorlesetext (bernstein), Spielleitung (blau), Probe (violett), Kampf (rot), Beute (grün), Merke dir und Entscheidung (gold).',
   'Als Spielleitung am Tisch: „Kampf beginnen“ setzt die Gegner mit Initiative in den Kampf, „Als Handout teilen“ schickt den Vorlesetext an alle, „Ins Beute-Formular“ füllt Gold und Gegenstände vor.',
+  'Rollenspiel-Kästen (rosa) sagen dir, wie eine Figur spricht und was sie will. Zähler wie Sternepunkte oder Verdacht zählst du mit + und −, Zufallstabellen würfelst du mit einem Knopf.',
+  'Manche Abenteuer bringen eigene Gegenstände mit. Sie erscheinen nur in den Auswahllisten, solange du sie unter „Gegenstände aktiv“ einschaltest. „Geben“ schaltet sie automatisch ein.',
   'Entscheidungen der Gruppe hältst du mit einem Tipp fest. Spätere Kapitel zeigen, was sie verändern. Fortschritt und Entscheidungen kommen mit „Alles sichern“ mit.']];
 
 /* ---------- Hilfen ---------- */
@@ -101,6 +135,9 @@ function advBlock(A, b, path, st, X, C) {
     case 'ol': return (b.ul ? '<ul' : '<ol') + ' class="advol">' + b.items.map((x) => '<li>' + advMd(x) + '</li>').join('') + (b.ul ? '</ul>' : '</ol>');
     case 'vorlese': return advBox('vor', '❧', b.title || 'Vorlesetext', b.ps.map((p) => '<p>' + advMd(p) + '</p>').join(''), dmBtn('advHo', 'Als Handout teilen', ' ghost'));
     case 'dm': return advBox('dm', '◆', b.title || 'Spielleitung', advItems(b.items));
+    case 'rp': return advBox('rp', '🎭', b.title || 'Rollenspiel', advItems(b.items));
+    case 'counter': return advCounter(b, path, st);
+    case 'roll': return advRollBox(b, path);
     case 'merke': return advBox('wahl', '!', b.title || 'Merke dir', advItems(b.items) + (b.flags ? advFlagChips(A, st, b.flags) : ''));
     case 'loot': {
       const g = [b.gm && b.gm + ' GM für die Gruppe', b.gmHero && b.gmHero + ' GM je Held'].filter(Boolean).join(' + ');
@@ -117,6 +154,23 @@ function advBlock(A, b, path, st, X, C) {
     case 'kampf': return advKampf(A, b, path, X, C);
     default: return '';
   }
+}
+/* Zähler (Sternepunkte, Verdacht …): Wert je Abenteuer unter st.cnt[id], dieselbe id an mehreren Stellen zeigt denselben Wert */
+function advCntVal(b, st) { const v = st.cnt[b.id]; return Number.isFinite(+v) && v !== '' && v != null ? +v : +b.start || 0; }
+function advCounter(b, path, st) {
+  const v = advCntVal(b, st); const min = b.min != null ? +b.min : -99, max = b.max != null ? +b.max : 99;
+  const steps = (b.steps || []).slice().sort((x, y) => x[0] - y[0]); const reached = steps.filter((x) => (+b.max > 0 && x[0] < 0 ? v <= x[0] : v >= x[0])).pop();
+  const body = '<div class="advcnt"><button class="btn ghost" data-act="advCnt" data-arg="' + path + '" data-d="-1" aria-label="eins weniger"' + (v <= min ? ' disabled' : '') + '>−</button><output aria-live="polite"><b>' + (b.icon ? '<span aria-hidden="true">' + esc(b.icon) + '</span> ' : '') + v + '</b>' + (b.max != null ? '<small>von ' + max + '</small>' : '') + '</output><button class="btn ghost" data-act="advCnt" data-arg="' + path + '" data-d="1" aria-label="eins mehr"' + (v >= max ? ' disabled' : '') + '>+</button></div>' +
+    (reached ? '<p class="advcnow">' + advMd(reached[1]) + '</p>' : '') +
+    (steps.length || b.hint ? '<details class="advcdet"><summary>Alle Stufen' + (b.hint ? ' und Regel' : '') + '</summary>' + (steps.length ? '<ul class="advcst">' + steps.map((x) => '<li class="' + (x === reached ? 'on' : '') + '"><b>' + (x[0] > 0 && b.min < 0 ? '+' : '') + x[0] + '</b><span>' + advMd(x[1]) + '</span></li>').join('') + '</ul>' : '') + (b.hint ? '<p class="hint">' + advMd(b.hint) + '</p>' : '') + '</details>' : '');
+  return advBox((b.tone || 'wahl') + ' cnt', '#', b.title, body);
+}
+/* Zufallstabelle mit Würfelknopf: der gewürfelte Eintrag leuchtet (nur für diese Sitzung) */
+const advRange = (r) => { const m = /^(\d+)(?:\s*[–-]\s*(\d+))?$/.exec(String(r).trim()); return m ? [+m[1], +(m[2] || m[1])] : [0, -1]; };
+function advRollBox(b, path) {
+  const got = (S.advRoll || {})[path];
+  const body = '<table class="advt roll">' + b.rows.map((r) => { const [a, z] = advRange(r[0]); const on = got >= a && got <= z; return '<tr class="' + (on ? 'on' : '') + '"><th>' + esc(r[0]) + '</th><td>' + advMd(r[1]) + '</td></tr>'; }).join('') + '</table>' + (b.note ? '<p class="hint">' + advMd(b.note) + '</p>' : '');
+  return advBox('probe roll', '⚄', b.title + ' · W' + b.die, body, '<button class="btn sm" data-act="advRoll" data-arg="' + path + '">W' + b.die + ' würfeln</button>' + (got ? '<span class="advgot">Gewürfelt: <b>' + got + '</b></span>' : ''));
 }
 function advKampf(A, b, path, X, C) {
   const e = advEnc(A, b.enc); const lv = advLevel(C);
@@ -140,12 +194,13 @@ function advKampf(A, b, path, X, C) {
 function renderAdv() {
   const A = S.adv && advGet(S.adv); if (!A) { S.adv = null; return advLibrary(); }
   const st = advSt(A.id); const X = advCtx();
-  const tabs = [['ov', 'Übersicht']].concat(A.chapters.map((c) => ['ch:' + c.id, c.kicker === 'Zwischenspiel' ? 'Zwischenspiel' + (c.level ? ' ' + c.level.replace(/\s/g, '') : '') : c.kicker])).concat([['fig', 'Figuren'], ['mob', 'Kreaturen']]);
+  const tabs = [['ov', 'Übersicht']].concat(A.chapters.map((c) => ['ch:' + c.id, c.kicker === 'Zwischenspiel' ? 'Zwischenspiel' + (c.level ? ' ' + c.level.replace(/\s/g, '') : '') : c.kicker])).concat([['fig', 'Figuren'], ['mob', 'Kreaturen']]).concat(advItemCount(A) ? [['it', 'Gegenstände']] : []);
   const cur = st.tab === 'ch' ? 'ch:' + advCh(A, st.ch).id : st.tab;
   let h = '<div class="camp adv"><div class="advhead"><button class="link" data-act="advLib">‹ Alle Abenteuer</button><h1>' + esc(A.title) + '</h1>' + (A.meta ? '<p class="hint">' + esc(A.meta) + '</p>' : '') + '</div>' +
     '<nav class="advnav chips" aria-label="Kapitel">' + tabs.map(([k, l]) => chip(cur === k, esc(l), 'data-act="advTab" data-arg="' + k + '"')).join('') + '</nav>';
   if (st.tab === 'fig') h += advFigures(A);
   else if (st.tab === 'mob') h += advCreatures(A, X);
+  else if (st.tab === 'it' && advItemCount(A)) h += advItemsTab(A, st, X);
   else if (st.tab === 'ch') h += advChapter(A, st, X);
   else h += advOverview(A, st, X);
   return h + '</div>';
@@ -156,14 +211,19 @@ function advLibrary() {
     '<section class="blk"><div class="bhead"><h2>Deine Abenteuer</h2>' + (typeof helpBtn === 'function' ? helpBtn('abenteuer') : '') + '</div><div class="advlib">' + all.map((A) => { const st = d.st[A.id]; const where = st && st.tab === 'ch' ? (() => { const C = advCh(A, st.ch); const Sc = advSc(C, st.sc); return C.kicker + ' · ' + Sc.title; })() : '';
       return '<article class="advcard"><h2>' + esc(A.title) + '</h2>' + (A.sub ? '<p class="advsubt">' + esc(A.sub) + '</p>' : '') + (A.meta ? '<p class="hint">' + esc(A.meta) + '</p>' : '') + (A.quote ? '<p class="advq">' + esc(A.quote) + '</p>' : '') +
         (where ? '<p class="advwhere">Weiter bei: <b>' + esc(where) + '</b></p>' : '') +
+        (advItemCount(A) ? advOnRow(A, st && st.on) : '') +
         '<div class="chips"><button class="btn" data-act="advOpen" data-arg="' + esc(A.id) + '">' + (where ? 'Weiterlesen' : 'Öffnen') + '</button>' +
         (advIsOwn(A.id) ? (S.advDel === A.id ? '<button class="btn sm ghost warn" data-act="advDel" data-arg="' + esc(A.id) + '">Wirklich entfernen?</button>' : '<button class="btn sm ghost" data-act="advDel" data-arg="' + esc(A.id) + '">Entfernen</button>') : '') + '</div></article>'; }).join('') + '</div>' +
     '<p class="hint">Weitere Abenteuer lädst du wie eine Sicherung: <b>Helden → Helden aus Datei laden</b>. Fortschritt und Entscheidungen bleiben auf diesem Gerät und kommen mit „Alles sichern“ mit.</p></section></div>';
 }
+function advOnRow(A, on) {
+  return '<label class="advon"><input type="checkbox" data-act="advOn" data-arg="' + esc(A.id) + '"' + (on ? ' checked' : '') + '><span><b>' + advItemCount(A) + ' Gegenstände aktiv</b><small>' + (on ? 'Sie stehen in den Auswahllisten: Bogen, Beute-Formular, Zufallsbeute, Suche.' : 'Aus: Sie stehen in keiner Auswahlliste. Helden, die sie schon haben, behalten sie.') + '</small></span></label>';
+}
 function advOverview(A, st, X) {
   let h = '<section class="blk advch"><div class="advkick">Übersicht</div><h2>' + esc(A.title) + '</h2>' + (A.quote ? '<p class="advq">' + esc(A.quote) + '</p>' : '');
   if (A.overview) h += advBlock(A, { t: 'table', tone: 'figur', head: A.overview.head, rows: A.overview.rows }, '', st, X, {});
-  h += '<div class="chips advgo"><button class="btn" data-act="advTab" data-arg="ch:' + esc((A.chapters.find((c) => c.id === st.ch) || A.chapters[0]).id) + '">' + (st.ch ? 'Weiterlesen' : 'Mit dem ' + esc(A.chapters[0].kicker) + ' beginnen') + ' ›</button></div>';
+  h += '<div class="chips advgo"><button class="btn" data-act="advTab" data-arg="ch:' + esc((A.chapters.find((c) => c.id === st.ch) || A.chapters[0]).id) + '">' + (st.ch ? 'Weiterlesen' : 'Beginnen: ' + esc(A.chapters[0].kicker)) + ' ›</button></div>';
+  if (advItemCount(A)) h += advOnRow(A, st.on);
   if ((A.flags || []).length) h += advBox('wahl', '⚑', 'Entscheidungen der Gruppe', advFlagChips(A, st, A.flags.map((f) => f.id)) + '<p class="hint">Sie verändern spätere Kapitel. Die Kästen „Merke dir“ und „Entscheidung“ tragen sie automatisch ein.</p>');
   h += advBox('dm', '◆', 'So leitest du mit dem Heldenbuch', advItems([
     '- **Vorlesetext** liest du vor. Mit „Als Handout teilen“ landet er bei allen am Tisch.',
@@ -191,11 +251,25 @@ function advFigures(A) {
     (f.fields || []).map(([k, v]) => '<p><b>' + esc(k) + ':</b> ' + advMd(v) + '</p>').join('') + (f.quote ? '<p class="advq">' + esc(f.quote) + '</p>' : '') + '</article>').join('') + '</div></section>';
 }
 function advCreatures(A, X) {
-  const L = A.lore || {}; const groups = {}; (A.mobs || []).forEach((o) => { const ch = (L[o.id] || {}).ch || ''; (groups[ch] = groups[ch] || []).push(o); });
+  const L = A.lore || {}; const groups = {}; const seen = new Set();
+  const add = (mid, ch) => { if (seen.has(mid)) return; const M = BESTIARY[mid]; const r = advMobRaw(A, mid); if (!M && !r) return; seen.add(mid);
+    (groups[ch] = groups[ch] || []).push({ mid, name: (L[mid.replace(/^u-/, '')] || {}).title || (M ? M[0] : r.name), cr: M ? M[1] : r.cr, ac: M ? M[2] : r.ac, hp: M ? M[3] : r.hp }); };
+  Object.keys(L).forEach((k) => add(advMobRaw(A, 'u-' + k) ? 'u-' + k : k, L[k].ch || ''));
+  (A.mobs || []).forEach((o) => add('u-' + o.id, ''));
+  const order = A.chapters.map((c) => c.id).concat(['']); const ents = Object.entries(groups).sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]));
   const chName = (id) => { const c = A.chapters.find((x) => x.id === id); return c ? c.kicker + ' · ' + c.title : 'Weitere'; };
   return '<section class="blk advch"><div class="advkick">Anhang</div><h2>Kreaturen</h2><p class="hint">Antippen zeigt Aussehen, Geschichte, Kampfweise und Schwächen. Die vollen Werte stehen im Bestiarium unter „✎ Eigene“.</p>' +
-    Object.entries(groups).map(([ch, list]) => '<h3 class="advsc">' + esc(chName(ch)) + '</h3><div class="advmobs big">' + list.map((o) => '<button class="advmob" data-act="advMob" data-arg="u-' + esc(o.id) + '"><b>' + esc(o.name) + '</b><small>HG ' + esc(o.cr) + ' · RK ' + o.ac + ' · TP ' + o.hp + '</small></button>').join('') + '</div>').join('') +
+    ents.map(([ch, list]) => '<h3 class="advsc">' + esc(chName(ch)) + '</h3><div class="advmobs big">' + list.map((o) => '<button class="advmob" data-act="advMob" data-arg="' + esc(o.mid) + '"><b>' + esc(o.name) + '</b><small>HG ' + esc(o.cr) + ' · RK ' + o.ac + ' · TP ' + o.hp + '</small></button>').join('') + '</div>').join('') +
     '<div class="chips"><button class="btn sm ghost" data-act="advPrep">Monster und Begegnungen ins Bestiarium</button></div>' + (A.srd ? '<p class="hint advsrd">' + esc(A.srd) + '</p>' : '') + '</section>';
+}
+function advItemsTab(A, st, X) {
+  const keys = Object.keys(A.items || {}).filter((k) => MAGIC_ITEMS[k] && MAGIC_ITEMS[k].adv === A.id);
+  const where = {}; A.chapters.forEach((c) => c.scenes.forEach((s) => s.blocks.forEach((b) => { if (b.t === 'items') (b.rows || []).forEach((r) => { if (r.item && !where[r.item]) where[r.item] = c.kicker + ' · ' + s.title + (r.from ? ': ' + r.from : ''); }); })));
+  const tags = (d) => [d.att && '◈ Einstimmung', d.curse && '☠ verflucht', d.cons && 'Verbrauchsgut', d.use && d.use.n + '× pro ' + (d.use.reset === 'short' ? 'kurzer' : 'langer') + ' Rast'].filter(Boolean).join(' · ');
+  return '<section class="blk advch"><div class="advkick">Anhang</div><h2>Gegenstände</h2><p class="hint">Waffen, Rüstungen und Kuriositäten aus diesem Abenteuer. Werte wie +1 auf Waffe oder RK rechnet der Heldenbogen selbst, sobald ein Held den Gegenstand trägt.</p>' + advOnRow(A, st.on) +
+    ITEM_RAR.filter((r) => keys.some((k) => MAGIC_ITEMS[k].r === r)).map((r) => '<h3 class="advsc">' + esc(r[0].toUpperCase() + r.slice(1)) + '</h3><div class="advits">' + keys.filter((k) => MAGIC_ITEMS[k].r === r).sort((a, b) => cmpDe(MAGIC_ITEMS[a].name, MAGIC_ITEMS[b].name)).map((k) => { const d = MAGIC_ITEMS[k];
+      return '<article class="advit"><header><b>' + esc(d.name) + '</b><small>' + esc(tags(d) || d.r) + '</small></header><p>' + advMd(d.text) + '</p>' + (where[k] ? '<p class="hint">Fundort: ' + advMd(where[k]) + '</p>' : '') + (X.dm ? '<div class="chips"><button class="btn sm ghost" data-act="advGiveK" data-arg="' + esc(k) + '">Geben</button></div>' : '') + '</article>'; }).join('') + '</div>').join('') +
+    (X.dm ? '' : '<p class="hint">Geben kann die Spielleitung am Tisch.</p>') + '</section>';
 }
 function advMobModal(A, mid) {
   const o = advMobRaw(A, mid); const M = BESTIARY[mid]; const L = (A.lore || {})[mid.replace(/^u-/, '')] || {}; if (!o && !M) return;
@@ -243,6 +317,7 @@ Object.assign(XA, {
     S.gPre = { to: 'all', xp: '', gm: gm || '', item: '', text: r.b.items.map((x) => advPlain(x).replace(/^-\s+/, '')).join(' · ') };
     S.view = 'camp'; render(); advGlowGift(); },
   advGive: (t, a) => { const A = advCurA(); const r = A && advBlockAt(A, a); const row = r && r.b.t === 'items' && r.b.rows[+t.dataset.i]; if (!row) return; if (!(typeof isDM === 'function' && isDM())) return;
+    if (MAGIC_ITEMS[row.item] && MAGIC_ITEMS[row.item].adv) advSetOn(MAGIC_ITEMS[row.item].adv, true);
     S.gPre = { to: 'all', xp: '', gm: '', item: MAGIC_ITEMS[row.item] ? row.item : '', text: row.name + ' (' + advPlain(row.rule) + ')' };
     S.view = 'camp'; render(); advGlowGift(); bannerToast(row.name, 'Wähle oben im Formular, welcher Held ihn bekommt.'); },
   advFight: (t, a) => { const A = advCurA(); const r = A && advBlockAt(A, a); const e = r && r.b.t === 'kampf' && advEnc(A, r.b.enc); if (!e) return;
@@ -260,10 +335,19 @@ Object.assign(XA, {
     pushLog({ label: x.name + ': Initiative', total: d + ini, detail: 'W20 ' + d + ' ' + sgn(ini) + ' · kämpft auf eurer Seite', sides: 20, nat: d });
     S.view = 'camp'; render(); },
   advMob: (t, a) => { const A = advCurA(); if (A) advMobModal(A, a); },
+  advGiveK: (t, a) => { const d = MAGIC_ITEMS[a]; if (!d || !d.adv || !(typeof isDM === 'function' && isDM())) return; advSetOn(d.adv, true);
+    S.gPre = { to: 'all', xp: '', gm: '', item: a, text: '' }; S.view = 'camp'; render(); advGlowGift(); bannerToast(d.name, 'Wähle oben im Formular, welcher Held ihn bekommt.'); },
+  advOn: (t, a) => { if (!advGet(a)) return; advSetOn(a, !!t.checked); render(); },
+  advCnt: (t, a) => { const A = advCurA(); const r = A && advBlockAt(A, a); if (!r || r.b.t !== 'counter') return; const b = r.b;
+    advSetSt(A.id, (s) => { const v = advCntVal(b, s) + (+t.dataset.d || 0); s.cnt[b.id] = Math.max(b.min != null ? +b.min : -99, Math.min(b.max != null ? +b.max : 99, v)); }); render(); },
+  advRoll: (t, a) => { const A = advCurA(); const r = A && advBlockAt(A, a); if (!r || r.b.t !== 'roll') return; const n = 1 + Math.floor(rnd() * (+r.b.die || 6));
+    S.advRoll = Object.assign({}, S.advRoll, { [a]: n }); const row = r.b.rows.find((x) => { const [lo, hi] = advRange(x[0]); return n >= lo && n <= hi; });
+    if (typeof pushLog === 'function') pushLog({ label: r.b.title, total: n, detail: 'W' + r.b.die + (row ? ' · ' + advPlain(row[1]).slice(0, 140) : ''), sides: +r.b.die, nat: n });
+    render(); },
   advBest: (t, a) => { const A = advCurA(); advMobsInstall(A); S.modal = null; $('#modal').hidden = true; S.mq = a; S.mhab = 'own'; S.view = 'mobs'; render(); window.scrollTo(0, 0); },
   advPrep: () => { const A = advCurA(); if (!A) return; const m = advMobsInstall(A); const e = advEncInstall(A);
     bannerToast(m || e ? 'Bestiarium ergänzt' : 'Schon da', (m || e) ? [m && m + ' Kreaturen unter „✎ Eigene“', e && e + ' Begegnungen im Planer'].filter(Boolean).join(', ') + '.' : 'Alle Kreaturen und Begegnungen sind bereits im Bestiarium.'); },
-  advReset: () => { const A = advCurA(); if (!A) return; if (S.advReset !== A.id) { S.advReset = A.id; render(); return; } S.advReset = null; const d = advDb(); delete d.st[A.id]; advSave(d); render(); bannerToast('Zurückgesetzt', 'Fortschritt und Entscheidungen von „' + A.title + '“ sind gelöscht.'); },
+  advReset: () => { const A = advCurA(); if (!A) return; if (S.advReset !== A.id) { S.advReset = A.id; render(); return; } S.advReset = null; const d = advDb(); const on = d.st[A.id] && d.st[A.id].on; delete d.st[A.id]; if (on) d.st[A.id] = Object.assign(ADV_ST0(), { on: true, t: Date.now() }); advSave(d); render(); bannerToast('Zurückgesetzt', 'Fortschritt und Entscheidungen von „' + A.title + '“ sind gelöscht.'); },
   advDel: (t, a) => { if (S.advDel !== a) { S.advDel = a; render(); return; } S.advDel = null; const d = advDb(); d.list = d.list.filter((x) => x.id !== a); delete d.st[a]; if (d.last === a) d.last = ''; advSave(d); render(); },
 });
 function advGlowGift() { setTimeout(() => { const b = $('[data-act="gift"]'); if (b) { b.scrollIntoView({ block: 'center', behavior: 'smooth' }); b.classList.add('glowbtn'); setTimeout(() => b.classList.remove('glowbtn'), 2400); } }, 80); }

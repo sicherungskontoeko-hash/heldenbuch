@@ -31,11 +31,11 @@ function lootGen(foes, hoard) {
   let gm = crs.reduce((s, cr) => s + coin(cr), 0); if (hoard) gm = gm * 4 + [50, 400, 2500, 15000][tier];
   const vals = []; const vRoll = hoard ? 1 + lootD(1, 3) : rnd() < 0.4 ? 1 : 0;
   for (let i = 0; i < vRoll; i++) { const g = LOOT_GEMS[Math.min(LOOT_GEMS.length - 1, tier * 1 + Math.floor(rnd() * 2) + (tier ? 1 : 0))]; vals.push({ n: lootPick(g[1]), v: g[0] }); }
-  const items = []; let scroll = null;
+  const vis = typeof itemVis === 'function' ? itemVis() : () => true; const items = []; let scroll = null;
   const nItems = hoard ? 1 + lootD(1, 2) : rnd() < Math.min(0.6, 0.25 + 0.05 * (foes.length - 1) + 0.1 * tier) ? 1 : 0;
   for (let i = 0; i < nItems; i++) {
     if (rnd() < 0.15) { const lv = [lootD(1, 2), 1 + lootD(1, 3), 3 + lootD(1, 3), 5 + lootD(1, 4)][tier]; scroll = 'Zauberschriftrolle (Grad ' + Math.min(9, lv) + ')'; continue; }
-    const r = lootWeighted(LOOT_RAR[tier]); const pool = Object.keys(MAGIC_ITEMS).filter((k) => MAGIC_ITEMS[k].r === r && !items.includes(k)); if (pool.length) items.push(lootPick(pool));
+    const r = lootWeighted(LOOT_RAR[tier]); const pool = Object.keys(MAGIC_ITEMS).filter((k) => MAGIC_ITEMS[k].r === r && !items.includes(k) && (!MAGIC_ITEMS[k].adv || vis(k))); if (pool.length) items.push(lootPick(pool));
   }
   if (!hoard && !items.length && tier === 0 && rnd() < 0.3) items.push('potion-heal');
   const xp = foes.reduce((s, x) => s + (CR_XP[(BESTIARY[x.mid] || [])[1]] || 0), 0);

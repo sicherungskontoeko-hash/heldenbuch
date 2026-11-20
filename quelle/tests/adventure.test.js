@@ -104,16 +104,16 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
     await setup();
     await p.evaluate((t) => { S.view = 'heroes'; importJson(t); }, text);
     T('Datei laden: öffnet das Abenteuer direkt', await p.evaluate(() => S.view === 'adv' && S.adv === 'machtader'));
-    T('Datei laden: eingebaute Fassung wird nicht doppelt gespeichert', await p.evaluate(() => advDb().list.length === 0 && advAll().length === 1));
+    T('Datei laden: eingebaute Fassung wird nicht doppelt gespeichert', await p.evaluate(() => advDb().list.length === 0 && advAll().filter((a) => a.id === 'machtader').length === 1));
     T('Datei laden: 18 Monster, 9 Begegnungen', await p.evaluate(() => Object.keys(BESTIARY).filter((k) => /^u-mach-/.test(k)).length === 18 && encLoad().filter((e) => /^mach-e-/.test(e.id)).length === 9));
     const v2 = JSON.parse(text); v2.extra.adv[0].ver = 2; v2.extra.adv[0].title = 'Die Machtader (überarbeitet)'; v2.extra.mobs = []; v2.extra.enc = [];
     await p.evaluate((t) => importJson(t), JSON.stringify(v2));
-    T('Neuere Fassung aus Datei ersetzt die eingebaute', await p.evaluate(() => advAll().length === 1 && advGet('machtader').title === 'Die Machtader (überarbeitet)' && advIsOwn('machtader')));
+    T('Neuere Fassung aus Datei ersetzt die eingebaute', await p.evaluate(() => advAll().filter((a) => a.id === 'machtader').length === 1 && advGet('machtader').title === 'Die Machtader (überarbeitet)' && advIsOwn('machtader')));
     await p.evaluate(() => { S.adv = null; render(); document.querySelector('[data-act="advDel"]').click(); document.querySelector('[data-act="advDel"]').click(); });
-    T('Entfernen (zweimal tippen): eingebaute Fassung wieder da', await p.evaluate(() => advAll().length === 1 && advGet('machtader').title === 'Die Machtader' && !advIsOwn('machtader')));
+    T('Entfernen (zweimal tippen): eingebaute Fassung wieder da', await p.evaluate(() => advAll().filter((a) => a.id === 'machtader').length === 1 && advGet('machtader').title === 'Die Machtader' && !advIsOwn('machtader')));
     const bad = { heldenbuch: 1, chars: [], extra: { adv: [{ id: 'Böse ID', title: 'x', chapters: [] }, { id: 'leer', title: 'Leer', chapters: [{ id: 'a', scenes: [] }] }] } };
     await p.evaluate((t) => { try { importJson(t); } catch (e) {} }, JSON.stringify(bad));
-    T('Ungültige Abenteuer werden nicht übernommen', await p.evaluate(() => advAll().length === 1));
+    T('Ungültige Abenteuer werden nicht übernommen', await p.evaluate(() => advAll().length === ADV_BUILTIN.length));
   }
 
   /* ---- Alle Szenen rendern ohne Fehler ---- */

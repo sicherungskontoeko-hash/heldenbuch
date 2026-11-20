@@ -1050,7 +1050,35 @@ body:has(#modal:not([hidden])) #undoBar,body:has(#prompt:not([hidden])) #undoBar
 .advraw p{font-size:.9rem;color:var(--muted)}
 .advsrd{font-size:.82rem}
 .btn.warn{border-color:var(--wine);color:var(--wine)}
-@media (max-width:600px){.advb .advt tr,.advb .advt th,.advb .advt td{display:block;width:auto;min-width:0}.advb .advt td{border-top:0;padding-top:0}.advcho{grid-template-columns:1fr;gap:3px}.advbb{padding:9px 11px}.advpn .btn{max-width:100%;flex:1 1 100%}.adv .advhead h1{font-size:1.5rem}.advt th{min-width:84px}}
+.advb.rp{--k:#E79BC0;--kr:231,155,192}
+.advb.rp .advbb li::marker{color:#E79BC0}
+.advcnt{display:flex;align-items:center;justify-content:center;gap:14px}
+.advcnt .btn{min-width:46px;font-size:1.3rem;padding:4px 0}
+.advcnt output{display:grid;justify-items:center;min-width:90px}
+.advcnt output b{font-family:var(--f-display);font-size:2rem;line-height:1.1;color:var(--k)}
+.advcnt output small{color:var(--muted);font-size:.78rem}
+.advcnow{margin:0;text-align:center;font-weight:600}
+.advcdet summary{cursor:pointer;color:var(--k);font-size:.88rem}
+.advcdet[open] summary{margin-bottom:6px}
+.advcst{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.advcst li{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:5px 8px;border-radius:8px;color:var(--muted)}
+.advcst li b{color:var(--k);text-align:right}
+.advcst li.on{background:rgba(var(--kr),.16);color:var(--ink);box-shadow:inset 0 0 0 1px rgba(var(--kr),.5)}
+.advt.roll th{width:56px;min-width:56px;text-align:center}
+.advt.roll tr.on{background:rgba(var(--arcane-rgb),.22)}
+.advt.roll tr.on th,.advt.roll tr.on td{border-top-color:transparent}
+.advt.roll tr.on th::before{content:'▸ '}
+.advgot{align-self:center;color:var(--muted)}.advgot b{color:var(--ink)}
+.advon{display:flex;gap:10px;align-items:flex-start;border:1px dashed rgba(var(--gold-rgb),.45);border-radius:10px;padding:8px 12px;background:rgba(var(--gold-rgb),.05);cursor:pointer}
+.advon input{margin-top:3px;width:18px;height:18px;accent-color:var(--gold)}
+.advon span{display:grid;gap:2px}.advon small{color:var(--muted)}
+.advits{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.advit{border:1px solid rgba(140,194,127,.4);border-radius:12px;background:var(--sunk);display:grid;gap:7px;align-content:start;padding:0 0 10px;overflow:hidden}
+.advit header{display:grid;padding:8px 12px;background:rgba(140,194,127,.12)}
+.advit header b{color:#A8D69C}.advit header small{color:var(--muted)}
+.advit>p,.advit>.chips{margin:0 12px;line-height:1.5;font-size:.93rem}
+.advit>.chips{justify-content:flex-start}
+@media (max-width:600px){.advb .advt:not(.roll) tr,.advb .advt:not(.roll) th,.advb .advt:not(.roll) td{display:block;width:auto;min-width:0}.advt.roll th{width:40px;min-width:40px}.advb .advt:not(.roll) td{border-top:0;padding-top:0}.advcho{grid-template-columns:1fr;gap:3px}.advbb{padding:9px 11px}.advpn .btn{max-width:100%;flex:1 1 100%}.adv .advhead h1{font-size:1.5rem}.advt th{min-width:84px}}
 </style>
 <div id="scene" aria-hidden="true"></div>
 <canvas id="embers" aria-hidden="true"></canvas>
