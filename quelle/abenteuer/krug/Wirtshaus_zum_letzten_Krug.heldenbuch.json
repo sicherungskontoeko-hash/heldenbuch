@@ -1042,10 +1042,10 @@
           "t": "vorlese",
           "title": "Vorlesetext",
           "ps": [
-           "Der Brief kam vor drei Tagen, krakelig, mit einem Bierring auf der Rückseite. Ihr habt die Schrift sofort erkannt: *„Kommt nach Hause. Bringt Hunger mit. Es ist ernst. Papa B.“*",
+           "Der Brief kam vor drei Tagen. Riesige Buchstaben, mit Bleistift in das Papier gedrückt, Mehl an den Rändern und ein Fettfleck, der nach Zwiebeln riecht: *„An die Kinder vom Chef. Chef schläft und wacht nicht auf. Gorm hat alles probiert, sogar Suppe. Chef redet immer von euch. Kommt nach Hause. Gorm (Koch)“*",
            "Jetzt steht ihr wieder in der Kupfergasse, vor dem Haus, in dem ihr gross geworden seid. Das Schild hängt schief, ein Krug, aus dem ein einzelner, trauriger Tropfen fällt. Die Tür knarrt wie früher. Drinnen riecht es nach altem Bier, frischem Brot und nach Kindheit.",
            "Mutter Holle, die euch früher die aufgeschlagenen Knie verbunden hat, winkt euch wortlos die Treppe hinauf. In der Kammer unter dem Dach liegt Barnabas im Bett, die Hände gefaltet, den Schnauzbart ordentlich gekämmt. Er atmet, langsam und tief. Auf seiner Brust liegt ein Bierdeckel: *„Nicht wecken, ausser es brennt.“*",
-           "Am Fussende steht ein Gnom mit drei Brillen auf der Nase und einer Taschenuhr in jeder Hand. „Ihr seid zwölf Minuten zu spät“, sagt er. „Setzt euch. Es geht um eure Zukunft.“"
+           "Am Fussende steht ein Gnom mit drei Brillen auf der Nase und einer Taschenuhr in jeder Hand. „Ihr seid zwölf Minuten zu spät“, sagt er. „Fidelis Pünktli, Notar. Der Koch sagte, ihr kommt heute. Setzt euch. Es geht um eure Zukunft.“"
           ]
          },
          {
@@ -1263,6 +1263,10 @@
             "Das Ei liegt bis zum Abend in der Schatzkammer, hinter vierzig Wachen, einem Zwergenschloss und einem sehr misstrauischen Kanarienvogel. Unmöglich. Erst am Abend kommt es in die Küche."
            ],
            [
+            "Sich als Aushilfe einschleichen",
+            "Der Palast nimmt heute keine Fremden. Federkiel tippt auf eine Liste: „Hochzeitspersonal nur mit Marke eines Hoflieferanten. Wegen der Diebe. Ihr wisst schon.“"
+           ],
+           [
             "Ein anderes Mittel suchen",
             "Holle hat alles versucht. Ein Wunsch-Zauber wäre eine Lösung, aber den kann in der ganzen Stadt niemand wirken."
            ]
@@ -1275,7 +1279,8 @@
           "ps": [
            "Auf dem Rückweg über den Marktplatz drängen sich Leute vor dem Brunnen. An der Säule hängt ein frischer Aushang mit königlichem Siegel:",
            "*„Bekanntmachung. Für das Hochzeitsmahl Seiner Majestät wird heute ein letztes Haus als Hoflieferant bestimmt. Oberinspektor Kunibert Zwick prüft am Nachmittag die verbleibenden Bewerber: den Goldenen Kapaun und den Letzten Krug. Der Gewinner liefert heute Abend in die Hofküche.“*",
-           "Neben euch seufzt jemand sehr zufrieden. Eine Frau mit hochgesteckten Haaren und einer Bratpfanne in der Hand. „Der Letzte Krug?“, sagt sie süss. „Wie herzig. Ich bring euch nachher einen Kuchen. Zum Trösten.“"
+           "Pünktli räuspert sich. „Barnabas hat sich vor einem Monat beworben. Er wollte das Wappen einmal über der Tür sehen, bevor er alt wird. Die Bewerbung gilt für das Haus. Also für euch.“",
+           "Neben euch seufzt jemand sehr zufrieden. Eine Frau mit hochgesteckten Haaren und einer Bratpfanne in der Hand. Prunella Schmalz von gegenüber. Ihr kennt sie noch, sie hat euch früher heimlich Kuchen zugesteckt. Jetzt lächelt sie kühl. „Ach, die Kleinen sind wieder da. Der Letzte Krug will Hoflieferant werden? Wie herzig. Ich bring euch nachher einen Kuchen. Zum Trösten.“"
           ]
          },
          {
@@ -1285,7 +1290,7 @@
            "- **Stimme:** süss wie Sirup. Sagt „Schätzchen“ wie eine Drohung.",
            "- **Will hier:** zeigen, wer gewinnt. Sie kennt die Helden noch als Kinder und hält sie jetzt für undankbare Ziehkinder, die nur wegen des Erbes zurückkommen.",
            "- **Weiss nicht:** dass Barnabas krank ist. Wer es ihr jetzt sagt, sieht sie kurz blass werden. Dann lächelt sie wieder: „Umso besser, dass sich jemand Fähiges um die Gäste kümmert.“",
-           "- **Typische Sätze:** „Zwanzig Jahre war ich Zweite. Heute nicht.“ · „Ach, die Kleinen sind wieder da. Jetzt, wo es was zu erben gibt.“ · „Ihr habt Wabbel noch? Wie mutig.“"
+           "- **Typische Sätze:** „Zwanzig Jahre war ich Zweite. Heute nicht.“ · „Jetzt, wo es was zu erben gibt, kommt ihr also.“ · „Ihr habt Wabbel noch? Wie mutig.“"
           ]
          },
          {
@@ -1304,7 +1309,7 @@
       "intro": [
        {
         "t": "p",
-        "x": "Die Helden haben bis zum Nachmittag Zeit, aus dem Haus ihrer Kindheit wieder ein Wirtshaus zu machen. Vieles kennen sie noch, manches ist neu, etwa Gorm, der erst nach ihrem Auszug kam. Lass sie frei herumlaufen. Die Szenen müssen nicht in dieser Reihenfolge kommen, nur der schmuddelige Gast kommt früh und der Weinkeller vor dem Einkaufszettel."
+        "x": "Die Helden haben bis zum Nachmittag Zeit, das Haus ihrer Kindheit für die Prüfung herzurichten. Seit Barnabas schläft, ist alles liegen geblieben, und ehrlich gesagt war es vorher schon nicht viel besser. Vieles kennen sie noch. Neu seit ihrem Auszug sind Gorm, Hildegard im Keller und das Portal in Zimmer 3. Lass sie frei herumlaufen. Die Szenen müssen nicht in dieser Reihenfolge kommen, nur der schmuddelige Gast kommt früh und der Weinkeller vor dem Einkaufszettel."
        }
       ],
       "id": "a1",
@@ -1334,7 +1339,7 @@
            "- **Stimme:** tief, langsam, spricht von sich in der dritten Person, wenn er gekränkt ist.",
            "- **Will:** dass jemand seine Kunst versteht. Seine Rüebli-Schaumsuppe ist ein Gedicht.",
            "- **Hasst:** Bratwurst. Ketchup. Den Namen „Ambrosius“.",
-           "- **Typische Sätze:** „Gorm macht kein Essen. Gorm macht Erinnerungen.“ · „Das ist keine zerbrochene Schüssel. Das ist Dekonstruktion.“ · „Ihr seid die Kinder vom Chef? Könnt ihr schmecken? Zeigt Zunge.“",
+           "- **Typische Sätze:** „Gorm macht kein Essen. Gorm macht Erinnerungen.“ · „Das ist keine zerbrochene Schüssel. Das ist Dekonstruktion.“ · „Ihr seid die Kinder vom Chef? Gorm hat geschrieben. Gorm schreibt nicht oft.“ · „Könnt ihr schmecken? Zeigt Zunge.“",
            "- **Laune:** Merke dir, wie die Helden mit ihm umgehen. Lob hebt sie, Spott senkt sie. Am Nachmittag zählt sie."
           ]
          },
@@ -1482,7 +1487,7 @@
           "t": "vorlese",
           "title": "Vorlesetext · Barnabas' Kuriositätenschrank",
           "ps": [
-           "Hinter der Theke steht ein Schrank mit Glastüren und einem Schild: *„Sammlung B. Krug. Nicht anfassen. Ausser mit Gefühl.“* Darin liegen Dinge, die Barnabas in vierzig Jahren von Gästen bekommen hat, die nicht bezahlen konnten. Manche summen. Eines schaut zurück."
+           "Hinter der Theke steht der Schrank mit den Glastüren, den ihr als Kinder nie anfassen durftet. Das Schild hängt noch: *„Sammlung B. Krug. Nicht anfassen. Ausser mit Gefühl.“* Darin liegen Dinge, die Barnabas in vierzig Jahren von Gästen bekommen hat, die nicht bezahlen konnten. Manche summen. Eines schaut zurück."
           ]
          },
          {
@@ -1720,7 +1725,7 @@
           "title": "Vorlesetext",
           "ps": [
            "Am Ende des Flurs im ersten Stock hängt an einer Tür ein Schild: *„Zimmer 3. Nicht öffnen. Ehrlich. B.“* Unter der Tür sickert Wasser durch. Oder Rauch. Oder Sand, das wechselt.",
-           "Hinter der Tür ist kein Zimmer mehr. In der Mitte des Raums dreht sich ein Ring aus Licht, gross wie ein Wagenrad. Durch ihn sieht man jede Stunde etwas anderes: einen Ozean, einen Vulkan, eine Kristallhöhle, einen Himmel ohne Boden."
+           "Zu eurer Zeit war das die Abstellkammer. Barnabas hat sie vor zwei Jahren umgebaut, mit einer Anleitung aus einem Buch, das er beim Würfeln gewonnen hat. Hinter der Tür ist kein Zimmer mehr. In der Mitte des Raums dreht sich ein Ring aus Licht, gross wie ein Wagenrad. Durch ihn sieht man jede Stunde etwas anderes: einen Ozean, einen Vulkan, eine Kristallhöhle, einen Himmel ohne Boden."
           ]
          },
          {
@@ -1788,7 +1793,8 @@
           "title": "Das Rätsel ohne Lösung",
           "items": [
            "Das Rätsel hat keine Antwort. Barnabas hat es erfunden, um Diebe zu beschäftigen. Die Tür ist nicht verschlossen. Lass die Spieler eine Minute grübeln, während das Wasser steigt (knöcheltief, dann wadentief). Sobald jemand die Klinke drückt, geht sie auf.",
-           "Wer verzweifelt eine Antwort ruft, hört von drinnen ein zufriedenes Schmatzen."
+           "Wer verzweifelt eine Antwort ruft, hört von drinnen ein zufriedenes Schmatzen.",
+           "Die Helden kennen dieses Schild. Als Kinder haben sie Wochen damit verbracht, das Rätsel zu lösen. Barnabas hat jedes Mal gelacht. Wer sich daran erinnert (Weisheit SG 10), weiss plötzlich warum."
           ]
          },
          {
@@ -4600,7 +4606,7 @@
           "t": "kampf",
           "title": "Die Schlägerei",
           "enc": "krug-e-schlaegerei",
-          "gegner": "Knut, der Grottenschrat-Wirt, fünf Raufbolde aus dem Goldenen Kapaun und Prunella Schmalz, falls sie den Helden nicht geholfen hat. Hat sie geholfen, ist sie nicht dabei.",
+          "gegner": "Knut, der Grottenschrat-Wirt, fünf Raufbolde aus dem Goldenen Kapaun und Prunella Schmalz, falls sie den Helden nicht geholfen hat. Hat sie geholfen, ist sie nicht dabei, und Knut kommt trotzdem: Er hält das leuchtende Ei für ein Spionagegerät der Möwen und will es „sicherstellen“.",
           "gelaende": "Die Gaststube, 15 auf 12 m, voller Tische, Stühle und feiernder Gäste (schwieriges Gelände). Der Kronleuchter in der Mitte, die Treppe an der Rückwand, die Theke als halbe Deckung.",
           "taktik": "Knut erzählt Verschwörungen und schlägt mit Krügen. Die Raufbolde gehen zu zweit auf den Eiträger los. Prunella pustet Pfeffer und pariert mit der Pfanne.",
           "ende": "Erreicht das Ei die Kammer, ist der Kampf vorbei: Ein goldenes Licht flutet das ganze Haus, und alle halten inne. Raufbolde geben auf, wenn man ihnen eine Runde ausgibt (20 GM für alle).",
@@ -4788,8 +4794,18 @@
           "title": "Vorlesetext",
           "ps": [
            "Am nächsten Morgen hängt am Brunnen auf dem Marktplatz ein neuer Aushang, mit königlichem Siegel:",
-           "*„Bekanntmachung. Die königliche Hochzeitstorte ist gestern Abend leider überraschend ausgefallen. Seine Majestät lässt mitteilen, dass das Mahl der neuen Hoflieferanten das beste seit Menschengedenken war. Der Letzte Krug darf ab sofort das königliche Wappen führen.“*",
+           "*„Bekanntmachung. Die königliche Hochzeitstorte ist gestern Abend leider überraschend ausgefallen. Seine Majestät lässt mitteilen, dass das Mahl der Hoflieferanten das beste seit Menschengedenken war.“*",
            "Im Letzten Krug sitzt Barnabas an seiner Theke, im Morgenmantel, mit einem kleinen Phönix auf der Schulter, und zapft das erste Bier des Tages. Für euch."
+          ]
+         },
+         {
+          "t": "dm",
+          "title": "Weiss der König es?",
+          "items": [
+           "Ein Phönix, der im Kamin eines Wirtshauses schläft, bleibt in einer Stadt nicht lange geheim. Am Mittag steht Oberinspektor Zwick in der Tür, in Amtsrobe, und setzt sich an seinen wackligen Tisch.",
+           "- **Wurde Zwick am Morgen gut behandelt:** „Ich habe es Seiner Majestät erzählt. Alles.“ Pause. „Er hat gelacht. Er sagt, ein Phönix sucht sich sein Nest selbst, und eine Torte, die beisst, hat ihm die Hochzeit gerettet. Er verlangt nur eines: Zu seinem ersten Hochzeitstag liefert der Letzte Krug. Mit Rüebli-Schaumsuppe.“ Wurden die Helden Hoflieferant, hängt ab heute das königliche Wappen über der Tür.",
+           "- **Wurde Zwick schlecht behandelt:** Er hat geschwiegen, aber er lässt eine Rechnung auf dem Tisch liegen: 40 000 GM, „für ein Ei“. Darunter in kleiner Schrift: „Zahlbar in Rüebli-Schaumsuppe, jeden Sonntag, bis ich es vergesse.“",
+           "- So oder so: Niemand kommt in den Kerker. Der Tag endet gut. Das ist eine Komödie."
           ]
          },
          {
@@ -5090,6 +5106,10 @@
        [
         "Hasst",
         "Bratwurst, Ketchup und den Hofkoch Ambrosius, seinen früheren Lehrmeister."
+       ],
+       [
+        "Mit den Helden",
+        "Kam erst nach ihrem Auszug, kennt sie nur aus Barnabas' Geschichten. Er hat ihnen den Brief geschrieben, der sie heimholt. Er ist stolz darauf und ein bisschen verlegen."
        ],
        [
         "Laune",
@@ -5397,7 +5417,7 @@
       "title": "Hildegard, die Mimik-Mutter",
       "ch": "a1",
       "look": "Ein Weinfass, grösser als die anderen, mit einem verdächtig feuchten Spundloch. Wenn sie gähnt, sieht man drei Reihen Zähne.",
-      "lore": "Hildegard kam vor Jahren als Weinfass in den Keller. Barnabas wusste es, gab ihr Reste und nannte sie „unsere Hausmutter“. Seit er schläft, hat sie niemand gefüttert, und sie hat Junge.",
+      "lore": "Hildegard kam vor drei Jahren als Weinfass in den Keller, nach dem Auszug der Helden. Barnabas wusste es, gab ihr Reste und nannte sie „unsere Hausmutter“. Gorm geht nicht in den Keller („Keller beisst“), also hat sie seit einer Woche niemand gefüttert, und sie hat Junge.",
       "fight": "Bleibt vor ihren Jungen stehen und schnappt nach allem, was sich bewegt. Ist sie satt, wird sie zutraulich.",
       "weak": [
        "Salz macht ihre Haut für 1 Runde unklebrig.",
