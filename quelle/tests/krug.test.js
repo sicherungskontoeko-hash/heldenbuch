@@ -68,10 +68,8 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
   await p.evaluate(() => { for (let i = 0; i < 9; i++) { const x = document.querySelector('.advb.cnt [data-d="-1"]'); if (x && !x.disabled) x.click(); } });
   T('Verdacht: zurück auf 0, − gesperrt', await p.evaluate(() => advSt('krug').cnt.verdacht === 0 && document.querySelector('.advb.cnt [data-d="-1"]').disabled));
 
-  await p.evaluate(() => { XA.advTab(null, 'ch:a2'); XA.advScene(null, 'a2s1'); for (let i = 0; i < 9; i++) { const x = document.querySelector('.advb.cnt [data-d="1"]'); if (x && !x.disabled) x.click(); } });
-  T('Hort-Zähler: bis 8, „Zu spät“ steht als aktuelle Stufe', await p.evaluate(() => advSt('krug').cnt.hort === 8 && /Zu spät/.test($('.advb.cnt .advcnow').textContent)));
-  await p.evaluate(() => { XA.advTab(null, 'ch:a4'); for (let i = 0; i < 5; i++) [...document.querySelectorAll('.advb.cnt')][1].querySelector('[data-d="1"]').click(); });
-  T('Gänge-Zähler: nach 5 Gängen „Anschnitt!“', await p.evaluate(() => advSt('krug').cnt.gaenge === 5 && /Anschnitt/.test([...document.querySelectorAll('.advb.cnt')][1].querySelector('.advcnow').textContent)));
+  T('Keine Zeit-Zähler mehr (Hort, Gänge)', await p.evaluate(() => { const A = advGet('krug'); const ids = []; A.chapters.forEach((C) => (C.intro || []).concat(...C.scenes.map((x) => x.blocks)).forEach((b) => { if (b.t === 'counter') ids.push(b.id); })); return !ids.includes('hort') && !ids.includes('gaenge') && ids.includes('sterne') && ids.includes('hitze'); }));
+  T('Barnabas ist der Ziehvater, kein Onkel', await p.evaluate(() => { const t = JSON.stringify(advGet('krug')); return !/Onkel/.test(t) && /Ziehvater/.test(t); }));
   T('Ring der bösen Ahnung: +1 Initiative am Helden', await p.evaluate(() => { const ch = newChar({ name: 'Ini', cls: 'fighter', level: 4 }); const a = derive(ch, S.hb).init; ch.items = [{ uid: 'r1', id: 'krug-ahnungsring', att: true, eq: true, qty: 1, w: '' }]; return derive(ch, S.hb).init === a + 1; }));
   /* ---- Entscheidungen ---- */
   await p.evaluate(() => { XA.advTab(null, 'ch:a1'); XA.advScene(null, 'a1s2'); document.querySelector('.advcho').click(); });

@@ -559,10 +559,10 @@
           "t": "dm",
           "title": "Die Wahrheit hinter dem Tag",
           "items": [
-           "**Onkel Barnabas Krug**, Wirt des „Letzten Krugs“, wollte vor einer Woche das Portal in Zimmer 3 auf „Frühling“ stellen. Er erwischte „Sternenleere“, einen Hauch aus der Leere zwischen den Ebenen, und fiel in einen Zauberschlaf. Ohne Hilfe wacht er nie wieder auf, und die Heilerin gibt ihm Zeit bis zum nächsten Sonnenaufgang.",
+           "**Barnabas Krug**, Wirt des „Letzten Krugs“, ist der Ziehvater der Helden. Er hat sie alle als kleine Kinder von der Strasse aufgelesen und im Wirtshaus grossgezogen. Vor einer Woche wollte er das Portal in Zimmer 3 auf „Frühling“ stellen. Er erwischte „Sternenleere“, einen Hauch aus der Leere zwischen den Ebenen, und fiel in einen Zauberschlaf. Ohne Hilfe wacht er nie wieder auf, und die Heilerin gibt ihm Zeit bis zum nächsten Sonnenaufgang.",
            "Das einzige Mittel ist ein **Phönixei**, warm an seine Brust gelegt. Im ganzen Reich gibt es genau eines. **König Leopold IV.** hat es gekauft, damit seine Hochzeitstorte heute Nacht leuchtet. Bis zum Fest liegt es in der Schatzkammer. Erst am Abend kommt es in die Hofküche und auf die Torte.",
            "In die Hofküche kommt nur der **Hoflieferant**. Den bestimmt heute Nachmittag **Oberinspektor Kunibert Zwick**. Er prüft inkognito: Der schmuddelige Wanderer, der am Morgen ein Frühstück will, ist er.",
-           "**Prunella Schmalz** vom Goldenen Kapaun gegenüber will den Titel auch. Sie hält die Helden für gierige Erben und sabotiert sie den ganzen Tag. Sie ist keine Verbrecherin, nur ehrgeizig und gekränkt. Vor dreissig Jahren waren sie und Barnabas ein Paar.",
+           "**Prunella Schmalz** vom Goldenen Kapaun gegenüber will den Titel auch. Sie hält die Helden für undankbare Ziehkinder, die erst beim Erbe wieder auftauchen, und sabotiert sie den ganzen Tag. Sie ist keine Verbrecherin, nur ehrgeizig und gekränkt. Vor dreissig Jahren waren sie und Barnabas ein Paar.",
            "Der **Hort** ist der grösste Markt des Reichs, ein alter Dungeon, den sein früherer Herr, der Minotaurus Bruno Hornig, zum Einkaufsparadies umgebaut hat. Jeder Wirt kauft dort ein. Die Angestellten sind Monster, und ein paar Monster sind nie gegangen."
           ]
          },
@@ -678,7 +678,7 @@
         "blocks": [
          {
           "t": "p",
-          "x": "Sechs Zähler halten den Tag zusammen und machen Druck. Du findest sie hier und in den Szenen, in denen sie gebraucht werden. Was du an einer Stelle einstellst, gilt überall."
+          "x": "Vier Zähler halten den Tag zusammen. Du findest sie hier und in den Szenen, in denen sie gebraucht werden. Was du an einer Stelle einstellst, gilt überall. Es gibt keine Uhr, die abläuft: Die Helden haben für alles Zeit, was sie tun wollen."
          },
          {
           "t": "counter",
@@ -708,35 +708,6 @@
            ]
           ],
           "hint": "Punkte gibt es für gelöste Probleme, den Umgang mit Zwick am Morgen und gute Proben beim Probeessen. Alle Quellen stehen in Akt 3 unter „Zwick kommt“."
-         },
-         {
-          "t": "counter",
-          "id": "hort",
-          "title": "Zeit im Hort",
-          "start": 0,
-          "min": 0,
-          "max": 8,
-          "tone": "probe",
-          "icon": "⌛",
-          "steps": [
-           [
-            0,
-            "Später Vormittag. Alles ist offen."
-           ],
-           [
-            4,
-            "Mittag. Gorm schickt einen Boten: „Wo bleibt das Wild?“"
-           ],
-           [
-            6,
-            "Knapp. Zu Hause bleibt nur noch Zeit für **eine** Aufgabe aus „Zwei Stunden“."
-           ],
-           [
-            8,
-            "**Zu spät.** Zwick steht schon vor der Tür, als die Helden zurückkommen: keine Vorbereitung, −2 Sternepunkte."
-           ]
-          ],
-          "hint": "Jede Abteilung kostet eine halbe Stunde (+1). Die Abkürzung im Möbellabyrinth kostet nichts, Anstehen an der Kasse +1. Die Spieler sehen den Zähler ruhig: Sie müssen wählen, was sie auslassen."
          },
          {
           "t": "counter",
@@ -798,35 +769,6 @@
          },
          {
           "t": "counter",
-          "id": "gaenge",
-          "title": "Gänge bis zum Anschnitt",
-          "start": 0,
-          "min": 0,
-          "max": 5,
-          "tone": "wahl",
-          "icon": "🍰",
-          "steps": [
-           [
-            0,
-            "Die Vorspeise wird aufgetragen. Die Torte steht in der Tortenkammer."
-           ],
-           [
-            3,
-            "Fräulein Zuckerguss bereitet die Torte vor und ist nur noch selten weg: Ablenkungen haben Nachteil."
-           ],
-           [
-            4,
-            "Die Diener holen den silbernen Wagen. Wer jetzt tauscht, hat nur noch eine Runde."
-           ],
-           [
-            5,
-            "**Anschnitt!** Die Torte rollt in den Festsaal. Ist das Ei noch darauf, muss es vor allen Augen geholt werden: Verdacht sofort auf 6."
-           ]
-          ],
-          "hint": "Nach jedem Gang des Hochzeitsmahls +1. Der Tausch muss vor dem fünften Gang gelingen."
-         },
-         {
-          "t": "counter",
           "id": "hitze",
           "title": "Hitze des Phönixeis",
           "start": 0,
@@ -852,7 +794,7 @@
             "Es will schlüpfen. Jetzt muss es an Barnabas' Brust, sonst ist die Magie verloren."
            ]
           ],
-          "hint": "Steigt bei jedem Misserfolg auf dem Rückweg und in jeder Runde der Schlägerei um 1."
+          "hint": "Steigt bei jedem Misserfolg auf dem Rückweg um 1 und in der Schlägerei immer dann, wenn das Ei zu Boden fällt."
          },
          {
           "t": "table",
@@ -989,7 +931,7 @@
           "t": "dm",
           "title": "Wenn die Zeit knapp wird",
           "items": [
-           "- Streiche im Hort das Möbellabyrinth und die Kassenschlange, beide sind freiwillig. Der Hort-Zähler sorgt ohnehin dafür, dass die Helden nicht alles schaffen.",
+           "- Streiche im Hort das Möbellabyrinth und die Kassenschlange, beide sind freiwillig.",
            "- Kürze das Probeessen auf zwei Gänge.",
            "- Lass die Belagerung mit einem Gespräch enden statt mit einem Kampf."
           ]
@@ -1100,47 +1042,81 @@
           "t": "vorlese",
           "title": "Vorlesetext",
           "ps": [
-           "Der Brief kam vor drei Tagen, krakelig, mit einem Bierring auf der Rückseite: *„Kommt sofort in den Letzten Krug. Bringt Hunger mit. Es ist ernst. B.“*",
-           "Jetzt steht ihr vor dem Wirtshaus in der Kupfergasse. Das Schild hängt schief, ein Krug, aus dem ein einzelner, trauriger Tropfen fällt. Die Tür knarrt, als hätte sie Rheuma. Drinnen riecht es nach altem Bier, frischem Brot und etwas, das ihr nicht einordnen könnt.",
-           "Eine Frau mit Kräutern im Haar winkt euch die Treppe hinauf. In einer Kammer unter dem Dach liegt Onkel Barnabas im Bett, die Hände gefaltet, den Schnauzbart ordentlich gekämmt. Er atmet, langsam und tief. Auf seiner Brust liegt ein Bierdeckel: *„Nicht wecken, ausser es brennt.“*",
+           "Der Brief kam vor drei Tagen, krakelig, mit einem Bierring auf der Rückseite. Ihr habt die Schrift sofort erkannt: *„Kommt nach Hause. Bringt Hunger mit. Es ist ernst. Papa B.“*",
+           "Jetzt steht ihr wieder in der Kupfergasse, vor dem Haus, in dem ihr gross geworden seid. Das Schild hängt schief, ein Krug, aus dem ein einzelner, trauriger Tropfen fällt. Die Tür knarrt wie früher. Drinnen riecht es nach altem Bier, frischem Brot und nach Kindheit.",
+           "Mutter Holle, die euch früher die aufgeschlagenen Knie verbunden hat, winkt euch wortlos die Treppe hinauf. In der Kammer unter dem Dach liegt Barnabas im Bett, die Hände gefaltet, den Schnauzbart ordentlich gekämmt. Er atmet, langsam und tief. Auf seiner Brust liegt ein Bierdeckel: *„Nicht wecken, ausser es brennt.“*",
            "Am Fussende steht ein Gnom mit drei Brillen auf der Nase und einer Taschenuhr in jeder Hand. „Ihr seid zwölf Minuten zu spät“, sagt er. „Setzt euch. Es geht um eure Zukunft.“"
           ]
          },
          {
           "t": "dm",
-          "title": "Wer sind die Helden für Barnabas?",
+          "title": "Barnabas ist euer Vater",
           "items": [
-           "Lass jeden Spieler in einem Satz sagen, wie sein Held mit Barnabas verbunden ist. Wer keine Idee hat, würfelt unten. Wichtig ist nur: Barnabas hat ihnen vertraut, und sie mögen ihn."
+           "Die Helden sind Geschwister, nicht durch Blut, sondern durch Barnabas. Er hat jeden von ihnen als kleines Kind von der Strasse geholt, ohne viele Fragen zu stellen, und im Letzten Krug grossgezogen. Irgendwann sind sie hinaus in die Welt gezogen, Abenteurer geworden. Jetzt ruft er sie heim.",
+           "Halte es vage. Niemand muss genau wissen, woher er kam. Lass jeden Spieler in einem Satz sagen, was sein Held an Barnabas am meisten vermisst hat. Wer keine Idee hat, würfelt unten.",
+           "Das ist der Grund für alles, was heute passiert: Die Helden würden für diesen Mann einen König bestehlen. Erinnere sie daran, wenn der Tag albern wird."
           ]
          },
          {
           "t": "roll",
-          "title": "Warum Barnabas euch gerufen hat",
+          "title": "Wie Barnabas dich gefunden hat",
           "die": 6,
           "rows": [
            [
             "1",
-            "Du bist sein Neffe oder seine Nichte. Er hat dir als Kind das Zapfen beigebracht, mit acht Jahren."
+            "In einer Winternacht, schlafend in seinem leeren Bierfass vor der Tür. Er hat das Fass nie wieder benutzt."
            ],
            [
             "2",
-            "Er hat dir einmal das Leben gerettet, mit einer Bratpfanne. Du schuldest ihm etwas."
+            "Auf dem Markt, beim Äpfelstehlen. Er hat bezahlt, dir einen zweiten Apfel gegeben und gesagt: „Komm mit, es gibt Suppe.“"
            ],
            [
             "3",
-            "Du hast zwei Jahre lang deine Zeche nicht bezahlt. Er hat nie gefragt."
+            "Du kannst dich nicht erinnern. Er sagt immer nur: „Du warst einfach da. Wie ein Huhn.“"
            ],
            [
             "4",
-            "Du warst Stammgast. Er hat dir einen eigenen Krug mit deinem Namen geschenkt. Er hängt noch über der Theke."
+            "Im Hafen, zwischen Netzen. Du hast ihn gebissen. Er hat gelacht und dich trotzdem mitgenommen."
            ],
            [
             "5",
-            "Du hast ihm einmal bei einem Abenteuer geholfen. Er nennt dich seitdem „mein Held“, auch vor Fremden."
+            "Vor dem Tor des Waisenhauses, das gerade abgebrannt war. Er hat damals gleich drei Kinder mitgenommen, eines davon warst du."
            ],
            [
             "6",
-            "Ihr kennt euch nicht. Er kennt dich aus der Zeitung. Du hast angeblich „ein ehrliches Gesicht“."
+            "Du hast ihn gefunden, nicht er dich: Du bist mit sechs Jahren in den Letzten Krug gelaufen und hast nach Arbeit gefragt. Er hat dich zum Gläserpolieren angestellt, für immer."
+           ]
+          ],
+          "note": ""
+         },
+         {
+          "t": "roll",
+          "title": "Eine Erinnerung an die Kindheit im Krug",
+          "die": 6,
+          "rows": [
+           [
+            "1",
+            "Euer Krug mit eurem Namen hängt noch über der Theke. Er hat ihn jeden Sonntag poliert."
+           ],
+           [
+            "2",
+            "Die Kerben im Türrahmen der Küche, eine für jeden Geburtstag, den er für euch erfunden hat."
+           ],
+           [
+            "3",
+            "Rudi Rostbart hat euch jeden Abend vom Grauen im Garten erzählt. Ihr habt jahrelang nicht in den Garten gedurft."
+           ],
+           [
+            "4",
+            "Prunella von gegenüber hat euch Kuchen geschenkt, wenn Barnabas nicht hinsah. Seit ihr ausgezogen seid, grüsst sie nicht mehr."
+           ],
+           [
+            "5",
+            "Barnabas hat euch Zapfen, Rechnen und Lügen beigebracht, in dieser Reihenfolge. Lügen nur „für den Notfall“."
+           ],
+           [
+            "6",
+            "Ui hat euch die Vokale beigebracht. Nur die Vokale."
            ]
           ],
           "note": ""
@@ -1159,8 +1135,8 @@
           "title": "Vorlesetext · Die Vollmacht",
           "ps": [
            "Pünktli entrollt ein Pergament, auf dem ein Bierring als Siegel klebt. „Vollmacht des Barnabas Krug. Ich zitiere wörtlich:“",
-           "*„Falls mir etwas zustösst, führen meine Familie, meine Freunde und wer sonst noch zur Tür reinkommt, den Letzten Krug weiter, bis ich wieder auf den Beinen bin. Füttert Wabbel. Lasst Gorm nicht allein kochen. Geht nicht in Zimmer 3. Und kauft mir neue Socken.“*",
-           "„Das ist formal korrekt“, sagt Pünktli, „aber menschlich bedauerlich. Ab heute seid ihr Wirte. Herzlichen Glückwunsch.“"
+           "*„Falls mir etwas zustösst, führen meine Kinder den Letzten Krug weiter, bis ich wieder auf den Beinen bin. Füttert Wabbel. Lasst Gorm nicht allein kochen. Geht nicht in Zimmer 3. Und kauft mir neue Socken.“*",
+           "„Das ist formal korrekt“, sagt Pünktli, „aber menschlich bedauerlich. Ab heute seid ihr Wirte. Herzlichen Glückwunsch.“ Er räuspert sich. „Er hat nur fünf Namen aufgeschrieben. Eure.“"
           ]
          },
          {
@@ -1168,7 +1144,7 @@
           "title": "Rollenspiel · Mutter Holle Kräuterlein, Heilerin",
           "items": [
            "- **Stimme:** warm, rauchig, nennt alle „Schätzchen“, klopft beim Reden auf Holz.",
-           "- **Weiss:** alles über Barnabas' Zustand. Sagt die Wahrheit, auch wenn sie wehtut.",
+           "- **Weiss:** alles über Barnabas' Zustand. Sagt die Wahrheit, auch wenn sie wehtut. Für sie seid ihr immer noch die Kinder mit den aufgeschlagenen Knien.",
            "- **Typische Sätze:** „Schätzchen, ich hab sogar Kamillentee probiert.“ · „Er war schon immer ein Sturkopf, auch im Schlaf.“"
           ]
          },
@@ -1207,7 +1183,7 @@
           "t": "loot",
           "title": "Die Erbstücke",
           "items": [
-           "Pünktli übergibt eine Holzkiste mit Barnabas' Handschrift: *„Für die, die nach mir kommen. Teilt fair. Gebt das Buch dem, der am meisten fragt.“*",
+           "Pünktli übergibt eine Holzkiste mit Barnabas' Handschrift: *„Für die, die nach mir kommen. Für meine Kinder. Teilt fair, wie früher. Gebt das Buch dem, der am meisten fragt.“*",
            "Dazu der Schlüssel zur Kasse unter der Theke: eine Blechdose mit 200 GM. *„Für Einkäufe. Nicht für Wetten. B.“*"
           ],
           "gm": 200
@@ -1307,9 +1283,9 @@
           "title": "Rollenspiel · Prunella Schmalz, erster Auftritt",
           "items": [
            "- **Stimme:** süss wie Sirup. Sagt „Schätzchen“ wie eine Drohung.",
-           "- **Will hier:** zeigen, wer gewinnt. Sie hält die Helden für Erben, die schnell Geld wollen.",
+           "- **Will hier:** zeigen, wer gewinnt. Sie kennt die Helden noch als Kinder und hält sie jetzt für undankbare Ziehkinder, die nur wegen des Erbes zurückkommen.",
            "- **Weiss nicht:** dass Barnabas krank ist. Wer es ihr jetzt sagt, sieht sie kurz blass werden. Dann lächelt sie wieder: „Umso besser, dass sich jemand Fähiges um die Gäste kümmert.“",
-           "- **Typische Sätze:** „Zwanzig Jahre war ich Zweite. Heute nicht.“ · „Ihr habt Wabbel noch? Wie mutig.“"
+           "- **Typische Sätze:** „Zwanzig Jahre war ich Zweite. Heute nicht.“ · „Ach, die Kleinen sind wieder da. Jetzt, wo es was zu erben gibt.“ · „Ihr habt Wabbel noch? Wie mutig.“"
           ]
          },
          {
@@ -1328,7 +1304,7 @@
       "intro": [
        {
         "t": "p",
-        "x": "Die Helden haben bis zum Nachmittag Zeit, aus einer Ruine ein Wirtshaus zu machen. Lass sie frei herumlaufen. Die Szenen müssen nicht in dieser Reihenfolge kommen, nur der schmuddelige Gast kommt früh und der Weinkeller vor dem Einkaufszettel."
+        "x": "Die Helden haben bis zum Nachmittag Zeit, aus dem Haus ihrer Kindheit wieder ein Wirtshaus zu machen. Vieles kennen sie noch, manches ist neu, etwa Gorm, der erst nach ihrem Auszug kam. Lass sie frei herumlaufen. Die Szenen müssen nicht in dieser Reihenfolge kommen, nur der schmuddelige Gast kommt früh und der Weinkeller vor dem Einkaufszettel."
        }
       ],
       "id": "a1",
@@ -1346,7 +1322,7 @@
           "title": "Vorlesetext · Die Gaststube",
           "ps": [
            "Die Gaststube ist gross, dunkel und voller Geschichten. Die Balken sind schwarz vom Rauch, an der Wand hängen hundert Krüge mit Namen darauf. Über der Theke ein ausgestopfter Fisch mit Monokel. Die Hälfte der Stühle fehlt, die andere Hälfte wackelt.",
-           "An einem Tisch am Fenster sitzt ein hagerer Halbork mit Strickmütze vor einem leeren Glas. Er hebt die Hand: „Aa oo!“ An der Theke lehnt ein alter Mann mit Holzbein und rostiger Rüstung und starrt in den Garten.",
+           "An einem Tisch am Fenster sitzt Ui, der hagere Halbork mit der Strickmütze, älter geworden, vor einem leeren Glas. Er erkennt euch und strahlt: „Aa oo!“ An der Theke lehnt Rudi Rostbart mit Holzbein und rostiger Rüstung und starrt wie immer in den Garten.",
            "Aus der Küche dröhnt eine Stimme, tief wie ein Brunnen: „WER HAT DIE ERBSE BEWEGT?“"
           ]
          },
@@ -1358,7 +1334,7 @@
            "- **Stimme:** tief, langsam, spricht von sich in der dritten Person, wenn er gekränkt ist.",
            "- **Will:** dass jemand seine Kunst versteht. Seine Rüebli-Schaumsuppe ist ein Gedicht.",
            "- **Hasst:** Bratwurst. Ketchup. Den Namen „Ambrosius“.",
-           "- **Typische Sätze:** „Gorm macht kein Essen. Gorm macht Erinnerungen.“ · „Das ist keine zerbrochene Schüssel. Das ist Dekonstruktion.“ · „Ihr seid die Neuen? Könnt ihr schmecken? Zeigt Zunge.“",
+           "- **Typische Sätze:** „Gorm macht kein Essen. Gorm macht Erinnerungen.“ · „Das ist keine zerbrochene Schüssel. Das ist Dekonstruktion.“ · „Ihr seid die Kinder vom Chef? Könnt ihr schmecken? Zeigt Zunge.“",
            "- **Laune:** Merke dir, wie die Helden mit ihm umgehen. Lob hebt sie, Spott senkt sie. Am Nachmittag zählt sie."
           ]
          },
@@ -1366,7 +1342,7 @@
           "t": "rp",
           "title": "Rollenspiel · Wabbel, Ui und Rudi",
           "items": [
-           "- **Wabbel** gleitet um die Ecke, ein Würfel aus Glibber, in dem drei Teller, ein Löffel, ein Pergament und eine Socke treiben. Er blubbert freundlich. Stellt man ihm Spülwasser hin, folgt er einem wie ein Hund. Das Pergament ist Barnabas' Testament, aber das braucht gerade niemand.",
+           "- **Wabbel** gleitet um die Ecke, ein Würfel aus Glibber, in dem drei Teller, ein Löffel, ein Pergament und eine Socke treiben. Er erkennt euch und blubbert vor Freude, so wie damals, als ihr auf ihm geritten seid. Stellt man ihm Spülwasser hin, folgt er einem wie ein Hund. Das Pergament ist Barnabas' Testament, aber das braucht gerade niemand.",
            "- **Ui, der Vokalmann** spricht nur in Vokalen. Lass die Spieler raten. Er hat immer recht, und man versteht ihn immer zu spät.",
            "- **Rudi Rostbart** erzählt jedem, der nicht schnell genug wegschaut, vom „Grauen im Garten“. Er meint den Pavillon."
           ]
@@ -2000,39 +1976,6 @@
        {
         "t": "p",
         "x": "Der Hort ist der grösste Markt des Reichs: ein alter Dungeon in einem Hügel, drei Stockwerke tief, mit Monstern als Personal. Jeder Wirt kauft hier ein, auch Prunella. Lass die Helden frei zwischen den Abteilungen wählen. Zwei Kämpfe sind fest (Frischetheke, Wühltisch), drei freiwillig (Kobolde und Mimik im Möbellabyrinth, Kasse)."
-       },
-       {
-        "t": "p",
-        "x": "**Die Zeit läuft.** Jede Abteilung kostet eine halbe Stunde. Wer alles mitnimmt, kommt zu spät zur Prüfung. Zähl mit und zeig den Spielern den Zähler: Die Spannung entsteht aus dem, was sie auslassen müssen."
-       },
-       {
-        "t": "counter",
-        "id": "hort",
-        "title": "Zeit im Hort",
-        "start": 0,
-        "min": 0,
-        "max": 8,
-        "tone": "probe",
-        "icon": "⌛",
-        "steps": [
-         [
-          0,
-          "Später Vormittag. Alles ist offen."
-         ],
-         [
-          4,
-          "Mittag. Gorm schickt einen Boten: „Wo bleibt das Wild?“"
-         ],
-         [
-          6,
-          "Knapp. Zu Hause bleibt nur noch Zeit für **eine** Aufgabe aus „Zwei Stunden“."
-         ],
-         [
-          8,
-          "**Zu spät.** Zwick steht schon vor der Tür, als die Helden zurückkommen: keine Vorbereitung, −2 Sternepunkte."
-         ]
-        ],
-        "hint": "Jede Abteilung kostet eine halbe Stunde (+1). Die Abkürzung im Möbellabyrinth kostet nichts, Anstehen an der Kasse +1. Die Spieler sehen den Zähler ruhig: Sie müssen wählen, was sie auslassen."
        }
       ],
       "id": "a2",
@@ -3177,11 +3120,11 @@
           "rows": [
            [
             "Den Pfeilen folgen",
-            "Sicher, aber lang: kostet eine halbe Stunde im Spiel. Würfle zweimal auf „Begegnungen zwischen den Regalen“."
+            "Sicher, aber lang und verwinkelt. Würfle zweimal auf „Begegnungen zwischen den Regalen“."
            ],
            [
             "Die Abkürzung",
-            "Überleben oder Nachforschungen SG 13. Gelingt es, steht ihr nach zehn Minuten am Ziel (kostet keine Zeit im Hort-Zähler). Misslingt es, steht ihr mitten in der Inventur der Kobolde (unten)."
+            "Überleben oder Nachforschungen SG 13. Gelingt es, steht ihr gleich am Ziel. Misslingt es, steht ihr mitten in der Inventur der Kobolde (unten)."
            ],
            [
             "Probesitzen",
@@ -3332,7 +3275,7 @@
           "t": "dm",
           "title": "Anstellen oder drängeln?",
           "items": [
-           "Anstellen kostet eine halbe Stunde im Spiel. Würfle dabei einmal auf „Durchsagen im Hort“, und Prunella versucht hinter den Helden, den Einkaufswagen-Mimik mit Wurst abzuwerben (Mit Tieren umgehen SG 12, sonst gehört er jetzt ihr).",
+           "Anstellen dauert. Würfle dabei einmal auf „Durchsagen im Hort“, und Prunella versucht hinter den Helden, den Einkaufswagen-Mimik mit Wurst abzuwerben (Mit Tieren umgehen SG 12, sonst gehört er jetzt ihr).",
            "Wer drängelt, löst den Kampf aus. Er endet sofort, sobald jemand bezahlt hat und den Kassenzettel zeigt."
           ]
          },
@@ -3388,10 +3331,6 @@
            "Zurück im Letzten Krug riecht es nach Zwiebeln und Aufregung. Gorm schärft Messer, Wabbel spült, Ui poliert Krüge mit einer Hingabe, die man ihm nicht zugetraut hätte. Oben atmet Barnabas langsamer als am Morgen. Holle sitzt an seinem Bett und strickt, ohne hinzuschauen.",
            "Über die Strasse hinweg seht ihr den Goldenen Kapaun. Dort hängen schon Girlanden. Prunella steht in der Tür und winkt."
           ]
-         },
-         {
-          "t": "p",
-          "x": "Wie viel die Helden schaffen, hängt davon ab, wie lange sie im Hort waren. **Hort-Zähler bis 5:** jede Aufgabe einmal. **6 oder 7:** nur eine Aufgabe. **8:** keine, Zwick steht schon in der Tür (−2 Sternepunkte)."
          },
          {
           "t": "table",
@@ -3669,10 +3608,6 @@
            [
             "Pavillon angezündet",
             "−1"
-           ],
-           [
-            "Zu spät aus dem Hort (Hort-Zähler 8)",
-            "−2"
            ]
           ],
           "bf": true
@@ -3942,7 +3877,7 @@
        },
        {
         "t": "p",
-        "x": "**Zwei Uhren laufen gegeneinander:** Der Verdacht steigt mit jeder Panne, und mit jedem Gang rückt der Anschnitt näher. Warten die Helden zu lange, müssen sie das Ei vor allen Augen holen. Handeln sie zu früh, fällt der Tausch auf."
+        "x": "Halte den Verdacht im Blick. Er steigt mit jeder Panne. Wann die Helden tauschen, entscheiden sie selbst: Die Torte wird erst angeschnitten, wenn der Tausch geschafft ist oder der Alarm losgeht."
        },
        {
         "t": "counter",
@@ -3972,35 +3907,6 @@
          ]
         ],
         "hint": "Jede misslungene Probe in der Hofküche, jede auffällige Waffe und jede Panne mit der Fälschung: +1. Startwert 1, wenn Zwick am Morgen schlecht behandelt wurde (ausser bei 8 Sternepunkten)."
-       },
-       {
-        "t": "counter",
-        "id": "gaenge",
-        "title": "Gänge bis zum Anschnitt",
-        "start": 0,
-        "min": 0,
-        "max": 5,
-        "tone": "wahl",
-        "icon": "🍰",
-        "steps": [
-         [
-          0,
-          "Die Vorspeise wird aufgetragen. Die Torte steht in der Tortenkammer."
-         ],
-         [
-          3,
-          "Fräulein Zuckerguss bereitet die Torte vor und ist nur noch selten weg: Ablenkungen haben Nachteil."
-         ],
-         [
-          4,
-          "Die Diener holen den silbernen Wagen. Wer jetzt tauscht, hat nur noch eine Runde."
-         ],
-         [
-          5,
-          "**Anschnitt!** Die Torte rollt in den Festsaal. Ist das Ei noch darauf, muss es vor allen Augen geholt werden: Verdacht sofort auf 6."
-         ]
-        ],
-        "hint": "Nach jedem Gang des Hochzeitsmahls +1. Der Tausch muss vor dem fünften Gang gelingen."
        }
       ],
       "id": "a4",
@@ -4131,7 +4037,7 @@
           "rows": [
            [
             "Ablauf",
-            "Fünf Gänge, eine Runde pro Gang. In jeder Runde würfelt jeder Held eine Probe für seine Rolle. Jede misslungene Probe: Verdacht +1. Gelingen in einer Runde alle: Verdacht −1. Nach jedem Gang: Gänge-Zähler +1."
+            "Fünf Gänge, eine Runde pro Gang. In jeder Runde würfelt jeder Held eine Probe für seine Rolle. Jede misslungene Probe: Verdacht +1. Gelingen in einer Runde alle: Verdacht −1."
            ],
            [
             "Koch",
@@ -4521,7 +4427,7 @@
           "Es will schlüpfen. Jetzt muss es an Barnabas' Brust, sonst ist die Magie verloren."
          ]
         ],
-        "hint": "Steigt bei jedem Misserfolg auf dem Rückweg und in jeder Runde der Schlägerei um 1."
+        "hint": "Steigt bei jedem Misserfolg auf dem Rückweg um 1 und in der Schlägerei immer dann, wenn das Ei zu Boden fällt."
        }
       ],
       "id": "f",
@@ -4632,7 +4538,7 @@
            "- **Das Ziel ist die Treppe,** nicht der Sieg. Wer das Ei trägt und die Kammer im ersten Stock erreicht, beendet den Kampf. Die Treppe hat sechs Stufen zu je 1,5 m. Wer gepackt ist, kommt nicht weiter.",
            "- **Das Ei** kann geworfen werden (Reichweite 9 m, Fangen: GES SG 10, mit Schürze automatisch). Fällt es zu Boden, rollt es 1W4 Felder in eine zufällige Richtung.",
            "- **Knuts Leute wollen das Ei,** nicht die Helden. Sie packen den Träger, wenn sie können.",
-           "- **Die Hitze** steigt jede Runde um 1. Bei 6 muss das Ei sofort an Barnabas' Brust.",
+           "- **Die Hitze** steigt um 1, wenn das Ei zu Boden fällt. Bei 6 muss das Ei sofort an Barnabas' Brust.",
            "- **Hilfe:** Gorm und Wabbel kämpfen mit (als Verbündete einsetzen). Ui wirft Krüge. Rudi verteidigt die Treppe mit seinem Holzbein.",
            "- **Die Bauern-Kanone:** Die Gaststube ist voll von Gästen, die auf der Seite der Helden sind. Wer das Ei hat, kann es als Aktion in die Menge geben. Die Gäste reichen es mit vorbereiteten Aktionen weiter, Hand für Hand: Es wandert 9 m pro Runde in eine Richtung deiner Wahl, auch die Treppe hoch. Knuts Leute können die Kette unterbrechen (Athletik SG 13). Anspielung auf die „Peasant Railgun“, das berüchtigte Gedankenspiel, bei dem tausende Bauern einen Gegenstand so schnell weiterreichen, dass er zur Kanone wird.",
            "- **Tödlicher Spott:** Knut ist bei seinen Verschwörungen empfindlich. Gehässiger Spott über eine seiner Theorien: Er hat Nachteil auf den Rettungswurf. Fällt er durch Spott auf 0 TP, setzt er sich hin, weint und kämpft nicht mehr. Anspielung auf den Forenklassiker, in dem ein Oger an einem Gehässigen Spott stirbt."
@@ -4818,7 +4724,8 @@
            "Die Kammer ist dunkel bis auf eine Kerze. Holle sitzt am Bett und hält Barnabas' Hand. Sein Atem ist kaum noch zu hören.",
            "Ihr legt das Ei auf seine Brust. Für einen Moment passiert nichts.",
            "Dann knackt die Schale. Ein goldenes Licht steigt aus dem Ei, erst ein Funke, dann ein Glühen, dann ein Leuchten, das durch die Fenster fällt, durch die Ritzen im Boden, hinunter in die Gaststube, wo die Schlägerei mitten in der Bewegung erstarrt. Etwas Kleines, Glühendes, Gefiedertes schüttelt sich auf Barnabas' Brust und gähnt.",
-           "Barnabas öffnet die Augen. Er blinzelt. Er schaut den kleinen Phönix an, dann euch, dann die Heilerin, die weint und so tut, als würde sie nicht weinen.",
+           "Barnabas öffnet die Augen. Er blinzelt. Er schaut den kleinen Phönix an, dann euch, einen nach dem anderen, so wie früher, wenn er abends gezählt hat, ob alle im Bett sind. Die Heilerin weint und tut so, als würde sie nicht weinen.",
+           "„Meine Kinder“, sagt er heiser. „Ihr seid heimgekommen.“",
            "Dann sagt er:"
           ]
          },
@@ -4946,7 +4853,7 @@
           "items": [
            "Der Hoflieferanten-Lohn: 50 GM je Held.",
            "Freibier im Letzten Krug, für immer. Barnabas schreibt es an die Wand.",
-           "Jeder Held bekommt einen Krug mit seinem Namen über der Theke."
+           "Eure alten Krüge mit euren Namen hängen wieder ganz vorne über der Theke, frisch poliert."
           ],
           "gmHero": 50
          },
@@ -4977,7 +4884,7 @@
           "t": "vorlese",
           "title": "Vorlesetext · Zum Schluss",
           "ps": [
-           "Barnabas hebt seinen Krug. „Auf die neuen Wirte“, sagt er. „Und auf den Letzten Krug. Möge er nie der letzte sein.“",
+           "Barnabas hebt seinen Krug. „Auf meine Kinder“, sagt er. „Und auf den Letzten Krug. Möge er nie der letzte sein.“",
            "Unter der Tür sickert Wasser durch. Zimmer 3. Barnabas seufzt. „Wer von euch hat das Portalband angebracht?“"
           ]
          },
@@ -5092,12 +4999,16 @@
     ],
     "figures": [
      {
-      "name": "Onkel Barnabas Krug",
-      "role": "Wirt des Letzten Krugs, liegt im Zauberschlaf",
+      "name": "Barnabas Krug",
+      "role": "Wirt des Letzten Krugs und Ziehvater der Helden, liegt im Zauberschlaf",
       "fields": [
        [
         "Aussehen",
         "Breit, rotgesichtig, Schnauzbart wie eine Bürste. Schläft mit gefalteten Händen, auf der Brust ein Bierdeckel mit der Aufschrift „Nicht wecken, ausser es brennt“."
+       ],
+       [
+        "Familie",
+        "Hat die Helden als kleine Kinder von der Strasse geholt und im Letzten Krug grossgezogen. Nie verheiratet, nie Zeit gehabt, aber immer Platz für ein Kind mehr. Sie nennen ihn Papa B., er nennt sie „meine Bande“."
        ],
        [
         "Geschichte",
@@ -5144,6 +5055,10 @@
        [
         "Stimme und Marotte",
         "Duzt alle, nennt jeden „Schätzchen“, klopft beim Reden auf Holz."
+       ],
+       [
+        "Mit den Helden",
+        "Hat ihnen als Kinder die Knie verbunden und den Lebertran eingeflösst. Für sie sind sie immer noch die Kleinen."
        ],
        [
         "Weiss",
@@ -5231,7 +5146,7 @@
        ],
        [
         "Marotte",
-        "Erzählt jedem dieselbe Geschichte vom „Grauen im Garten“. Meint den Pavillon."
+        "Erzählt jedem dieselbe Geschichte vom „Grauen im Garten“. Meint den Pavillon. Den Helden hat er sie schon als Kindern jeden Abend erzählt."
        ],
        [
         "Will",
@@ -5281,11 +5196,11 @@
        ],
        [
         "Weiss nicht",
-        "Warum die Helden den Titel so dringend wollen. Sie hält es für Gier."
+        "Warum die Helden den Titel so dringend wollen. Sie kennt sie als Kinder von gegenüber und hält sie heute für undankbare Ziehkinder, die nur ans Erbe denken."
        ],
        [
         "Wendung",
-        "Erfährt sie vom Onkel und dem Ei, zögert sie. Vor dreissig Jahren machte sie Barnabas einen Antrag. Er sagte: „Später, ich steche gerade ein Fass an.“ Später kam nie."
+        "Erfährt sie von Barnabas' Zustand und dem Ei, zögert sie. Vor dreissig Jahren machte sie Barnabas einen Antrag. Er sagte: „Später, ich steche gerade ein Fass an.“ Später kam nie."
        ]
       ],
       "quote": "„Wie herzig. Ein Wirtshaus voller Amateure. Ich bringe euch nachher einen Kuchen, zum Trösten.“"
