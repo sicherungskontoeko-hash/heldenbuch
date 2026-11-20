@@ -108,10 +108,10 @@ const vor = { id: 'vor', kicker: 'Vorbereitung', title: 'Bevor die Tür aufgeht'
 const prolog = { id: 'prolog', kicker: 'Prolog', title: 'Die Vollmacht', sub: 'Am Morgen · etwa 30 Minuten', level: '4', intro: [], scenes: [
   { title: 'Die Kammer im ersten Stock', blocks: [
     V('Vorlesetext',
-      'Der Brief kam vor drei Tagen, krakelig, mit einem Bierring auf der Rückseite. Ihr habt die Schrift sofort erkannt: *„Kommt nach Hause. Bringt Hunger mit. Es ist ernst. Papa B.“*',
+      'Der Brief kam vor drei Tagen. Riesige Buchstaben, mit Bleistift in das Papier gedrückt, Mehl an den Rändern und ein Fettfleck, der nach Zwiebeln riecht: *„An die Kinder vom Chef. Chef schläft und wacht nicht auf. Gorm hat alles probiert, sogar Suppe. Chef redet immer von euch. Kommt nach Hause. Gorm (Koch)“*',
       'Jetzt steht ihr wieder in der Kupfergasse, vor dem Haus, in dem ihr gross geworden seid. Das Schild hängt schief, ein Krug, aus dem ein einzelner, trauriger Tropfen fällt. Die Tür knarrt wie früher. Drinnen riecht es nach altem Bier, frischem Brot und nach Kindheit.',
       'Mutter Holle, die euch früher die aufgeschlagenen Knie verbunden hat, winkt euch wortlos die Treppe hinauf. In der Kammer unter dem Dach liegt Barnabas im Bett, die Hände gefaltet, den Schnauzbart ordentlich gekämmt. Er atmet, langsam und tief. Auf seiner Brust liegt ein Bierdeckel: *„Nicht wecken, ausser es brennt.“*',
-      'Am Fussende steht ein Gnom mit drei Brillen auf der Nase und einer Taschenuhr in jeder Hand. „Ihr seid zwölf Minuten zu spät“, sagt er. „Setzt euch. Es geht um eure Zukunft.“'),
+      'Am Fussende steht ein Gnom mit drei Brillen auf der Nase und einer Taschenuhr in jeder Hand. „Ihr seid zwölf Minuten zu spät“, sagt er. „Fidelis Pünktli, Notar. Der Koch sagte, ihr kommt heute. Setzt euch. Es geht um eure Zukunft.“'),
     DM('Barnabas ist euer Vater',
       'Die Helden sind Geschwister, nicht durch Blut, sondern durch Barnabas. Er hat jeden von ihnen als kleines Kind von der Strasse geholt, ohne viele Fragen zu stellen, und im Letzten Krug grossgezogen. Irgendwann sind sie hinaus in die Welt gezogen, Abenteurer geworden. Jetzt ruft er sie heim.',
       'Halte es vage. Niemand muss genau wissen, woher er kam. Lass jeden Spieler in einem Satz sagen, was sein Held an Barnabas am meisten vermisst hat. Wer keine Idee hat, würfelt unten.',
@@ -167,17 +167,19 @@ const prolog = { id: 'prolog', kicker: 'Prolog', title: 'Die Vollmacht', sub: 'A
       ['Den König bitten', 'Eine Audienz gibt es frühestens nächsten Monat. Wer laut wird, landet auf „der Liste“. Niemand weiss, was die Liste ist, aber alle haben Angst davor.'],
       ['Den Hofkoch fragen', 'Hofkoch Ambrosius lässt ausrichten: „Wir sind nicht amüsiert.“ Die Tür bleibt zu.'],
       ['Sofort einbrechen', 'Das Ei liegt bis zum Abend in der Schatzkammer, hinter vierzig Wachen, einem Zwergenschloss und einem sehr misstrauischen Kanarienvogel. Unmöglich. Erst am Abend kommt es in die Küche.'],
+      ['Sich als Aushilfe einschleichen', 'Der Palast nimmt heute keine Fremden. Federkiel tippt auf eine Liste: „Hochzeitspersonal nur mit Marke eines Hoflieferanten. Wegen der Diebe. Ihr wisst schon.“'],
       ['Ein anderes Mittel suchen', 'Holle hat alles versucht. Ein Wunsch-Zauber wäre eine Lösung, aber den kann in der ganzen Stadt niemand wirken.'],
     ], 'wahl'),
     V('Vorlesetext · Der Aushang',
       'Auf dem Rückweg über den Marktplatz drängen sich Leute vor dem Brunnen. An der Säule hängt ein frischer Aushang mit königlichem Siegel:',
       '*„Bekanntmachung. Für das Hochzeitsmahl Seiner Majestät wird heute ein letztes Haus als Hoflieferant bestimmt. Oberinspektor Kunibert Zwick prüft am Nachmittag die verbleibenden Bewerber: den Goldenen Kapaun und den Letzten Krug. Der Gewinner liefert heute Abend in die Hofküche.“*',
-      'Neben euch seufzt jemand sehr zufrieden. Eine Frau mit hochgesteckten Haaren und einer Bratpfanne in der Hand. „Der Letzte Krug?“, sagt sie süss. „Wie herzig. Ich bring euch nachher einen Kuchen. Zum Trösten.“'),
+      'Pünktli räuspert sich. „Barnabas hat sich vor einem Monat beworben. Er wollte das Wappen einmal über der Tür sehen, bevor er alt wird. Die Bewerbung gilt für das Haus. Also für euch.“',
+      'Neben euch seufzt jemand sehr zufrieden. Eine Frau mit hochgesteckten Haaren und einer Bratpfanne in der Hand. Prunella Schmalz von gegenüber. Ihr kennt sie noch, sie hat euch früher heimlich Kuchen zugesteckt. Jetzt lächelt sie kühl. „Ach, die Kleinen sind wieder da. Der Letzte Krug will Hoflieferant werden? Wie herzig. Ich bring euch nachher einen Kuchen. Zum Trösten.“'),
     RP('Rollenspiel · Prunella Schmalz, erster Auftritt',
       '- **Stimme:** süss wie Sirup. Sagt „Schätzchen“ wie eine Drohung.',
       '- **Will hier:** zeigen, wer gewinnt. Sie kennt die Helden noch als Kinder und hält sie jetzt für undankbare Ziehkinder, die nur wegen des Erbes zurückkommen.',
       '- **Weiss nicht:** dass Barnabas krank ist. Wer es ihr jetzt sagt, sieht sie kurz blass werden. Dann lächelt sie wieder: „Umso besser, dass sich jemand Fähiges um die Gäste kümmert.“',
-      '- **Typische Sätze:** „Zwanzig Jahre war ich Zweite. Heute nicht.“ · „Ach, die Kleinen sind wieder da. Jetzt, wo es was zu erben gibt.“ · „Ihr habt Wabbel noch? Wie mutig.“'),
+      '- **Typische Sätze:** „Zwanzig Jahre war ich Zweite. Heute nicht.“ · „Jetzt, wo es was zu erben gibt, kommt ihr also.“ · „Ihr habt Wabbel noch? Wie mutig.“'),
     MERKE('Die Uhr läuft', [
       'Ab jetzt ist klar: Die Helden müssen **Hoflieferant werden**, in die **Hofküche** kommen und das Ei **heimlich austauschen**. Niemand darf es erfahren, denn wer am Hof stiehlt, sieht den Kerker von innen.',
       'Zwick kommt am **Nachmittag**. Bis dahin muss der Letzte Krug wieder ein Wirtshaus sein.',
@@ -186,7 +188,7 @@ const prolog = { id: 'prolog', kicker: 'Prolog', title: 'Die Vollmacht', sub: 'A
 ] };
 
 const a1 = { id: 'a1', kicker: 'Akt 1', title: 'Der Letzte Krug', sub: 'Vormittag · etwa 90 Minuten', level: '4', intro: [
-  P('Die Helden haben bis zum Nachmittag Zeit, aus dem Haus ihrer Kindheit wieder ein Wirtshaus zu machen. Vieles kennen sie noch, manches ist neu, etwa Gorm, der erst nach ihrem Auszug kam. Lass sie frei herumlaufen. Die Szenen müssen nicht in dieser Reihenfolge kommen, nur der schmuddelige Gast kommt früh und der Weinkeller vor dem Einkaufszettel.'),
+  P('Die Helden haben bis zum Nachmittag Zeit, das Haus ihrer Kindheit für die Prüfung herzurichten. Seit Barnabas schläft, ist alles liegen geblieben, und ehrlich gesagt war es vorher schon nicht viel besser. Vieles kennen sie noch. Neu seit ihrem Auszug sind Gorm, Hildegard im Keller und das Portal in Zimmer 3. Lass sie frei herumlaufen. Die Szenen müssen nicht in dieser Reihenfolge kommen, nur der schmuddelige Gast kommt früh und der Weinkeller vor dem Einkaufszettel.'),
 ], scenes: [
   { title: 'Rundgang', blocks: [
     V('Vorlesetext · Die Gaststube',
@@ -198,7 +200,7 @@ const a1 = { id: 'a1', kicker: 'Akt 1', title: 'Der Letzte Krug', sub: 'Vormitta
       '- **Stimme:** tief, langsam, spricht von sich in der dritten Person, wenn er gekränkt ist.',
       '- **Will:** dass jemand seine Kunst versteht. Seine Rüebli-Schaumsuppe ist ein Gedicht.',
       '- **Hasst:** Bratwurst. Ketchup. Den Namen „Ambrosius“.',
-      '- **Typische Sätze:** „Gorm macht kein Essen. Gorm macht Erinnerungen.“ · „Das ist keine zerbrochene Schüssel. Das ist Dekonstruktion.“ · „Ihr seid die Kinder vom Chef? Könnt ihr schmecken? Zeigt Zunge.“',
+      '- **Typische Sätze:** „Gorm macht kein Essen. Gorm macht Erinnerungen.“ · „Das ist keine zerbrochene Schüssel. Das ist Dekonstruktion.“ · „Ihr seid die Kinder vom Chef? Gorm hat geschrieben. Gorm schreibt nicht oft.“ · „Könnt ihr schmecken? Zeigt Zunge.“',
       '- **Laune:** Merke dir, wie die Helden mit ihm umgehen. Lob hebt sie, Spott senkt sie. Am Nachmittag zählt sie.'),
     RP('Rollenspiel · Wabbel, Ui und Rudi',
       '- **Wabbel** gleitet um die Ecke, ein Würfel aus Glibber, in dem drei Teller, ein Löffel, ein Pergament und eine Socke treiben. Er erkennt euch und blubbert vor Freude, so wie damals, als ihr auf ihm geritten seid. Stellt man ihm Spülwasser hin, folgt er einem wie ein Hund. Das Pergament ist Barnabas\' Testament, aber das braucht gerade niemand.',
@@ -233,7 +235,7 @@ const a1 = { id: 'a1', kicker: 'Akt 1', title: 'Der Letzte Krug', sub: 'Vormitta
       ['8', 'Eine Gästebuchseite. Der letzte Eintrag: „Gut gegessen, dreimal gebissen. Komme wieder.“'],
     ]),
     V('Vorlesetext · Barnabas\' Kuriositätenschrank',
-      'Hinter der Theke steht ein Schrank mit Glastüren und einem Schild: *„Sammlung B. Krug. Nicht anfassen. Ausser mit Gefühl.“* Darin liegen Dinge, die Barnabas in vierzig Jahren von Gästen bekommen hat, die nicht bezahlen konnten. Manche summen. Eines schaut zurück.'),
+      'Hinter der Theke steht der Schrank mit den Glastüren, den ihr als Kinder nie anfassen durftet. Das Schild hängt noch: *„Sammlung B. Krug. Nicht anfassen. Ausser mit Gefühl.“* Darin liegen Dinge, die Barnabas in vierzig Jahren von Gästen bekommen hat, die nicht bezahlen konnten. Manche summen. Eines schaut zurück.'),
     ROLL('Barnabas\' Kuriositätenschrank', 8, [
       ['1', 'Abgefülltes Sonnenlicht. Die Flasche ist warm und leuchtet durch die Finger.'],
       ['2', 'Der Faltbeutel. Darin liegen zwölf Servietten, perfekt zu Schwänen gefaltet.'],
@@ -284,7 +286,7 @@ const a1 = { id: 'a1', kicker: 'Akt 1', title: 'Der Letzte Krug', sub: 'Vormitta
   { title: 'Zimmer 3', blocks: [
     V('Vorlesetext',
       'Am Ende des Flurs im ersten Stock hängt an einer Tür ein Schild: *„Zimmer 3. Nicht öffnen. Ehrlich. B.“* Unter der Tür sickert Wasser durch. Oder Rauch. Oder Sand, das wechselt.',
-      'Hinter der Tür ist kein Zimmer mehr. In der Mitte des Raums dreht sich ein Ring aus Licht, gross wie ein Wagenrad. Durch ihn sieht man jede Stunde etwas anderes: einen Ozean, einen Vulkan, eine Kristallhöhle, einen Himmel ohne Boden.'),
+      'Zu eurer Zeit war das die Abstellkammer. Barnabas hat sie vor zwei Jahren umgebaut, mit einer Anleitung aus einem Buch, das er beim Würfeln gewonnen hat. Hinter der Tür ist kein Zimmer mehr. In der Mitte des Raums dreht sich ein Ring aus Licht, gross wie ein Wagenrad. Durch ihn sieht man jede Stunde etwas anderes: einen Ozean, einen Vulkan, eine Kristallhöhle, einen Himmel ohne Boden.'),
     PROBE('Das Portal untersuchen', [
       ['Arkane Kunde SG 12', 'Ein Lüftungsportal, schlecht gebaut, gut gemeint. Es wechselt die Ebene, weil die Dichtung fehlt.'],
       ['Arkane Kunde SG 15', 'Um Mitternacht zeigt es die Sternenleere, die Barnabas eingeschläfert hat. Wer dann hineinschaut, wird schläfrig.'],
@@ -305,7 +307,8 @@ const a1 = { id: 'a1', kicker: 'Akt 1', title: 'Der Letzte Krug', sub: 'Vormitta
       'Von oben hört ihr ein Rauschen. Das Portal in Zimmer 3 ist wohl gerade auf Wasser gesprungen, und es läuft die Treppe hinunter.'),
     DM('Das Rätsel ohne Lösung',
       'Das Rätsel hat keine Antwort. Barnabas hat es erfunden, um Diebe zu beschäftigen. Die Tür ist nicht verschlossen. Lass die Spieler eine Minute grübeln, während das Wasser steigt (knöcheltief, dann wadentief). Sobald jemand die Klinke drückt, geht sie auf.',
-      'Wer verzweifelt eine Antwort ruft, hört von drinnen ein zufriedenes Schmatzen.'),
+      'Wer verzweifelt eine Antwort ruft, hört von drinnen ein zufriedenes Schmatzen.',
+      'Die Helden kennen dieses Schild. Als Kinder haben sie Wochen damit verbracht, das Rätsel zu lösen. Barnabas hat jedes Mal gelacht. Wer sich daran erinnert (Weisheit SG 10), weiss plötzlich warum.'),
     V('Vorlesetext · Im Keller',
       'Der Keller ist lang, gewölbt und voller Fässer. Es ist still. Zu still. Eure Laterne flackert. Dann schnappt etwas danach, es knirscht, und es ist stockdunkel.',
       'Aus der Dunkelheit kommt ein zufriedenes Schmatzen. Dann ein Gähnen, tief und hölzern. Irgendwo hüpft ein Bierkrug.'),

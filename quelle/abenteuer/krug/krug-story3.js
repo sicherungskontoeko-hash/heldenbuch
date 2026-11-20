@@ -326,7 +326,7 @@ const fin = { id: 'f', kicker: 'Finale', title: 'Mitternacht', sub: 'Nacht · et
       ['Krug der ewigen Mayonnaise', '–', 'Ausgekippt wird ein Feld von 3 auf 3 m rutschig: GES SG 12 oder liegend.'],
     ], 'kampf'),
     KAMPF('Die Schlägerei', 'krug-e-schlaegerei', {
-      gegner: 'Knut, der Grottenschrat-Wirt, fünf Raufbolde aus dem Goldenen Kapaun und Prunella Schmalz, falls sie den Helden nicht geholfen hat. Hat sie geholfen, ist sie nicht dabei.',
+      gegner: 'Knut, der Grottenschrat-Wirt, fünf Raufbolde aus dem Goldenen Kapaun und Prunella Schmalz, falls sie den Helden nicht geholfen hat. Hat sie geholfen, ist sie nicht dabei, und Knut kommt trotzdem: Er hält das leuchtende Ei für ein Spionagegerät der Möwen und will es „sicherstellen“.',
       gelaende: 'Die Gaststube, 15 auf 12 m, voller Tische, Stühle und feiernder Gäste (schwieriges Gelände). Der Kronleuchter in der Mitte, die Treppe an der Rückwand, die Theke als halbe Deckung.',
       taktik: 'Knut erzählt Verschwörungen und schlägt mit Krügen. Die Raufbolde gehen zu zweit auf den Eiträger los. Prunella pustet Pfeffer und pariert mit der Pfanne.',
       ende: 'Erreicht das Ei die Kammer, ist der Kampf vorbei: Ein goldenes Licht flutet das ganze Haus, und alle halten inne. Raufbolde geben auf, wenn man ihnen eine Runde ausgibt (20 GM für alle).',
@@ -376,8 +376,13 @@ const epilog = { id: 'epilog', kicker: 'Epilog', title: 'Der Morgen danach', sub
   { title: 'Der Morgen danach', blocks: [
     V('Vorlesetext',
       'Am nächsten Morgen hängt am Brunnen auf dem Marktplatz ein neuer Aushang, mit königlichem Siegel:',
-      '*„Bekanntmachung. Die königliche Hochzeitstorte ist gestern Abend leider überraschend ausgefallen. Seine Majestät lässt mitteilen, dass das Mahl der neuen Hoflieferanten das beste seit Menschengedenken war. Der Letzte Krug darf ab sofort das königliche Wappen führen.“*',
+      '*„Bekanntmachung. Die königliche Hochzeitstorte ist gestern Abend leider überraschend ausgefallen. Seine Majestät lässt mitteilen, dass das Mahl der Hoflieferanten das beste seit Menschengedenken war.“*',
       'Im Letzten Krug sitzt Barnabas an seiner Theke, im Morgenmantel, mit einem kleinen Phönix auf der Schulter, und zapft das erste Bier des Tages. Für euch.'),
+    DM('Weiss der König es?',
+      'Ein Phönix, der im Kamin eines Wirtshauses schläft, bleibt in einer Stadt nicht lange geheim. Am Mittag steht Oberinspektor Zwick in der Tür, in Amtsrobe, und setzt sich an seinen wackligen Tisch.',
+      '- **Wurde Zwick am Morgen gut behandelt:** „Ich habe es Seiner Majestät erzählt. Alles.“ Pause. „Er hat gelacht. Er sagt, ein Phönix sucht sich sein Nest selbst, und eine Torte, die beisst, hat ihm die Hochzeit gerettet. Er verlangt nur eines: Zu seinem ersten Hochzeitstag liefert der Letzte Krug. Mit Rüebli-Schaumsuppe.“ Wurden die Helden Hoflieferant, hängt ab heute das königliche Wappen über der Tür.',
+      '- **Wurde Zwick schlecht behandelt:** Er hat geschwiegen, aber er lässt eine Rechnung auf dem Tisch liegen: 40 000 GM, „für ein Ei“. Darunter in kleiner Schrift: „Zahlbar in Rüebli-Schaumsuppe, jeden Sonntag, bis ich es vergesse.“',
+      '- So oder so: Niemand kommt in den Kerker. Der Tag endet gut. Das ist eine Komödie.'),
     FLAGS('Wie der Tag ausgegangen ist', ['zwick', 'mimiken', 'pavillon', 'lieferung', 'basilisk', 'faelschung', 'portal', 'hobgoblins', 'gorm', 'prunella']),
     TAB(['Wenn …', 'dann im Epilog'], [
       ['Zwick gut behandelt wurde', 'Er kommt jeden Sonntag zum Frühstück. Haferbrei. Er zahlt mit einer Kupfermünze und lässt ein Goldstück liegen.'],
