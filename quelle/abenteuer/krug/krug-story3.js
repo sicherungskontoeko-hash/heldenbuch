@@ -1,8 +1,6 @@
 /* Akt 3, Akt 4, Finale, Epilog */
 const { P, SUB, LAB, V, DM, RP, PROBE, KAMPF, LOOT, MERKE, TAB, ROLL, CNT, CHOICE, FLAGS, ITEMS } = require('./krug-lib');
-const STERNE = { start: 0, min: -5, max: 15, tone: 'wahl', icon: '★', steps: [[-5, 'Zwick verzieht keine Miene.'], [5, '**Hoflieferant.** Ab 5 Punkten bekommen die Helden den Titel.'], [8, '**Mit Lob.** Im Palast startet der Verdacht bei 0, auch wenn Zwick schlecht behandelt wurde.'], [11, '**Glänzend.** Zwick wird zum stillen Verbündeten und lenkt im Palast einmal die Wachen ab.']], hint: 'Punkte aus Entscheidungen und Proben. Die Quellen stehen unten.' };
-const VERDACHT = { start: 0, min: 0, max: 6, tone: 'kampf', icon: '👁', steps: [[0, 'Niemand ahnt etwas.'], [2, 'Der Hofkoch beobachtet die neuen Lieferanten.'], [4, 'Zwei Wachen folgen den Helden unauffällig. Heimlichkeit mit Nachteil.'], [6, '**Alarm.** Weiter mit „Der Weg hinaus“, Flucht.']], hint: 'Jede misslungene Probe, jede auffällige Waffe und jede Panne mit der Fälschung: +1.' };
-const HITZE = { start: 0, min: 0, max: 6, tone: 'kampf', icon: '🔥', steps: [[0, 'Warm wie ein frisches Brot.'], [2, 'Heiss: Wer es ohne Schutz trägt, erleidet zu Beginn seines Zugs 1W6 Feuer.'], [4, 'Glühend: 2W6 Feuer pro Zug ohne Ofenhandschuhe, Stoff fängt Feuer.'], [6, 'Es will schlüpfen. Jetzt muss es an Barnabas\' Brust.']], hint: 'Steigt bei jedem Misserfolg auf dem Rückweg und jede Runde in der Schlägerei um 1.' };
+const { C } = require('./krug-cnt');
 
 const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag · etwa 60 Minuten', level: '4', intro: [
   P('Zwei Stunden bis Zwick kommt. Die Helden richten das Haus her, wehren Prunellas Sabotage ab, und dann entscheidet ein Probeessen in drei Gängen, wer heute Abend in den Palast darf.'),
@@ -11,15 +9,16 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
     V('Vorlesetext',
       'Zurück im Letzten Krug riecht es nach Zwiebeln und Aufregung. Gorm schärft Messer, Wabbel spült, Ui poliert Krüge mit einer Hingabe, die man ihm nicht zugetraut hätte. Oben atmet Barnabas langsamer als am Morgen. Holle sitzt an seinem Bett und strickt, ohne hinzuschauen.',
       'Über die Strasse hinweg seht ihr den Goldenen Kapaun. Dort hängen schon Girlanden. Prunella steht in der Tür und winkt.'),
+    P('Wie viel die Helden schaffen, hängt davon ab, wie lange sie im Hort waren. **Hort-Zähler bis 5:** jede Aufgabe einmal. **6 oder 7:** nur eine Aufgabe. **8:** keine, Zwick steht schon in der Tür (−2 Sternepunkte).'),
     TAB(['Aufgabe', 'Probe', 'Folge'], [
       ['Portal abdichten (mit Portalband)', 'Arkane Kunde oder Geschicklichkeit SG 13. Zur Wasserstunde mit Nachteil, zur Luftstunde mit Vorteil.', 'Gelungen: Das Portal ist dicht. Misslungen: Es zischt weiter.'],
-      ['Portal ohne Portalband', 'Magie bannen hält es eine Stunde zu, genau während der Prüfung, wenn man es richtig timt.', 'Gilt als dicht für die Prüfung.'],
+      ['Portal ohne Portalband', 'Magie bannen hält es eine Stunde zu, genau während der Prüfung, wenn man den Zeitpunkt richtig abpasst.', 'Gilt als dicht für die Prüfung.'],
       ['Gorm beruhigen', 'Überzeugen SG 12, Vorteil mit echtem Basiliskenei oder Elchwild, Nachteil, wenn jemand über seine Suppe gelacht hat.', 'Zufrieden oder beleidigt.'],
       ['Gaststube schmücken', 'Gruppenprobe aus Akt 1, falls noch nicht gemacht.', '+1 Sternepunkt bei Erfolg.'],
       ['Wabbel vorbereiten', 'Mit Tieren umgehen SG 10. Mit Spülmittel aus dem Hort automatisch.', 'Er spült während des Essens unsichtbar, kein Geschirr geht aus.'],
     ], 'wahl'),
     MERKE('Merke dir', ['Ist das Portal dicht? Wie ist Gorms Laune?'], ['portal', 'gorm']),
-    DM('Lirroy Jänkins', 'Mitten in die Vorbereitung stürmt ein Abenteurer zur Tür herein. „Ich hab gehört, hier gibt es Ärger! Na gut, Leute, los geht\'s!“ Er brüllt seinen eigenen Namen und rennt in die Küche, wo Gorm ihn mit einer Pfanne zurückschickt. Er setzt sich in die Ecke, bestellt ein Bier und bleibt bis Mitternacht. Er meint es gut.'),
+    DM('Lirroy Jänkins', 'Mitten in die Vorbereitung stürmt Lirroy zur Tür herein, den die Helden aus dem Hort kennen. „Ich hab gehört, hier gibt es Ärger! Na gut, Leute, los geht\'s!“ Er brüllt seinen eigenen Namen und rennt in die Küche, wo Gorm ihn mit einer Pfanne zurückschickt. Er setzt sich in die Ecke, bestellt ein Bier und bleibt bis Mitternacht. Er meint es gut.'),
   ] },
   { title: 'Die Belagerung', blocks: [
     V('Vorlesetext',
@@ -61,7 +60,7 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
       '- **Prüft:** Sauberkeit, Service, Geschmack, und wie das Haus mit Pannen umgeht. Eine gute Ausrede ist ihm lieber als eine schlechte Wahrheit.',
       '- **War der Morgen gut:** Er nickt einmal kurz, das ist bei ihm ein Jubelschrei.',
       '- **War der Morgen schlecht:** Er schreibt sehr lange etwas auf. Und schaut dann auf die Tür.'),
-    CNT('sterne', 'Sternepunkte für die Prüfung', STERNE),
+    C('sterne'),
     TAB(['Woher Sternepunkte kommen', 'Punkte'], [
       ['Der schmuddelige Gast am Morgen', 'gut +2 · schlecht −2'],
       ['Hildegard gezähmt (Stühle)', '+1'],
@@ -75,13 +74,14 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
       ['Krabben-Vorspeise aus dem Hort', '+1'],
       ['Probeessen: jeder gelungene Gang', '+1 bis +2'],
       ['Pavillon angezündet', '−1'],
+      ['Zu spät aus dem Hort (Hort-Zähler 8)', '−2'],
     ], 'wahl'),
     FLAGS('Was bisher entschieden wurde', ['zwick', 'mimiken', 'basilisk', 'portal', 'hobgoblins', 'gorm', 'pavillon']),
   ] },
   { title: 'Das Probeessen', blocks: [
     P('Drei Gänge. Bei jedem Gang würfeln zwei Helden: einer in der Küche mit Gorm, einer im Saal beim Auftragen. Gelingen beide, +2 Sternepunkte, gelingt einer, +1. Danach kommt die Panne des Gangs.'),
     PROBE('Erster Gang · Rüebli-Schaumsuppe', [
-      ['Küche', 'Überleben oder Koch-Werkzeug SG 12. Mit Gorms Gewürzbeutel automatisch.'],
+      ['Küche', 'Überleben oder Kochutensilien SG 12. Mit Gorms Gewürzbeutel automatisch.'],
       ['Saal', 'Geschicklichkeit SG 12: Schaum darf nicht zusammenfallen.'],
       ['Panne: die Ratten', 'Genau als Zwick den Löffel hebt, platzt unter dem Fenster ein Sack auf. Ratten. Prunellas Ratten. Kampf, aber leise, Zwick isst weiter. Gezähmte Mimiken oder Wabbel fressen die Ratten in einer Runde.'],
     ]),
@@ -91,15 +91,20 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
       taktik: 'Die Ratten wollen zur Suppe.',
       ende: 'Jede Runde Kampf: Heimlichkeit SG 12 für den ganzen Tisch. Misslingt sie, hebt Zwick eine Augenbraue, −1 Sternepunkt. Gelingt alles, schreibt Zwick: „Ruhige Atmosphäre.“',
     }),
+    DM('Der Rattensack',
+      'Unter dem Fenster bleibt Prunellas Jutesack liegen. Er raschelt weiter. Er wird nie leer.',
+      'Anspielung auf den „Bag of Rats“, den berüchtigten Trick, mit einem Sack voll Ratten Fähigkeiten auszulösen, die beim Töten einer Kreatur wirken. Er ist so bekannt, dass die Spielleiter-Regeln von 2024 ihn ausdrücklich verbieten. Hier gibt es ihn als harmlosen Gegenstand, der genau das nicht kann.'),
+    ITEMS([['krug-rattensack', 'Prunellas Sack unter dem Fenster']]),
     PROBE('Zweiter Gang · Wildbraten mit Beeren', [
-      ['Küche', 'Überleben oder Koch-Werkzeug SG 13. Mit Elchwild aus dem Hort Vorteil, ohne Wild Nachteil (es gibt Bratwurst, Gorm weint).'],
+      ['Küche', 'Überleben oder Kochutensilien SG 13. Mit Elchwild aus dem Hort Vorteil, ohne Wild Nachteil (es gibt Bratwurst, Gorm weint).'],
       ['Saal', 'Auftreten SG 12: Den Braten am Tisch tranchieren, mit einer Geschichte dazu. Das Kochbeil kommentiert.'],
       ['Panne: Gorm', 'Gorm will den Braten persönlich servieren. Ist er beleidigt, nennt er Zwick einen „Banausen“. Überzeugen SG 14, um es als Spezialität des Hauses zu verkaufen.'],
     ]),
     PROBE('Dritter Gang · Basilisken-Soufflé', [
-      ['Küche', 'Mit echtem Basiliskenei: Koch-Werkzeug SG 12. Ohne Ei gibt es Apfelkuchen, gut, aber kein Krönchen.'],
+      ['Küche', 'Mit echtem Basiliskenei: Kochutensilien SG 12. Ohne Ei gibt es Apfelkuchen, gut, aber kein Krönchen.'],
       ['Saal', 'Geschicklichkeit SG 13: Ein Soufflé fällt in sich zusammen, wenn man es schief anschaut.'],
       ['Panne: Prunellas faules Ei', 'Der Löffel versteinert in Zwicks Hand. Täuschen SG 15: „Das ist unsere Steinlöffel-Spezialität.“ Gelingt das, schreibt Zwick: „Mutig.“ und gibt den Punkt zurück.'],
+      ['Papier schlägt Stein', 'Hat jemand Formular V von Herrn Okulus, hält er es an den Löffel und ruft „Papier schlägt Stein!“: Der Löffel wird wieder Silber. Zwick lacht zum ersten Mal seit Jahren, +1 Sternepunkt. Anspielung auf die Forengeschichte vom Steingolem, den Spieler mit einem Stück Pergament besiegten.'],
       ['Panne: das Portal', 'Ist das Portal offen und gerade auf Feuer, faucht ein Stoss durch die Gaststube und flambiert das Dessert. Akrobatik SG 13 rettet es, und es sieht sogar beabsichtigt aus.'],
     ]),
     ROLL('Kleine Pannen beim Probeessen', 8, [
@@ -114,7 +119,7 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
     ], 'Einmal pro Gang, oder wenn es zu glatt läuft.'),
   ] },
   { title: 'Das Urteil', blocks: [
-    CNT('sterne', 'Sternepunkte für die Prüfung', STERNE),
+    C('sterne'),
     V('Vorlesetext · Bei 5 Punkten oder mehr',
       'Zwick legt das Besteck hin, tupft sich den Mund ab und klappt das Notizbuch zu. Zum ersten Mal an diesem Tag.',
       '„Der Letzte Krug“, sagt er, „ist ein seltsames Haus. Die Stühle beissen. Der Koch weint. Im ersten Stock ist das Wetter schlecht.“ Er steht auf. „Aber hier wird mit Herz gekocht. Ihr liefert heute Abend in die Hofküche.“',
@@ -124,7 +129,7 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
       'Er geht. Gegenüber kreischt jemand.'),
     DM('Wenn die Helden durchfallen',
       'Das Abenteuer geht trotzdem weiter. Die Helden kommen als Prunellas Aushilfen in die Hofküche. Das ist härter: Prunella gibt ihnen die schlimmsten Aufgaben (Zwiebeln, Abwasch, Kartoffeln), und der Verdacht startet bei 1. Dafür ist es sehr lustig, wenn Prunella merkt, wer da in ihrer Schürze steht. Die Hoflieferanten-Marke bekommen sie als Aushilfsmarke.'),
-    LOOT('Nach der Prüfung', ['Die Hoflieferanten-Marke (oder die Aushilfsmarke).', 'Zwick bezahlt das Essen, das erste Mal in vierzig Jahren: 20 GM und eine Kupfermünze für den Haferbrei vom Morgen.'], {}),
+    LOOT('Nach der Prüfung', ['Die Hoflieferanten-Marke (oder die Aushilfsmarke).', 'Zwick bezahlt das Essen, das erste Mal in vierzig Jahren: 20 GM und eine Kupfermünze für den Haferbrei vom Morgen.'], { gm: 20 }),
     ITEMS([['krug-hofmarke', 'Von Zwick'], ['krug-gewuerzbeutel', 'Von Gorm, wenn er zufrieden ist (3 Prisen)']]),
     DM('Kurze Rast und Aufstieg',
       'Vor dem Palast haben die Helden eine Stunde, um sich umzuziehen, zu essen und zu planen. Das ist eine kurze Rast.',
@@ -135,8 +140,10 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
 ] };
 
 const a4 = { id: 'a4', kicker: 'Akt 4', title: 'Die Hofküche', sub: 'Abend · etwa 90 Minuten', level: '4 oder 5', intro: [
-  P('Die Hochzeit des Königs. Hunderte Gäste, eine Küche voller Feuer und Geschrei, und in einer Kammer nebenan eine Torte, auf der das einzige Phönixei des Reichs leuchtet. Die Helden müssen kochen, servieren, unauffällig bleiben und im richtigen Moment tauschen. Halte den Verdacht im Blick.'),
-  CNT('verdacht', 'Verdacht im Palast', VERDACHT),
+  P('Die Hochzeit des Königs. Hunderte Gäste, eine Küche voller Feuer und Geschrei, und in einer Kammer nebenan eine Torte, auf der das einzige Phönixei des Reichs leuchtet. Die Helden müssen kochen, servieren, unauffällig bleiben und im richtigen Moment tauschen.'),
+  P('**Zwei Uhren laufen gegeneinander:** Der Verdacht steigt mit jeder Panne, und mit jedem Gang rückt der Anschnitt näher. Warten die Helden zu lange, müssen sie das Ei vor allen Augen holen. Handeln sie zu früh, fällt der Tausch auf.'),
+  C('verdacht'),
+  C('gaenge'),
 ], scenes: [
   { title: 'Der Dienstboteneingang', blocks: [
     V('Vorlesetext',
@@ -173,15 +180,15 @@ const a4 = { id: 'a4', kicker: 'Akt 4', title: 'Die Hofküche', sub: 'Abend · e
       '- **Schwäche:** ein Gespräch über Zuckerkunst. Wer ihr zuhört und klug fragt (Geschichte oder Überzeugen SG 12), hat ihr Herz und fünf unbewachte Minuten, weil sie ihm ihre Zuckerrosen in der Nebenkammer zeigen will.',
       '- **Typische Sätze:** „Nicht atmen! Die Glasur ist noch nicht gesetzt!“ · „Sie leuchtet so schön, nicht wahr? Wie ein kleiner Sonnenaufgang.“'),
     PROBE('Gruppenprobe · Das Hochzeitsmahl', [
-      ['Ablauf', 'Fünf Gänge, eine Runde pro Gang. In jeder Runde würfelt jeder Held eine Probe für seine Rolle. Jede misslungene Probe: Verdacht +1. Gelingen in einer Runde alle: Verdacht −1.'],
-      ['Koch', 'Koch-Werkzeug oder Überleben SG 13'],
+      ['Ablauf', 'Fünf Gänge, eine Runde pro Gang. In jeder Runde würfelt jeder Held eine Probe für seine Rolle. Jede misslungene Probe: Verdacht +1. Gelingen in einer Runde alle: Verdacht −1. Nach jedem Gang: Gänge-Zähler +1.'],
+      ['Koch', 'Kochutensilien oder Überleben SG 13'],
       ['Kellner', 'Geschicklichkeit oder Akrobatik SG 13, mit Kellnerweste oder Schürze Vorteil'],
       ['Spüler', 'Athletik SG 11, mit Wabbel automatisch'],
       ['Mundschenk', 'Auftreten oder Täuschen SG 13'],
       ['Page', 'Heimlichkeit oder Wahrnehmung SG 12'],
       ['Gorm und Ambrosius', 'Ist Gorm zufrieden, lenkt er Ambrosius mit einem Kochduell ab: Vorteil auf den Tausch. Ist er beleidigt, streiten sie lautstark: Verdacht +1.'],
     ]),
-    ROLL('Ereignisse in der Hofküche', 10, [
+    ROLL('Ereignisse in der Hofküche', 12, [
       ['1', 'Ein Schinken fällt von der Decke. Wer darunter steht: GES SG 12 oder liegend.'],
       ['2', 'Ambrosius kostet die Sauce eines Helden. „Interessant.“ Er klingt wie Zwick. Überzeugen SG 13, sonst Verdacht +1.'],
       ['3', 'Pippo rennt mit einem Tablett voller Gläser quer durch die Küche. Ein Held fängt es oder alles geht zu Bruch (Verdacht +1).'],
@@ -192,6 +199,8 @@ const a4 = { id: 'a4', kicker: 'Akt 4', title: 'Die Hofküche', sub: 'Abend · e
       ['8', 'Lirroy Jänkins ist irgendwie hineingekommen. Er brüllt im Festsaal seinen Namen und stürmt das Buffet. Alle Wachen schauen hin: Verdacht −1.'],
       ['9', 'Die Königin will die Torte vor dem Anschnitt sehen. Fräulein Zuckerguss rennt in die Tortenkammer. In zehn Minuten ist sie wieder da.'],
       ['10', 'Ein Feuerwerk explodiert direkt vor dem Küchenfenster. Alle zucken zusammen, eine Runde lang schaut niemand hin.'],
+      ['11', 'Im Festsaal streiten zwei betrunkene Grafen. Einer packt das Spanferkel vom Buffet und wirft es nach dem anderen. Er trifft die Braut. Totenstille, dann lacht die Königin, und der ganze Saal lacht mit. Alle Wachen schauen hin: Verdacht −1. (Anspielung auf die Forengeschichte, in der ein Barbar an Strahds Hochzeit ein Ferkel wirft und die Braut trifft.)'],
+      ['12', 'Unter den Gästen sitzt die Gesandte der Drachen: Frau Glimmerschuppe aus der Wechselstube des Horts. Hat ein Held sie am Mittag umgarnt, zwinkert sie ihm zu und fordert den König zum Tanz auf. Der ganze Hof schaut zu: Verdacht −2. Sonst nickt sie nur höflich.'],
     ], 'Einmal pro Gang des Mahls.'),
   ] },
   { title: 'Die Tortenkammer', blocks: [
@@ -211,10 +220,12 @@ const a4 = { id: 'a4', kicker: 'Akt 4', title: 'Die Hofküche', sub: 'Abend · e
       ['Ein verlorener Halbling', 'Pippo laut nach seinen Eltern rufen lassen', 'Die Wachen suchen eine Runde lang mit.'],
       ['Zwick', 'Nur bei 11 Sternepunkten', 'Er verlangt von den Wachen, ihm den Weg zum Abort zu zeigen. Beide.'],
       ['Ein Zauber', 'Etwa Kleine Illusion oder Einflüsterung', 'Wie eine gute Ausrede, die Wachen schauen weg.'],
+      ['Das Schlaflied', 'Der Zauberstab des Schlaflieds auf den Vorkoster', 'Er schläft sofort. Aber das Lied hört man im Flur: Verdacht +1, wenn keine Musik spielt.'],
+      ['Wabbels Würfelchen', 'Es gleitet unter dem Wagen hindurch', 'Es verschluckt das echte Ei und kommt erst draussen wieder heraus. Der Tausch ist dann nur noch Geschicklichkeit SG 12.'],
     ], 'wahl'),
     FLAGS('Die Fälschung der Helden', ['faelschung']),
     TAB(['Fälschung', 'Was nach dem Tausch passiert'], [
-      ['Die Gans', 'Die Torte ist dunkel. Ohne Licht-Zauber, Leuchtpilze oder eine Kerze im Zuckernest merkt es Fräulein Zuckerguss in zehn Minuten: Verdacht +2, und sie schreit.'],
+      ['Die Gans', 'Die Torte ist dunkel. Ohne Licht-Zauber, Leuchtpilze, Abgefülltes Sonnenlicht oder eine Kerze im Zuckernest merkt es Fräulein Zuckerguss in zehn Minuten: Verdacht +2, und sie schreit.'],
       ['Das Feuer', 'Die Torte leuchtet schöner als vorher. Nach zehn Minuten wird sie heiss. Dann platzt die Schale, und Glutwichtel springen heraus, direkt auf den Zucker.'],
       ['Der Mimik', 'Die Torte leuchtet nicht, aber das Mimik-Junges ist stolz und hält still. Wird es nicht gefüttert, fängt es an, die Torte von innen zu essen. Wird es angeschnitten, beisst es zurück.'],
     ], 'wahl'),
@@ -237,9 +248,9 @@ const a4 = { id: 'a4', kicker: 'Akt 4', title: 'Die Hofküche', sub: 'Abend · e
       '„So, so“, sagt sie leise. „Das ist es also. Ihr wolltet nie Hoflieferanten werden. Ihr wolltet das Ei.“ Sie hebt die Pfanne. „Ein Schrei, und ihr seht den Kerker von innen.“'),
     DM('Was jetzt passieren kann',
       'Prunella weiss nicht, wofür das Ei ist. Sie hält die Helden für Diebe, die es verkaufen wollen.',
-      '- **Die Wahrheit sagen:** Erzählen die Helden ihr von Barnabas, wird sie blass. Einsicht SG 12: Ihre Hand zittert. Sie war vor dreissig Jahren mit ihm verlobt, er hat die Hochzeit verpasst, weil er ein Fass anstach. Sie lässt die Pfanne sinken. „Dieser sture Esel.“ Sie hilft den Helden hinaus und lenkt die Wachen ab.',
+      '- **Die Wahrheit sagen:** Erzählen die Helden ihr von Barnabas, wird sie blass. Einsicht SG 12: Ihre Hand zittert. Vor dreissig Jahren hat sie ihm einen Antrag gemacht. Er sagte: „Später, ich steche gerade ein Fass an.“ Später kam nie. Sie lässt die Pfanne sinken. „Dieser sture Esel.“ Sie hilft den Helden hinaus und lenkt die Wachen ab.',
       '- **Lügen:** Täuschen SG 16. Gelingt es, glaubt sie ihnen nicht, lässt sie aber gehen und schwört Rache. Im Finale wartet sie mit Knut.',
-      '- **Bestechen:** Sie will keinen Gold. Sie will, dass die Helden öffentlich sagen, ihr Kuchen sei der beste der Stadt. Wer das tut (vor allen Leuten, im Festsaal), hat sie für heute auf seiner Seite.',
+      '- **Bestechen:** Sie will kein Gold. Sie will, dass die Helden öffentlich sagen, ihr Kuchen sei der beste der Stadt. Wer das tut (vor allen Leuten, im Festsaal), hat sie für heute auf seiner Seite.',
       '- **Kämpfen:** Sie schreit. Verdacht auf 6, Alarm.'),
     MERKE('Merke dir', ['Hilft Prunella den Helden, ist sie im Finale nicht bei Knut. Dann kommt Knut allein mit seinen Raufbolden, und Prunella steht im Epilog mit einem Kuchen vor der Tür.']),
   ] },
@@ -262,13 +273,13 @@ const a4 = { id: 'a4', kicker: 'Akt 4', title: 'Die Hofküche', sub: 'Abend · e
     V('Vorlesetext · Im Festsaal, hinter euch',
       'Ihr hört, wie der König das Messer ansetzt. Ihr hört, wie die Gäste klatschen. Und ihr hört, je nachdem, was in der Torte steckt, ein entzücktes „Aaah“, ein erschrockenes „Huch“ oder ein sehr lautes „AUA“.',
       'Dann seid ihr draussen. Die Nacht riecht nach Feuerwerk. Es ist kurz vor Mitternacht.'),
-    LOOT('Aus dem Palast', ['Eine goldene Feder, die beim Tausch aus dem Zuckernest gefallen ist. Sie glimmt.', 'In der Garderobe der Hofköche: eine Kochmütze mit eingesticktem Wappen. Niemand vermisst sie.'], {}),
-    ITEMS([['krug-phoenixfeder', 'Aus dem Zuckernest'], ['krug-kochmuetze', 'Garderobe der Hofköche']]),
+    LOOT('Aus dem Palast', ['Eine goldene Feder, die beim Tausch aus dem Zuckernest gefallen ist. Sie glimmt.', 'In der Garderobe der Hofköche: eine Kochmütze mit eingesticktem Wappen. Niemand vermisst sie.', 'Neben der Torte lag das königliche Tortenmesser. Wer es eingesteckt hat, hat jetzt ein Problem, aber ein sehr schönes.', 'Vom Buffet: ein ganzes Spanferkel, falls jemand Hunger hat oder etwas zum Werfen braucht.'], {}),
+    ITEMS([['krug-phoenixfeder', 'Aus dem Zuckernest'], ['krug-kochmuetze', 'Garderobe der Hofköche'], ['krug-tortenmesser', 'Tortenkammer, neben der Torte'], ['krug-spanferkel', 'Buffet im Festsaal']]),
   ] },
 ] };
 
 const fin = { id: 'f', kicker: 'Finale', title: 'Mitternacht', sub: 'Nacht · etwa 35 Minuten', level: '4 oder 5', intro: [
-  CNT('hitze', 'Hitze des Phönixeis', HITZE),
+  C('hitze'),
 ], scenes: [
   { title: 'Durch die Stadt', blocks: [
     V('Vorlesetext',
@@ -304,7 +315,9 @@ const fin = { id: 'f', kicker: 'Finale', title: 'Mitternacht', sub: 'Nacht · et
       '- **Das Ei** kann geworfen werden (Reichweite 9 m, Fangen: GES SG 10, mit Schürze automatisch). Fällt es zu Boden, rollt es 1W4 Felder in eine zufällige Richtung.',
       '- **Knuts Leute wollen das Ei,** nicht die Helden. Sie packen den Träger, wenn sie können.',
       '- **Die Hitze** steigt jede Runde um 1. Bei 6 muss das Ei sofort an Barnabas\' Brust.',
-      '- **Hilfe:** Gorm und Wabbel kämpfen mit (als Verbündete einsetzen). Ui wirft Krüge. Rudi verteidigt die Treppe mit seinem Holzbein.'),
+      '- **Hilfe:** Gorm und Wabbel kämpfen mit (als Verbündete einsetzen). Ui wirft Krüge. Rudi verteidigt die Treppe mit seinem Holzbein.',
+      '- **Die Bauern-Kanone:** Die Gaststube ist voll von Gästen, die auf der Seite der Helden sind. Wer das Ei hat, kann es als Aktion in die Menge geben. Die Gäste reichen es mit vorbereiteten Aktionen weiter, Hand für Hand: Es wandert 9 m pro Runde in eine Richtung deiner Wahl, auch die Treppe hoch. Knuts Leute können die Kette unterbrechen (Athletik SG 13). Anspielung auf die „Peasant Railgun“, das berüchtigte Gedankenspiel, bei dem tausende Bauern einen Gegenstand so schnell weiterreichen, dass er zur Kanone wird.',
+      '- **Tödlicher Spott:** Knut ist bei seinen Verschwörungen empfindlich. Gehässiger Spott über eine seiner Theorien: Er hat Nachteil auf den Rettungswurf. Fällt er durch Spott auf 0 TP, setzt er sich hin, weint und kämpft nicht mehr. Anspielung auf den Forenklassiker, in dem ein Oger an einem Gehässigen Spott stirbt.'),
     TAB(['Improvisierte Waffe', 'Schaden', 'Besonderheit'], [
       ['Stuhl', '1W6 Wucht', 'Zerbricht nach dem Treffer. Ist es ein Mimik, beisst er zurück.'],
       ['Bierkrug, voll', '1W4 Wucht', 'Das Ziel ist bis Ende seines nächsten Zugs geblendet von Schaum.'],
@@ -312,6 +325,8 @@ const fin = { id: 'f', kicker: 'Finale', title: 'Mitternacht', sub: 'Nacht · et
       ['Kronleuchter', '2W6 Wucht', 'Seil kappen (Angriff gegen RK 12): Alles darunter, GES SG 13 oder 2W6 und liegend. Knut steht immer darunter.'],
       ['Wabbel', '3W6 Säure', 'Wer ihn schubst (Athletik SG 14), lässt ihn über die Gegner gleiten.'],
       ['Herr Flossmann, der ausgestopfte Fisch', '1W4 Wucht', 'Sein Monokel fliegt davon. Rudi ist empört.'],
+      ['Spanferkel (wenn aus dem Palast mitgebracht)', '2W6 Wucht', 'Wurf mit Nachteil, Reichweite 6 m. Wer getroffen wird, riecht köstlich: Wabbel verfolgt ihn.'],
+      ['Krug der ewigen Mayonnaise', '–', 'Ausgekippt wird ein Feld von 3 auf 3 m rutschig: GES SG 12 oder liegend.'],
     ], 'kampf'),
     KAMPF('Die Schlägerei', 'krug-e-schlaegerei', {
       gegner: 'Knut, der Grottenschrat-Wirt, fünf Raufbolde aus dem Goldenen Kapaun und Prunella Schmalz, falls sie den Helden nicht geholfen hat. Hat sie geholfen, ist sie nicht dabei.',
@@ -336,8 +351,9 @@ const fin = { id: 'f', kicker: 'Finale', title: 'Mitternacht', sub: 'Nacht · et
     ], 'Zu Beginn jeder Runde einmal würfeln.'),
     CHOICE('prunella', 'Was wird aus Prunella?', ['Ausgang', 'Folge'], [
       { a: 'Geschont, versöhnt oder die Wahrheit erfahren', b: 'Im Epilog steht sie mit einem Kuchen vor der Tür. Er ist nicht versalzen.', sets: { prunella: 'geschont' } },
-      { a: 'Gedemütigt oder besiegt', b: 'Sie schwört Rache. Stoff für eine Fortsetzung.', sets: { prunella: 'gedemütigt' } },
+      { a: 'Gedemütigt oder besiegt', b: 'Sie schwört Rache. Stoff für eine Fortsetzung. Ihre Bratpfanne bleibt in der Gaststube liegen.', sets: { prunella: 'gedemütigt' } },
     ]),
+    ITEMS([['krug-bratpfanne', 'Bleibt liegen, wenn Prunella besiegt oder gedemütigt wurde']]),
   ] },
   { title: 'Barnabas', blocks: [
     V('Vorlesetext',
@@ -374,7 +390,7 @@ const epilog = { id: 'epilog', kicker: 'Epilog', title: 'Der Morgen danach', sub
       ['Pippo dabei war', 'Gorm nimmt ihn als Küchenlehrling. Seine Eltern finden ihn dort, alle drei Tage.'],
       ['die Fälschung die Mimik war', 'Der König hat das Mimik-Junge adoptiert. Es lebt jetzt im Palast als „die Torte, die beisst“.'],
     ], 'wahl'),
-    LOOT('Danke von allen', ['Der Hoflieferanten-Lohn: 50 GM je Held.', 'Freibier im Letzten Krug, für immer. Barnabas schreibt es an die Wand.', 'Jeder Held bekommt einen Krug mit seinem Namen über der Theke.'], {}),
+    LOOT('Danke von allen', ['Der Hoflieferanten-Lohn: 50 GM je Held.', 'Freibier im Letzten Krug, für immer. Barnabas schreibt es an die Wand.', 'Jeder Held bekommt einen Krug mit seinem Namen über der Theke.'], { gmHero: 50 }),
     ITEMS([['krug-kellnerweste', 'Von Barnabas: „Ihr habt euch das verdient.“'], ['krug-glibberpanzer', 'Von Wabbel. Er hat sich gehäutet.'], ['krug-nudelholz', 'Von Prunella, wenn sie geschont wurde: „Für den Fall, dass ihr mal einen richtigen Teig machen wollt.“']]),
     V('Vorlesetext · Zum Schluss',
       'Barnabas hebt seinen Krug. „Auf die neuen Wirte“, sagt er. „Und auf den Letzten Krug. Möge er nie der letzte sein.“',

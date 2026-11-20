@@ -63,7 +63,7 @@ const adv = {
   meta: 'Fünf Helden · Stufe 4 (5) · rund acht Stunden',
   quote: '„Ehrlich kommt man weit. Bis Mitternacht aber nicht.“',
   overview, chapters, flags: D.flags, figures: D.figures, lore: D.lore, items: D.items,
-  srd: 'Mimik, Gallertwürfel, Riesenkrabbe, Hobgoblin, Rattenschwarm, Schläger und Oger stammen aus dem SRD 5.1 (CC-BY-4.0). Alle anderen Werte sind eigene.',
+  srd: 'Mimik, Gallertwürfel, Riesenkrabbe, Hobgoblin, Kobold, Rattenschwarm, Schläger und Oger stammen aus dem SRD 5.2.1 (CC-BY-4.0). Alle anderen Werte und Gegenstände sind eigene, einige nach beliebten Ideen aus Foren der D&D-Szene.',
   mobs: D.mobs, enc: D.enc,
 };
 

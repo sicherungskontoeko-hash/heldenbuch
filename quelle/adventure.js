@@ -161,7 +161,8 @@ function advCounter(b, path, st) {
   const v = advCntVal(b, st); const min = b.min != null ? +b.min : -99, max = b.max != null ? +b.max : 99;
   const steps = (b.steps || []).slice().sort((x, y) => x[0] - y[0]); const reached = steps.filter((x) => (+b.max > 0 && x[0] < 0 ? v <= x[0] : v >= x[0])).pop();
   const body = '<div class="advcnt"><button class="btn ghost" data-act="advCnt" data-arg="' + path + '" data-d="-1" aria-label="eins weniger"' + (v <= min ? ' disabled' : '') + '>−</button><output aria-live="polite"><b>' + (b.icon ? '<span aria-hidden="true">' + esc(b.icon) + '</span> ' : '') + v + '</b>' + (b.max != null ? '<small>von ' + max + '</small>' : '') + '</output><button class="btn ghost" data-act="advCnt" data-arg="' + path + '" data-d="1" aria-label="eins mehr"' + (v >= max ? ' disabled' : '') + '>+</button></div>' +
-    (steps.length ? '<ul class="advcst">' + steps.map((x) => '<li class="' + (x === reached ? 'on' : '') + '"><b>' + (x[0] > 0 && b.min < 0 ? '+' : '') + x[0] + '</b><span>' + advMd(x[1]) + '</span></li>').join('') + '</ul>' : '') + (b.hint ? '<p class="hint">' + advMd(b.hint) + '</p>' : '');
+    (reached ? '<p class="advcnow">' + advMd(reached[1]) + '</p>' : '') +
+    (steps.length || b.hint ? '<details class="advcdet"><summary>Alle Stufen' + (b.hint ? ' und Regel' : '') + '</summary>' + (steps.length ? '<ul class="advcst">' + steps.map((x) => '<li class="' + (x === reached ? 'on' : '') + '"><b>' + (x[0] > 0 && b.min < 0 ? '+' : '') + x[0] + '</b><span>' + advMd(x[1]) + '</span></li>').join('') + '</ul>' : '') + (b.hint ? '<p class="hint">' + advMd(b.hint) + '</p>' : '') + '</details>' : '');
   return advBox((b.tone || 'wahl') + ' cnt', '#', b.title, body);
 }
 /* Zufallstabelle mit Würfelknopf: der gewürfelte Eintrag leuchtet (nur für diese Sitzung) */

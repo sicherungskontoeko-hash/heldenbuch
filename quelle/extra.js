@@ -72,7 +72,7 @@ function itemFx(ch) {
   const out = [];
   for (const x of itemList(ch)) {
     if (!itemActive(x)) continue; const d = itemDef(x); const nm = d.name + (x.label ? ' (' + x.label + ')' : '');
-    const h = { id: 'it_' + x.uid, kind: 'item', name: nm, text: d.text, ac: d.ac || 0, save: d.save || 0, dc: d.dc || 0, atk: d.atk || 0, init: 0, speed: 0 };
+    const h = { id: 'it_' + x.uid, kind: 'item', name: nm, text: d.text, ac: d.ac || 0, save: d.save || 0, dc: d.dc || 0, atk: d.atk || 0, init: +d.init || 0, speed: +d.speed || 0 };
     if (d.arm && ch.armor && ch.armor !== 'none') h.ac += d.arm;
     if (d.shd && ch.shield) h.ac += d.shd;
     if (d.acBare && (!ch.armor || ch.armor === 'none') && !ch.shield) h.ac += d.acBare;

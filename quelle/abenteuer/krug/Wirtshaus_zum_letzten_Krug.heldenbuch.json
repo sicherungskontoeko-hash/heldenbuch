@@ -433,6 +433,17 @@
     "t": 1795175991000
    },
    {
+    "id": "krug-e-kobolde",
+    "name": "Letzter Krug A2 · Die Inventur",
+    "mobs": [
+     {
+      "mid": "kobold",
+      "n": 8
+     }
+    ],
+    "t": 1795175990000
+   },
+   {
     "id": "krug-e-schlaegerei",
     "name": "Letzter Krug F · Die Schlägerei",
     "mobs": [
@@ -449,7 +460,7 @@
       "n": 1
      }
     ],
-    "t": 1795175990000
+    "t": 1795175989000
    }
   ],
   "adv": [
@@ -565,6 +576,99 @@
            "- Die Not ist echt. Barnabas stirbt, wenn sie scheitern. Erinnere sie zwischendurch daran, mit Holles Zetteln und Barnabas' Atem, der langsamer wird. Das gibt dem Unsinn Gewicht.",
            "- Kämpfe sind kurz und laut. Gegner geben auf, fliehen, werden gezähmt oder bestochen. Getötet wird fast nur, was sich wirklich wehrt."
           ]
+         },
+         {
+          "t": "table",
+          "tone": "dm",
+          "head": [
+           "Klassiker der D&D-Szene",
+           "Wo im Abenteuer"
+          ],
+          "rows": [
+           [
+            "**Eric und der furchtbare Pavillon** (Eric and the Dread Gazebo), die bekannteste Anekdote des Rollenspiels",
+            "Akt 1, „Das Grauen im Garten“"
+           ],
+           [
+            "**„Ich greife die Dunkelheit an!“** aus dem Hörsketch der Dead Alewives",
+            "Akt 1, im dunklen Weinkeller"
+           ],
+           [
+            "**Steine fallen, alle sterben**, der Spruch für eine Spielleitung am Ende ihrer Geduld",
+            "Akt 1, Zimmer 3 zur Erdstunde"
+           ],
+           [
+            "**Leeroy Jenkins**, hier Lirroy Jänkins",
+            "Akt 2 bis Finale, immer im dümmsten Moment"
+           ],
+           [
+            "**Die Goblin-Tür**: „Fünf! Fünf! Fünf!“",
+            "Akt 2, „Die Goblin-Tür“"
+           ],
+           [
+            "**Der Höhleninspektor**, mit dem ein ertappter Schurke eine ganze Goblinbande anwirbt",
+            "Akt 2, „Die Goblin-Tür“"
+           ],
+           [
+            "**„Bist du sicher?“**, die gefürchtetste Frage jeder Spielleitung",
+            "Akt 2, Herr Okulus am Kundendienst"
+           ],
+           [
+            "**Wundfreier Mittwoch**: Ladenwerbung per Botschaftszauber im schlechtesten Moment",
+            "Akt 2, Kundenkarte des Horts"
+           ],
+           [
+            "**Der Kopf des Vecna**: der falsche Artefakt-Kopf, für den man den eigenen abschneiden soll",
+            "Akt 2, Restposten"
+           ],
+           [
+            "**Der Barde verführt den Drachen**",
+            "Akt 2, Glimmerschuppe in der Wechselstube, Akt 4 als Hochzeitsgast"
+           ],
+           [
+            "**Tuckers Kobolde**: schwache Gegner, die mit Fallen und Tunneln jede Gruppe zermürben",
+            "Akt 2, „Das Möbellabyrinth“"
+           ],
+           [
+            "**Der Rattensack** (Bag of Rats), den sogar die Spielleiter-Regeln von 2024 verbieten",
+            "Akt 3, Prunellas Ratten"
+           ],
+           [
+            "**Papier schlägt Stein**: ein Golem, besiegt mit einem Stück Pergament",
+            "Akt 2 und 3, Formular V gegen Basilisken-Versteinerung"
+           ],
+           [
+            "**Das Spanferkel an der Hochzeit**: geworfen nach dem Bräutigam, getroffen die Braut",
+            "Akt 4, Festsaal, und im Finale als Wurfwaffe"
+           ],
+           [
+            "**Die Bauern-Kanone** (Peasant Railgun): ein Gegenstand, durch eine lange Kette von Leuten weitergereicht",
+            "Finale, das Ei geht durch die Menge die Treppe hoch"
+           ],
+           [
+            "**Tödlicher Spott**: ein Oger, gestorben an einem Gehässigen Spott",
+            "Finale, gegen Knut"
+           ]
+          ],
+          "bf": true
+         },
+         {
+          "t": "dm",
+          "title": "So nutzt du die Klassiker",
+          "items": [
+           "- Spiel sie ernst und erklär sie nicht. Wer den Klassiker kennt, grinst. Wer ihn nicht kennt, erlebt eine lustige Szene.",
+           "- Lass die Spieler die Pointe selbst finden. Ruft jemand „Papier schlägt Stein!“, bevor du das Formular erwähnst: umso besser, lass es wirken."
+          ]
+         },
+         {
+          "t": "dm",
+          "title": "Gegenstände und Fundstücke",
+          "items": [
+           "- Das Abenteuer bringt 59 eigene Gegenstände mit: Erbstücke, Kuriositäten, Restposten, Beute. Unter „Gegenstände“ stehen alle mit Fundort.",
+           "- **Nicht alles verteilen.** Drei bis vier Gegenstände pro Held reichen für den Tag. Die Würfeltabellen „Kuriositätenschrank“, „Wühltisch“ und „Wühlkiste“ entscheiden, was die Helden finden. Was übrig bleibt, ist Stoff für die nächste Runde.",
+           "- **Gold:** Barnabas' Kasse (200 GM) gibt es im Prolog. Das reicht für Basiliskenei, Geschirr und ein, zwei Restposten. Wer mehr will, muss verkaufen, verhandeln oder den Elch einfangen.",
+           "- **Die Gegenstände einschalten:** Unter „Übersicht“ den Schalter „Gegenstände aktiv“ setzen. Dann stehen sie im Bogen, im Beute-Formular, in der Zufallsbeute und in der Suche. „Geben“ schaltet ihn von selbst ein."
+          ]
          }
         ]
        },
@@ -574,7 +678,7 @@
         "blocks": [
          {
           "t": "p",
-          "x": "Vier Zähler halten den Tag zusammen. Du findest sie hier und in den Szenen, in denen sie gebraucht werden. Was du hier einstellst, gilt überall."
+          "x": "Sechs Zähler halten den Tag zusammen und machen Druck. Du findest sie hier und in den Szenen, in denen sie gebraucht werden. Was du an einer Stelle einstellst, gilt überall."
          },
          {
           "t": "counter",
@@ -596,43 +700,43 @@
            ],
            [
             8,
-            "**Mit Lob.** Im Palast startet der Verdacht bei 0, auch wenn Zwick schlecht behandelt wurde."
+            "**Mit Lob.** Im Palast startet der Verdacht bei 0, auch wenn Zwick am Morgen schlecht behandelt wurde."
            ],
            [
             11,
             "**Glänzend.** Zwick wird zum stillen Verbündeten und lenkt im Palast einmal die Wachen ab."
            ]
           ],
-          "hint": "Punkte gibt es für gelöste Probleme, gute Proben beim Probeessen und für den Umgang mit Zwick am Morgen. Die Quellen stehen in Akt 3."
+          "hint": "Punkte gibt es für gelöste Probleme, den Umgang mit Zwick am Morgen und gute Proben beim Probeessen. Alle Quellen stehen in Akt 3 unter „Zwick kommt“."
          },
          {
           "t": "counter",
-          "id": "verdacht",
-          "title": "Verdacht im Palast",
+          "id": "hort",
+          "title": "Zeit im Hort",
           "start": 0,
           "min": 0,
-          "max": 6,
-          "tone": "kampf",
-          "icon": "👁",
+          "max": 8,
+          "tone": "probe",
+          "icon": "⌛",
           "steps": [
            [
             0,
-            "Niemand ahnt etwas."
-           ],
-           [
-            2,
-            "Der Hofkoch beobachtet die neuen Lieferanten."
+            "Später Vormittag. Alles ist offen."
            ],
            [
             4,
-            "Zwei Wachen folgen den Helden unauffällig. Proben für Heimlichkeit mit Nachteil."
+            "Mittag. Gorm schickt einen Boten: „Wo bleibt das Wild?“"
            ],
            [
             6,
-            "**Alarm.** Die Wachen rücken an. Weiter mit „Flucht aus dem Palast“."
+            "Knapp. Zu Hause bleibt nur noch Zeit für **eine** Aufgabe aus „Zwei Stunden“."
+           ],
+           [
+            8,
+            "**Zu spät.** Zwick steht schon vor der Tür, als die Helden zurückkommen: keine Vorbereitung, −2 Sternepunkte."
            ]
           ],
-          "hint": "Jede misslungene Probe in der Hofküche, jede auffällige Waffe und jede Panne mit der Fälschung erhöht den Verdacht um 1."
+          "hint": "Jede Abteilung kostet eine halbe Stunde (+1). Die Abkürzung im Möbellabyrinth kostet nichts, Anstehen an der Kasse +1. Die Spieler sehen den Zähler ruhig: Sie müssen wählen, was sie auslassen."
          },
          {
           "t": "counter",
@@ -654,10 +758,72 @@
            ],
            [
             15,
-            "Neuer Hausrekord. Die Goblins singen."
+            "Neuer Tagesrekord. Die Goblins singen."
+           ],
+           [
+            47,
+            "Hausrekord eingestellt. Grimsel weint vor Glück."
            ]
           ],
-          "hint": "Jeder, der durchs Schlüsselloch schaut, zählt einen hoch. Läuft den ganzen Tag weiter, auch in der Nacht."
+          "hint": "Jeder Blick durchs Schlüsselloch zählt einen hoch. Der Zähler läuft den ganzen Tag weiter, auch an anderen Türen."
+         },
+         {
+          "t": "counter",
+          "id": "verdacht",
+          "title": "Verdacht im Palast",
+          "start": 0,
+          "min": 0,
+          "max": 6,
+          "tone": "kampf",
+          "icon": "👁",
+          "steps": [
+           [
+            0,
+            "Niemand ahnt etwas."
+           ],
+           [
+            2,
+            "Der Hofkoch beobachtet die neuen Lieferanten."
+           ],
+           [
+            4,
+            "Zwei Wachen folgen den Helden unauffällig. Heimlichkeit mit Nachteil."
+           ],
+           [
+            6,
+            "**Alarm.** Die Wachen rücken an. Weiter mit „Der Weg hinaus“, Flucht aus dem Palast."
+           ]
+          ],
+          "hint": "Jede misslungene Probe in der Hofküche, jede auffällige Waffe und jede Panne mit der Fälschung: +1. Startwert 1, wenn Zwick am Morgen schlecht behandelt wurde (ausser bei 8 Sternepunkten)."
+         },
+         {
+          "t": "counter",
+          "id": "gaenge",
+          "title": "Gänge bis zum Anschnitt",
+          "start": 0,
+          "min": 0,
+          "max": 5,
+          "tone": "wahl",
+          "icon": "🍰",
+          "steps": [
+           [
+            0,
+            "Die Vorspeise wird aufgetragen. Die Torte steht in der Tortenkammer."
+           ],
+           [
+            3,
+            "Fräulein Zuckerguss bereitet die Torte vor und ist nur noch selten weg: Ablenkungen haben Nachteil."
+           ],
+           [
+            4,
+            "Die Diener holen den silbernen Wagen. Wer jetzt tauscht, hat nur noch eine Runde."
+           ],
+           [
+            5,
+            "**Anschnitt!** Die Torte rollt in den Festsaal. Ist das Ei noch darauf, muss es vor allen Augen geholt werden: Verdacht sofort auf 6."
+           ]
+          ],
+          "hint": "Nach jedem Gang des Hochzeitsmahls +1. Der Tausch muss vor dem fünften Gang gelingen."
          },
          {
           "t": "counter",
@@ -671,7 +837,7 @@
           "steps": [
            [
             0,
-            "Das Ei ist warm wie ein frisches Brot."
+            "Warm wie ein frisches Brot."
            ],
            [
             2,
@@ -683,10 +849,10 @@
            ],
            [
             6,
-            "Das Ei will schlüpfen. Jetzt muss es an Barnabas' Brust, sonst geht die Magie verloren."
+            "Es will schlüpfen. Jetzt muss es an Barnabas' Brust, sonst ist die Magie verloren."
            ]
           ],
-          "hint": "Steigt jede halbe Stunde Spielzeit oder bei jedem Misserfolg auf dem Rückweg um 1."
+          "hint": "Steigt bei jedem Misserfolg auf dem Rückweg und in jeder Runde der Schlägerei um 1."
          },
          {
           "t": "table",
@@ -710,7 +876,7 @@
            [
             "10 Uhr, 14 Uhr, 18 Uhr, 22 Uhr",
             "Erde",
-            "Das Haus bebt leicht, Krüge wandern über die Theke. Im Zimmer wachsen Kristalle."
+            "Das Haus bebt leicht, Krüge wandern über die Theke. Im Zimmer wachsen Kristalle, und aus dem Portal fallen Steine (siehe Zimmer 3)."
            ],
            [
             "11 Uhr, 15 Uhr, 19 Uhr, 23 Uhr",
@@ -729,7 +895,7 @@
           "t": "dm",
           "title": "Rasten und Aufstieg",
           "items": [
-           "- **Kurze Rast 1:** nach Akt 1, bei Gorms Probeessen in der Küche.",
+           "- **Kurze Rast 1:** nach Akt 1, bei Gorms Probierplatte in der Küche.",
            "- **Kurze Rast 2:** nach Akt 2, auf der Fahrt vom Hort zurück.",
            "- **Kurze Rast 3:** nach der Prüfung, beim Umziehen für den Palast.",
            "- **Keine lange Rast.** Der Tag ist zu kurz.",
@@ -778,8 +944,8 @@
             "16:15",
             "Akt 2",
             "Mittag",
-            "Einkaufen im Hort: Elch, Kundendienst, Restposten, Goblin-Tür, Wühltisch, Basiliskenei, Kasse",
-            "Elch, Wühltisch, optional Möbel und Kasse"
+            "Einkaufen im Hort: Elch, Basiliskenei, Kundendienst, Restposten, Goblin-Tür, Wühltisch, Möbellabyrinth, Kasse",
+            "Elch, Wühltisch, freiwillig Kobolde, Möbel und Kasse"
            ],
            [
             "18:15",
@@ -823,7 +989,7 @@
           "t": "dm",
           "title": "Wenn die Zeit knapp wird",
           "items": [
-           "- Streiche im Hort das Möbellabyrinth und die Kassenschlange, beide sind freiwillig.",
+           "- Streiche im Hort das Möbellabyrinth und die Kassenschlange, beide sind freiwillig. Der Hort-Zähler sorgt ohnehin dafür, dass die Helden nicht alles schaffen.",
            "- Kürze das Probeessen auf zwei Gänge.",
            "- Lass die Belagerung mit einem Gespräch enden statt mit einem Kampf."
           ]
@@ -897,7 +1063,7 @@
            ],
            [
             "3",
-            "Prunella Schmalz hat Barnabas einmal einen Antrag gemacht. (Wahr, er hat Nein gesagt, weil er gerade ein Fass anstach.)"
+            "Prunella Schmalz hat Barnabas einmal einen Antrag gemacht. (Wahr. Er sagte: „Später, ich steche gerade ein Fass an.“ Später kam nie.)"
            ],
            [
             "4",
@@ -974,7 +1140,7 @@
            ],
            [
             "6",
-            "Ihr kennt euch nicht. Er hat dich aus der Zeitung. Du hast angeblich „ein ehrliches Gesicht“."
+            "Ihr kennt euch nicht. Er kennt dich aus der Zeitung. Du hast angeblich „ein ehrliches Gesicht“."
            ]
           ],
           "note": ""
@@ -993,7 +1159,7 @@
           "title": "Vorlesetext · Die Vollmacht",
           "ps": [
            "Pünktli entrollt ein Pergament, auf dem ein Bierring als Siegel klebt. „Vollmacht des Barnabas Krug. Ich zitiere wörtlich:“",
-           "*„Falls mir etwas zustösst, führt meine Familie, meine Freunde und wer sonst noch zur Tür reinkommt, den Letzten Krug weiter, bis ich wieder auf den Beinen bin. Füttert Wabbel. Lasst Gorm nicht allein kochen. Geht nicht in Zimmer 3. Und kauft mir neue Socken.“*",
+           "*„Falls mir etwas zustösst, führen meine Familie, meine Freunde und wer sonst noch zur Tür reinkommt, den Letzten Krug weiter, bis ich wieder auf den Beinen bin. Füttert Wabbel. Lasst Gorm nicht allein kochen. Geht nicht in Zimmer 3. Und kauft mir neue Socken.“*",
            "„Das ist formal korrekt“, sagt Pünktli, „aber menschlich bedauerlich. Ab heute seid ihr Wirte. Herzlichen Glückwunsch.“"
           ]
          },
@@ -1041,8 +1207,10 @@
           "t": "loot",
           "title": "Die Erbstücke",
           "items": [
-           "Pünktli übergibt eine Holzkiste mit Barnabas' Handschrift: *„Für die, die nach mir kommen. Teilt fair. Gebt das Buch dem, der am meisten fragt.“*"
-          ]
+           "Pünktli übergibt eine Holzkiste mit Barnabas' Handschrift: *„Für die, die nach mir kommen. Teilt fair. Gebt das Buch dem, der am meisten fragt.“*",
+           "Dazu der Schlüssel zur Kasse unter der Theke: eine Blechdose mit 200 GM. *„Für Einkäufe. Nicht für Wetten. B.“*"
+          ],
+          "gm": 200
          },
          {
           "t": "items",
@@ -1120,7 +1288,7 @@
            ],
            [
             "Ein anderes Mittel suchen",
-            "Holle hat alles versucht. Ein Wunsch-Zauber wäre eine Lösung, aber den kann in der Stadt niemand wirken, und Gorm will nicht in eine Wunderlampe pusten."
+            "Holle hat alles versucht. Ein Wunsch-Zauber wäre eine Lösung, aber den kann in der ganzen Stadt niemand wirken."
            ]
           ],
           "bf": true
@@ -1165,7 +1333,7 @@
       ],
       "id": "a1",
       "kicker": "Akt 1",
-      "title": "Der letzte Krug",
+      "title": "Der Letzte Krug",
       "sub": "Vormittag · etwa 90 Minuten",
       "level": "4",
       "scenes": [
@@ -1333,6 +1501,112 @@
            ]
           ],
           "note": ""
+         },
+         {
+          "t": "vorlese",
+          "title": "Vorlesetext · Barnabas' Kuriositätenschrank",
+          "ps": [
+           "Hinter der Theke steht ein Schrank mit Glastüren und einem Schild: *„Sammlung B. Krug. Nicht anfassen. Ausser mit Gefühl.“* Darin liegen Dinge, die Barnabas in vierzig Jahren von Gästen bekommen hat, die nicht bezahlen konnten. Manche summen. Eines schaut zurück."
+          ]
+         },
+         {
+          "t": "roll",
+          "title": "Barnabas' Kuriositätenschrank",
+          "die": 8,
+          "rows": [
+           [
+            "1",
+            "Abgefülltes Sonnenlicht. Die Flasche ist warm und leuchtet durch die Finger."
+           ],
+           [
+            "2",
+            "Der Faltbeutel. Darin liegen zwölf Servietten, perfekt zu Schwänen gefaltet."
+           ],
+           [
+            "3",
+            "Der verdoppelnde Geldbeutel. Darin eine einzige Kupfermünze. Barnabas hat sie nie herausgenommen."
+           ],
+           [
+            "4",
+            "Der Teller des guten Essens. Darauf erscheint, wenn man ihn umdreht, ein dampfender Haferbrei."
+           ],
+           [
+            "5",
+            "Das Horn des Kauderwelschs. Wer hineinbläst, hört ein fernes „Aaa ooo?“."
+           ],
+           [
+            "6",
+            "Die goldene Kiste der guten Ratschläge. Sie räuspert sich und sagt: „Endlich. Zieht euch was Anständiges an.“"
+           ],
+           [
+            "7",
+            "Der Ring der bösen Ahnung. Sein Stein ist gelb. Er wird rot, sobald jemand Prunella erwähnt."
+           ],
+           [
+            "8",
+            "Der brennende Wasserschlauch. Er riecht nach Kirsch."
+           ]
+          ],
+          "note": "Jeder Held, der den Schrank durchsucht, würfelt einmal. Doppelte Würfe: Der Schrank ist leer, bis auf einen Zettel „Hab ich verliehen. B.“"
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Abgefülltes Sonnenlicht",
+            "rule": "Eine Flasche voll Mittagssonne. Schütteln: helles Licht in 6 m und dämmriges in weiteren 6 m, 10 Minuten lang. Oder werfen (Reichweite 9 m): Die Flasche zerplatzt, jede Kreatur in 3 m schafft KON SG 12 oder ist bis Ende ihres nächsten Zugs blind. Ein paar Tropfen in einem bemalten Gänseei lassen es 1 Stunde lang leuchten wie ein Phönixei.",
+            "from": "Kuriositätenschrank",
+            "item": "krug-sonnenlicht"
+           },
+           {
+            "name": "Faltbeutel",
+            "rule": "Sieht aus wie ein Nimmervoller Beutel, ist aber nur ein Beutel. Was man hineinlegt, kommt ordentlich gefaltet wieder heraus: Hemden auf Kante, Landkarten als Fächer, Briefe als Papierschwäne. Wer ihn für einen echten Nimmervollen Beutel hält, merkt es beim ersten Langschwert.",
+            "from": "Kuriositätenschrank",
+            "item": "krug-faltbeutel"
+           },
+           {
+            "name": "Verdoppelnder Geldbeutel",
+            "rule": "Bei Sonnenaufgang verdoppelt er die Münzen darin, höchstens bis zu einem Wert von 10 GM. Nimmt jemand die letzte Münze heraus, ist die Magie für immer fort. Darin liegt eine einzige Kupfermünze. Barnabas hat sie nie angerührt.",
+            "from": "Kuriositätenschrank",
+            "item": "krug-geldbeutel"
+           },
+           {
+            "name": "Teller des guten Essens",
+            "rule": "1× pro langer Rast: Dreht man ihn um, liegt darauf ein warmes Essen nach Wunsch, das einen Menschen einen Tag lang satt macht. Gorm findet das beleidigend und sagt es auch.",
+            "from": "Kuriositätenschrank",
+            "item": "krug-teller"
+           },
+           {
+            "name": "Horn des Kauderwelschs",
+            "rule": "1× pro langer Rast wirkst du Botschaft senden. Die Nachricht kommt in einer zufälligen Sprache an (W6: 1 Zwergisch, 2 Elfisch, 3 Goblinisch, 4 Riesisch, 5 Drakonisch, 6 nur in Vokalen). Die Antwort kommt in derselben Sprache zurück.",
+            "from": "Kuriositätenschrank",
+            "item": "krug-kauderhorn"
+           },
+           {
+            "name": "Goldene Kiste der guten Ratschläge",
+            "rule": "Eine sprechende Schatulle mit Edelsteinaugen. 3× pro langer Rast: Wer freundlich mit ihr spricht, bekommt einen Rat und darf 1W4 zu seiner nächsten Probe addieren. Sie verlangt Edelsteine und schmollt, wenn keine kommen. Wer sie beleidigt, hat Nachteil auf seine nächste Probe. Zerbricht sie, springt ein sehr beleidigter Goblin heraus.",
+            "from": "Kuriositätenschrank",
+            "item": "krug-ratgeberkiste"
+           },
+           {
+            "name": "Ring der bösen Ahnung",
+            "rule": "+1 auf Initiative. Der Stein wechselt die Farbe mit der Gefahr: grün ruhig, gelb Ärger in der Luft, rot Kampf, violett Magie im Spiel. Die SL sagt dir, welche Farbe er gerade hat, auch wenn du nicht fragst.",
+            "from": "Kuriositätenschrank",
+            "item": "krug-ahnungsring"
+           },
+           {
+            "name": "Brennender Wasserschlauch",
+            "rule": "Was über Nacht darin bleibt, ist am Morgen Schnaps: Wasser wird Kirsch, Milch wird Eierlikör, Tinte wird etwas, das man nicht trinken sollte. Wer ihn Knut oder den Raufbolden des Goldenen Kapauns anbietet, hat für eine Runde Freunde.",
+            "from": "Kuriositätenschrank",
+            "item": "krug-schnapsschlauch"
+           },
+           {
+            "name": "Wabbels Würfelchen",
+            "rule": "Ein Gallertwürfel so gross wie eine Hutschachtel, Wabbels Nachwuchs. Er folgt dir, frisst Krümel und putzt alles, worüber er gleitet. 1× pro langer Rast, Aktion: Er verschluckt einen Gegenstand bis zur Grösse eines Kopfes in 1,5 m und gibt ihn erst auf dein Kommando wieder heraus, sauber und unversehrt. Wer ihn durchsucht, sieht durch ihn hindurch, was er trägt (Wahrnehmung SG 14). Riecht nach Spülmittel.",
+            "from": "Folgt Wabbel überall hin. Wer Wabbel Spülwasser hinstellt, bekommt es dazu.",
+            "item": "krug-wuerfelchen"
+           }
+          ]
          }
         ]
        },
@@ -1499,7 +1773,15 @@
           "t": "dm",
           "title": "Was gerade aus dem Portal kommt",
           "items": [
-           "Schau in die Portal-Uhr unter „Die Werkzeuge“. Wer den Raum betritt, erlebt die Ebene der aktuellen Stunde. Wollen die Helden das Portal später als Fälschung nutzen (eine Feuerkugel in eine Eierschale locken), geht das nur zur Feuerstunde."
+           "Schau in die Portal-Uhr unter „Die Werkzeuge“. Wer den Raum betritt, erlebt die Ebene der aktuellen Stunde. Wollen die Helden das Portal später für die Fälschung nutzen (eine Glut aus der Feuerebene in eine Eierschale locken), geht das nur zur Feuerstunde."
+          ]
+         },
+         {
+          "t": "dm",
+          "title": "Zur Erdstunde: Steine fallen",
+          "items": [
+           "Ist gerade Erdstunde, poltert es im Portal. Schau ernst in die Runde, mach eine Pause und sag: „Steine fallen. Alle …“ Noch eine Pause. „… würfeln Geschicklichkeit.“",
+           "GES SG 10 oder 1W4 Wucht. Danach liegt ein Haufen Kiesel im Zimmer. Anspielung auf „Steine fallen, alle sterben“, den Spruch für eine Spielleitung am Ende ihrer Geduld. Hier stirbt natürlich niemand."
           ]
          },
          {
@@ -1537,7 +1819,17 @@
           "t": "vorlese",
           "title": "Vorlesetext · Im Keller",
           "ps": [
-           "Der Keller ist lang, gewölbt und voller Fässer. Es ist still. Zu still. Dann gähnt das grösste Fass in der Ecke, und drei Reihen Zähne blitzen auf. Ein Bierkrug auf dem Regal hüpft. Ein Hocker zieht die Beine an."
+           "Der Keller ist lang, gewölbt und voller Fässer. Es ist still. Zu still. Eure Laterne flackert. Dann schnappt etwas danach, es knirscht, und es ist stockdunkel.",
+           "Aus der Dunkelheit kommt ein zufriedenes Schmatzen. Dann ein Gähnen, tief und hölzern. Irgendwo hüpft ein Bierkrug."
+          ]
+         },
+         {
+          "t": "dm",
+          "title": "Ich greife die Dunkelheit an!",
+          "items": [
+           "Ein Mimik-Junges hat die Laterne gefressen. Die erste Runde ist dunkel, ausser jemand hat Dunkelsicht oder macht Licht.",
+           "Ruft ein Spieler „Ich greife die Dunkelheit an!“ (der berühmte Satz aus dem Hörsketch der Dead Alewives über eine D&D-Runde mit Anfängern), dann lass es zu: Bei einem Angriffswurf von 15 oder mehr trifft er zufällig ein Mimik-Junges, das gerade gähnt.",
+           "Danach blinzelt das grösste Fass in der Ecke, drei Reihen Zähne blitzen auf, und der Kampf beginnt."
           ]
          },
          {
@@ -1615,7 +1907,7 @@
            },
            {
             "name": "Hellebrot",
-            "rule": "Eine Hellebarde aus steinhartem Brot, zählt als Hellebarde. 10 Krümel, die sich nicht von selbst auffüllen: Nach jedem Treffer verliert sie einen, bei 0 zerfällt sie. Bonusaktion, Abbeissen: Du erhältst 1W4 TP zurück, sie verliert einen Krümel.",
+            "rule": "Eine Hellebarde aus steinhartem Brot, zählt als Hellebarde. 10 Krümel: Nach jedem Treffer verliert sie einen, bei 0 ist sie bis zur nächsten langen Rast weich und nutzlos. Bonusaktion, Abbeissen: Du erhältst 1W4 TP zurück, sie verliert einen Krümel. Über Nacht wird sie wieder steinhart.",
             "from": "Speisekammer, das Brot, das niemand essen kann",
             "item": "krug-hellebrot"
            }
@@ -1707,7 +1999,40 @@
       "intro": [
        {
         "t": "p",
-        "x": "Der Hort ist der grösste Markt des Reichs: ein alter Dungeon in einem Hügel, drei Stockwerke tief, mit Monstern als Personal. Jeder Wirt kauft hier ein, auch Prunella. Lass die Helden frei zwischen den Abteilungen wählen. Zwei Kämpfe sind fest (Frischetheke, Wühltisch), zwei freiwillig (Möbellabyrinth, Kasse)."
+        "x": "Der Hort ist der grösste Markt des Reichs: ein alter Dungeon in einem Hügel, drei Stockwerke tief, mit Monstern als Personal. Jeder Wirt kauft hier ein, auch Prunella. Lass die Helden frei zwischen den Abteilungen wählen. Zwei Kämpfe sind fest (Frischetheke, Wühltisch), drei freiwillig (Kobolde und Mimik im Möbellabyrinth, Kasse)."
+       },
+       {
+        "t": "p",
+        "x": "**Die Zeit läuft.** Jede Abteilung kostet eine halbe Stunde. Wer alles mitnimmt, kommt zu spät zur Prüfung. Zähl mit und zeig den Spielern den Zähler: Die Spannung entsteht aus dem, was sie auslassen müssen."
+       },
+       {
+        "t": "counter",
+        "id": "hort",
+        "title": "Zeit im Hort",
+        "start": 0,
+        "min": 0,
+        "max": 8,
+        "tone": "probe",
+        "icon": "⌛",
+        "steps": [
+         [
+          0,
+          "Später Vormittag. Alles ist offen."
+         ],
+         [
+          4,
+          "Mittag. Gorm schickt einen Boten: „Wo bleibt das Wild?“"
+         ],
+         [
+          6,
+          "Knapp. Zu Hause bleibt nur noch Zeit für **eine** Aufgabe aus „Zwei Stunden“."
+         ],
+         [
+          8,
+          "**Zu spät.** Zwick steht schon vor der Tür, als die Helden zurückkommen: keine Vorbereitung, −2 Sternepunkte."
+         ]
+        ],
+        "hint": "Jede Abteilung kostet eine halbe Stunde (+1). Die Abkürzung im Möbellabyrinth kostet nichts, Anstehen an der Kasse +1. Die Spieler sehen den Zähler ruhig: Sie müssen wählen, was sie auslassen."
        }
       ],
       "id": "a2",
@@ -1749,7 +2074,7 @@
           "rows": [
            [
             "Erdgeschoss",
-            "Eingang mit Gewinnspiel, Frischetheke (Fleisch, Fisch, Eier, Gemüse), Haushalt (Geschirr, Salzlecksteine, Topfdeckel, Rattenfallen), Kasse"
+            "Eingang mit Gewinnspiel, Frischetheke (Fleisch, Fisch, Eier, Gemüse), Haushalt (Geschirr, Salzlecksteine, Topfdeckel, Rattenfallen), Wechselstube, Kasse"
            ],
            [
             "Erstes Untergeschoss",
@@ -1838,7 +2163,7 @@
          {
           "t": "roll",
           "title": "Begegnungen zwischen den Regalen",
-          "die": 10,
+          "die": 12,
           "rows": [
            [
             "1",
@@ -1879,9 +2204,26 @@
            [
             "10",
             "Der Verdrängerelch röhrt in der Ferne. Alle Kunden ducken sich routiniert."
+           ],
+           [
+            "11",
+            "In der Wechselstube sitzt Frau Glimmerschuppe, eine junge Messingdrachin in Menschengestalt mit Goldmonokel, und prüft jede Münze mit der Zunge. Barden: Jetzt ist euer Moment (siehe unten)."
+           ],
+           [
+            "12",
+            "Ein Trupp Kobolde mit Klemmbrettern und Helmlampen eilt vorbei. „Inventur im Möbellabyrinth! Niemand stört die Inventur!“"
            ]
           ],
           "note": ""
+         },
+         {
+          "t": "dm",
+          "title": "Der Barde und der Drache",
+          "items": [
+           "Der Barde, der den Drachen verführt, ist der älteste Witz über die Klasse. Hier darf er wahr werden. Will ein Held Frau Glimmerschuppe umgarnen, lass es zu: Überzeugen oder Auftreten SG 15, mit der Laute der unpassenden Romantik Vorteil.",
+           "- **Gelingt es:** Sie errötet, Rauch steigt aus ihren Nasenlöchern. Sie wechselt Gold zum Freundschaftskurs (die Helden bekommen 20 GM geschenkt) und verrät, dass sie heute Abend als Gesandte der Drachen zur Königshochzeit geht. „Vielleicht sieht man sich, Schätzchen.“ Im Palast hilft sie (Akt 4, Ereignis 12).",
+           "- **Misslingt es:** Sie lacht so herzlich, dass ihre Brille beschlägt, und schenkt dem Helden trotzdem einen Kupferling „für den Mut“."
+          ]
          },
          {
           "t": "table",
@@ -1946,6 +2288,11 @@
             "Spülmittel für Gallertwürfel",
             "1 GM",
             "Wabbel liebt es"
+           ],
+           [
+            "Krug der ewigen Mayonnaise",
+            "60 GM",
+            "Haushalt, Regal mit „Fast magisch“"
            ],
            [
             "Heiltrank, leicht verdünnt",
@@ -2147,7 +2494,8 @@
            "- **Stimme:** monoton, höflich, jede Silbe mit Bedacht. Jedes Stielauge stempelt ein anderes Formular.",
            "- **Will:** Ordnung. Und, ohne es je zu sagen, ein einziges Mal ein ehrliches Danke.",
            "- **Hat:** das Portalband, das Barnabas bestellt hat. Es liegt hinter ihm im Regal. Er gibt es heraus, wenn das richtige Formular vorliegt.",
-           "- **Typische Sätze:** „Das ist Formular C. Sie brauchen Formular C-Strich.“ · „Der Schalter für C-Strich ist nebenan. Er ist geschlossen.“ · „Das vierte Auge ist nicht zuständig.“"
+           "- **Typische Sätze:** „Das ist Formular C. Sie brauchen Formular C-Strich.“ · „Der Schalter für C-Strich ist nebenan. Er ist geschlossen.“ · „Das vierte Auge ist nicht zuständig.“",
+           "- **Seine Lieblingsfrage:** „Sind Sie sicher?“ Er stellt sie nach jeder Antwort, ruhig, mit allen fünf Augen. Das ist die gefürchtetste Frage jeder Spielleitung, und genau so sollst du sie stellen. Wer zweimal „Ja“ sagt, bekommt den Stempel. Wer zögert, fängt von vorne an."
           ]
          },
          {
@@ -2178,6 +2526,11 @@
             "C-Strich",
             "Abholung bestellter Ware, magisch",
             "Liegt am geschlossenen Schalter nebenan. Er ist nicht abgeschlossen."
+           ],
+           [
+            "V",
+            "Antrag auf Entsteinerung",
+            "Gibt es nur, wenn jemand nach Versteinerung, Basilisken oder Medusen fragt. Okulus stempelt es sofort: „Papier schlägt Stein. Das steht so in der Vorschrift.“"
            ]
           ],
           "bf": true
@@ -2226,6 +2579,14 @@
           "ende": "Bei der Hälfte seiner TP gibt er auf. Bruno Hornig erscheint und verbannt die Helden aus dem Hort, das Portalband bekommen sie nicht."
          },
          {
+          "t": "dm",
+          "title": "Wundfreier Mittwoch",
+          "items": [
+           "Die Kundenkarte hat einen Haken: Wer sie hat, bekommt Werbung. Filialleiter Hornig schickt sie per Botschaftszauber, und zwar immer im ungünstigsten Moment. In jedem Kampf ab jetzt würfelst du einmal W6. Bei einer 1 hört der Kartenbesitzer mitten im Getümmel Hornigs Stimme: „Nicht vergessen: Wundfreier Mittwoch! Alle Heiltränke zum halben Preis!“ Er erschrickt und hat Nachteil auf seinen nächsten Wurf.",
+           "Das ist ein beliebter Forenklassiker: Ein Zauberladen, der seine Kunden mit Botschaften überhäuft. Das wird schnell zum Dauerwitz am Tisch."
+          ]
+         },
+         {
           "t": "loot",
           "title": "Am Kundendienst",
           "items": [
@@ -2244,9 +2605,15 @@
            },
            {
             "name": "Kundenkarte des Horts",
-            "rule": "9 von 10 Stempeln. Beim zehnten Stempel gibt es einen beliebigen gewöhnlichen Gegenstand aus dem Hort umsonst oder einen kleinen Gefallen von Filialleiter Hornig.",
+            "rule": "9 von 10 Stempeln. Beim zehnten Stempel gibt es einen beliebigen gewöhnlichen Gegenstand aus dem Hort umsonst oder einen kleinen Gefallen von Filialleiter Hornig. Haken: Wer die Karte trägt, bekommt Werbung per Botschaftszauber, immer im schlechtesten Moment („Wundfreier Mittwoch! Alle Heiltränke zum halben Preis!“). Die SL würfelt in jedem Kampf W6, bei 1 hast du Nachteil auf deinen nächsten Wurf.",
             "from": "Am Kundendienst, gratis für Neukunden",
             "item": "krug-kundenkarte"
+           },
+           {
+            "name": "Formular V: Antrag auf Entsteinerung",
+            "rule": "Von Herrn Okulus ordnungsgemäss gestempelt. Aktion: Halte es an eine Kreatur oder einen Gegenstand und sag „Papier schlägt Stein!“. Der Zustand versteinert endet sofort, ebenso ein Festsetzen durch Basiliskeneier. Gegen ein Wesen aus Stein (etwa einen Golem) zählt es als magischer Angriff mit 3W6 Wucht. Danach ist es verbraucht.",
+            "from": "Formular V, von Herrn Okulus gestempelt",
+            "item": "krug-formular"
            }
           ]
          }
@@ -2281,7 +2648,7 @@
           "rows": [
            [
             "Die Gans",
-            "Ein grosses Gänseei (1 SM), Goldfarbe (2 GM) und Geschick mit dem Pinsel (Geschicklichkeit SG 12 oder Maler-Werkzeug).",
+            "Ein grosses Gänseei (1 SM), Goldfarbe (2 GM) und Geschick mit dem Pinsel (Geschicklichkeit SG 12 oder Malerbedarf).",
             "Leuchtet nicht. Ohne Licht-Zauber oder Leuchtpilze im Glas (5 GM) sieht jeder, dass die Torte dunkel ist: Verdacht +2."
            ],
            [
@@ -2377,9 +2744,100 @@
             "Strausseneischale, leer",
             "3 GM",
             "Für die Feuer-Fälschung"
+           ],
+           [
+            "Klebestiefel",
+            "30 GM",
+            "„Leicht verflucht“"
+           ],
+           [
+            "Brille der Gelassenheit",
+            "50 GM",
+            "„Wird manchmal schwarz“"
+           ],
+           [
+            "Handschuhe des Mitgefühls",
+            "60 GM",
+            "„Zurückgegeben, Grund unbekannt“"
+           ],
+           [
+            "Ausweis für alles",
+            "100 GM",
+            "„Leeres Blatt“, sagt der Gnom. Ihr seht einen königlichen Passierschein."
+           ],
+           [
+            "Zauberstab des Schlaflieds",
+            "150 GM",
+            "„Singt“"
+           ],
+           [
+            "Zauberstab des peinlichen Nebels",
+            "250 GM",
+            "„Nur draussen benutzen“"
+           ],
+           [
+            "Laute der unpassenden Romantik",
+            "300 GM",
+            "„Für Barden. Nur für Barden. Bitte.“"
+           ],
+           [
+            "Kopf des Vecna",
+            "999 GM, verhandelbar",
+            "Siehe unten"
            ]
           ],
           "bf": true
+         },
+         {
+          "t": "rp",
+          "title": "Rollenspiel · Der Gnom verkauft den Kopf des Vecna",
+          "items": [
+           "- Der Gnom erwacht, sobald jemand die Glasglocke ansieht. „Ah! Kenner! Das ist er. Der Kopf des Vecna. Die Hand kennt ihr, das Auge kennt ihr. Hier ist der Rest.“",
+           "- **Seine Erklärung:** „Ganz einfach. Wie bei Hand und Auge: Man trennt den eigenen Kopf ab und setzt diesen auf. Dann hat man unvorstellbare Macht.“ Er schaut ernst. „Fast alle Kunden haben es so gemacht. Fast alle.“",
+           "- **Die Wahrheit:** Wachs. Arkane Kunde SG 10 sieht es sofort. Der Gnom hat ihn von einem Abenteurer, der damit eine andere Gruppe hereinlegen wollte.",
+           "- **Hintergrund:** Anspielung auf die alte Spieltisch-Legende vom Kopf des Vecna. Eine Gruppe lockte eine andere mit diesem erfundenen Artefakt in die Falle, und einer schnitt sich tatsächlich den Kopf ab. Hier darf niemand so weit gehen: Wer es versucht, wird von Bruno Hornig persönlich davon abgehalten.",
+           "- **Typische Sätze:** „Neunhundertneunundneunzig. Für euch neunhundert. Weil ihr so ehrliche Gesichter habt.“ · „Kein Umtausch nach Gebrauch.“"
+          ]
+         },
+         {
+          "t": "roll",
+          "title": "Die Wühlkiste der unbestimmten Tränke",
+          "die": 8,
+          "rows": [
+           [
+            "1",
+            "Ein vergorener Heiltrank. Er heilt, aber er schmeckt nach Rache."
+           ],
+           [
+            "2",
+            "Eine Tüte Springbohnen, falsch einsortiert."
+           ],
+           [
+            "3",
+            "Trank, der die Stimme 1 Stunde lang sehr tief macht. Vorteil auf Einschüchtern, Nachteil auf Täuschen."
+           ],
+           [
+            "4",
+            "Trank, nach dem man 1 Stunde lang nach Rosen riecht. Hildegard und alle Mimiken mögen das."
+           ],
+           [
+            "5",
+            "Ein echter Trank der Heilung, versehentlich hier gelandet."
+           ],
+           [
+            "6",
+            "Trank, nach dem einem 10 Minuten lang Blüten aus den Ohren wachsen. Sonst nichts."
+           ],
+           [
+            "7",
+            "Ein Trank der Unsichtbarkeit, aber nur für die Kleidung."
+           ],
+           [
+            "8",
+            "Ein Trank des Wachstums, aber nur für Bart und Haare. Sie wachsen 30 cm."
+           ]
+          ],
+          "note": "Je Trank 5 GM. Niemand weiss vorher, was drin ist. Das ist eine beliebte Idee aus den Foren: eine Kiste verbilligter, unbestimmbarer Tränke, mal nützlich, mal zum Brüllen."
          },
          {
           "t": "items",
@@ -2421,6 +2879,66 @@
             "item": "krug-zwergenhammer"
            },
            {
+            "name": "Klebestiefel",
+            "rule": "Du erhältst eine Kletterbewegung gleich deiner Bewegungsrate, kannst an Wänden gehen und rutschst nie aus. Fluch: Jede Stunde kleben sie fester. Nach 4 Stunden lassen sie sich nicht mehr ausziehen, und deine Bewegungsrate sinkt um 3 m. Wird der Fluch gebrochen, platzen sie in einer Wolke aus Glibber.",
+            "from": "Restposten, 30 GM",
+            "item": "krug-klebestiefel"
+           },
+           {
+            "name": "Brille der Gelassenheit",
+            "rule": "Dunkle Gläser, die sich bei schrecklichem Anblick von selbst schwärzen. Du hast Vorteil auf Rettungswürfe gegen den Zustand verängstigt. Ist die Lage so schlimm, dass sie ganz schwarz werden (die SL entscheidet, etwa bei Alarm im Palast), bist du blind, bis du sie absetzt.",
+            "from": "Restposten, 50 GM",
+            "item": "krug-brille"
+           },
+           {
+            "name": "Handschuhe des Mitgefühls",
+            "rule": "Du spürst die Stimmung jeder Kreatur in 9 m: Freude, Angst, Zorn oder Trauer. Aber alles, was du sagst, während du sie trägst, bewirkt das Gegenteil: Trösten macht wütend, Drohen macht fröhlich. Wer das weiss, sagt mit Absicht das Falsche.",
+            "from": "Restposten, 60 GM",
+            "item": "krug-gefuehlshandschuhe"
+           },
+           {
+            "name": "Ausweis für alles",
+            "rule": "Ein leeres Blatt in einem Lederumschlag. Wer es ansieht, sieht das Dokument, das er gerade erwartet: Lieferschein, Passierschein, Einladung, Inspektorenausweis. 3× pro langer Rast: Vorteil auf Täuschen gegenüber jemandem, der es liest. Einsicht SG 15 erkennt ein leeres Blatt.",
+            "from": "Restposten, 100 GM",
+            "item": "krug-ausweis"
+           },
+           {
+            "name": "Zauberstab des Schlaflieds",
+            "rule": "1× pro langer Rast wirkst du Schlaf (SG 13). Der Stab singt dabei laut ein Wiegenlied, das man in 30 m hört. Wer es hört und nicht getroffen wurde, gähnt.",
+            "from": "Restposten, 150 GM",
+            "item": "krug-schlafstab"
+           },
+           {
+            "name": "Zauberstab des peinlichen Nebels",
+            "rule": "1× pro langer Rast wirkst du Stinkende Wolke (SG 13). Die Wolke entsteht mit einem Geräusch, über das danach niemand spricht. Wer darin war, riecht bis zur nächsten Rast danach: Nachteil auf Heimlichkeit gegen alles mit einer Nase.",
+            "from": "Restposten, 250 GM",
+            "item": "krug-stinkstab"
+           },
+           {
+            "name": "Laute der unpassenden Romantik",
+            "rule": "1× pro langer Rast wirkst du Person bezaubern (SG 13), aber es wirkt auch auf Drachen, Riesen und Monstrositäten, die eigentlich keine Personen sind. Wer damit einen Drachen umwirbt, hat Vorteil auf Überzeugen und Auftreten ihm gegenüber. Was danach passiert, ist Sache des Barden.",
+            "from": "Restposten, 300 GM",
+            "item": "krug-drachenlaute"
+           },
+           {
+            "name": "Kopf des Vecna",
+            "rule": "So steht es jedenfalls auf dem Schild. Ein schrumpeliger Kopf unter einer Glasglocke. Wie bei Hand und Auge des Vecna soll man den eigenen Kopf abtrennen und diesen aufsetzen, um unvorstellbare Macht zu erhalten. Arkane Kunde SG 10: Es ist Wachs. Trägt man ihn unter dem Arm, hat man Vorteil auf Einschüchtern gegenüber allen, die die Geschichte kennen. Fluch: Man wird ihn nicht mehr los, jeder Händler sagt „Kein Umtausch“.",
+            "from": "Restposten, 999 GM, verhandelbar",
+            "item": "krug-vecnakopf"
+           },
+           {
+            "name": "Vergorener Heiltrank",
+            "rule": "Aus der Wühlkiste der Restposten. Du erhältst 2W4+2 TP zurück, musst danach aber KON SG 10 schaffen, sonst übergibst du dich und verlierst deine nächste Aktion. Schmeckt nach Rache.",
+            "from": "Wühlkiste der Tränke, 5 GM",
+            "item": "krug-gaertrank"
+           },
+           {
+            "name": "Springbohnen",
+            "rule": "Drei Bohnen in einer Papiertüte. Wer eine isst, kann 1 Stunde lang dreimal so weit und hoch springen. Wer zwei auf einmal isst, hüpft 1 Minute lang unkontrolliert (Nachteil auf Angriffe und Geschicklichkeit) und danach 1 Stunde gar nicht mehr.",
+            "from": "Wühlkiste der Tränke, 5 GM",
+            "item": "krug-springbohnen"
+           },
+           {
             "name": "Flachwitzdolch",
             "rule": "Dolch +1. Empfindungsfähig, erzählt ungefragt Flachwitze. Erzählt der Spieler beim Angriff einen Wortwitz, über den der Tisch stöhnt, verursacht der Treffer zusätzlich 1W4 psychisch. Fluch: Ablegen kannst du ihn erst, wenn jemand über einen seiner Witze ehrlich lacht.",
             "from": "Fundbüro, gratis. Niemand will ihn zurück.",
@@ -2431,6 +2949,12 @@
             "rule": "Was du mit diesen Handschuhen hältst, verursacht dir keinen Feuerschaden, auch nicht ein glühendes Ei. 1× pro langer Rast, Reaktion: Du halbierst Feuerschaden, den du erleidest.",
             "from": "Haushalt, 15 GM",
             "item": "krug-ofenhandschuhe"
+           },
+           {
+            "name": "Krug der ewigen Mayonnaise",
+            "rule": "Wie ein Alchemistenkrug, nur kennt er ein einziges Rezept. 1× pro langer Rast, Aktion: 2 Liter Mayonnaise. Ausgekippt wird ein Feld von 3 auf 3 m rutschig: Wer es betritt oder dort seinen Zug beginnt, schafft GES SG 12 oder liegt am Boden. Diplomaten verlassen den Raum.",
+            "from": "Haushalt, 60 GM",
+            "item": "krug-mayokrug"
            }
           ]
          },
@@ -2482,14 +3006,26 @@
            ],
            [
             10,
-            "Die Goblins sind begeistert."
+            "Die Goblins sind begeistert, so viele waren es lange nicht."
            ],
            [
             15,
-            "Neuer Hausrekord. Die Goblins singen."
+            "Neuer Tagesrekord. Die Goblins singen."
+           ],
+           [
+            47,
+            "Hausrekord eingestellt. Grimsel weint vor Glück."
            ]
           ],
-          "hint": "Jeder Blick durchs Schlüsselloch: +1."
+          "hint": "Jeder Blick durchs Schlüsselloch zählt einen hoch. Der Zähler läuft den ganzen Tag weiter, auch an anderen Türen."
+         },
+         {
+          "t": "dm",
+          "title": "Der Höhleninspektor",
+          "items": [
+           "Ein Forenklassiker: Ein Schurke wird von Goblins ertappt, behauptet, er sei der Höhleninspektor und prüfe, ob alles nach Vorschrift ist, und am Ende schliesst sich ihm die ganze Bande an.",
+           "Gibt sich ein Held hier als Inspektor aus (Täuschen SG 12, mit dem Ausweis für alles automatisch), öffnen die Goblins die Tür sofort und stehen stramm. Sie zeigen ihre Strichliste, ihre Kochlöffel und ihr Notausgangsschild. Gelingt die Probe mit 20 oder mehr, wollen sie mit: Sechs Goblins folgen den Helden bis zum Ende des Hort-Besuchs und tragen Einkäufe. In der Nacht kommen sie zur Schlägerei (Ereignis 11)."
+          ]
          },
          {
           "t": "rp",
@@ -2564,7 +3100,7 @@
          {
           "t": "roll",
           "title": "Was man im Wühltisch findet",
-          "die": 6,
+          "die": 8,
           "rows": [
            [
             "1",
@@ -2589,9 +3125,34 @@
            [
             "6",
             "Ofenhandschuhe der Glut, im Angebot für 1 GM."
+           ],
+           [
+            "7",
+            "Ein Hämmerchen der Heilung. Jemand hat es mit einem Fleischklopfer verwechselt."
+           ],
+           [
+            "8",
+            "Ein selbstknotendes Seil, das sich um das Bein des Finders geknotet hat."
            ]
           ],
-          "note": "Wer nach dem Kampf wühlt: Jeder Held würfelt einmal."
+          "note": "Wer nach dem Kampf wühlt: Jeder Held würfelt einmal. Alles kostet 1 GM."
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Hämmerchen der Heilung",
+            "rule": "Leichter Hammer. 3× pro langer Rast: Triffst du damit eine Kreatur, erleidet sie 1W4 Wucht und erhält danach 2W4+2 TP zurück. Klopft man damit einer Kreatur mit 0 TP auf den Kopf, erleidet sie keinen Schaden und steht fluchend auf.",
+            "from": "Wühltisch, 1 GM",
+            "item": "krug-heilhammer"
+           },
+           {
+            "name": "Selbstknotendes Seil",
+            "rule": "15 m Hanfseil. 3× pro langer Rast, Aktion: Wirf es auf einen Gegenstand oder eine Kreatur in 9 m. Ein Gegenstand wird sicher umknotet. Eine Kreatur schafft GES SG 12 oder ist festgesetzt, bis sie sich mit einer Aktion befreit (STÄ oder GES SG 12). Auf ein Befehlswort löst es sich.",
+            "from": "Wühltisch, 1 GM",
+            "item": "krug-seil"
+           }
+          ]
          }
         ]
        },
@@ -2620,7 +3181,7 @@
            ],
            [
             "Die Abkürzung",
-            "Überleben oder Nachforschungen SG 13. Gelingt es, steht ihr nach zehn Minuten am Ziel. Misslingt es, steht ihr wieder am Eingang, vor dem Schild."
+            "Überleben oder Nachforschungen SG 13. Gelingt es, steht ihr nach zehn Minuten am Ziel (kostet keine Zeit im Hort-Zähler). Misslingt es, steht ihr mitten in der Inventur der Kobolde (unten)."
            ],
            [
             "Probesitzen",
@@ -2630,6 +3191,82 @@
             "Aufbauanleitungen",
             "Sie sind auf Zwergisch. Wer sie lesen kann, findet heraus, dass es nur ein Bild gibt: ein lächelnder Zwerg mit einem Hammer."
            ]
+          ]
+         },
+         {
+          "t": "vorlese",
+          "title": "Vorlesetext · Die Inventur",
+          "ps": [
+           "Hinter der Abkürzung liegt ein Lagerraum voller Kisten. Auf jeder klebt eine Nummer. Auf einem Stapel steht ein Kobold mit Helmlampe und Klemmbrett und starrt euch an.",
+           "„Inventur“, piepst er. „Niemand stört die Inventur.“ Dann pfeift er. Irgendwo klickt etwas. Aus Löchern in den Wänden, die gerade mal so gross sind wie eine Katze, blitzen zwanzig kleine Helmlampen."
+          ]
+         },
+         {
+          "t": "dm",
+          "title": "Tuckers Kobolde",
+          "items": [
+           "Anspielung auf eine der bekanntesten Geschichten der D&D-Szene: Tuckers Kobolde, die schwächsten Monster überhaupt, die eine starke Gruppe mit Fallen, Feuer und engen Tunneln fast zur Verzweiflung brachten. Spiel die Kobolde genau so: Sie kämpfen nie offen. Sie schiessen aus Löchern, ziehen sich zurück und lassen die Helden in Fallen laufen.",
+           "- **Das Ziel der Helden** ist nicht der Sieg, sondern der Ausgang auf der anderen Seite, 18 m entfernt. Jede Runde würfelst du eine Falle unten für den vordersten Helden.",
+           "- **Friedlich lösen:** Wer sich ordnungsgemäss als Kunde ausweist (Kundenkarte, Kassenzettel oder der Ausweis für alles) oder beim Zählen hilft (Nachforschungen SG 12), beendet die Inventur: Die Kobolde entschuldigen sich und begleiten die Helden hinaus.",
+           "- **Kämpfen:** Die Kobolde fliehen in ihre Tunnel, sobald einer fällt, und kommen in der nächsten Runde woanders heraus. Wer sie verfolgen will, muss klein sein."
+          ]
+         },
+         {
+          "t": "roll",
+          "title": "Fallen der Inventur-Kobolde",
+          "die": 6,
+          "rows": [
+           [
+            "1",
+            "Stolperdraht zwischen zwei Kisten. GES SG 13 oder liegend."
+           ],
+           [
+            "2",
+            "Ein Sack Murmeln aus dem Lager. Ein Feld von 3 auf 3 m wird rutschig."
+           ],
+           [
+            "3",
+            "Ein Netz fällt von der Decke. GES SG 12 oder festgesetzt (Befreien STÄ SG 12)."
+           ],
+           [
+            "4",
+            "Armbrustbolzen aus einem Loch in der Wand: Angriff +4, 1W6+2 Stich."
+           ],
+           [
+            "5",
+            "Ein Kistenstapel kippt. GES SG 12 oder 2W6 Wucht und liegend."
+           ],
+           [
+            "6",
+            "Eine kleine Brandflasche. Alle in 1,5 m: GES SG 12 oder 2W4 Feuer. Bruno Hornig schreit aus der Ferne: „Bitte kein Feuer in der Möbelabteilung!“"
+           ]
+          ],
+          "note": "Einmal pro Runde für den vordersten Helden."
+         },
+         {
+          "t": "kampf",
+          "title": "Die Inventur",
+          "enc": "krug-e-kobolde",
+          "gegner": "Acht Kobolde der Inventur, die nie gleichzeitig sichtbar sind.",
+          "gelaende": "Ein Lagerraum von 18 auf 9 m voller Kisten (halbe Deckung), in den Wänden katzengrosse Tunnel. Der Ausgang liegt gegenüber dem Eingang.",
+          "taktik": "Schiessen aus den Tunneln, ziehen sich nach jedem Schuss zurück (Bonusaktion), lösen Fallen aus. Nie mehr als drei sind zugleich zu sehen.",
+          "ende": "Erreicht ein Held den Ausgang oder gibt es einen friedlichen Ausweg, ist die Inventur beendet. Die Kobolde lassen eine Kiste mit Fallen und eine Armbrust mit Zählwerk zurück, „aus Versehen“."
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Kobold-Fallenkiste",
+            "rule": "Von den Inventur-Kobolden zurückgelassen. Darin drei Fallen, die man als Aktion auf ein Feld in 1,5 m stellt: Stolperdraht (GES SG 13 oder liegend), Fussangel (1W4 Stich, Bewegungsrate 0 bis Ende des Zugs) oder Murmelsack (3 auf 3 m rutschig). Über Nacht füllt sich die Kiste wieder auf, Kobolde sind gründlich.",
+            "from": "Von den Inventur-Kobolden zurückgelassen",
+            "item": "krug-koboldkiste"
+           },
+           {
+            "name": "Inventur-Armbrust",
+            "rule": "Leichte Armbrust +1 mit einem Zählwerk am Schaft, das jeden Schuss mitzählt. 1× pro kurzer Rast: ein Brandbolzen. Trifft er, verursacht er zusätzlich 2W6 Feuer, und Brennbares in 1,5 m fängt Feuer.",
+            "from": "Von den Inventur-Kobolden zurückgelassen",
+            "item": "krug-koboldarmbrust"
+           }
           ]
          },
          {
@@ -2649,6 +3286,24 @@
           "gelaende": "Eine eingerichtete Musterküche von 9 auf 9 m. Tische, Stühle, ein Herd, eine Schrankwand an der Rückseite.",
           "taktik": "Die Schrankwand wartet, bis jemand eine Tür öffnet. Die Stühle kleben fest.",
           "ende": "Wer die Mimiken füttert, darf sie mitnehmen. Bruno Hornig verkauft sie gern: „Die stehen seit Jahren hier und beissen die Kunden.“ Das ersetzt die fehlenden Stühle."
+         },
+         {
+          "t": "loot",
+          "title": "In der Musterküche",
+          "items": [
+           "In der Schrankwand hängt eine Ritterrüstung. Sie war nie ein Ausstellungsstück, sondern das Junge der Schrankwand. Gefüttert lässt sie sich anziehen."
+          ]
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Mimikenrüstung",
+            "rule": "Rüstung +1. Eine Ritterrüstung aus dem Möbellabyrinth, die eigentlich ein junger Mimik ist. Sie passt sich jeder Rüstungsart und Grösse an (wähle beim Anlegen, welche sie nachahmt). 1× pro kurzer Rast, Reaktion: Trifft dich ein Nahkampfangriff, beisst sie zurück, 1W8 Stich. Ohne Häppchen nach einer langen Rast schmollt sie bis Mittag: −1 RK.",
+            "from": "Aus der Schrankwand im Möbellabyrinth",
+            "item": "krug-mimikenruestung"
+           }
+          ]
          }
         ]
        },
@@ -2735,6 +3390,10 @@
           ]
          },
          {
+          "t": "p",
+          "x": "Wie viel die Helden schaffen, hängt davon ab, wie lange sie im Hort waren. **Hort-Zähler bis 5:** jede Aufgabe einmal. **6 oder 7:** nur eine Aufgabe. **8:** keine, Zwick steht schon in der Tür (−2 Sternepunkte)."
+         },
+         {
           "t": "table",
           "tone": "wahl",
           "head": [
@@ -2750,7 +3409,7 @@
            ],
            [
             "Portal ohne Portalband",
-            "Magie bannen hält es eine Stunde zu, genau während der Prüfung, wenn man es richtig timt.",
+            "Magie bannen hält es eine Stunde zu, genau während der Prüfung, wenn man den Zeitpunkt richtig abpasst.",
             "Gilt als dicht für die Prüfung."
            ],
            [
@@ -2786,7 +3445,7 @@
           "t": "dm",
           "title": "Lirroy Jänkins",
           "items": [
-           "Mitten in die Vorbereitung stürmt ein Abenteurer zur Tür herein. „Ich hab gehört, hier gibt es Ärger! Na gut, Leute, los geht's!“ Er brüllt seinen eigenen Namen und rennt in die Küche, wo Gorm ihn mit einer Pfanne zurückschickt. Er setzt sich in die Ecke, bestellt ein Bier und bleibt bis Mitternacht. Er meint es gut."
+           "Mitten in die Vorbereitung stürmt Lirroy zur Tür herein, den die Helden aus dem Hort kennen. „Ich hab gehört, hier gibt es Ärger! Na gut, Leute, los geht's!“ Er brüllt seinen eigenen Namen und rennt in die Küche, wo Gorm ihn mit einer Pfanne zurückschickt. Er setzt sich in die Ecke, bestellt ein Bier und bleibt bis Mitternacht. Er meint es gut."
           ]
          }
         ]
@@ -2946,14 +3605,14 @@
            ],
            [
             8,
-            "**Mit Lob.** Im Palast startet der Verdacht bei 0, auch wenn Zwick schlecht behandelt wurde."
+            "**Mit Lob.** Im Palast startet der Verdacht bei 0, auch wenn Zwick am Morgen schlecht behandelt wurde."
            ],
            [
             11,
             "**Glänzend.** Zwick wird zum stillen Verbündeten und lenkt im Palast einmal die Wachen ab."
            ]
           ],
-          "hint": "Punkte aus Entscheidungen und Proben. Die Quellen stehen unten."
+          "hint": "Punkte gibt es für gelöste Probleme, den Umgang mit Zwick am Morgen und gute Proben beim Probeessen. Alle Quellen stehen in Akt 3 unter „Zwick kommt“."
          },
          {
           "t": "table",
@@ -3010,6 +3669,10 @@
            [
             "Pavillon angezündet",
             "−1"
+           ],
+           [
+            "Zu spät aus dem Hort (Hort-Zähler 8)",
+            "−2"
            ]
           ],
           "bf": true
@@ -3043,7 +3706,7 @@
           "rows": [
            [
             "Küche",
-            "Überleben oder Koch-Werkzeug SG 12. Mit Gorms Gewürzbeutel automatisch."
+            "Überleben oder Kochutensilien SG 12. Mit Gorms Gewürzbeutel automatisch."
            ],
            [
             "Saal",
@@ -3065,12 +3728,31 @@
           "ende": "Jede Runde Kampf: Heimlichkeit SG 12 für den ganzen Tisch. Misslingt sie, hebt Zwick eine Augenbraue, −1 Sternepunkt. Gelingt alles, schreibt Zwick: „Ruhige Atmosphäre.“"
          },
          {
+          "t": "dm",
+          "title": "Der Rattensack",
+          "items": [
+           "Unter dem Fenster bleibt Prunellas Jutesack liegen. Er raschelt weiter. Er wird nie leer.",
+           "Anspielung auf den „Bag of Rats“, den berüchtigten Trick, mit einem Sack voll Ratten Fähigkeiten auszulösen, die beim Töten einer Kreatur wirken. Er ist so bekannt, dass die Spielleiter-Regeln von 2024 ihn ausdrücklich verbieten. Hier gibt es ihn als harmlosen Gegenstand, der genau das nicht kann."
+          ]
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Prunellas Rattensack",
+            "rule": "Ein Jutesack, in dem es immer raschelt. 3× pro langer Rast, Bonusaktion: Du ziehst eine harmlose Ratte heraus und setzt sie in 1,5 m ab. Eine Kreatur deiner Wahl neben ihr erschrickt und hat Nachteil auf ihren nächsten Angriff. Für Fähigkeiten, die beim Töten einer Kreatur wirken, zählen die Ratten nicht, die Götter haben es ausdrücklich verboten.",
+            "from": "Prunellas Sack unter dem Fenster",
+            "item": "krug-rattensack"
+           }
+          ]
+         },
+         {
           "t": "probe",
           "title": "Zweiter Gang · Wildbraten mit Beeren",
           "rows": [
            [
             "Küche",
-            "Überleben oder Koch-Werkzeug SG 13. Mit Elchwild aus dem Hort Vorteil, ohne Wild Nachteil (es gibt Bratwurst, Gorm weint)."
+            "Überleben oder Kochutensilien SG 13. Mit Elchwild aus dem Hort Vorteil, ohne Wild Nachteil (es gibt Bratwurst, Gorm weint)."
            ],
            [
             "Saal",
@@ -3088,7 +3770,7 @@
           "rows": [
            [
             "Küche",
-            "Mit echtem Basiliskenei: Koch-Werkzeug SG 12. Ohne Ei gibt es Apfelkuchen, gut, aber kein Krönchen."
+            "Mit echtem Basiliskenei: Kochutensilien SG 12. Ohne Ei gibt es Apfelkuchen, gut, aber kein Krönchen."
            ],
            [
             "Saal",
@@ -3097,6 +3779,10 @@
            [
             "Panne: Prunellas faules Ei",
             "Der Löffel versteinert in Zwicks Hand. Täuschen SG 15: „Das ist unsere Steinlöffel-Spezialität.“ Gelingt das, schreibt Zwick: „Mutig.“ und gibt den Punkt zurück."
+           ],
+           [
+            "Papier schlägt Stein",
+            "Hat jemand Formular V von Herrn Okulus, hält er es an den Löffel und ruft „Papier schlägt Stein!“: Der Löffel wird wieder Silber. Zwick lacht zum ersten Mal seit Jahren, +1 Sternepunkt. Anspielung auf die Forengeschichte vom Steingolem, den Spieler mit einem Stück Pergament besiegten."
            ],
            [
             "Panne: das Portal",
@@ -3170,14 +3856,14 @@
            ],
            [
             8,
-            "**Mit Lob.** Im Palast startet der Verdacht bei 0, auch wenn Zwick schlecht behandelt wurde."
+            "**Mit Lob.** Im Palast startet der Verdacht bei 0, auch wenn Zwick am Morgen schlecht behandelt wurde."
            ],
            [
             11,
             "**Glänzend.** Zwick wird zum stillen Verbündeten und lenkt im Palast einmal die Wachen ab."
            ]
           ],
-          "hint": "Punkte aus Entscheidungen und Proben. Die Quellen stehen unten."
+          "hint": "Punkte gibt es für gelöste Probleme, den Umgang mit Zwick am Morgen und gute Proben beim Probeessen. Alle Quellen stehen in Akt 3 unter „Zwick kommt“."
          },
          {
           "t": "vorlese",
@@ -3209,7 +3895,8 @@
           "items": [
            "Die Hoflieferanten-Marke (oder die Aushilfsmarke).",
            "Zwick bezahlt das Essen, das erste Mal in vierzig Jahren: 20 GM und eine Kupfermünze für den Haferbrei vom Morgen."
-          ]
+          ],
+          "gm": 20
          },
          {
           "t": "items",
@@ -3251,7 +3938,11 @@
       "intro": [
        {
         "t": "p",
-        "x": "Die Hochzeit des Königs. Hunderte Gäste, eine Küche voller Feuer und Geschrei, und in einer Kammer nebenan eine Torte, auf der das einzige Phönixei des Reichs leuchtet. Die Helden müssen kochen, servieren, unauffällig bleiben und im richtigen Moment tauschen. Halte den Verdacht im Blick."
+        "x": "Die Hochzeit des Königs. Hunderte Gäste, eine Küche voller Feuer und Geschrei, und in einer Kammer nebenan eine Torte, auf der das einzige Phönixei des Reichs leuchtet. Die Helden müssen kochen, servieren, unauffällig bleiben und im richtigen Moment tauschen."
+       },
+       {
+        "t": "p",
+        "x": "**Zwei Uhren laufen gegeneinander:** Der Verdacht steigt mit jeder Panne, und mit jedem Gang rückt der Anschnitt näher. Warten die Helden zu lange, müssen sie das Ei vor allen Augen holen. Handeln sie zu früh, fällt der Tausch auf."
        },
        {
         "t": "counter",
@@ -3277,10 +3968,39 @@
          ],
          [
           6,
-          "**Alarm.** Weiter mit „Der Weg hinaus“, Flucht."
+          "**Alarm.** Die Wachen rücken an. Weiter mit „Der Weg hinaus“, Flucht aus dem Palast."
          ]
         ],
-        "hint": "Jede misslungene Probe, jede auffällige Waffe und jede Panne mit der Fälschung: +1."
+        "hint": "Jede misslungene Probe in der Hofküche, jede auffällige Waffe und jede Panne mit der Fälschung: +1. Startwert 1, wenn Zwick am Morgen schlecht behandelt wurde (ausser bei 8 Sternepunkten)."
+       },
+       {
+        "t": "counter",
+        "id": "gaenge",
+        "title": "Gänge bis zum Anschnitt",
+        "start": 0,
+        "min": 0,
+        "max": 5,
+        "tone": "wahl",
+        "icon": "🍰",
+        "steps": [
+         [
+          0,
+          "Die Vorspeise wird aufgetragen. Die Torte steht in der Tortenkammer."
+         ],
+         [
+          3,
+          "Fräulein Zuckerguss bereitet die Torte vor und ist nur noch selten weg: Ablenkungen haben Nachteil."
+         ],
+         [
+          4,
+          "Die Diener holen den silbernen Wagen. Wer jetzt tauscht, hat nur noch eine Runde."
+         ],
+         [
+          5,
+          "**Anschnitt!** Die Torte rollt in den Festsaal. Ist das Ei noch darauf, muss es vor allen Augen geholt werden: Verdacht sofort auf 6."
+         ]
+        ],
+        "hint": "Nach jedem Gang des Hochzeitsmahls +1. Der Tausch muss vor dem fünften Gang gelingen."
        }
       ],
       "id": "a4",
@@ -3411,11 +4131,11 @@
           "rows": [
            [
             "Ablauf",
-            "Fünf Gänge, eine Runde pro Gang. In jeder Runde würfelt jeder Held eine Probe für seine Rolle. Jede misslungene Probe: Verdacht +1. Gelingen in einer Runde alle: Verdacht −1."
+            "Fünf Gänge, eine Runde pro Gang. In jeder Runde würfelt jeder Held eine Probe für seine Rolle. Jede misslungene Probe: Verdacht +1. Gelingen in einer Runde alle: Verdacht −1. Nach jedem Gang: Gänge-Zähler +1."
            ],
            [
             "Koch",
-            "Koch-Werkzeug oder Überleben SG 13"
+            "Kochutensilien oder Überleben SG 13"
            ],
            [
             "Kellner",
@@ -3442,7 +4162,7 @@
          {
           "t": "roll",
           "title": "Ereignisse in der Hofküche",
-          "die": 10,
+          "die": 12,
           "rows": [
            [
             "1",
@@ -3483,6 +4203,14 @@
            [
             "10",
             "Ein Feuerwerk explodiert direkt vor dem Küchenfenster. Alle zucken zusammen, eine Runde lang schaut niemand hin."
+           ],
+           [
+            "11",
+            "Im Festsaal streiten zwei betrunkene Grafen. Einer packt das Spanferkel vom Buffet und wirft es nach dem anderen. Er trifft die Braut. Totenstille, dann lacht die Königin, und der ganze Saal lacht mit. Alle Wachen schauen hin: Verdacht −1. (Anspielung auf die Forengeschichte, in der ein Barbar an Strahds Hochzeit ein Ferkel wirft und die Braut trifft.)"
+           ],
+           [
+            "12",
+            "Unter den Gästen sitzt die Gesandte der Drachen: Frau Glimmerschuppe aus der Wechselstube des Horts. Hat ein Held sie am Mittag umgarnt, zwinkert sie ihm zu und fordert den König zum Tanz auf. Der ganze Hof schaut zu: Verdacht −2. Sonst nickt sie nur höflich."
            ]
           ],
           "note": "Einmal pro Gang des Mahls."
@@ -3550,6 +4278,16 @@
             "Ein Zauber",
             "Etwa Kleine Illusion oder Einflüsterung",
             "Wie eine gute Ausrede, die Wachen schauen weg."
+           ],
+           [
+            "Das Schlaflied",
+            "Der Zauberstab des Schlaflieds auf den Vorkoster",
+            "Er schläft sofort. Aber das Lied hört man im Flur: Verdacht +1, wenn keine Musik spielt."
+           ],
+           [
+            "Wabbels Würfelchen",
+            "Es gleitet unter dem Wagen hindurch",
+            "Es verschluckt das echte Ei und kommt erst draussen wieder heraus. Der Tausch ist dann nur noch Geschicklichkeit SG 12."
            ]
           ],
           "bf": true
@@ -3571,7 +4309,7 @@
           "rows": [
            [
             "Die Gans",
-            "Die Torte ist dunkel. Ohne Licht-Zauber, Leuchtpilze oder eine Kerze im Zuckernest merkt es Fräulein Zuckerguss in zehn Minuten: Verdacht +2, und sie schreit."
+            "Die Torte ist dunkel. Ohne Licht-Zauber, Leuchtpilze, Abgefülltes Sonnenlicht oder eine Kerze im Zuckernest merkt es Fräulein Zuckerguss in zehn Minuten: Verdacht +2, und sie schreit."
            ],
            [
             "Das Feuer",
@@ -3621,9 +4359,9 @@
           "title": "Was jetzt passieren kann",
           "items": [
            "Prunella weiss nicht, wofür das Ei ist. Sie hält die Helden für Diebe, die es verkaufen wollen.",
-           "- **Die Wahrheit sagen:** Erzählen die Helden ihr von Barnabas, wird sie blass. Einsicht SG 12: Ihre Hand zittert. Sie war vor dreissig Jahren mit ihm verlobt, er hat die Hochzeit verpasst, weil er ein Fass anstach. Sie lässt die Pfanne sinken. „Dieser sture Esel.“ Sie hilft den Helden hinaus und lenkt die Wachen ab.",
+           "- **Die Wahrheit sagen:** Erzählen die Helden ihr von Barnabas, wird sie blass. Einsicht SG 12: Ihre Hand zittert. Vor dreissig Jahren hat sie ihm einen Antrag gemacht. Er sagte: „Später, ich steche gerade ein Fass an.“ Später kam nie. Sie lässt die Pfanne sinken. „Dieser sture Esel.“ Sie hilft den Helden hinaus und lenkt die Wachen ab.",
            "- **Lügen:** Täuschen SG 16. Gelingt es, glaubt sie ihnen nicht, lässt sie aber gehen und schwört Rache. Im Finale wartet sie mit Knut.",
-           "- **Bestechen:** Sie will keinen Gold. Sie will, dass die Helden öffentlich sagen, ihr Kuchen sei der beste der Stadt. Wer das tut (vor allen Leuten, im Festsaal), hat sie für heute auf seiner Seite.",
+           "- **Bestechen:** Sie will kein Gold. Sie will, dass die Helden öffentlich sagen, ihr Kuchen sei der beste der Stadt. Wer das tut (vor allen Leuten, im Festsaal), hat sie für heute auf seiner Seite.",
            "- **Kämpfen:** Sie schreit. Verdacht auf 6, Alarm."
           ]
          },
@@ -3716,7 +4454,9 @@
           "title": "Aus dem Palast",
           "items": [
            "Eine goldene Feder, die beim Tausch aus dem Zuckernest gefallen ist. Sie glimmt.",
-           "In der Garderobe der Hofköche: eine Kochmütze mit eingesticktem Wappen. Niemand vermisst sie."
+           "In der Garderobe der Hofköche: eine Kochmütze mit eingesticktem Wappen. Niemand vermisst sie.",
+           "Neben der Torte lag das königliche Tortenmesser. Wer es eingesteckt hat, hat jetzt ein Problem, aber ein sehr schönes.",
+           "Vom Buffet: ein ganzes Spanferkel, falls jemand Hunger hat oder etwas zum Werfen braucht."
           ]
          },
          {
@@ -3733,6 +4473,18 @@
             "rule": "1× pro langer Rast wirkst du Befehl (SG 13), aber nur in Küchen und Wirtshäusern. Erlaubte Befehle: „Abwasch!“, „Raus!“, „Probier!“, „Hinsetzen!“ und „Ruhe!“.",
             "from": "Garderobe der Hofköche",
             "item": "krug-kochmuetze"
+           },
+           {
+            "name": "Das königliche Tortenmesser",
+            "rule": "Kurzschwert +1, die Klinge mit Zuckerrosen verziert. 1× pro kurzer Rast, Bonusaktion, Anschnitt: Dein nächster Treffer bis Ende des Zugs verursacht zusätzlich 2W6 Hieb. Schneidet jeden Kuchen in genau gleich grosse Stücke. Der König sucht es.",
+            "from": "Tortenkammer, neben der Torte",
+            "item": "krug-tortenmesser"
+           },
+           {
+            "name": "Spanferkel vom Festmahl",
+            "rule": "Ein ganzes gebratenes Spanferkel. Als Wurfwaffe: Reichweite 6 m, Angriff mit Nachteil, 2W6 Wucht, und das Ziel riecht so köstlich, dass Wabbel und alle Mimiken es verfolgen. Gegessen: Bis zu fünf Helden erhalten je 1W4+1 temporäre TP.",
+            "from": "Buffet im Festsaal",
+            "item": "krug-spanferkel"
            }
           ]
          }
@@ -3762,14 +4514,14 @@
          ],
          [
           4,
-          "Glühend: 2W6 Feuer pro Zug ohne Ofenhandschuhe, Stoff fängt Feuer."
+          "Glühend: 2W6 Feuer pro Zug für den Träger ohne Ofenhandschuhe, Stoff fängt Feuer."
          ],
          [
           6,
-          "Es will schlüpfen. Jetzt muss es an Barnabas' Brust."
+          "Es will schlüpfen. Jetzt muss es an Barnabas' Brust, sonst ist die Magie verloren."
          ]
         ],
-        "hint": "Steigt bei jedem Misserfolg auf dem Rückweg und jede Runde in der Schlägerei um 1."
+        "hint": "Steigt bei jedem Misserfolg auf dem Rückweg und in jeder Runde der Schlägerei um 1."
        }
       ],
       "id": "f",
@@ -3881,7 +4633,9 @@
            "- **Das Ei** kann geworfen werden (Reichweite 9 m, Fangen: GES SG 10, mit Schürze automatisch). Fällt es zu Boden, rollt es 1W4 Felder in eine zufällige Richtung.",
            "- **Knuts Leute wollen das Ei,** nicht die Helden. Sie packen den Träger, wenn sie können.",
            "- **Die Hitze** steigt jede Runde um 1. Bei 6 muss das Ei sofort an Barnabas' Brust.",
-           "- **Hilfe:** Gorm und Wabbel kämpfen mit (als Verbündete einsetzen). Ui wirft Krüge. Rudi verteidigt die Treppe mit seinem Holzbein."
+           "- **Hilfe:** Gorm und Wabbel kämpfen mit (als Verbündete einsetzen). Ui wirft Krüge. Rudi verteidigt die Treppe mit seinem Holzbein.",
+           "- **Die Bauern-Kanone:** Die Gaststube ist voll von Gästen, die auf der Seite der Helden sind. Wer das Ei hat, kann es als Aktion in die Menge geben. Die Gäste reichen es mit vorbereiteten Aktionen weiter, Hand für Hand: Es wandert 9 m pro Runde in eine Richtung deiner Wahl, auch die Treppe hoch. Knuts Leute können die Kette unterbrechen (Athletik SG 13). Anspielung auf die „Peasant Railgun“, das berüchtigte Gedankenspiel, bei dem tausende Bauern einen Gegenstand so schnell weiterreichen, dass er zur Kanone wird.",
+           "- **Tödlicher Spott:** Knut ist bei seinen Verschwörungen empfindlich. Gehässiger Spott über eine seiner Theorien: Er hat Nachteil auf den Rettungswurf. Fällt er durch Spott auf 0 TP, setzt er sich hin, weint und kämpft nicht mehr. Anspielung auf den Forenklassiker, in dem ein Oger an einem Gehässigen Spott stirbt."
           ]
          },
          {
@@ -3922,6 +4676,16 @@
             "Herr Flossmann, der ausgestopfte Fisch",
             "1W4 Wucht",
             "Sein Monokel fliegt davon. Rudi ist empört."
+           ],
+           [
+            "Spanferkel (wenn aus dem Palast mitgebracht)",
+            "2W6 Wucht",
+            "Wurf mit Nachteil, Reichweite 6 m. Wer getroffen wird, riecht köstlich: Wabbel verfolgt ihn."
+           ],
+           [
+            "Krug der ewigen Mayonnaise",
+            "–",
+            "Ausgekippt wird ein Feld von 3 auf 3 m rutschig: GES SG 12 oder liegend."
            ]
           ],
           "bf": true
@@ -4023,10 +4787,21 @@
            },
            {
             "a": "Gedemütigt oder besiegt",
-            "b": "Sie schwört Rache. Stoff für eine Fortsetzung.",
+            "b": "Sie schwört Rache. Stoff für eine Fortsetzung. Ihre Bratpfanne bleibt in der Gaststube liegen.",
             "sets": {
              "prunella": "gedemütigt"
             }
+           }
+          ]
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Prunellas Bratpfanne",
+            "rule": "Zählt als Knüppel +1 auf Angriff und Schaden. 1× pro kurzer Rast, Reaktion, Parade: +2 RK gegen einen Nahkampfangriff. Jeder Treffer klingt wie eine Glocke, man hört ihn bis auf die Strasse. Spiegeleier gelingen darin immer.",
+            "from": "Bleibt liegen, wenn Prunella besiegt oder gedemütigt wurde",
+            "item": "krug-bratpfanne"
            }
           ]
          }
@@ -4172,7 +4947,8 @@
            "Der Hoflieferanten-Lohn: 50 GM je Held.",
            "Freibier im Letzten Krug, für immer. Barnabas schreibt es an die Wand.",
            "Jeder Held bekommt einen Krug mit seinem Namen über der Theke."
-          ]
+          ],
+          "gmHero": 50
          },
          {
           "t": "items",
@@ -4509,7 +5285,7 @@
        ],
        [
         "Wendung",
-        "Erfährt sie vom Onkel und dem Ei, zögert sie. Sie und Barnabas waren in ihrer Jugend ein Paar."
+        "Erfährt sie vom Onkel und dem Ei, zögert sie. Vor dreissig Jahren machte sie Barnabas einen Antrag. Er sagte: „Später, ich steche gerade ein Fass an.“ Später kam nie."
        ]
       ],
       "quote": "„Wie herzig. Ein Wirtshaus voller Amateure. Ich bringe euch nachher einen Kuchen, zum Trösten.“"
@@ -4638,7 +5414,11 @@
        ],
        [
         "So spielst du ihn",
-        "Taucht im dümmsten Moment auf. Einmal am Nachmittag, einmal in der Nacht. Er meint es gut."
+        "Taucht im dümmsten Moment auf: im Hort, bei der Vorbereitung, im Palast und in der Nacht. Er meint es gut."
+       ],
+       [
+        "Vorbild",
+        "Leeroy Jenkins, der berühmteste Sturmangriff der Spielegeschichte."
        ]
       ],
       "quote": "„Na gut, Leute, los geht's. LIIIRROOOY JÄÄÄNKINS!“"
@@ -4746,7 +5526,7 @@
       "title": "Kassandra, die Kassenschlange",
       "ch": "a2",
       "look": "Eine Riesenschlange mit Brille, um die Kasse gewickelt. Ihr Schwanz liegt quer über allen Kassen.",
-      "lore": "Seit der Eröffnung an Kasse 1. Sie hat noch nie einen Fehler beim Wechselgeld gemacht.",
+      "lore": "Seit der Eröffnung an Kasse 2. Sie hat noch nie einen Fehler beim Wechselgeld gemacht.",
       "fight": "Nur gegen Drängler: umschlingen, bis bezahlt ist.",
       "weak": [
        "Kassenzettel vorzeigen: sofort frei.",
@@ -4838,7 +5618,8 @@
       "lore": "Aus dem Aquarium der Frischetheke, das der Elch umgestossen hat.",
       "fight": "Zwicken, packen, laufen seitwärts davon.",
       "weak": [
-       "Seitwärts: Wer vor ihnen steht, wird selten getroffen (kein Regeleffekt, nur Beschreibung)."
+       "Ein Stück Fisch lenkt eine Krabbe 1 Runde lang ab.",
+       "Sie laufen nur seitwärts: Wer hinter einer Säule steht, ist sicher."
       ]
      },
      "mimic": {
@@ -4873,10 +5654,22 @@
        "Wabbel auch."
       ]
      },
+     "kobold": {
+      "title": "Tuckers Kobolde",
+      "ch": "a2",
+      "look": "Kleine Echsenwesen mit Helmlampen, Klemmbrettern und Armbrüsten, die nie alle zugleich zu sehen sind.",
+      "lore": "Die Inventur-Kobolde des Horts. Sie zählen das Lager jedes Jahr, und jedes Jahr stören Kunden. Seitdem haben sie Fallen. Vorbild sind Tuckers Kobolde aus dem Magazin Dragon (1987): die schwächsten Monster, die eine starke Gruppe mit Fallen und Tunneln fast zur Verzweiflung brachten.",
+      "fight": "Schiessen aus Tunneln, ziehen sich nach jedem Schuss zurück, lösen Fallen aus. Nie offen.",
+      "weak": [
+       "Kundenkarte oder Kassenzettel vorzeigen beendet die Inventur.",
+       "Wer beim Zählen hilft, hat Freunde fürs Leben.",
+       "In ihre Tunnel passen nur Kleine."
+      ]
+     },
      "thug": {
       "title": "Prunellas Raufbolde",
       "ch": "f",
-      "look": "Fünf Stammgäste des Goldenen Kapauns mit Hemdsärmeln und schlechten Absichten.",
+      "look": "Fünf Stammgäste des Goldenen Kapauns mit hochgekrempelten Ärmeln und schlechten Absichten.",
       "lore": "Für ein Freibier tun sie alles. Für zwei auch das Gegenteil.",
       "fight": "Prügeln mit Fäusten und Stühlen, bevorzugt zu zweit auf einen.",
       "weak": [
@@ -4924,7 +5717,7 @@
        "reset": "long",
        "name": "Hellebrot: Krümel"
       },
-      "text": "Eine Hellebarde aus steinhartem Brot, zählt als Hellebarde. 10 Krümel, die sich nicht von selbst auffüllen: Nach jedem Treffer verliert sie einen, bei 0 zerfällt sie. Bonusaktion, Abbeissen: Du erhältst 1W4 TP zurück, sie verliert einen Krümel."
+      "text": "Eine Hellebarde aus steinhartem Brot, zählt als Hellebarde. 10 Krümel: Nach jedem Treffer verliert sie einen, bei 0 ist sie bis zur nächsten langen Rast weich und nutzlos. Bonusaktion, Abbeissen: Du erhältst 1W4 TP zurück, sie verliert einen Krümel. Über Nacht wird sie wieder steinhart."
      },
      "krug-flachwitzdolch": {
       "name": "Flachwitzdolch",
@@ -5054,7 +5847,7 @@
      "krug-kundenkarte": {
       "name": "Kundenkarte des Horts",
       "r": "gewöhnlich",
-      "text": "9 von 10 Stempeln. Beim zehnten Stempel gibt es einen beliebigen gewöhnlichen Gegenstand aus dem Hort umsonst oder einen kleinen Gefallen von Filialleiter Hornig."
+      "text": "9 von 10 Stempeln. Beim zehnten Stempel gibt es einen beliebigen gewöhnlichen Gegenstand aus dem Hort umsonst oder einen kleinen Gefallen von Filialleiter Hornig. Haken: Wer die Karte trägt, bekommt Werbung per Botschaftszauber, immer im schlechtesten Moment („Wundfreier Mittwoch! Alle Heiltränke zum halben Preis!“). Die SL würfelt in jedem Kampf W6, bei 1 hast du Nachteil auf deinen nächsten Wurf."
      },
      "krug-augenklappe": {
       "name": "Augenklappe des Schlüssellochs",
@@ -5126,6 +5919,266 @@
       "r": "gewöhnlich",
       "text": "Messingmarke mit Krone und Kochlöffel. Öffnet den Dienstboteneingang des Palasts. Vorteil auf Überzeugen gegenüber Dienstboten und Wachen des Hofs, solange sie sichtbar getragen wird."
      },
+     "krug-sonnenlicht": {
+      "name": "Abgefülltes Sonnenlicht",
+      "r": "gewöhnlich",
+      "cons": true,
+      "kg": 0.5,
+      "text": "Eine Flasche voll Mittagssonne. Schütteln: helles Licht in 6 m und dämmriges in weiteren 6 m, 10 Minuten lang. Oder werfen (Reichweite 9 m): Die Flasche zerplatzt, jede Kreatur in 3 m schafft KON SG 12 oder ist bis Ende ihres nächsten Zugs blind. Ein paar Tropfen in einem bemalten Gänseei lassen es 1 Stunde lang leuchten wie ein Phönixei."
+     },
+     "krug-faltbeutel": {
+      "name": "Faltbeutel",
+      "r": "gewöhnlich",
+      "text": "Sieht aus wie ein Nimmervoller Beutel, ist aber nur ein Beutel. Was man hineinlegt, kommt ordentlich gefaltet wieder heraus: Hemden auf Kante, Landkarten als Fächer, Briefe als Papierschwäne. Wer ihn für einen echten Nimmervollen Beutel hält, merkt es beim ersten Langschwert."
+     },
+     "krug-geldbeutel": {
+      "name": "Verdoppelnder Geldbeutel",
+      "r": "ungewöhnlich",
+      "text": "Bei Sonnenaufgang verdoppelt er die Münzen darin, höchstens bis zu einem Wert von 10 GM. Nimmt jemand die letzte Münze heraus, ist die Magie für immer fort. Darin liegt eine einzige Kupfermünze. Barnabas hat sie nie angerührt."
+     },
+     "krug-teller": {
+      "name": "Teller des guten Essens",
+      "r": "gewöhnlich",
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Teller: Mahlzeit"
+      },
+      "text": "1× pro langer Rast: Dreht man ihn um, liegt darauf ein warmes Essen nach Wunsch, das einen Menschen einen Tag lang satt macht. Gorm findet das beleidigend und sagt es auch."
+     },
+     "krug-kauderhorn": {
+      "name": "Horn des Kauderwelschs",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Horn: Botschaft"
+      },
+      "text": "1× pro langer Rast wirkst du Botschaft senden. Die Nachricht kommt in einer zufälligen Sprache an (W6: 1 Zwergisch, 2 Elfisch, 3 Goblinisch, 4 Riesisch, 5 Drakonisch, 6 nur in Vokalen). Die Antwort kommt in derselben Sprache zurück."
+     },
+     "krug-ratgeberkiste": {
+      "name": "Goldene Kiste der guten Ratschläge",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 3,
+       "reset": "long",
+       "name": "Kiste: guter Rat"
+      },
+      "text": "Eine sprechende Schatulle mit Edelsteinaugen. 3× pro langer Rast: Wer freundlich mit ihr spricht, bekommt einen Rat und darf 1W4 zu seiner nächsten Probe addieren. Sie verlangt Edelsteine und schmollt, wenn keine kommen. Wer sie beleidigt, hat Nachteil auf seine nächste Probe. Zerbricht sie, springt ein sehr beleidigter Goblin heraus."
+     },
+     "krug-ahnungsring": {
+      "name": "Ring der bösen Ahnung",
+      "r": "ungewöhnlich",
+      "att": true,
+      "init": 1,
+      "text": "+1 auf Initiative. Der Stein wechselt die Farbe mit der Gefahr: grün ruhig, gelb Ärger in der Luft, rot Kampf, violett Magie im Spiel. Die SL sagt dir, welche Farbe er gerade hat, auch wenn du nicht fragst."
+     },
+     "krug-schnapsschlauch": {
+      "name": "Brennender Wasserschlauch",
+      "r": "gewöhnlich",
+      "text": "Was über Nacht darin bleibt, ist am Morgen Schnaps: Wasser wird Kirsch, Milch wird Eierlikör, Tinte wird etwas, das man nicht trinken sollte. Wer ihn Knut oder den Raufbolden des Goldenen Kapauns anbietet, hat für eine Runde Freunde."
+     },
+     "krug-wuerfelchen": {
+      "name": "Wabbels Würfelchen",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Würfelchen: verschlucken"
+      },
+      "text": "Ein Gallertwürfel so gross wie eine Hutschachtel, Wabbels Nachwuchs. Er folgt dir, frisst Krümel und putzt alles, worüber er gleitet. 1× pro langer Rast, Aktion: Er verschluckt einen Gegenstand bis zur Grösse eines Kopfes in 1,5 m und gibt ihn erst auf dein Kommando wieder heraus, sauber und unversehrt. Wer ihn durchsucht, sieht durch ihn hindurch, was er trägt (Wahrnehmung SG 14). Riecht nach Spülmittel."
+     },
+     "krug-heilhammer": {
+      "name": "Hämmerchen der Heilung",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 3,
+       "reset": "long",
+       "name": "Hämmerchen: heilen"
+      },
+      "text": "Leichter Hammer. 3× pro langer Rast: Triffst du damit eine Kreatur, erleidet sie 1W4 Wucht und erhält danach 2W4+2 TP zurück. Klopft man damit einer Kreatur mit 0 TP auf den Kopf, erleidet sie keinen Schaden und steht fluchend auf."
+     },
+     "krug-seil": {
+      "name": "Selbstknotendes Seil",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 3,
+       "reset": "long",
+       "name": "Seil: verknoten"
+      },
+      "text": "15 m Hanfseil. 3× pro langer Rast, Aktion: Wirf es auf einen Gegenstand oder eine Kreatur in 9 m. Ein Gegenstand wird sicher umknotet. Eine Kreatur schafft GES SG 12 oder ist festgesetzt, bis sie sich mit einer Aktion befreit (STÄ oder GES SG 12). Auf ein Befehlswort löst es sich."
+     },
+     "krug-gaertrank": {
+      "name": "Vergorener Heiltrank",
+      "r": "gewöhnlich",
+      "cons": true,
+      "drink": "2W4+2",
+      "kg": 0.5,
+      "text": "Aus der Wühlkiste der Restposten. Du erhältst 2W4+2 TP zurück, musst danach aber KON SG 10 schaffen, sonst übergibst du dich und verlierst deine nächste Aktion. Schmeckt nach Rache."
+     },
+     "krug-springbohnen": {
+      "name": "Springbohnen",
+      "r": "gewöhnlich",
+      "cons": true,
+      "text": "Drei Bohnen in einer Papiertüte. Wer eine isst, kann 1 Stunde lang dreimal so weit und hoch springen. Wer zwei auf einmal isst, hüpft 1 Minute lang unkontrolliert (Nachteil auf Angriffe und Geschicklichkeit) und danach 1 Stunde gar nicht mehr."
+     },
+     "krug-klebestiefel": {
+      "name": "Klebestiefel",
+      "r": "ungewöhnlich",
+      "att": true,
+      "curse": true,
+      "text": "Du erhältst eine Kletterbewegung gleich deiner Bewegungsrate, kannst an Wänden gehen und rutschst nie aus. Fluch: Jede Stunde kleben sie fester. Nach 4 Stunden lassen sie sich nicht mehr ausziehen, und deine Bewegungsrate sinkt um 3 m. Wird der Fluch gebrochen, platzen sie in einer Wolke aus Glibber."
+     },
+     "krug-brille": {
+      "name": "Brille der Gelassenheit",
+      "r": "ungewöhnlich",
+      "att": true,
+      "text": "Dunkle Gläser, die sich bei schrecklichem Anblick von selbst schwärzen. Du hast Vorteil auf Rettungswürfe gegen den Zustand verängstigt. Ist die Lage so schlimm, dass sie ganz schwarz werden (die SL entscheidet, etwa bei Alarm im Palast), bist du blind, bis du sie absetzt."
+     },
+     "krug-gefuehlshandschuhe": {
+      "name": "Handschuhe des Mitgefühls",
+      "r": "ungewöhnlich",
+      "att": true,
+      "text": "Du spürst die Stimmung jeder Kreatur in 9 m: Freude, Angst, Zorn oder Trauer. Aber alles, was du sagst, während du sie trägst, bewirkt das Gegenteil: Trösten macht wütend, Drohen macht fröhlich. Wer das weiss, sagt mit Absicht das Falsche."
+     },
+     "krug-ausweis": {
+      "name": "Ausweis für alles",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 3,
+       "reset": "long",
+       "name": "Ausweis vorzeigen"
+      },
+      "text": "Ein leeres Blatt in einem Lederumschlag. Wer es ansieht, sieht das Dokument, das er gerade erwartet: Lieferschein, Passierschein, Einladung, Inspektorenausweis. 3× pro langer Rast: Vorteil auf Täuschen gegenüber jemandem, der es liest. Einsicht SG 15 erkennt ein leeres Blatt."
+     },
+     "krug-schlafstab": {
+      "name": "Zauberstab des Schlaflieds",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Schlaflied"
+      },
+      "text": "1× pro langer Rast wirkst du Schlaf (SG 13). Der Stab singt dabei laut ein Wiegenlied, das man in 30 m hört. Wer es hört und nicht getroffen wurde, gähnt."
+     },
+     "krug-stinkstab": {
+      "name": "Zauberstab des peinlichen Nebels",
+      "r": "selten",
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Peinlicher Nebel"
+      },
+      "text": "1× pro langer Rast wirkst du Stinkende Wolke (SG 13). Die Wolke entsteht mit einem Geräusch, über das danach niemand spricht. Wer darin war, riecht bis zur nächsten Rast danach: Nachteil auf Heimlichkeit gegen alles mit einer Nase."
+     },
+     "krug-drachenlaute": {
+      "name": "Laute der unpassenden Romantik",
+      "r": "selten",
+      "att": true,
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Laute: Romanze"
+      },
+      "text": "1× pro langer Rast wirkst du Person bezaubern (SG 13), aber es wirkt auch auf Drachen, Riesen und Monstrositäten, die eigentlich keine Personen sind. Wer damit einen Drachen umwirbt, hat Vorteil auf Überzeugen und Auftreten ihm gegenüber. Was danach passiert, ist Sache des Barden."
+     },
+     "krug-vecnakopf": {
+      "name": "Kopf des Vecna",
+      "r": "Artefakt",
+      "curse": true,
+      "kg": 2,
+      "text": "So steht es jedenfalls auf dem Schild. Ein schrumpeliger Kopf unter einer Glasglocke. Wie bei Hand und Auge des Vecna soll man den eigenen Kopf abtrennen und diesen aufsetzen, um unvorstellbare Macht zu erhalten. Arkane Kunde SG 10: Es ist Wachs. Trägt man ihn unter dem Arm, hat man Vorteil auf Einschüchtern gegenüber allen, die die Geschichte kennen. Fluch: Man wird ihn nicht mehr los, jeder Händler sagt „Kein Umtausch“."
+     },
+     "krug-mayokrug": {
+      "name": "Krug der ewigen Mayonnaise",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Mayonnaise"
+      },
+      "text": "Wie ein Alchemistenkrug, nur kennt er ein einziges Rezept. 1× pro langer Rast, Aktion: 2 Liter Mayonnaise. Ausgekippt wird ein Feld von 3 auf 3 m rutschig: Wer es betritt oder dort seinen Zug beginnt, schafft GES SG 12 oder liegt am Boden. Diplomaten verlassen den Raum."
+     },
+     "krug-formular": {
+      "name": "Formular V: Antrag auf Entsteinerung",
+      "r": "gewöhnlich",
+      "cons": true,
+      "text": "Von Herrn Okulus ordnungsgemäss gestempelt. Aktion: Halte es an eine Kreatur oder einen Gegenstand und sag „Papier schlägt Stein!“. Der Zustand versteinert endet sofort, ebenso ein Festsetzen durch Basiliskeneier. Gegen ein Wesen aus Stein (etwa einen Golem) zählt es als magischer Angriff mit 3W6 Wucht. Danach ist es verbraucht."
+     },
+     "krug-koboldkiste": {
+      "name": "Kobold-Fallenkiste",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 3,
+       "reset": "long",
+       "name": "Kobold-Falle"
+      },
+      "text": "Von den Inventur-Kobolden zurückgelassen. Darin drei Fallen, die man als Aktion auf ein Feld in 1,5 m stellt: Stolperdraht (GES SG 13 oder liegend), Fussangel (1W4 Stich, Bewegungsrate 0 bis Ende des Zugs) oder Murmelsack (3 auf 3 m rutschig). Über Nacht füllt sich die Kiste wieder auf, Kobolde sind gründlich."
+     },
+     "krug-koboldarmbrust": {
+      "name": "Inventur-Armbrust",
+      "r": "ungewöhnlich",
+      "wpn": 1,
+      "use": {
+       "n": 1,
+       "reset": "short",
+       "name": "Brandbolzen"
+      },
+      "text": "Leichte Armbrust +1 mit einem Zählwerk am Schaft, das jeden Schuss mitzählt. 1× pro kurzer Rast: ein Brandbolzen. Trifft er, verursacht er zusätzlich 2W6 Feuer, und Brennbares in 1,5 m fängt Feuer."
+     },
+     "krug-mimikenruestung": {
+      "name": "Mimikenrüstung",
+      "r": "selten",
+      "att": true,
+      "arm": 1,
+      "use": {
+       "n": 1,
+       "reset": "short",
+       "name": "Mimikenrüstung: Zurückbeissen"
+      },
+      "text": "Rüstung +1. Eine Ritterrüstung aus dem Möbellabyrinth, die eigentlich ein junger Mimik ist. Sie passt sich jeder Rüstungsart und Grösse an (wähle beim Anlegen, welche sie nachahmt). 1× pro kurzer Rast, Reaktion: Trifft dich ein Nahkampfangriff, beisst sie zurück, 1W8 Stich. Ohne Häppchen nach einer langen Rast schmollt sie bis Mittag: −1 RK."
+     },
+     "krug-tortenmesser": {
+      "name": "Das königliche Tortenmesser",
+      "r": "selten",
+      "att": true,
+      "wpn": 1,
+      "use": {
+       "n": 1,
+       "reset": "short",
+       "name": "Tortenmesser: Anschnitt"
+      },
+      "text": "Kurzschwert +1, die Klinge mit Zuckerrosen verziert. 1× pro kurzer Rast, Bonusaktion, Anschnitt: Dein nächster Treffer bis Ende des Zugs verursacht zusätzlich 2W6 Hieb. Schneidet jeden Kuchen in genau gleich grosse Stücke. Der König sucht es."
+     },
+     "krug-spanferkel": {
+      "name": "Spanferkel vom Festmahl",
+      "r": "gewöhnlich",
+      "cons": true,
+      "kg": 15,
+      "text": "Ein ganzes gebratenes Spanferkel. Als Wurfwaffe: Reichweite 6 m, Angriff mit Nachteil, 2W6 Wucht, und das Ziel riecht so köstlich, dass Wabbel und alle Mimiken es verfolgen. Gegessen: Bis zu fünf Helden erhalten je 1W4+1 temporäre TP."
+     },
+     "krug-rattensack": {
+      "name": "Prunellas Rattensack",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 3,
+       "reset": "long",
+       "name": "Rattensack"
+      },
+      "text": "Ein Jutesack, in dem es immer raschelt. 3× pro langer Rast, Bonusaktion: Du ziehst eine harmlose Ratte heraus und setzt sie in 1,5 m ab. Eine Kreatur deiner Wahl neben ihr erschrickt und hat Nachteil auf ihren nächsten Angriff. Für Fähigkeiten, die beim Töten einer Kreatur wirken, zählen die Ratten nicht, die Götter haben es ausdrücklich verboten."
+     },
+     "krug-bratpfanne": {
+      "name": "Prunellas Bratpfanne",
+      "r": "ungewöhnlich",
+      "att": true,
+      "wpn": 1,
+      "use": {
+       "n": 1,
+       "reset": "short",
+       "name": "Bratpfanne: Parade"
+      },
+      "text": "Zählt als Knüppel +1 auf Angriff und Schaden. 1× pro kurzer Rast, Reaktion, Parade: +2 RK gegen einen Nahkampfangriff. Jeder Treffer klingt wie eine Glocke, man hört ihn bis auf die Strasse. Spiegeleier gelingen darin immer."
+     },
      "krug-basiliskenei": {
       "name": "Basiliskenei",
       "r": "gewöhnlich",
@@ -5133,7 +6186,7 @@
       "text": "Werfen, Reichweite 6 m: Das getroffene Ziel schafft KON SG 12 oder ist bis Ende seines nächsten Zugs festgesetzt, weil seine Füsse kurz versteinern. Oder Gorm macht daraus das beste Soufflé des Reichs."
      }
     },
-    "srd": "Mimik, Gallertwürfel, Riesenkrabbe, Hobgoblin, Rattenschwarm, Schläger und Oger stammen aus dem SRD 5.1 (CC-BY-4.0). Alle anderen Werte sind eigene.",
+    "srd": "Mimik, Gallertwürfel, Riesenkrabbe, Hobgoblin, Kobold, Rattenschwarm, Schläger und Oger stammen aus dem SRD 5.2.1 (CC-BY-4.0). Alle anderen Werte und Gegenstände sind eigene, einige nach beliebten Ideen aus Foren der D&D-Szene.",
     "mobs": [
      {
       "id": "krug-hildegard",
@@ -5562,6 +6615,17 @@
       "t": 1795175991000
      },
      {
+      "id": "krug-e-kobolde",
+      "name": "Letzter Krug A2 · Die Inventur",
+      "mobs": [
+       {
+        "mid": "kobold",
+        "n": 8
+       }
+      ],
+      "t": 1795175990000
+     },
+     {
       "id": "krug-e-schlaegerei",
       "name": "Letzter Krug F · Die Schlägerei",
       "mobs": [
@@ -5578,7 +6642,7 @@
         "n": 1
        }
       ],
-      "t": 1795175990000
+      "t": 1795175989000
      }
     ]
    }

@@ -19,7 +19,7 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
 
   /* ---- Bibliothek und Gegenstände (aus) ---- */
   T('Bibliothek zeigt beide eingebauten Abenteuer', await p.evaluate(() => !!document.querySelector('[data-act="advOpen"][data-arg="krug"]') && !!document.querySelector('[data-act="advOpen"][data-arg="machtader"]')));
-  T('29 Gegenstände in MAGIC_ITEMS, alle mit Herkunft „krug“', await p.evaluate(() => Object.keys(MAGIC_ITEMS).filter((k) => /^krug-/.test(k) && MAGIC_ITEMS[k].adv === 'krug').length === 29));
+  T('59 Gegenstände in MAGIC_ITEMS, alle mit Herkunft „krug“', await p.evaluate(() => Object.keys(MAGIC_ITEMS).filter((k) => /^krug-/.test(k) && MAGIC_ITEMS[k].adv === 'krug').length === 59));
   T('Karte: Schalter „Gegenstände aktiv“ ist aus', await p.evaluate(() => { const c = document.querySelector('.advon input[data-arg="krug"]'); return c && !c.checked; }));
   const hidden = await p.evaluate(() => ({ opts: /krug-/.test(itemOpts()), srch: srchIndex().some((x) => x.cat === 'item' && /^krug-/.test(x.id)), vis: itemVis()('krug-kochbeil') }));
   T('Aus: nicht im Bogen, nicht in der Suche', !hidden.opts && !hidden.srch && !hidden.vis, hidden);
@@ -31,7 +31,7 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
   /* ---- Einschalten ---- */
   await p.evaluate(() => { S.view = 'adv'; S.adv = null; render(); document.querySelector('.advon input[data-arg="krug"]').click(); });
   const shown = await p.evaluate(() => ({ on: advActiveIds(), opts: (itemOpts().match(/value="krug-/g) || []).length, star: /✦ Das Kochbeil/.test(itemOpts()), srch: srchIndex().filter((x) => x.cat === 'item' && /^krug-/.test(x.id)).length }));
-  T('Ein: alle 29 im Bogen (mit ✦) und in der Suche', shown.on.includes('krug') && shown.opts === 29 && shown.star && shown.srch === 29, shown);
+  T('Ein: alle 59 im Bogen (mit ✦) und in der Suche', shown.on.includes('krug') && shown.opts === 59 && shown.star && shown.srch === 59, shown);
   await p.evaluate(() => { S.view = 'camp'; render(); });
   T('Ein: Beute-Formular zeigt „✦ Das Kochbeil“', await p.evaluate(() => [...$('#gItem').options].some((o) => o.value === 'krug-kochbeil' && /✦/.test(o.textContent))));
   const loot1 = await p.evaluate(() => { let n = 0; for (let i = 0; i < 400; i++) n += lootGen([{ mid: 'cr4' in BESTIARY ? 'cr4' : 'troll' }], true).items.filter((k) => /^krug-/.test(k)).length; return n; });
@@ -68,6 +68,11 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
   await p.evaluate(() => { for (let i = 0; i < 9; i++) { const x = document.querySelector('.advb.cnt [data-d="-1"]'); if (x && !x.disabled) x.click(); } });
   T('Verdacht: zurück auf 0, − gesperrt', await p.evaluate(() => advSt('krug').cnt.verdacht === 0 && document.querySelector('.advb.cnt [data-d="-1"]').disabled));
 
+  await p.evaluate(() => { XA.advTab(null, 'ch:a2'); XA.advScene(null, 'a2s1'); for (let i = 0; i < 9; i++) { const x = document.querySelector('.advb.cnt [data-d="1"]'); if (x && !x.disabled) x.click(); } });
+  T('Hort-Zähler: bis 8, „Zu spät“ steht als aktuelle Stufe', await p.evaluate(() => advSt('krug').cnt.hort === 8 && /Zu spät/.test($('.advb.cnt .advcnow').textContent)));
+  await p.evaluate(() => { XA.advTab(null, 'ch:a4'); for (let i = 0; i < 5; i++) [...document.querySelectorAll('.advb.cnt')][1].querySelector('[data-d="1"]').click(); });
+  T('Gänge-Zähler: nach 5 Gängen „Anschnitt!“', await p.evaluate(() => advSt('krug').cnt.gaenge === 5 && /Anschnitt/.test([...document.querySelectorAll('.advb.cnt')][1].querySelector('.advcnow').textContent)));
+  T('Ring der bösen Ahnung: +1 Initiative am Helden', await p.evaluate(() => { const ch = newChar({ name: 'Ini', cls: 'fighter', level: 4 }); const a = derive(ch, S.hb).init; ch.items = [{ uid: 'r1', id: 'krug-ahnungsring', att: true, eq: true, qty: 1, w: '' }]; return derive(ch, S.hb).init === a + 1; }));
   /* ---- Entscheidungen ---- */
   await p.evaluate(() => { XA.advTab(null, 'ch:a1'); XA.advScene(null, 'a1s2'); document.querySelector('.advcho').click(); });
   T('Zwick gut behandelt: Merker gesetzt', await p.evaluate(() => advSt('krug').flags.zwick === 'gut'));
@@ -79,7 +84,7 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
   await p.evaluate(() => { const bt = [...document.querySelectorAll('[data-act="advGive"]')].find((x) => /Kochbeil/.test(x.closest('tr').textContent)); bt.click(); });
   T('Geben (Szene): Kochbeil im Beute-Formular', await p.evaluate(() => S.view === 'camp' && $('#gItem').value === 'krug-kochbeil'));
   await p.evaluate(() => { S.view = 'adv'; XA.advTab(null, 'it'); });
-  T('Reiter Gegenstände: 29 Karten nach Seltenheit, mit Fundort', await p.evaluate(() => document.querySelectorAll('.advit').length === 29 && document.querySelectorAll('.advch h3.advsc').length >= 3 && /Fundort/.test($('.advit').textContent)));
+  T('Reiter Gegenstände: 59 Karten nach Seltenheit, mit Fundort', await p.evaluate(() => document.querySelectorAll('.advit').length === 59 && document.querySelectorAll('.advch h3.advsc').length >= 3 && /Fundort/.test($('.advit').textContent)));
   await shot('krug-4-gegenstaende.png');
   await p.evaluate(() => { S.view = 'adv'; S.adv = null; render(); document.querySelector('.advon input[data-arg="krug"]').click(); S.adv = 'krug'; XA.advTab(null, 'it'); });
   T('Ausschalten wirkt sofort', await p.evaluate(() => !advActiveIds().includes('krug') && !/krug-/.test(itemOpts())));
@@ -94,8 +99,8 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
 
   /* ---- Kreaturen ---- */
   await p.evaluate(() => { S.view = 'adv'; S.adv = 'krug'; XA.advTab(null, 'mob'); });
-  const cre = await p.evaluate(() => ({ n: document.querySelectorAll('.advmobs.big .advmob').length, srd: ['mimic', 'gelatinous-cube', 'giant-crab', 'hobgoblin', 'swarm-of-rats', 'thug'].every((m) => document.querySelector('.advmob[data-arg="' + m + '"]')), h: document.querySelectorAll('.advch h3.advsc').length }));
-  T('Kreaturen: 17 Karten (11 eigene + 6 aus dem SRD) nach Kapiteln', cre.n === 17 && cre.srd && cre.h >= 5, cre);
+  const cre = await p.evaluate(() => ({ n: document.querySelectorAll('.advmobs.big .advmob').length, srd: ['mimic', 'gelatinous-cube', 'giant-crab', 'hobgoblin', 'swarm-of-rats', 'thug', 'kobold'].every((m) => document.querySelector('.advmob[data-arg="' + m + '"]')), h: document.querySelectorAll('.advch h3.advsc').length }));
+  T('Kreaturen: 18 Karten (11 eigene + 7 aus dem SRD) nach Kapiteln', cre.n === 18 && cre.srd && cre.h >= 5, cre);
   await p.evaluate(() => document.querySelector('[data-act="advMob"][data-arg="mimic"]').click());
   T('SRD-Mimik: Fenster mit Geschichte aus dem Abenteuer', await p.evaluate(() => !$('#modal').hidden && /Geschichte/.test($('#modal').textContent)));
   await p.evaluate(() => { S.modal = null; $('#modal').hidden = true; });
@@ -105,7 +110,7 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
     A.chapters.forEach((C, ci) => C.scenes.forEach((Sc, si) => Sc.blocks.forEach((b, bi) => { if (b.t !== 'kampf') return; S.combat = null; S.view = 'adv'; XA.advFight({ dataset: {} }, ci + '.' + si + '.' + bi);
       const e = A.enc.find((x) => x.id === b.enc); const want = e.mobs.reduce((s, m) => s + m.n, 0); const got = ((S.combat || {}).npcs || []).length; res.push([b.enc, want, got]); })));
     return res; });
-  T('Alle 11 Kämpfe starten mit der richtigen Zahl Gegner', fights.length === 11 && fights.every(([, w, g]) => w === g), fights);
+  T('Alle 12 Kämpfe starten mit der richtigen Zahl Gegner', fights.length === 12 && fights.every(([, w, g]) => w === g), fights);
   T('Eigene Monster im Bestiarium (11)', await p.evaluate(() => Object.keys(BESTIARY).filter((k) => /^u-krug-/.test(k)).length === 11));
   await p.evaluate(() => { S.combat = null; S.view = 'adv'; XA.advTab(null, 'ch:f'); XA.advScene(null, 'fs2'); document.querySelector('.advb.kampf [data-act="advFight"]').click(); S.view = 'adv'; render(); [0, 1].forEach((i) => { S.view = 'adv'; render(); const x = document.querySelector('.advb.kampf [data-act="advAlly"][data-i="' + i + '"]'); if (x) x.click(); }); });
   T('Schlägerei: Gorm (68 TP) und Wabbel als Verbündete', await p.evaluate(() => { const a = S.combat.npcs.filter((x) => x.ally); return a.length === 2 && a.some((x) => x.name === 'Gorm' && x.hp === 68) && a.some((x) => x.name === 'Wabbel'); }), await p.evaluate(() => (S.combat && S.combat.npcs || []).map((x) => x.name + (x.ally ? '*' : ''))));

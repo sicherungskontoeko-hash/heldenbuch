@@ -15,9 +15,11 @@ Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUN
 
 ## Neu in Version 1.9
 - Neues eingebautes Abenteuer: „Das Wirtshaus zum letzten Krug“, ein lustiges Eintagesabenteuer für fünf Helden der Stufe 4 (Aufstieg auf 5 möglich), von etwa 14 bis 22 Uhr. Ein Wirtshaus retten, im Dungeon-Markt einkaufen, Hoflieferant werden und an der Königshochzeit ein Phönixei aus der Torte tauschen.
-- 29 eigene Gegenstände (Waffen, Rüstungen, Kuriositäten mit Fähigkeiten). Sie erscheinen nur in den Auswahllisten, solange das Abenteuer aktiv ist; Helden, die sie haben, behalten sie immer.
-- Neue Kästen im Abenteuer: Rollenspiel-Notizen je Figur, Zähler mit + und − (Sternepunkte, Verdacht, Hitze) und Zufallstabellen mit Würfelknopf.
+- Voller Klassiker der D&D-Szene: der furchtbare Pavillon, Leeroy Jenkins, Tuckers Kobolde, der Kopf des Vecna, der Rattensack, die Bauern-Kanone, „Ich greife die Dunkelheit an!“ und mehr, jeweils mit Hinweis für die Spielleitung.
+- 59 eigene Gegenstände (Waffen, Rüstungen, Kuriositäten und ein falsches Artefakt), viele nach beliebten Ideen aus Foren. Sie erscheinen nur in den Auswahllisten, solange das Abenteuer aktiv ist; Helden, die sie haben, behalten sie immer.
+- Neue Kästen im Abenteuer: Rollenspiel-Notizen je Figur, Zähler mit + und − (Sternepunkte, Zeit im Hort, Verdacht, Gänge bis zum Anschnitt, Hitze) und Zufallstabellen mit Würfelknopf.
 - Reiter „Gegenstände“ im Abenteuer mit Fundort und „Geben“; unter „Kreaturen“ stehen jetzt auch die SRD-Monster des Abenteuers.
+- Magische Gegenstände können die Initiative und die Bewegungsrate verändern.
 
 ## Neu in Version 1.8
 - Abenteuer (Mehr → Abenteuer): fertige Abenteuer Kapitel für Kapitel leiten, mit farbigen Kästen für Vorlesetext, Spielleitung, Proben, Kämpfe, Beute und Entscheidungen.
