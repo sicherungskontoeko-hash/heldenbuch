@@ -3,6 +3,7 @@ const { P, SUB, LAB, V, DM, RP, PROBE, KAMPF, LOOT, MERKE, TAB, ROLL, CNT, CHOIC
 const { C } = require('./krug-cnt');
 
 const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag · etwa 60 Minuten', level: '4', intro: [
+  DM('Kurz gesagt', '**Ziel:** Die Prüfung bestehen und Hoflieferant werden. **Muss passieren:** Zwick kommt, das Probeessen, das Urteil. **Wenn es schiefgeht:** Die Helden kommen als Prunellas Aushilfen in den Palast. Es geht in jedem Fall weiter.'),
   P('Zwei Stunden bis Zwick kommt. Die Helden richten das Haus her, wehren Prunellas Sabotage ab, und dann entscheidet ein Probeessen in drei Gängen, wer heute Abend in den Palast darf.'),
 ], scenes: [
   { title: 'Zwei Stunden', blocks: [
@@ -17,6 +18,7 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
       ['Wabbel vorbereiten', 'Mit Tieren umgehen SG 10. Mit Spülmittel aus dem Hort automatisch.', 'Er spült während des Essens unsichtbar, kein Geschirr geht aus.'],
     ], 'wahl'),
     MERKE('Merke dir', ['Ist das Portal dicht? Wie ist Gorms Laune?'], ['portal', 'gorm']),
+    ITEMS([['krug-portalring', 'Der Rest des Portalbands rollt sich nach dem Abdichten von selbst zu einem Ring']]),
     DM('Lirroy Jänkins', 'Mitten in die Vorbereitung stürmt Lirroy zur Tür herein, den die Helden aus dem Hort kennen. „Ich hab gehört, hier gibt es Ärger! Na gut, Leute, los geht\'s!“ Er brüllt seinen eigenen Namen und rennt in die Küche, wo Gorm ihn mit einer Pfanne zurückschickt. Er setzt sich in die Ecke, bestellt ein Bier und bleibt bis Mitternacht. Er meint es gut.'),
   ] },
   { title: 'Die Belagerung', blocks: [
@@ -77,6 +79,9 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
     FLAGS('Was bisher entschieden wurde', ['zwick', 'mimiken', 'basilisk', 'portal', 'hobgoblins', 'gorm', 'pavillon']),
   ] },
   { title: 'Das Probeessen', blocks: [
+    V('Vorlesetext',
+      'Die Gaststube ist still wie eine Kirche. Zwick sitzt allein an seinem wackligen Tisch, das Notizbuch aufgeschlagen, den Stift erhoben. Aus der Küche hört ihr Gorm leise mit seiner Suppe reden.',
+      'Dann schwingt die Küchentür auf. Gorm steht darin, die Kochmütze frisch gestärkt, eine dampfende Schüssel in den Pranken, und flüstert so laut, dass es die ganze Gasse hört: „Erster Gang.“'),
     P('Drei Gänge. Bei jedem Gang würfeln zwei Helden: einer in der Küche mit Gorm, einer im Saal beim Auftragen. Gelingen beide, +2 Sternepunkte, gelingt einer, +1. Danach kommt die Panne des Gangs.'),
     PROBE('Erster Gang · Rüebli-Schaumsuppe', [
       ['Küche', 'Überleben oder Kochutensilien SG 12. Mit Gorms Gewürzbeutel automatisch.'],
@@ -138,6 +143,7 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
 ] };
 
 const a4 = { id: 'a4', kicker: 'Akt 4', title: 'Die Hofküche', sub: 'Abend · etwa 90 Minuten', level: '4 oder 5', intro: [
+  DM('Kurz gesagt', '**Ziel:** In die Hofküche, das Ei gegen die Fälschung tauschen und unbemerkt hinaus. **Muss passieren:** die Tortenkammer. Wann die Helden tauschen, entscheiden sie selbst. **Wenn es schiefgeht:** Alarm und Flucht, das Ei haben sie trotzdem.'),
   P('Die Hochzeit des Königs. Hunderte Gäste, eine Küche voller Feuer und Geschrei, und in einer Kammer nebenan eine Torte, auf der das einzige Phönixei des Reichs leuchtet. Die Helden müssen kochen, servieren, unauffällig bleiben und im richtigen Moment tauschen.'),
   P('Halte den Verdacht im Blick. Er steigt mit jeder Panne. Wann die Helden tauschen, entscheiden sie selbst: Die Torte wird erst angeschnitten, wenn der Tausch geschafft ist oder der Alarm losgeht.'),
   C('verdacht'),
@@ -172,6 +178,12 @@ const a4 = { id: 'a4', kicker: 'Akt 4', title: 'Die Hofküche', sub: 'Abend · e
       '- **Will:** dass die Torte perfekt leuchtet. Fünfzehn Jahre hat er an der Glasur gearbeitet.',
       '- **Schwäche:** Gorm. Er war sein bester Schüler, bis Gorm ihn beim Wettkochen mit einer Rüebli-Schaumsuppe schlug. Sieht er Gorm, vergisst er alles andere.',
       '- **Typische Sätze:** „Wer die Glasur berührt, kocht ab morgen in der Kaserne.“ · „Rüebli-Schaumsuppe. Pah.“ · „Mehr Butter. Immer mehr Butter.“'),
+    ITEMS([['krug-zuckerrose', 'Von Fräulein Zuckerguss, für den, der ihr zugehört hat']]),
+    RP('Rollenspiel · Meister Lysander Glanz, Hofmagier',
+      '- Kommt einmal pro Gang in die Tortenkammer, um „sein“ Ei zu bewundern, und schaut dabei vor allem in den Spiegel an seinem Gürtel.',
+      '- **Will:** dass sein Auftritt beim Anschnitt perfekt wird. Er übt die Formel halblaut, immer wieder.',
+      '- **Schwäche:** Eitelkeit. Wer seine Robe lobt, hat 10 Minuten lang seine volle Aufmerksamkeit, und das Ei hat sie nicht.',
+      '- **Typische Sätze:** „Und nun, Majestät, das Wunder des Feuers!“ · „Nicht so nah, die Aura ist empfindlich.“'),
     RP('Rollenspiel · Fräulein Zuckerguss, Hofkonditorin',
       '- Bewacht die Tortenkammer. Nervös, flüstert mit der Torte, nennt sie „mein Schatz“.',
       '- **Schwäche:** ein Gespräch über Zuckerkunst. Wer ihr zuhört und klug fragt (Geschichte oder Überzeugen SG 12), hat ihr Herz und fünf unbewachte Minuten, weil sie ihm ihre Zuckerrosen in der Nebenkammer zeigen will.',
@@ -232,6 +244,7 @@ const a4 = { id: 'a4', kicker: 'Akt 4', title: 'Die Hofküche', sub: 'Abend · e
       taktik: 'Sie wollen nur Zucker. Sie fliegen zur Torte und spucken Feuer auf alles, was sie hindert.',
       ende: 'Wasser und Topfdeckel. Die Köche halten das Ganze für eine besonders gewagte Flambage. Gelingt den Helden eine Ausrede (Täuschen SG 13), steigt der Verdacht nicht.',
     }),
+    ITEMS([['krug-glutherz', 'Bleibt übrig, wenn ein Glutwichtel zerplatzt']]),
     KAMPF('Die Torte beisst', 'krug-e-torte', {
       gegner: 'Eine grosse Mimik. Die Hofkonditorin hat zur Sicherheit eine zweite Torte bestellt, und die stammt aus dem Möbellabyrinth des Horts.',
       gelaende: 'Die Tortenkammer. Die echte Torte darf nicht kaputt gehen.',
@@ -271,11 +284,12 @@ const a4 = { id: 'a4', kicker: 'Akt 4', title: 'Die Hofküche', sub: 'Abend · e
       'Ihr hört, wie der König das Messer ansetzt. Ihr hört den Hofmagier feierlich eine Formel sprechen, damit der Phönix schlüpft. Und ihr hört, je nachdem, was in der Torte steckt, ein entzücktes „Aaah“, ein erschrockenes „Huch“ oder ein sehr lautes „AUA“.',
       'Dann seid ihr draussen. Die Nacht riecht nach Feuerwerk. Es ist kurz vor Mitternacht.'),
     LOOT('Aus dem Palast', ['Eine goldene Feder, die beim Tausch aus dem Zuckernest gefallen ist. Sie glimmt.', 'In der Garderobe der Hofköche: eine Kochmütze mit eingesticktem Wappen. Niemand vermisst sie.', 'Neben der Torte lag das königliche Tortenmesser. Wer es eingesteckt hat, hat jetzt ein Problem, aber ein sehr schönes.', 'Vom Buffet: ein ganzes Spanferkel, falls jemand Hunger hat oder etwas zum Werfen braucht.'], {}),
-    ITEMS([['krug-phoenixfeder', 'Aus dem Zuckernest'], ['krug-kochmuetze', 'Garderobe der Hofköche'], ['krug-tortenmesser', 'Tortenkammer, neben der Torte'], ['krug-spanferkel', 'Buffet im Festsaal']]),
+    ITEMS([['krug-phoenixfeder', 'Aus dem Zuckernest'], ['krug-kochmuetze', 'Garderobe der Hofköche'], ['krug-tortenmesser', 'Tortenkammer, neben der Torte'], ['krug-spanferkel', 'Buffet im Festsaal'], ['krug-feuerwerkstab', 'Der Ersatzstab des Hofmagiers, im Chaos verloren']]),
   ] },
 ] };
 
 const fin = { id: 'f', kicker: 'Finale', title: 'Mitternacht', sub: 'Nacht · etwa 35 Minuten', level: '4 oder 5', intro: [
+  DM('Kurz gesagt', '**Ziel:** Das Ei nach Hause bringen, die Treppe hinauf, und Barnabas zurückrufen. **Muss passieren:** Barnabas wacht auf. Wie laut der Weg dorthin wird, entscheiden die Würfel.'),
   C('hitze'),
 ], scenes: [
   { title: 'Durch die Stadt', blocks: [
@@ -350,13 +364,31 @@ const fin = { id: 'f', kicker: 'Finale', title: 'Mitternacht', sub: 'Nacht · et
       { a: 'Geschont, versöhnt oder die Wahrheit erfahren', b: 'Im Epilog steht sie mit einem Kuchen vor der Tür. Er ist nicht versalzen.', sets: { prunella: 'geschont' } },
       { a: 'Gedemütigt oder besiegt', b: 'Sie schwört Rache. Stoff für eine Fortsetzung. Ihre Bratpfanne bleibt in der Gaststube liegen.', sets: { prunella: 'gedemütigt' } },
     ]),
-    ITEMS([['krug-bratpfanne', 'Bleibt liegen, wenn Prunella besiegt oder gedemütigt wurde']]),
+    ITEMS([['krug-bratpfanne', 'Bleibt liegen, wenn Prunella besiegt oder gedemütigt wurde'], ['krug-knutshut', 'Fällt Knut in der Schlägerei vom Kopf']]),
   ] },
   { title: 'Barnabas', blocks: [
-    V('Vorlesetext',
+    V('Vorlesetext · Die Kammer',
       'Die Kammer ist dunkel bis auf eine Kerze. Holle sitzt am Bett und hält Barnabas\' Hand. Sein Atem ist kaum noch zu hören.',
-      'Ihr legt das Ei auf seine Brust. Für einen Moment passiert nichts.',
-      'Dann knackt die Schale. Ein goldenes Licht steigt aus dem Ei, erst ein Funke, dann ein Glühen, dann ein Leuchten, das durch die Fenster fällt, durch die Ritzen im Boden, hinunter in die Gaststube, wo die Schlägerei mitten in der Bewegung erstarrt. Etwas Kleines, Glühendes, Gefiedertes schüttelt sich auf Barnabas\' Brust und gähnt.',
+      'Ihr legt das Ei auf seine Brust. Es wird heiss, so heiss, dass die Decke zu qualmen beginnt. Die Schale bekommt einen feinen Riss, und goldenes Licht sickert heraus.',
+      'Und dann passiert nichts. Das Licht flackert über Barnabas\' Gesicht, hin und her, als suche es etwas und fände es nicht.',
+      'Holle flüstert: „Er ist zu weit weg, Schätzchen. Das Feuer findet ihn nicht. Ihr müsst ihn rufen.“'),
+    DM('Barnabas zurückrufen',
+      'Das ist der Moment, für den die Helden den ganzen Tag gekämpft haben. Lass ihn wirken und mach keine Würfelorgie daraus.',
+      '- **So geht es:** Ein Held nach dem anderen nimmt Barnabas\' Hand und ruft ihn mit einer Erinnerung zurück, gern einer aus dem Prolog („Wie Barnabas dich gefunden hat“), oder einer neuen. Der Spieler erzählt sie in einem, zwei Sätzen.',
+      '- **Die Probe:** Danach Einsicht, Auftreten oder Überzeugen SG 12. Vorteil, wenn die Erinnerung den Tisch zum Lachen oder still gebracht hat. Jeder Erfolg: Das Licht im Ei wird heller, und Barnabas lächelt im Schlaf.',
+      '- **Drei Erfolge**, und er folgt dem Licht. Weiter mit „Er wacht auf“.',
+      '- **Kein Scheitern:** Ein Misserfolg kostet nichts. Die Leere antwortet nur seltsam: Ein Bierdeckel fällt vom Regal, Barnabas murmelt „Socken“, das Licht wird kurz blau. Der nächste Held ist dran, oder derselbe mit einer anderen Erinnerung.',
+      '- **Helfer:** Auch die anderen dürfen rufen. Gorm brüllt von der Treppe: „CHEF! SUPPE IST FERTIG!“ (ein Erfolg, wenn Gorm zufrieden ist). Ui ruft etwas in Vokalen, und niemand weiss warum, aber es zählt immer als Erfolg.'),
+    V('Vorlesetext · In der Leere',
+      'Als der Erste von euch Barnabas\' Hand nimmt, ist die Kammer für einen Herzschlag fort. Ihr steht in einer Weite aus Sternen, ohne Boden und ohne Himmel. Es ist still, so still, dass ihr euer Blut hört.',
+      'Mittendrin sitzt Barnabas auf einem Hocker vor einem Fass, den Zapfhahn in der Hand, und schaut nicht auf. „Gleich“, murmelt er. „Ich steche nur noch dieses Fass an. Dann komme ich.“',
+      'Dann seid ihr wieder in der Kammer. Seine Hand ist kalt.'),
+    DM('Prunella sagt es',
+      'Hat Prunella den Helden geholfen oder die Wahrheit erfahren, steht sie jetzt in der Tür, die Pfanne noch in der Hand. Sie hört das Wort „Fass“, und ihr Gesicht wird ganz still.',
+      'Sie setzt sich auf die Bettkante, nimmt seine andere Hand und sagt leise: „Barnabas Krug. Es ist später.“',
+      'Das zählt als alle fehlenden Erfolge auf einmal. Vor dreissig Jahren hat er ihr „Später“ gesagt. Jetzt ist es so weit.'),
+    V('Vorlesetext · Er wacht auf',
+      'Dann bricht die Schale. Ein goldenes Licht steigt aus dem Ei, erst ein Funke, dann ein Glühen, dann ein Leuchten, das durch die Fenster fällt, durch die Ritzen im Boden, hinunter in die Gaststube, wo die Schlägerei mitten in der Bewegung erstarrt. Etwas Kleines, Glühendes, Gefiedertes schüttelt sich auf Barnabas\' Brust und gähnt.',
       'Barnabas öffnet die Augen. Er blinzelt. Er schaut den kleinen Phönix an, dann euch, einen nach dem anderen, so wie früher, wenn er abends gezählt hat, ob alle im Bett sind. Die Heilerin weint und tut so, als würde sie nicht weinen.',
       '„Meine Kinder“, sagt er heiser. „Ihr seid heimgekommen.“',
       'Dann sagt er:'),
@@ -369,6 +401,8 @@ const fin = { id: 'f', kicker: 'Finale', title: 'Mitternacht', sub: 'Nacht · et
     ], 'vorlese'),
     DM('Der Phönix',
       'Aus dem Ei schlüpft ein Phönixküken, so gross wie eine Faust. Es ist jetzt das Haustier des Letzten Krugs. Es heisst, wie die Spieler es nennen. Es lebt im Kamin, frisst Glut und leuchtet nachts. Die Stadt wird bald erzählen, im Letzten Krug sei das Feuer nie ausgegangen.'),
+    LOOT('Was von der Schale bleibt', ['Die Eierschale zerfällt auf der Bettdecke in drei goldene Splitter. Sie sind noch warm. Holle sammelt sie ein und drückt sie den Helden in die Hand: „Für das nächste Mal. Es gibt immer ein nächstes Mal, Schätzchen.“'], {}),
+    ITEMS([['krug-phoenixschale', 'Die Schale des Phönixeis, auf Barnabas\' Bettdecke']]),
   ] },
 ] };
 
@@ -394,7 +428,7 @@ const epilog = { id: 'epilog', kicker: 'Epilog', title: 'Der Morgen danach', sub
       ['die Fälschung die Mimik war', 'Der König hat das Mimik-Junge adoptiert. Es lebt jetzt im Palast als „die Torte, die beisst“.'],
     ], 'wahl'),
     LOOT('Danke von allen', ['Der Hoflieferanten-Lohn: 50 GM je Held.', 'Freibier im Letzten Krug, für immer. Barnabas schreibt es an die Wand.', 'Eure alten Krüge mit euren Namen hängen wieder ganz vorne über der Theke, frisch poliert.'], { gmHero: 50 }),
-    ITEMS([['krug-kellnerweste', 'Von Barnabas: „Ihr habt euch das verdient.“'], ['krug-glibberpanzer', 'Von Wabbel. Er hat sich gehäutet.'], ['krug-nudelholz', 'Von Prunella, wenn sie geschont wurde: „Für den Fall, dass ihr mal einen richtigen Teig machen wollt.“']]),
+    ITEMS([['krug-kellnerweste', 'Von Barnabas: „Ihr habt euch das verdient.“'], ['krug-glibberpanzer', 'Von Wabbel. Er hat sich gehäutet.'], ['krug-nudelholz', 'Von Prunella, wenn sie geschont wurde: „Für den Fall, dass ihr mal einen richtigen Teig machen wollt.“'], ['krug-zapfhahn', 'Von Barnabas: „Jetzt gehört der Krug euch auch.“'], ['krug-kraeuterbeutel', 'Von Mutter Holle, „für die nächsten aufgeschlagenen Knie“'], ['krug-goldloeffel', 'Von Hofkoch Ambrosius über Gorm'], ['krug-mimiktruhe', 'Hildegards Junges, wenn sie gezähmt wurde']]),
     V('Vorlesetext · Zum Schluss',
       'Barnabas hebt seinen Krug. „Auf meine Kinder“, sagt er. „Und auf den Letzten Krug. Möge er nie der letzte sein.“',
       'Unter der Tür sickert Wasser durch. Zimmer 3. Barnabas seufzt. „Wer von euch hat das Portalband angebracht?“'),

@@ -41,10 +41,78 @@ const vor = { id: 'vor', kicker: 'Vorbereitung', title: 'Bevor die Tür aufgeht'
       '- Spiel sie ernst und erklär sie nicht. Wer den Klassiker kennt, grinst. Wer ihn nicht kennt, erlebt eine lustige Szene.',
       '- Lass die Spieler die Pointe selbst finden. Ruft jemand „Papier schlägt Stein!“, bevor du das Formular erwähnst: umso besser, lass es wirken.'),
     DM('Gegenstände und Fundstücke',
-      '- Das Abenteuer bringt 59 eigene Gegenstände mit: Erbstücke, Kuriositäten, Restposten, Beute. Unter „Gegenstände“ stehen alle mit Fundort.',
+      '- Das Abenteuer bringt 75 eigene Gegenstände mit: Erbstücke, Kuriositäten, Restposten, phantastische Fundstücke und Beute. Unter „Gegenstände“ stehen alle mit Fundort.',
       '- **Nicht alles verteilen.** Drei bis vier Gegenstände pro Held reichen für den Tag. Die Würfeltabellen „Kuriositätenschrank“, „Wühltisch“ und „Wühlkiste“ entscheiden, was die Helden finden. Was übrig bleibt, ist Stoff für die nächste Runde.',
       '- **Gold:** Barnabas\' Kasse (200 GM) gibt es im Prolog. Das reicht für Basiliskenei, Geschirr und ein, zwei Restposten. Wer mehr will, muss verkaufen, verhandeln oder den Elch einfangen.',
       '- **Die Gegenstände einschalten:** Unter „Übersicht“ den Schalter „Gegenstände aktiv“ setzen. Dann stehen sie im Bogen, im Beute-Formular, in der Zufallsbeute und in der Suche. „Geben“ schaltet ihn von selbst ein.'),
+  ] },
+  { title: 'Spielleitung auf einen Blick', blocks: [
+    DM('Die Geschichte in fünf Sätzen',
+      '1. Barnabas, Wirt des Letzten Krugs und Ziehvater der Helden, liegt im Zauberschlaf und stirbt beim nächsten Sonnenaufgang.',
+      '2. Nur das einzige Phönixei des Reichs kann ihn wecken, und das liegt heute Abend auf der Hochzeitstorte des Königs, bis der Hofmagier es beim Anschnitt schlüpfen lässt.',
+      '3. In die Hofküche kommt nur das Personal des Hoflieferanten, und den bestimmt heute Nachmittag Oberinspektor Zwick, zwischen dem Letzten Krug und Prunellas Goldenem Kapaun.',
+      '4. Also machen die Helden das Haus ihrer Kindheit fit, kaufen im Hort ein, bestehen die Prüfung und tauschen im Palast das Ei gegen eine Fälschung.',
+      '5. In der Nacht bringen sie es durch die Stadt und eine Schlägerei nach Hause, legen es Barnabas auf die Brust und rufen ihn mit ihren Erinnerungen zurück.'),
+    TAB(['Was die Helden wissen müssen', 'Wo sie es erfahren (immer mehr als ein Weg)'], [
+      ['Nur ein Phönixei weckt Barnabas', 'Holle im Prolog · Arkane Kunde SG 13 am Bett · Gorms Brief („Holle sagt Ei“, wenn sie fragen)'],
+      ['Das Ei liegt heute Abend auf der Hochzeitstorte', 'Pünktli im Prolog · Geschichte SG 12 · Gerücht 1 · Schreiber Federkiel in der Hofkanzlei'],
+      ['In die Hofküche kommt nur der Hoflieferant', 'Der Aushang · Federkiel („nur mit Marke“) · Pünktli (Barnabas\' Bewerbung)'],
+      ['Zwick prüft zweimal, am Morgen verkleidet', 'Gerücht 5 · Hinweise am Gast (Monokelabdruck) · die Helden erkennen den Haferbrei-Mann'],
+      ['Sie brauchen eine Fälschung', 'Holle bei Gorms Einkaufszettel · der Gnom in den Restposten · der gesunde Menschenverstand der Spieler'],
+      ['Das echte Ei ist heiss', 'Holle · Ofenhandschuhe im Hort · das Glühen in der Tortenkammer'],
+      ['Das Ei muss auf seine Brust, und er muss gerufen werden', 'Holle im Prolog und am Bett'],
+    ], 'dm'),
+    DM('Wenn die Spieler feststecken',
+      '- **Prolog:** Pünktli schaut auf die Uhr: „Gemäss Aushang hat der Letzte Krug eine Bewerbung offen. Gemäss Vollmacht seid ihr der Letzte Krug.“',
+      '- **Akt 1:** Gorm stürmt aus der Küche, mit dem Einkaufszettel in der Pranke.',
+      '- **Akt 2:** Eine Durchsage ruft die Helden in die Abteilung, die ihnen noch fehlt. Bruno Hornig hilft gern weiter.',
+      '- **Akt 3:** Zwick kommt, ob alles fertig ist oder nicht. Ein unfertiges Haus kostet Sternepunkte, nicht das Abenteuer.',
+      '- **Akt 4:** Pippo kennt jeden Gang. Für etwas Süsses führt er die Helden zur Tortenkammer.',
+      '- **Finale:** Gnarz, die Goblins oder Lirroy tauchen auf und helfen.',
+      '- **Immer:** Kein Misserfolg beendet das Abenteuer. Fallen die Helden durch, kommen sie als Prunellas Aushilfen in den Palast. Fliegt der Tausch auf, gibt es eine Flucht. Fällt das Ei, rollt es.'),
+    TAB(['Schwierigkeit', 'SG', 'Wann'], [
+      ['Leicht', '10', 'Jeder Held schafft es meistens. Für Dinge, die nur ein bisschen schiefgehen können.'],
+      ['Normal', '12', 'Die meisten Proben in diesem Abenteuer.'],
+      ['Schwer', '15', 'Der Tausch, Lügen gegenüber Prunella, Täuschen der Wache mit Waffe.'],
+      ['Fast unmöglich', '18', 'Nur mit guter Idee, Hilfe oder dem richtigen Gegenstand.'],
+      ['Gute Idee', '–', 'Vorteil. Eine gute und sehr lustige Idee gelingt ohne Probe.'],
+    ], 'dm'),
+    ROLL('Spontane Namen für Nebenfiguren', 12, [
+      ['1', 'Frau Hasenfuss, Bäckerin. Flüstert immer, auch wenn es brennt.'],
+      ['2', 'Herr Grützli, Fischhändler. Riecht danach und weiss es.'],
+      ['3', 'Zwirbel, Gnom und Schuhputzer. Kennt jedes Gerücht der Stadt.'],
+      ['4', 'Agathe Schmiedeisen, Zwergin. Schlägt beim Reden auf den Tisch.'],
+      ['5', 'Bertram Wendehals, Stadtschreier. Kann nicht leise.'],
+      ['6', 'Mumpitz, Kobold-Lehrling im Hort. Will befördert werden, unbedingt heute.'],
+      ['7', 'Schwester Ottilie, Nonne. Wettet auf alles.'],
+      ['8', 'Kaspar Kesselflick, Kesselflicker. Flickt auch Herzen, sagt er.'],
+      ['9', 'Lina Löffelstiel, Küchenmagd im Palast. Kichert, wenn sie nervös ist, also immer.'],
+      ['10', 'Hauptwachtmeister Brummbart. Will Feierabend.'],
+      ['11', 'Fräulein Nadel, Schneiderin. Misst jeden mit den Augen ab.'],
+      ['12', 'Opa Kieselbart. Erinnert sich an alles, aber falsch.'],
+    ], 'Für jede Figur, die du nicht geplant hast.'),
+  ] },
+  { title: 'Orte', blocks: [
+    DM('Der Letzte Krug',
+      '- **Von aussen:** Ein schiefes Fachwerkhaus mit drei Stockwerken am Ende der Kupfergasse. Über der Tür das Schild: ein Krug, aus dem ein einzelner Tropfen fällt. Hinter dem Haus ein Garten mit Rosen, einem Brunnen und dem Pavillon.',
+      '- **Gaststube:** 15 auf 12 m, Kamin, lange Theke, hundert Krüge mit Namen an der Wand, darunter die der Helden. Über der Theke Herr Flossmann, der ausgestopfte Fisch mit Monokel. Barnabas\' Kuriositätenschrank hinter der Theke.',
+      '- **Küche:** Gorms Reich. Drei Herde, eine Sammlung von Pinzetten, ein Spülbecken, in dem Wabbel wohnt. Daneben die Speisekammer.',
+      '- **Keller:** Steile Treppe, die Eichentür mit dem Rätsel ohne Lösung, dahinter der Weinkeller mit Hildegard.',
+      '- **Erster Stock:** Fünf Gästezimmer. Zimmer 3 mit dem Portal. Am Ende des Flurs die alte Kinderkammer: fünf Betten, Kritzeleien an der Wand, eure Namen in den Bettpfosten geritzt. Barnabas hat nichts verändert.',
+      '- **Dachkammer:** Barnabas\' Kammer, in der er schläft.'),
+    DM('Die Kupfergasse und der Goldene Kapaun',
+      '- **Die Kupfergasse:** Eine enge Gasse der Kupferschmiede, Kopfsteinpflaster, den ganzen Tag Hämmern. Jeder kennt jeden, und jeder kannte die Helden als Kinder.',
+      '- **Der Goldene Kapaun:** Direkt gegenüber. Frisch gestrichen, goldener Hahn über der Tür, Rüschenvorhänge, Girlanden. Drinnen zapft Knut, und Prunellas Stammgäste sitzen in Reih und Glied. Alles ist sauber, ordentlich und ein bisschen leblos. Wer hineinschaut, sieht an der Wand ein altes Bild: Prunella und Barnabas, jung, lachend, vor einem Fass.'),
+    DM('Der Hort',
+      'Ein Hügel am Stadtrand mit einem Tor wie ein Maul. Früher das Labyrinth des Schreckens, heute der grösste Markt des Reichs, drei Stockwerke tief. Alles Weitere steht in Akt 2.'),
+    DM('Der Palast',
+      '- **Lage:** Auf dem Hügel über der Stadt, heute voller Laternen, Musik und Feuerwerk.',
+      '- **Der Dienstboteneingang:** Hinten, bei den Mülltonnen. Eine Wache mit Klemmbrett.',
+      '- **Die Hofküche:** Ein Saal mit zwölf Herden und vierzig Köchen. Daneben die Tortenkammer, kühl und still, mit der Torte auf einem silbernen Wagen. Dahinter der Festsaal.',
+      '- **Wege hinaus:** Der Speiseaufzug zum Weinkeller, der Wäscheschacht, der Geheimgang hinter dem Vorratsschrank, den nur Pippo kennt, und der Festsaal selbst.',
+      '- **Die Schatzkammer:** Tief unten, unerreichbar. Dort lag das Ei bis zum Abend.'),
+    DM('Die Stadt',
+      'Die Hauptstadt des Königreichs, an einem Fluss mit Hafen. Zwischen Palast und Kupfergasse liegen zwanzig Minuten Fussweg, zwei Brücken und der Marktplatz mit dem Brunnen, der Aushangsäule und der Hofkanzlei. Heute Nacht feiert die ganze Stadt.'),
   ] },
   { title: 'Die Werkzeuge', blocks: [
     P('Vier Zähler halten den Tag zusammen. Du findest sie hier und in den Szenen, in denen sie gebraucht werden. Was du an einer Stelle einstellst, gilt überall. Es gibt keine Uhr, die abläuft: Die Helden haben für alles Zeit, was sie tun wollen.'),
@@ -107,7 +175,9 @@ const vor = { id: 'vor', kicker: 'Vorbereitung', title: 'Bevor die Tür aufgeht'
   ] },
 ] };
 
-const prolog = { id: 'prolog', kicker: 'Prolog', title: 'Die Vollmacht', sub: 'Am Morgen · etwa 30 Minuten', level: '4', intro: [], scenes: [
+const prolog = { id: 'prolog', kicker: 'Prolog', title: 'Die Vollmacht', sub: 'Am Morgen · etwa 30 Minuten', level: '4', intro: [
+  DM('Kurz gesagt', '**Ziel:** Die Helden kommen heim, erfahren, was mit Barnabas los ist, und dass nur das Ei des Königs hilft. **Muss passieren:** die Diagnose, ein ehrlicher Versuch, der scheitert, der Aushang. **Am Ende wissen sie:** Hoflieferant werden, in die Hofküche, das Ei tauschen.'),
+], scenes: [
   { title: 'Die Kammer im ersten Stock', blocks: [
     V('Vorlesetext',
       'Der Brief kam vor drei Tagen. Riesige Buchstaben, mit Bleistift in das Papier gedrückt, Mehl an den Rändern und ein Fettfleck, der nach Zwiebeln riecht: *„An die Kinder vom Chef. Chef schläft und wacht nicht auf. Gorm hat alles probiert, sogar Suppe. Chef redet immer von euch. Kommt nach Hause. Gorm (Koch)“*',
@@ -195,6 +265,7 @@ const prolog = { id: 'prolog', kicker: 'Prolog', title: 'Die Vollmacht', sub: 'A
 ] };
 
 const a1 = { id: 'a1', kicker: 'Akt 1', title: 'Der Letzte Krug', sub: 'Vormittag · etwa 90 Minuten', level: '4', intro: [
+  DM('Kurz gesagt', '**Ziel:** Das Haus herrichten, den Gast am Morgen gut bedienen, den Keller klären, Gorms Einkaufszettel holen. **Muss passieren:** der schmuddelige Gast. Alles andere in beliebiger Reihenfolge.'),
   P('Die Helden haben bis zum Nachmittag Zeit, das Haus ihrer Kindheit für die Prüfung herzurichten. Seit Barnabas schläft, ist alles liegen geblieben, und ehrlich gesagt war es vorher schon nicht viel besser. Vieles kennen sie noch. Neu seit ihrem Auszug sind Gorm, Hildegard im Keller und das Portal in Zimmer 3. Lass sie frei herumlaufen. Die Szenen müssen nicht in dieser Reihenfolge kommen, nur der schmuddelige Gast kommt früh und der Weinkeller vor dem Einkaufszettel.'),
 ], scenes: [
   { title: 'Rundgang', blocks: [
@@ -290,6 +361,7 @@ const a1 = { id: 'a1', kicker: 'Akt 1', title: 'Der Letzte Krug', sub: 'Vormitta
       ['Ihn anzünden', 'Er brennt. Ui rennt mit einem Eimer. Rudi weint vor Glück. −1 Sternepunkt, verbrannte Rosen riechen nicht gut.'],
     ], 'wahl'),
     MERKE('Merke dir', ['Was haben die Helden mit dem Pavillon gemacht? Barnabas fragt beim Aufwachen danach.'], ['pavillon']),
+    ITEMS([['krug-rudispfeil', 'Rudi schenkt ihn dem, der ihn aus dem Pavillon zieht']]),
   ] },
   { title: 'Zimmer 3', blocks: [
     V('Vorlesetext',
@@ -306,7 +378,8 @@ const a1 = { id: 'a1', kicker: 'Akt 1', title: 'Der Letzte Krug', sub: 'Vormitta
     DM('Zur Erdstunde: Steine fallen',
       'Ist gerade Erdstunde, poltert es im Portal. Schau ernst in die Runde, mach eine Pause und sag: „Steine fallen. Alle …“ Noch eine Pause. „… würfeln Geschicklichkeit.“',
       'GES SG 10 oder 1W4 Wucht. Danach liegt ein Haufen Kiesel im Zimmer. Anspielung auf „Steine fallen, alle sterben“, den Spruch für eine Spielleitung am Ende ihrer Geduld. Hier stirbt natürlich niemand.'),
-    LOOT('Im Zimmer', ['Barnabas\' Notizbuch mit dem Hinweis auf das Portalband.', 'Ein Stück erstarrte Lava, ein Seestern und ein Kristall: Andenken an die Ebenen. Zusammen 15 GM bei einem Sammler.'], {}),
+    LOOT('Im Zimmer', ['Barnabas\' Notizbuch mit dem Hinweis auf das Portalband.', 'Ein Stück erstarrte Lava, ein Seestern und ein Kristall: Andenken an die Ebenen. Zusammen 15 GM bei einem Sammler.', 'Auf dem Nachttisch Barnabas\' Laterne, in der seit dem Unfall ein Stück Nachthimmel gefangen ist, und sein Kompass mit vier Nadeln.'], {}),
+    ITEMS([['krug-sternenlaterne', 'Zimmer 3, auf dem Nachttisch'], ['krug-portalkompass', 'Zimmer 3, auf dem Nachttisch']]),
   ] },
   { title: 'Der Weinkeller', blocks: [
     V('Vorlesetext',

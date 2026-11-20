@@ -11,7 +11,7 @@ const { a3, a4, fin, epilog } = require('./krug-story3');
 const errs = [];
 const chapters = [vor, prolog, a1, a2, a3, a4, fin, epilog].map((c) => Object.assign({ intro: [] }, c));
 const mobIds = new Set(D.mobs.map((m) => 'u-' + m.id));
-const BUILTIN = ['gelatinous-cube', 'giant-crab', 'swarm-of-rats', 'hobgoblin', 'mimic', 'thug', 'ogre', 'guard', 'kobold', 'bandit', 'goblin', 'noble', 'commoner', 'veteran', 'knight'];
+const BUILTIN = ['gelatinous-cube', 'giant-crab', 'swarm-of-rats', 'hobgoblin', 'mimic', 'thug', 'ogre', 'guard', 'kobold', 'bandit', 'goblin', 'noble', 'commoner', 'veteran', 'knight', 'minotaur', 'troll', 'medusa', 'mage'];
 const encIds = new Set(D.enc.map((e) => e.id));
 const flagIds = new Set(D.flags.map((f) => f.id));
 D.enc.forEach((e) => e.mobs.forEach((m) => { if (!mobIds.has(m.mid) && !BUILTIN.includes(m.mid)) errs.push('Begegnung ' + e.id + ': unbekanntes Monster ' + m.mid); }));
@@ -41,6 +41,7 @@ chapters.forEach((c) => c.scenes.concat([{ title: 'Einleitung', blocks: c.intro 
 })));
 Object.entries(D.items).forEach(([k, it]) => { if (!/^krug-/.test(k)) errs.push('Gegenstand ohne Präfix ' + k); if (!it.name || !it.r || !it.text) errs.push('Gegenstand unvollständig ' + k); });
 Object.values(D.lore).forEach((l) => { if (l.ch && !chapters.some((c) => c.id === l.ch)) errs.push('Kreatur mit unbekanntem Kapitel ' + l.title); });
+Object.keys(D.lore).forEach((k) => { if (!mobIds.has('u-' + k) && !BUILTIN.includes(k)) errs.push('Kreatur ohne Werte: ' + k); });
 D.flags.forEach((f) => { if (!chapters.some((c) => c.id === f.ch)) errs.push('Merker ' + f.id + ' mit unbekanntem Kapitel'); });
 // Wird jeder Gegenstand irgendwo verteilt?
 const given = new Set(); chapters.forEach((c) => c.scenes.forEach((s) => s.blocks.forEach((b) => { if (b.t === 'items') b.rows.forEach((r) => given.add(r.item)); })));
@@ -63,7 +64,7 @@ const adv = {
   meta: 'Fünf Helden · Stufe 4 (5) · rund acht Stunden',
   quote: '„Ehrlich kommt man weit. Bis Mitternacht aber nicht.“',
   overview, chapters, flags: D.flags, figures: D.figures, lore: D.lore, items: D.items,
-  srd: 'Mimik, Gallertwürfel, Riesenkrabbe, Hobgoblin, Kobold, Rattenschwarm, Schläger und Oger stammen aus dem SRD 5.2.1 (CC-BY-4.0). Alle anderen Werte und Gegenstände sind eigene, einige nach beliebten Ideen aus Foren der D&D-Szene.',
+  srd: 'Mimik, Gallertwürfel, Riesenkrabbe, Hobgoblin, Kobold, Rattenschwarm, Schläger, Oger, Minotaurus, Troll, Medusa, Wache, Magier und Krieger-Veteran stammen aus dem SRD 5.2.1 (CC-BY-4.0). Alle anderen Werte und Gegenstände sind eigene, einige nach beliebten Ideen aus Foren der D&D-Szene.',
   mobs: D.mobs, enc: D.enc,
 };
 

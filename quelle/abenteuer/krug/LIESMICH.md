@@ -6,7 +6,7 @@ Eingebaut ab Heldenbuch 1.9 (Mehr → Abenteuer).
 | Datei | Inhalt |
 |---|---|
 | krug-lib.js | Bausteine für die Kästen (Vorlesetext, Spielleitung, Rollenspiel, Probe, Kampf, Zähler, Würfeltabelle …) |
-| krug-data.js | 11 eigene Monster, 12 Begegnungen, 59 Gegenstände, Merker, 19 Figuren, Kreaturen-Texte |
+| krug-data.js | 13 eigene Monster, 12 Begegnungen, 75 Gegenstände, Merker, 25 Figuren, Kreaturen-Texte |
 | krug-cnt.js | Die vier Zähler (Sternepunkte, Goblins, Verdacht, Hitze), einmal definiert |
 | krug-story1.js | Vorbereitung, Prolog, Akt 1 (Der letzte Krug) |
 | krug-story2.js | Akt 2 (Einkaufen im Hort) |

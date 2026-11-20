@@ -299,6 +299,60 @@
     ],
     "la": 0,
     "lr": 0
+   },
+   {
+    "id": "krug-glimmerschuppe",
+    "name": "Frau Glimmerschuppe, Messingdrachin",
+    "cr": "3",
+    "ac": 16,
+    "hp": 75,
+    "hd": "10W10+20",
+    "spd": "9 m, Fliegen 18 m, Graben 6 m",
+    "ini": 0,
+    "atks": [
+     [
+      "Biss",
+      5,
+      "2W10+3",
+      "Stich"
+     ],
+     [
+      "Klaue",
+      5,
+      "1W6+3",
+      "Hieb"
+     ]
+    ],
+    "txt": "Mehrfachangriff: Ein Biss und eine Klaue. Schlafatem (Aufladung 5–6): Kegel von 9 m, KON SG 13 oder bewusstlos für 1 Minute oder bis jemand die Kreatur weckt. Feueratem (Aufladung 5–6): Linie von 9 m auf 1,5 m, GES SG 13, 4W6 Feuer (halb bei Erfolg). Gestaltwandel: In Menschengestalt eine elegante Dame mit Goldmonokel. Plaudertasche: Wer ein gutes Gespräch mit ihr führt, ist ihr Freund. Schwächen: ✦ Neugier: Eine gute Geschichte unterbricht jeden Kampf. ✦ Gold: Wirft man Münzen, prüft sie jede mit der Zunge (1 Runde).",
+    "hab": [
+     "stadt"
+    ],
+    "la": 0,
+    "lr": 0
+   },
+   {
+    "id": "krug-phoenixkueken",
+    "name": "Phönixküken",
+    "cr": "1/4",
+    "ac": 13,
+    "hp": 10,
+    "hd": "3W4+3",
+    "spd": "3 m, Fliegen 18 m",
+    "ini": 3,
+    "atks": [
+     [
+      "Glutschnabel",
+      5,
+      "1W4+3",
+      "Feuer"
+     ]
+    ],
+    "txt": "Feuerleib: Wer es berührt oder mit einer Nahkampfwaffe trifft, erleidet 1W4 Feuer. Licht: Es leuchtet hell wie eine Fackel. Wiedergeburt: Bei 0 TP zerfällt es zu Asche und schlüpft beim nächsten Sonnenaufgang neu daraus. Schwächen: ✦ Wasser: Ein Eimer Wasser lässt es 1 Runde lang beleidigt qualmen. ✦ Zucker: Für ein Stück Zucker tut es fast alles.",
+    "hab": [
+     "stadt"
+    ],
+    "la": 0,
+    "lr": 0
    }
   ],
   "enc": [
@@ -666,7 +720,7 @@
           "t": "dm",
           "title": "Gegenstände und Fundstücke",
           "items": [
-           "- Das Abenteuer bringt 59 eigene Gegenstände mit: Erbstücke, Kuriositäten, Restposten, Beute. Unter „Gegenstände“ stehen alle mit Fundort.",
+           "- Das Abenteuer bringt 75 eigene Gegenstände mit: Erbstücke, Kuriositäten, Restposten, phantastische Fundstücke und Beute. Unter „Gegenstände“ stehen alle mit Fundort.",
            "- **Nicht alles verteilen.** Drei bis vier Gegenstände pro Held reichen für den Tag. Die Würfeltabellen „Kuriositätenschrank“, „Wühltisch“ und „Wühlkiste“ entscheiden, was die Helden finden. Was übrig bleibt, ist Stoff für die nächste Runde.",
            "- **Gold:** Barnabas' Kasse (200 GM) gibt es im Prolog. Das reicht für Basiliskenei, Geschirr und ein, zwei Restposten. Wer mehr will, muss verkaufen, verhandeln oder den Elch einfangen.",
            "- **Die Gegenstände einschalten:** Unter „Übersicht“ den Schalter „Gegenstände aktiv“ setzen. Dann stehen sie im Bogen, im Beute-Formular, in der Zufallsbeute und in der Suche. „Geben“ schaltet ihn von selbst ein."
@@ -676,6 +730,219 @@
        },
        {
         "id": "vors2",
+        "title": "Spielleitung auf einen Blick",
+        "blocks": [
+         {
+          "t": "dm",
+          "title": "Die Geschichte in fünf Sätzen",
+          "items": [
+           "1. Barnabas, Wirt des Letzten Krugs und Ziehvater der Helden, liegt im Zauberschlaf und stirbt beim nächsten Sonnenaufgang.",
+           "2. Nur das einzige Phönixei des Reichs kann ihn wecken, und das liegt heute Abend auf der Hochzeitstorte des Königs, bis der Hofmagier es beim Anschnitt schlüpfen lässt.",
+           "3. In die Hofküche kommt nur das Personal des Hoflieferanten, und den bestimmt heute Nachmittag Oberinspektor Zwick, zwischen dem Letzten Krug und Prunellas Goldenem Kapaun.",
+           "4. Also machen die Helden das Haus ihrer Kindheit fit, kaufen im Hort ein, bestehen die Prüfung und tauschen im Palast das Ei gegen eine Fälschung.",
+           "5. In der Nacht bringen sie es durch die Stadt und eine Schlägerei nach Hause, legen es Barnabas auf die Brust und rufen ihn mit ihren Erinnerungen zurück."
+          ]
+         },
+         {
+          "t": "table",
+          "tone": "dm",
+          "head": [
+           "Was die Helden wissen müssen",
+           "Wo sie es erfahren (immer mehr als ein Weg)"
+          ],
+          "rows": [
+           [
+            "Nur ein Phönixei weckt Barnabas",
+            "Holle im Prolog · Arkane Kunde SG 13 am Bett · Gorms Brief („Holle sagt Ei“, wenn sie fragen)"
+           ],
+           [
+            "Das Ei liegt heute Abend auf der Hochzeitstorte",
+            "Pünktli im Prolog · Geschichte SG 12 · Gerücht 1 · Schreiber Federkiel in der Hofkanzlei"
+           ],
+           [
+            "In die Hofküche kommt nur der Hoflieferant",
+            "Der Aushang · Federkiel („nur mit Marke“) · Pünktli (Barnabas' Bewerbung)"
+           ],
+           [
+            "Zwick prüft zweimal, am Morgen verkleidet",
+            "Gerücht 5 · Hinweise am Gast (Monokelabdruck) · die Helden erkennen den Haferbrei-Mann"
+           ],
+           [
+            "Sie brauchen eine Fälschung",
+            "Holle bei Gorms Einkaufszettel · der Gnom in den Restposten · der gesunde Menschenverstand der Spieler"
+           ],
+           [
+            "Das echte Ei ist heiss",
+            "Holle · Ofenhandschuhe im Hort · das Glühen in der Tortenkammer"
+           ],
+           [
+            "Das Ei muss auf seine Brust, und er muss gerufen werden",
+            "Holle im Prolog und am Bett"
+           ]
+          ],
+          "bf": true
+         },
+         {
+          "t": "dm",
+          "title": "Wenn die Spieler feststecken",
+          "items": [
+           "- **Prolog:** Pünktli schaut auf die Uhr: „Gemäss Aushang hat der Letzte Krug eine Bewerbung offen. Gemäss Vollmacht seid ihr der Letzte Krug.“",
+           "- **Akt 1:** Gorm stürmt aus der Küche, mit dem Einkaufszettel in der Pranke.",
+           "- **Akt 2:** Eine Durchsage ruft die Helden in die Abteilung, die ihnen noch fehlt. Bruno Hornig hilft gern weiter.",
+           "- **Akt 3:** Zwick kommt, ob alles fertig ist oder nicht. Ein unfertiges Haus kostet Sternepunkte, nicht das Abenteuer.",
+           "- **Akt 4:** Pippo kennt jeden Gang. Für etwas Süsses führt er die Helden zur Tortenkammer.",
+           "- **Finale:** Gnarz, die Goblins oder Lirroy tauchen auf und helfen.",
+           "- **Immer:** Kein Misserfolg beendet das Abenteuer. Fallen die Helden durch, kommen sie als Prunellas Aushilfen in den Palast. Fliegt der Tausch auf, gibt es eine Flucht. Fällt das Ei, rollt es."
+          ]
+         },
+         {
+          "t": "table",
+          "tone": "dm",
+          "head": [
+           "Schwierigkeit",
+           "SG",
+           "Wann"
+          ],
+          "rows": [
+           [
+            "Leicht",
+            "10",
+            "Jeder Held schafft es meistens. Für Dinge, die nur ein bisschen schiefgehen können."
+           ],
+           [
+            "Normal",
+            "12",
+            "Die meisten Proben in diesem Abenteuer."
+           ],
+           [
+            "Schwer",
+            "15",
+            "Der Tausch, Lügen gegenüber Prunella, Täuschen der Wache mit Waffe."
+           ],
+           [
+            "Fast unmöglich",
+            "18",
+            "Nur mit guter Idee, Hilfe oder dem richtigen Gegenstand."
+           ],
+           [
+            "Gute Idee",
+            "–",
+            "Vorteil. Eine gute und sehr lustige Idee gelingt ohne Probe."
+           ]
+          ],
+          "bf": true
+         },
+         {
+          "t": "roll",
+          "title": "Spontane Namen für Nebenfiguren",
+          "die": 12,
+          "rows": [
+           [
+            "1",
+            "Frau Hasenfuss, Bäckerin. Flüstert immer, auch wenn es brennt."
+           ],
+           [
+            "2",
+            "Herr Grützli, Fischhändler. Riecht danach und weiss es."
+           ],
+           [
+            "3",
+            "Zwirbel, Gnom und Schuhputzer. Kennt jedes Gerücht der Stadt."
+           ],
+           [
+            "4",
+            "Agathe Schmiedeisen, Zwergin. Schlägt beim Reden auf den Tisch."
+           ],
+           [
+            "5",
+            "Bertram Wendehals, Stadtschreier. Kann nicht leise."
+           ],
+           [
+            "6",
+            "Mumpitz, Kobold-Lehrling im Hort. Will befördert werden, unbedingt heute."
+           ],
+           [
+            "7",
+            "Schwester Ottilie, Nonne. Wettet auf alles."
+           ],
+           [
+            "8",
+            "Kaspar Kesselflick, Kesselflicker. Flickt auch Herzen, sagt er."
+           ],
+           [
+            "9",
+            "Lina Löffelstiel, Küchenmagd im Palast. Kichert, wenn sie nervös ist, also immer."
+           ],
+           [
+            "10",
+            "Hauptwachtmeister Brummbart. Will Feierabend."
+           ],
+           [
+            "11",
+            "Fräulein Nadel, Schneiderin. Misst jeden mit den Augen ab."
+           ],
+           [
+            "12",
+            "Opa Kieselbart. Erinnert sich an alles, aber falsch."
+           ]
+          ],
+          "note": "Für jede Figur, die du nicht geplant hast."
+         }
+        ]
+       },
+       {
+        "id": "vors3",
+        "title": "Orte",
+        "blocks": [
+         {
+          "t": "dm",
+          "title": "Der Letzte Krug",
+          "items": [
+           "- **Von aussen:** Ein schiefes Fachwerkhaus mit drei Stockwerken am Ende der Kupfergasse. Über der Tür das Schild: ein Krug, aus dem ein einzelner Tropfen fällt. Hinter dem Haus ein Garten mit Rosen, einem Brunnen und dem Pavillon.",
+           "- **Gaststube:** 15 auf 12 m, Kamin, lange Theke, hundert Krüge mit Namen an der Wand, darunter die der Helden. Über der Theke Herr Flossmann, der ausgestopfte Fisch mit Monokel. Barnabas' Kuriositätenschrank hinter der Theke.",
+           "- **Küche:** Gorms Reich. Drei Herde, eine Sammlung von Pinzetten, ein Spülbecken, in dem Wabbel wohnt. Daneben die Speisekammer.",
+           "- **Keller:** Steile Treppe, die Eichentür mit dem Rätsel ohne Lösung, dahinter der Weinkeller mit Hildegard.",
+           "- **Erster Stock:** Fünf Gästezimmer. Zimmer 3 mit dem Portal. Am Ende des Flurs die alte Kinderkammer: fünf Betten, Kritzeleien an der Wand, eure Namen in den Bettpfosten geritzt. Barnabas hat nichts verändert.",
+           "- **Dachkammer:** Barnabas' Kammer, in der er schläft."
+          ]
+         },
+         {
+          "t": "dm",
+          "title": "Die Kupfergasse und der Goldene Kapaun",
+          "items": [
+           "- **Die Kupfergasse:** Eine enge Gasse der Kupferschmiede, Kopfsteinpflaster, den ganzen Tag Hämmern. Jeder kennt jeden, und jeder kannte die Helden als Kinder.",
+           "- **Der Goldene Kapaun:** Direkt gegenüber. Frisch gestrichen, goldener Hahn über der Tür, Rüschenvorhänge, Girlanden. Drinnen zapft Knut, und Prunellas Stammgäste sitzen in Reih und Glied. Alles ist sauber, ordentlich und ein bisschen leblos. Wer hineinschaut, sieht an der Wand ein altes Bild: Prunella und Barnabas, jung, lachend, vor einem Fass."
+          ]
+         },
+         {
+          "t": "dm",
+          "title": "Der Hort",
+          "items": [
+           "Ein Hügel am Stadtrand mit einem Tor wie ein Maul. Früher das Labyrinth des Schreckens, heute der grösste Markt des Reichs, drei Stockwerke tief. Alles Weitere steht in Akt 2."
+          ]
+         },
+         {
+          "t": "dm",
+          "title": "Der Palast",
+          "items": [
+           "- **Lage:** Auf dem Hügel über der Stadt, heute voller Laternen, Musik und Feuerwerk.",
+           "- **Der Dienstboteneingang:** Hinten, bei den Mülltonnen. Eine Wache mit Klemmbrett.",
+           "- **Die Hofküche:** Ein Saal mit zwölf Herden und vierzig Köchen. Daneben die Tortenkammer, kühl und still, mit der Torte auf einem silbernen Wagen. Dahinter der Festsaal.",
+           "- **Wege hinaus:** Der Speiseaufzug zum Weinkeller, der Wäscheschacht, der Geheimgang hinter dem Vorratsschrank, den nur Pippo kennt, und der Festsaal selbst.",
+           "- **Die Schatzkammer:** Tief unten, unerreichbar. Dort lag das Ei bis zum Abend."
+          ]
+         },
+         {
+          "t": "dm",
+          "title": "Die Stadt",
+          "items": [
+           "Die Hauptstadt des Königreichs, an einem Fluss mit Hafen. Zwischen Palast und Kupfergasse liegen zwanzig Minuten Fussweg, zwei Brücken und der Marktplatz mit dem Brunnen, der Aushangsäule und der Hofkanzlei. Heute Nacht feiert die ganze Stadt."
+          ]
+         }
+        ]
+       },
+       {
+        "id": "vors4",
         "title": "Die Werkzeuge",
         "blocks": [
          {
@@ -849,7 +1116,7 @@
         ]
        },
        {
-        "id": "vors3",
+        "id": "vors5",
         "title": "Zeitplan",
         "blocks": [
          {
@@ -941,7 +1208,7 @@
         ]
        },
        {
-        "id": "vors4",
+        "id": "vors6",
         "title": "Zufall im Wirtshaus",
         "blocks": [
          {
@@ -1029,7 +1296,15 @@
       ]
      },
      {
-      "intro": [],
+      "intro": [
+       {
+        "t": "dm",
+        "title": "Kurz gesagt",
+        "items": [
+         "**Ziel:** Die Helden kommen heim, erfahren, was mit Barnabas los ist, und dass nur das Ei des Königs hilft. **Muss passieren:** die Diagnose, ein ehrlicher Versuch, der scheitert, der Aushang. **Am Ende wissen sie:** Hoflieferant werden, in die Hofküche, das Ei tauschen."
+        ]
+       }
+      ],
       "id": "prolog",
       "kicker": "Prolog",
       "title": "Die Vollmacht",
@@ -1322,6 +1597,13 @@
      },
      {
       "intro": [
+       {
+        "t": "dm",
+        "title": "Kurz gesagt",
+        "items": [
+         "**Ziel:** Das Haus herrichten, den Gast am Morgen gut bedienen, den Keller klären, Gorms Einkaufszettel holen. **Muss passieren:** der schmuddelige Gast. Alles andere in beliebiger Reihenfolge."
+        ]
+       },
        {
         "t": "p",
         "x": "Die Helden haben bis zum Nachmittag Zeit, das Haus ihrer Kindheit für die Prüfung herzurichten. Seit Barnabas schläft, ist alles liegen geblieben, und ehrlich gesagt war es vorher schon nicht viel besser. Vieles kennen sie noch. Neu seit ihrem Auszug sind Gorm, Hildegard im Keller und das Portal in Zimmer 3. Lass sie frei herumlaufen. Die Szenen müssen nicht in dieser Reihenfolge kommen, nur der schmuddelige Gast kommt früh und der Weinkeller vor dem Einkaufszettel."
@@ -1729,6 +2011,17 @@
           "flags": [
            "pavillon"
           ]
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Rudis Pavillonpfeil",
+            "rule": "Der Pfeil, mit dem Rudi Rostbart vor dreissig Jahren den Pavillon „verwundet“ hat, frisch herausgezogen. Ein Pfeil +1, der nie bricht und nach dem Kampf von selbst wieder in deinem Köcher steckt. Gegen Bauwerke, Türen und Gartenhäuschen verursacht er doppelten Schaden. Rudi will ihn zurück, sobald der Pavillon wieder angreift.",
+            "from": "Rudi schenkt ihn dem, der ihn aus dem Pavillon zieht",
+            "item": "krug-rudispfeil"
+           }
+          ]
          }
         ]
        },
@@ -1786,7 +2079,25 @@
           "title": "Im Zimmer",
           "items": [
            "Barnabas' Notizbuch mit dem Hinweis auf das Portalband.",
-           "Ein Stück erstarrte Lava, ein Seestern und ein Kristall: Andenken an die Ebenen. Zusammen 15 GM bei einem Sammler."
+           "Ein Stück erstarrte Lava, ein Seestern und ein Kristall: Andenken an die Ebenen. Zusammen 15 GM bei einem Sammler.",
+           "Auf dem Nachttisch Barnabas' Laterne, in der seit dem Unfall ein Stück Nachthimmel gefangen ist, und sein Kompass mit vier Nadeln."
+          ]
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Laterne der Sternenleere",
+            "rule": "Barnabas' Laterne aus Zimmer 3. Seit dem Unfall ist darin ein Stück Sternenleere gefangen: Sie leuchtet nicht, sie zeigt einen Nachthimmel, der nicht über dieser Welt steht. Solange du sie trägst, siehst du im Dunkeln 18 m weit wie bei Dämmerlicht. 1× pro langer Rast, Bonusaktion: Du trittst durch die Leere und erscheinst an einem freien Ort, den du in 9 m siehst (wie Nebelschritt). Wer länger als eine Minute hineinschaut, schafft WEI SG 13 oder schläft eine Stunde.",
+            "from": "Zimmer 3, auf dem Nachttisch",
+            "item": "krug-sternenlaterne"
+           },
+           {
+            "name": "Kompass der vier Ebenen",
+            "rule": "Barnabas' Messingkompass mit vier Nadeln, eine für jede Ebene. Er zeigt immer, welche Ebene das Portal in Zimmer 3 gerade öffnet. 1× pro langer Rast, Aktion: Für 1 Stunde umgibt dich ein Hauch dieser Ebene. Wasser: Du kannst unter Wasser atmen. Feuer: Resistenz gegen Feuerschaden. Erde: Du kannst nicht umgeworfen werden. Luft: Du fällst sanft wie mit Federfall.",
+            "from": "Zimmer 3, auf dem Nachttisch",
+            "item": "krug-portalkompass"
+           }
           ]
          }
         ]
@@ -1996,6 +2307,13 @@
      {
       "intro": [
        {
+        "t": "dm",
+        "title": "Kurz gesagt",
+        "items": [
+         "**Ziel:** Basiliskenei, Wild, Portalband, eine Fälschung des Phönixeis und Ofenhandschuhe. **Muss passieren:** die Wahl der Fälschung. Alles andere frei, in beliebiger Reihenfolge, so viel die Spieler wollen."
+        ]
+       },
+       {
         "t": "p",
         "x": "Der Hort ist der grösste Markt des Reichs: ein alter Dungeon in einem Hügel, drei Stockwerke tief, mit Monstern als Personal. Jeder Wirt kauft hier ein, auch Prunella. Lass die Helden frei zwischen den Abteilungen wählen. Zwei Kämpfe sind fest (Frischetheke, Wühltisch), drei freiwillig (Kobolde und Mimik im Möbellabyrinth, Kasse)."
        }
@@ -2188,6 +2506,17 @@
            "Der Barde, der den Drachen verführt, ist der älteste Witz über die Klasse. Hier darf er wahr werden. Will ein Held Frau Glimmerschuppe umgarnen, lass es zu: Überzeugen oder Auftreten SG 15, mit der Laute der unpassenden Romantik Vorteil.",
            "- **Gelingt es:** Sie errötet, Rauch steigt aus ihren Nasenlöchern. Sie wechselt Gold zum Freundschaftskurs (die Helden bekommen 20 GM geschenkt) und verrät, dass sie heute Abend als Gesandte der Drachen zur Königshochzeit geht. „Vielleicht sieht man sich, Schätzchen.“ Im Palast hilft sie (Akt 4, Ereignis 12).",
            "- **Misslingt es:** Sie lacht so herzlich, dass ihre Brille beschlägt, und schenkt dem Helden trotzdem einen Kupferling „für den Mut“."
+          ]
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Glimmerschuppes Schuppe",
+            "rule": "Eine handgrosse Messingschuppe, warm wie Sand in der Mittagssonne, ein Geschenk der Drachin aus der Wechselstube. Du hast Resistenz gegen Feuerschaden. 1× pro langer Rast kannst du 10 Minuten lang mit jeder Kreatur sprechen, die eine Sprache versteht, und sie versteht dich. Messingdrachen erkennen die Schuppe und reden sehr, sehr lange mit dir.",
+            "from": "Geschenk von Frau Glimmerschuppe, wenn ein Held sie umgarnt hat",
+            "item": "krug-messingschuppe"
+           }
           ]
          },
          {
@@ -2579,6 +2908,12 @@
             "rule": "Von Herrn Okulus ordnungsgemäss gestempelt. Aktion: Halte es an eine Kreatur oder einen Gegenstand und sag „Papier schlägt Stein!“. Der Zustand versteinert endet sofort, ebenso ein Festsetzen durch Basiliskeneier. Gegen ein Wesen aus Stein (etwa einen Golem) zählt es als magischer Angriff mit 3W6 Wucht. Danach ist es verbraucht.",
             "from": "Formular V, von Herrn Okulus gestempelt",
             "item": "krug-formular"
+           },
+           {
+            "name": "Lesebrille des Kundendiensts",
+            "rule": "Eine der Lesebrillen von Herrn Okulus, für Menschenaugen umgeschliffen. Du kannst jede geschriebene Sprache lesen, auch Kleingedrucktes und Barnabas' Handschrift. 1× pro langer Rast: 1 Minute lang siehst du Unsichtbares und Ätherisches.",
+            "from": "Von Herrn Okulus, wenn die Helden alle drei Formulare richtig ausgefüllt haben: „Sie haben es verdient. Ich habe vier.“",
+            "item": "krug-lesebrille"
            }
           ]
          }
@@ -3319,6 +3654,25 @@
           ]
          },
          {
+          "t": "vorlese",
+          "title": "Vorlesetext · Abschied vom Hort",
+          "ps": [
+           "Am Ausgang wartet Bruno Hornig, die Hände gefaltet, das Namensschild schief. Er verbeugt sich so tief, dass die Messingkappen seiner Hörner über den Boden kratzen.",
+           "„Ihr seid die Kinder vom alten Barnabas, nicht wahr? Er kauft hier seit dem ersten Tag. Er hat mir damals gesagt, ein Labyrinth sei auch nur ein Laden, in dem man sich verläuft.“ Er schraubt eine der Kappen ab und drückt sie euch in die Hand. „Damit verlauft ihr euch nie. Grüsst ihn von mir. Wenn er wieder wach ist.“"
+          ]
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Hornigs Labyrinthkappe",
+            "rule": "Eine Messingkappe von Bruno Hornigs Hörnern, als Anhänger. Solange du sie trägst, verirrst du dich nie: Du findest in jedem Gebäude den kürzesten Weg nach draussen und weisst immer, wo der Ort liegt, an dem du heute aufgewacht bist. 1× pro langer Rast: Bewegst du dich 6 m gerade auf ein Ziel zu und triffst es im Nahkampf, verursachst du zusätzlich 2W6 Wucht, und es schafft STÄ SG 13 oder liegt am Boden.",
+            "from": "Geschenk von Bruno Hornig am Ausgang",
+            "item": "krug-hornkompass"
+           }
+          ]
+         },
+         {
           "t": "dm",
           "title": "Kurze Rast",
           "items": [
@@ -3331,6 +3685,13 @@
      },
      {
       "intro": [
+       {
+        "t": "dm",
+        "title": "Kurz gesagt",
+        "items": [
+         "**Ziel:** Die Prüfung bestehen und Hoflieferant werden. **Muss passieren:** Zwick kommt, das Probeessen, das Urteil. **Wenn es schiefgeht:** Die Helden kommen als Prunellas Aushilfen in den Palast. Es geht in jedem Fall weiter."
+        ]
+       },
        {
         "t": "p",
         "x": "Zwei Stunden bis Zwick kommt. Die Helden richten das Haus her, wehren Prunellas Sabotage ab, und dann entscheidet ein Probeessen in drei Gängen, wer heute Abend in den Palast darf."
@@ -3400,6 +3761,17 @@
           "flags": [
            "portal",
            "gorm"
+          ]
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Ring des Portalbands",
+            "rule": "Aus dem Rest des Portalbands, mit dem Zimmer 3 abgedichtet wurde. Er summt leise und wird um Mitternacht kalt. 1× pro langer Rast, Reaktion: Öffnet sich in 9 m eine Tür, ein Fenster oder ein magischer Durchgang, schlägst du ihn zu und verriegelst ihn 1 Stunde lang magisch (wie Arkanes Schloss).",
+            "from": "Der Rest des Portalbands rollt sich nach dem Abdichten von selbst zu einem Ring",
+            "item": "krug-portalring"
+           }
           ]
          },
          {
@@ -3654,6 +4026,14 @@
         "title": "Das Probeessen",
         "blocks": [
          {
+          "t": "vorlese",
+          "title": "Vorlesetext",
+          "ps": [
+           "Die Gaststube ist still wie eine Kirche. Zwick sitzt allein an seinem wackligen Tisch, das Notizbuch aufgeschlagen, den Stift erhoben. Aus der Küche hört ihr Gorm leise mit seiner Suppe reden.",
+           "Dann schwingt die Küchentür auf. Gorm steht darin, die Kochmütze frisch gestärkt, eine dampfende Schüssel in den Pranken, und flüstert so laut, dass es die ganze Gasse hört: „Erster Gang.“"
+          ]
+         },
+         {
           "t": "p",
           "x": "Drei Gänge. Bei jedem Gang würfeln zwei Helden: einer in der Küche mit Gorm, einer im Saal beim Auftragen. Gelingen beide, +2 Sternepunkte, gelingt einer, +1. Danach kommt die Panne des Gangs."
          },
@@ -3894,6 +4274,13 @@
      {
       "intro": [
        {
+        "t": "dm",
+        "title": "Kurz gesagt",
+        "items": [
+         "**Ziel:** In die Hofküche, das Ei gegen die Fälschung tauschen und unbemerkt hinaus. **Muss passieren:** die Tortenkammer. Wann die Helden tauschen, entscheiden sie selbst. **Wenn es schiefgeht:** Alarm und Flucht, das Ei haben sie trotzdem."
+        ]
+       },
+       {
         "t": "p",
         "x": "Die Hochzeit des Königs. Hunderte Gäste, eine Küche voller Feuer und Geschrei, und in einer Kammer nebenan eine Torte, auf der das einzige Phönixei des Reichs leuchtet. Die Helden müssen kochen, servieren, unauffällig bleiben und im richtigen Moment tauschen."
        },
@@ -4042,6 +4429,27 @@
            "- **Will:** dass die Torte perfekt leuchtet. Fünfzehn Jahre hat er an der Glasur gearbeitet.",
            "- **Schwäche:** Gorm. Er war sein bester Schüler, bis Gorm ihn beim Wettkochen mit einer Rüebli-Schaumsuppe schlug. Sieht er Gorm, vergisst er alles andere.",
            "- **Typische Sätze:** „Wer die Glasur berührt, kocht ab morgen in der Kaserne.“ · „Rüebli-Schaumsuppe. Pah.“ · „Mehr Butter. Immer mehr Butter.“"
+          ]
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Zuckerrose der Verwandlung",
+            "rule": "Von Fräulein Zuckerguss, aus gesponnenem Zucker und einem Hauch Feenstaub. Wer sie isst, sieht 1 Stunde lang aus wie eine andere Person seiner Grösse, die er schon einmal gesehen hat (wie Selbstverkleidung). Die Verkleidung riecht leicht nach Vanille: Hunde und Mimiken folgen dir.",
+            "from": "Von Fräulein Zuckerguss, für den, der ihr zugehört hat",
+            "item": "krug-zuckerrose"
+           }
+          ]
+         },
+         {
+          "t": "rp",
+          "title": "Rollenspiel · Meister Lysander Glanz, Hofmagier",
+          "items": [
+           "- Kommt einmal pro Gang in die Tortenkammer, um „sein“ Ei zu bewundern, und schaut dabei vor allem in den Spiegel an seinem Gürtel.",
+           "- **Will:** dass sein Auftritt beim Anschnitt perfekt wird. Er übt die Formel halblaut, immer wieder.",
+           "- **Schwäche:** Eitelkeit. Wer seine Robe lobt, hat 10 Minuten lang seine volle Aufmerksamkeit, und das Ei hat sie nicht.",
+           "- **Typische Sätze:** „Und nun, Majestät, das Wunder des Feuers!“ · „Nicht so nah, die Aura ist empfindlich.“"
           ]
          },
          {
@@ -4260,6 +4668,17 @@
           "ende": "Wasser und Topfdeckel. Die Köche halten das Ganze für eine besonders gewagte Flambage. Gelingt den Helden eine Ausrede (Täuschen SG 13), steigt der Verdacht nicht."
          },
          {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Glutherz",
+            "rule": "Das Herz eines Glutwichtels, eine faustgrosse Glut in einer Drahtkugel. Bonusaktion: Es macht Feuer, kocht Wasser oder hält Essen warm. 3× pro langer Rast, Aktion: Du schleuderst eine Flamme auf ein Ziel in 9 m, Fernkampfangriff mit GES, 2W6 Feuer. Füttert man es mit einem Stück Zucker, leuchtet es eine Stunde lang wie eine Fackel und schnurrt.",
+            "from": "Bleibt übrig, wenn ein Glutwichtel zerplatzt",
+            "item": "krug-glutherz"
+           }
+          ]
+         },
+         {
           "t": "kampf",
           "title": "Die Torte beisst",
           "enc": "krug-e-torte",
@@ -4413,6 +4832,12 @@
             "rule": "Ein ganzes gebratenes Spanferkel. Als Wurfwaffe: Reichweite 6 m, Angriff mit Nachteil, 2W6 Wucht, und das Ziel riecht so köstlich, dass Wabbel und alle Mimiken es verfolgen. Gegessen: Bis zu fünf Helden erhalten je 1W4+1 temporäre TP.",
             "from": "Buffet im Festsaal",
             "item": "krug-spanferkel"
+           },
+           {
+            "name": "Zauberstab der Hochzeitsfeuerwerke",
+            "rule": "Der Ersatzstab des Hofmagiers, im Chaos des Festsaals verloren. 7 Ladungen, 1W6+1 kehren bei Sonnenaufgang zurück. 1 Ladung: Tanzende Lichter oder ein Feuerwerkskörper, der alle Blicke in 18 m auf sich zieht (alle anderen haben in der nächsten Runde Vorteil auf Heimlichkeit). 2 Ladungen: Ein Farbenregen im Kegel von 4,5 m, jede Kreatur schafft KON SG 13 oder ist bis Ende ihres nächsten Zugs blind.",
+            "from": "Der Ersatzstab des Hofmagiers, im Chaos verloren",
+            "item": "krug-feuerwerkstab"
            }
           ]
          }
@@ -4422,6 +4847,13 @@
      },
      {
       "intro": [
+       {
+        "t": "dm",
+        "title": "Kurz gesagt",
+        "items": [
+         "**Ziel:** Das Ei nach Hause bringen, die Treppe hinauf, und Barnabas zurückrufen. **Muss passieren:** Barnabas wacht auf. Wie laut der Weg dorthin wird, entscheiden die Würfel."
+        ]
+       },
        {
         "t": "counter",
         "id": "hitze",
@@ -4730,6 +5162,12 @@
             "rule": "Zählt als Knüppel +1 auf Angriff und Schaden. 1× pro kurzer Rast, Reaktion, Parade: +2 RK gegen einen Nahkampfangriff. Jeder Treffer klingt wie eine Glocke, man hört ihn bis auf die Strasse. Spiegeleier gelingen darin immer.",
             "from": "Bleibt liegen, wenn Prunella besiegt oder gedemütigt wurde",
             "item": "krug-bratpfanne"
+           },
+           {
+            "name": "Knuts Hut der Gewissheit",
+            "rule": "Ein Filzhut, innen mit Zinnfolie ausgekleidet. Niemand kann deine Gedanken lesen, und du hast Vorteil auf Rettungswürfe gegen bezaubert. Dafür glaubst du, solange du ihn trägst, an eine Verschwörung deiner Wahl und musst sie mindestens einmal pro Stunde erwähnen. Knut schwört, die Möwen hassen ihn.",
+            "from": "Fällt Knut in der Schlägerei vom Kopf",
+            "item": "krug-knutshut"
            }
           ]
          }
@@ -4741,11 +5179,49 @@
         "blocks": [
          {
           "t": "vorlese",
-          "title": "Vorlesetext",
+          "title": "Vorlesetext · Die Kammer",
           "ps": [
            "Die Kammer ist dunkel bis auf eine Kerze. Holle sitzt am Bett und hält Barnabas' Hand. Sein Atem ist kaum noch zu hören.",
-           "Ihr legt das Ei auf seine Brust. Für einen Moment passiert nichts.",
-           "Dann knackt die Schale. Ein goldenes Licht steigt aus dem Ei, erst ein Funke, dann ein Glühen, dann ein Leuchten, das durch die Fenster fällt, durch die Ritzen im Boden, hinunter in die Gaststube, wo die Schlägerei mitten in der Bewegung erstarrt. Etwas Kleines, Glühendes, Gefiedertes schüttelt sich auf Barnabas' Brust und gähnt.",
+           "Ihr legt das Ei auf seine Brust. Es wird heiss, so heiss, dass die Decke zu qualmen beginnt. Die Schale bekommt einen feinen Riss, und goldenes Licht sickert heraus.",
+           "Und dann passiert nichts. Das Licht flackert über Barnabas' Gesicht, hin und her, als suche es etwas und fände es nicht.",
+           "Holle flüstert: „Er ist zu weit weg, Schätzchen. Das Feuer findet ihn nicht. Ihr müsst ihn rufen.“"
+          ]
+         },
+         {
+          "t": "dm",
+          "title": "Barnabas zurückrufen",
+          "items": [
+           "Das ist der Moment, für den die Helden den ganzen Tag gekämpft haben. Lass ihn wirken und mach keine Würfelorgie daraus.",
+           "- **So geht es:** Ein Held nach dem anderen nimmt Barnabas' Hand und ruft ihn mit einer Erinnerung zurück, gern einer aus dem Prolog („Wie Barnabas dich gefunden hat“), oder einer neuen. Der Spieler erzählt sie in einem, zwei Sätzen.",
+           "- **Die Probe:** Danach Einsicht, Auftreten oder Überzeugen SG 12. Vorteil, wenn die Erinnerung den Tisch zum Lachen oder still gebracht hat. Jeder Erfolg: Das Licht im Ei wird heller, und Barnabas lächelt im Schlaf.",
+           "- **Drei Erfolge**, und er folgt dem Licht. Weiter mit „Er wacht auf“.",
+           "- **Kein Scheitern:** Ein Misserfolg kostet nichts. Die Leere antwortet nur seltsam: Ein Bierdeckel fällt vom Regal, Barnabas murmelt „Socken“, das Licht wird kurz blau. Der nächste Held ist dran, oder derselbe mit einer anderen Erinnerung.",
+           "- **Helfer:** Auch die anderen dürfen rufen. Gorm brüllt von der Treppe: „CHEF! SUPPE IST FERTIG!“ (ein Erfolg, wenn Gorm zufrieden ist). Ui ruft etwas in Vokalen, und niemand weiss warum, aber es zählt immer als Erfolg."
+          ]
+         },
+         {
+          "t": "vorlese",
+          "title": "Vorlesetext · In der Leere",
+          "ps": [
+           "Als der Erste von euch Barnabas' Hand nimmt, ist die Kammer für einen Herzschlag fort. Ihr steht in einer Weite aus Sternen, ohne Boden und ohne Himmel. Es ist still, so still, dass ihr euer Blut hört.",
+           "Mittendrin sitzt Barnabas auf einem Hocker vor einem Fass, den Zapfhahn in der Hand, und schaut nicht auf. „Gleich“, murmelt er. „Ich steche nur noch dieses Fass an. Dann komme ich.“",
+           "Dann seid ihr wieder in der Kammer. Seine Hand ist kalt."
+          ]
+         },
+         {
+          "t": "dm",
+          "title": "Prunella sagt es",
+          "items": [
+           "Hat Prunella den Helden geholfen oder die Wahrheit erfahren, steht sie jetzt in der Tür, die Pfanne noch in der Hand. Sie hört das Wort „Fass“, und ihr Gesicht wird ganz still.",
+           "Sie setzt sich auf die Bettkante, nimmt seine andere Hand und sagt leise: „Barnabas Krug. Es ist später.“",
+           "Das zählt als alle fehlenden Erfolge auf einmal. Vor dreissig Jahren hat er ihr „Später“ gesagt. Jetzt ist es so weit."
+          ]
+         },
+         {
+          "t": "vorlese",
+          "title": "Vorlesetext · Er wacht auf",
+          "ps": [
+           "Dann bricht die Schale. Ein goldenes Licht steigt aus dem Ei, erst ein Funke, dann ein Glühen, dann ein Leuchten, das durch die Fenster fällt, durch die Ritzen im Boden, hinunter in die Gaststube, wo die Schlägerei mitten in der Bewegung erstarrt. Etwas Kleines, Glühendes, Gefiedertes schüttelt sich auf Barnabas' Brust und gähnt.",
            "Barnabas öffnet die Augen. Er blinzelt. Er schaut den kleinen Phönix an, dann euch, einen nach dem anderen, so wie früher, wenn er abends gezählt hat, ob alle im Bett sind. Die Heilerin weint und tut so, als würde sie nicht weinen.",
            "„Meine Kinder“, sagt er heiser. „Ihr seid heimgekommen.“",
            "Dann sagt er:"
@@ -4787,6 +5263,24 @@
           "title": "Der Phönix",
           "items": [
            "Aus dem Ei schlüpft ein Phönixküken, so gross wie eine Faust. Es ist jetzt das Haustier des Letzten Krugs. Es heisst, wie die Spieler es nennen. Es lebt im Kamin, frisst Glut und leuchtet nachts. Die Stadt wird bald erzählen, im Letzten Krug sei das Feuer nie ausgegangen."
+          ]
+         },
+         {
+          "t": "loot",
+          "title": "Was von der Schale bleibt",
+          "items": [
+           "Die Eierschale zerfällt auf der Bettdecke in drei goldene Splitter. Sie sind noch warm. Holle sammelt sie ein und drückt sie den Helden in die Hand: „Für das nächste Mal. Es gibt immer ein nächstes Mal, Schätzchen.“"
+          ]
+         },
+         {
+          "t": "items",
+          "rows": [
+           {
+            "name": "Splitter der Phönixschale",
+            "rule": "Drei goldene Splitter der Eierschale, aus der der Phönix auf Barnabas' Brust geschlüpft ist. Sie glühen noch. Aktion: Zerreibe einen Splitter über einer Kreatur mit 0 TP. Sie erhält 2W8+4 TP zurück und steht sofort auf. Der letzte Splitter kann stattdessen eine Kreatur, die seit höchstens einer Minute tot ist, mit 1 TP zurückholen. Danach ist die Schale verbraucht.",
+            "from": "Die Schale des Phönixeis, auf Barnabas' Bettdecke",
+            "item": "krug-phoenixschale"
+           }
           ]
          }
         ]
@@ -4909,6 +5403,30 @@
             "rule": "Knüppel +1 auf Angriff und Schaden. 3× pro langer Rast, Ausrollen: Nach einem Treffer schafft das Ziel STÄ SG 13 oder liegt am Boden. Wer damit Teig ausrollt, bekommt nie Klumpen.",
             "from": "Von Prunella, wenn sie geschont wurde: „Für den Fall, dass ihr mal einen richtigen Teig machen wollt.“",
             "item": "krug-nudelholz"
+           },
+           {
+            "name": "Der Zapfhahn des Letzten Krugs",
+            "rule": "Der alte Messingzapfhahn, mit dem Barnabas vierzig Jahre lang das erste Fass des Tages angestochen hat. „Jetzt gehört der Krug euch auch.“ Steckt er in einem Fass, wird das Haus zum Zufluchtsort: Wer es mit böser Absicht betreten will, schafft CHA SG 15 oder bleibt an der Tür stehen, und wer dort eine lange Rast macht, erhält zusätzlich 1 Trefferwürfel zurück. Unterwegs zapft er aus jedem Fass einmal am Tag das beste Bier, das der Trinkende je hatte: Vorteil auf den nächsten Rettungswurf gegen verängstigt.",
+            "from": "Von Barnabas: „Jetzt gehört der Krug euch auch.“",
+            "item": "krug-zapfhahn"
+           },
+           {
+            "name": "Mutter Holles Kräuterbeutel",
+            "rule": "Ein Lederbeutel, der nach Kamille riecht und nie leer wird. 3× pro langer Rast, Aktion: Ein Umschlag auf eine Wunde heilt 1W8+3 TP oder beendet den Zustand vergiftet. Wer ihn benutzt, hört Holle leise „Schätzchen“ sagen.",
+            "from": "Von Mutter Holle, „für die nächsten aufgeschlagenen Knie“",
+            "item": "krug-kraeuterbeutel"
+           },
+           {
+            "name": "Der goldene Löffel des Hofkochs",
+            "rule": "Ambrosius schickt ihn am Morgen danach mit einem Zettel: „Für Gorm. Wir sind amüsiert.“ Gorm gibt ihn euch, er hat seine Pinzette. Mit dem Löffel schmeckst du jedes Gift und jeden Zauber in Essen und Trank heraus. 1× pro langer Rast, 1 Stunde Kochen: ein Festmahl für bis zu sechs Kreaturen. Wer davon isst, erhält 2W6 temporäre TP und 8 Stunden lang Vorteil auf Rettungswürfe gegen verängstigt.",
+            "from": "Von Hofkoch Ambrosius über Gorm",
+            "item": "krug-goldloeffel"
+           },
+           {
+            "name": "Hildegards Truhenkind",
+            "rule": "Eines von Hildegards Jungen ist über Nacht zu einer Reisetruhe auf vier kurzen Beinen gewachsen und hat sich euch ausgesucht. Sie fasst so viel wie ein Nimmervoller Beutel (250 kg) und läuft dir mit 6 m hinterher. Öffnet sie jemand ausser dir, beisst sie: 2W6 Stich, und er klebt an ihr fest (Befreien SG 13). Füttere sie jeden Tag, sonst frisst sie den Inhalt.",
+            "from": "Hildegards Junges, wenn sie gezähmt wurde",
+            "item": "krug-mimiktruhe"
            }
           ]
          },
@@ -5430,6 +5948,120 @@
        ]
       ],
       "quote": "„Habt ihr meine Eltern gesehen? Die verlieren sich immer.“"
+     },
+     {
+      "name": "Trondur",
+      "role": "Troll an der Fleischtheke des Horts",
+      "fields": [
+       [
+        "Aussehen",
+        "Grün, riesig, Haarnetz und Metzgerschürze, wischt sich ständig die Hände ab."
+       ],
+       [
+        "Marotte",
+        "Bietet Kostproben seines eigenen Arms an. „Nachhaltig. Wächst nach.“"
+       ],
+       [
+        "Will",
+        "Dass der Elch weg ist, ohne dass das Gemüse leidet."
+       ]
+      ],
+      "quote": "„Probieren Sie! Ist vom Ellenbogen, da ist es am zartesten.“"
+     },
+     {
+      "name": "Madame Gorgo",
+      "role": "Medusa, Optikerin im Hort",
+      "fields": [
+       [
+        "Aussehen",
+        "Dunkle Brille, Schlangen mit Lockenwicklern, ein winziger Laden voller Spiegel."
+       ],
+       [
+        "Marotte",
+        "Verkauft jedem eine Spiegelbrille, „zu Ihrer Sicherheit, Schätzchen“."
+       ],
+       [
+        "Geheimnis",
+        "Sie hat sich im Griff. Wer ihr ohne Brille in die Augen schaut, wird nur kurz steif, nicht zu Stein."
+       ]
+      ],
+      "quote": "„Die Versteinerten reden nicht mehr mit mir. Das ist das eigentliche Problem.“"
+     },
+     {
+      "name": "Frau Glimmerschuppe",
+      "role": "Messingdrachin, Wechselstube des Horts",
+      "fields": [
+       [
+        "Aussehen",
+        "In Menschengestalt eine elegante Dame mit Goldmonokel, die jede Münze mit der Zunge prüft. Wenn sie lacht, steigt Rauch aus ihrer Nase."
+       ],
+       [
+        "Will",
+        "Gute Gespräche. Messingdrachen leben davon wie andere von Brot."
+       ],
+       [
+        "Wendung",
+        "Wird von einem Barden umgarnt und erscheint am Abend als Gesandte der Drachen an der Hochzeit."
+       ]
+      ],
+      "quote": "„Oh, ein Barde. Wie entzückend. Erzählt mir etwas, das ich noch nicht kenne.“"
+     },
+     {
+      "name": "Schreiber Federkiel",
+      "role": "Hofkanzlei",
+      "fields": [
+       [
+        "Aussehen",
+        "Ärmelschoner, Brille an einer Kette, ein Stempel in jeder Hand."
+       ],
+       [
+        "Marotte",
+        "Stempelt „Abgelehnt“ schon vorher, „zur Beschleunigung“."
+       ],
+       [
+        "Nützlich",
+        "Weiss, dass heute nur Personal von Hoflieferanten in den Palast darf."
+       ]
+      ],
+      "quote": "„Bitte Nummer ziehen. Wir sind bei siebzehn.“"
+     },
+     {
+      "name": "Meister Lysander Glanz",
+      "role": "Hofmagier",
+      "fields": [
+       [
+        "Aussehen",
+        "Silberner Bart, Sternenrobe, ein Spiegel am Gürtel, in dem er sich ständig prüft."
+       ],
+       [
+        "Aufgabe",
+        "Soll beim Anschnitt das Phönixei mit einer feierlichen Formel schlüpfen lassen."
+       ],
+       [
+        "Schwäche",
+        "Er schaut lieber sich selbst an als das Ei. Eine gute Fälschung fällt ihm erst auf, wenn es zu spät ist."
+       ]
+      ],
+      "quote": "„Und nun, Majestät, das Wunder des Feuers!“"
+     },
+     {
+      "name": "König Leopold IV.",
+      "role": "Bräutigam",
+      "fields": [
+       [
+        "Art",
+        "Gutmütig, verliebt, tanzt schlecht und gern."
+       ],
+       [
+        "Will",
+        "Eine Hochzeit, von der man noch in hundert Jahren spricht. Das bekommt er."
+       ],
+       [
+        "Nach dem Fest",
+        "Lacht über die beissende Torte, sobald er die ganze Geschichte von Zwick hört."
+       ]
+      ],
+      "quote": "„Auf die Liebe! Und jetzt die Torte!“"
      }
     ],
     "lore": {
@@ -5619,6 +6251,103 @@
        "Kundenkarte oder Kassenzettel vorzeigen beendet die Inventur.",
        "Wer beim Zählen hilft, hat Freunde fürs Leben.",
        "In ihre Tunnel passen nur Kleine."
+      ]
+     },
+     "krug-glimmerschuppe": {
+      "title": "Frau Glimmerschuppe, Messingdrachin",
+      "ch": "a2",
+      "look": "In Menschengestalt eine elegante Dame mit Goldmonokel. In ihrer wahren Gestalt ein Drache aus poliertem Messing, mit einem Kragen wie ein Sonnenschirm.",
+      "lore": "Sie führt die Wechselstube des Horts, weil man dort den ganzen Tag mit Leuten redet. Messingdrachen sind die geselligsten aller Drachen. Am Abend ist sie Gesandte der Drachen an der Königshochzeit.",
+      "fight": "Kämpft nur, wenn man sie beleidigt. Dann schläfert sie lieber ein, als zu verbrennen.",
+      "weak": [
+       "Eine gute Geschichte unterbricht jeden Kampf.",
+       "Münzen werfen: Sie prüft jede einzeln.",
+       "Barden mit der Laute der unpassenden Romantik haben Vorteil."
+      ]
+     },
+     "krug-phoenixkueken": {
+      "title": "Das Phönixküken",
+      "ch": "f",
+      "look": "So gross wie eine Faust, Federn wie Glut, Augen wie zwei Funken. Es gähnt viel.",
+      "lore": "Geschlüpft auf Barnabas' Brust, in seinem fast erloschenen Lebensfeuer. Ein Phönix schlüpft dort, wo ein Feuer am Erlöschen ist. Jetzt lebt es im Kamin des Letzten Krugs und frisst Glut.",
+      "fight": "Kämpft nicht, ausser jemand bedroht Barnabas. Dann pickt es mit glühendem Schnabel.",
+      "weak": [
+       "Zucker macht es zahm.",
+       "Wasser beleidigt es."
+      ]
+     },
+     "ogre": {
+      "title": "Gorm, der Oger-Koch",
+      "ch": "a1",
+      "look": "Drei Meter, Kochmütze aus einem Mehlsack, Pinzette in der Pranke.",
+      "lore": "Kam nach dem Auszug der Helden in den Letzten Krug, weil Barnabas der Einzige war, der seine Rüebli-Schaumsuppe verstand. Früher Schüler des Hofkochs Ambrosius. Er hat den Brief geschrieben, der die Helden heimholt. Im Finale kämpft er mit der Bratpfanne auf ihrer Seite (Werte: Oger, 68 TP).",
+      "fight": "Schwingt die Pfanne wie eine Keule. Wer seine Küche beleidigt, wird zuerst getroffen.",
+      "weak": [
+       "Lob für seine Küche: Er tut alles.",
+       "Bratwurst und Ketchup: Er weint."
+      ]
+     },
+     "minotaur": {
+      "title": "Bruno Hornig, Filialleiter",
+      "ch": "a2",
+      "look": "Ein Minotaurus im zu kleinen Anzug, die Hörner mit Messingkappen, Namensschild.",
+      "lore": "Früher der Schrecken dieses Labyrinths. Als die Abenteurer ausblieben, hat er es zum Hort umgebaut, dem grössten Markt des Reichs. Er kämpft nicht mehr, ausser jemand legt Feuer in der Möbelabteilung.",
+      "fight": "Senkt den Kopf und scharrt, dann entschuldigt er sich. Greift er doch an, ist es ein Ansturm wie früher.",
+      "weak": [
+       "Kundenzufriedenheit: Eine Beschwerde trifft ihn härter als ein Schwert.",
+       "Er verirrt sich nie. Wer sich verirrt, kann ihn fragen."
+      ]
+     },
+     "troll": {
+      "title": "Trondur, der Metzger",
+      "ch": "a2",
+      "look": "Ein Troll mit Haarnetz und Schürze hinter der Fleischtheke.",
+      "lore": "Bietet Kostproben seines eigenen Arms an, der nachwächst. Freundlich, gemütlich, ängstlich, wenn der Elch röhrt.",
+      "fight": "Kämpft nie. Wer ihn angreift, bekommt ein Kotelett ins Gesicht und eine Beschwerde beim Filialleiter.",
+      "weak": [
+       "Er weiss: Der Elch mag Salz und hasst sein Spiegelbild."
+      ]
+     },
+     "medusa": {
+      "title": "Madame Gorgo, Optikerin",
+      "ch": "a2",
+      "look": "Eine Medusa mit dunkler Brille und Schlangen in Lockenwicklern.",
+      "lore": "Verkauft im Hort Spiegelbrillen und Handspiegel. Sie hat ihren Blick im Griff: Wer ihr ohne Brille in die Augen schaut, wird nur für eine Runde steif.",
+      "fight": "Kämpft nicht. Die Werte sind für den Notfall, falls die Helden sie doch ärgern.",
+      "weak": [
+       "Ein Spiegel: Sie richtet sich die Frisur und vergisst alles andere."
+      ]
+     },
+     "guard": {
+      "title": "Palastwachen",
+      "ch": "a4",
+      "look": "Prunkrüstung, Hellebarde, Federbusch, sehr müde.",
+      "lore": "Heute sind hundert von ihnen im Dienst. Sie wollen eigentlich nur, dass die Hochzeit vorbeigeht und sie Feierabend haben.",
+      "fight": "Rufen zuerst nach Verstärkung. Bei einer Flucht stellen sie sich in den Weg, kämpfen aber nicht tödlich.",
+      "weak": [
+       "Jedes Feuerwerk vor dem Fenster lenkt sie ab.",
+       "Ein lautes „Sonderangebot am Buffet!“ auch."
+      ]
+     },
+     "mage": {
+      "title": "Meister Lysander Glanz, Hofmagier",
+      "ch": "a4",
+      "look": "Silberner Bart, Sternenrobe, ein Spiegel am Gürtel.",
+      "lore": "Soll beim Anschnitt das Phönixei schlüpfen lassen, mit einer Formel, die er seit Wochen vor dem Spiegel übt.",
+      "fight": "Kämpft nur, wenn er sich bedroht fühlt, und dann mit viel Licht und Getöse. Die Werte sind für den Notfall.",
+      "weak": [
+       "Eitel: Er schaut lieber sich selbst an als das Ei.",
+       "Er verliert im Chaos seinen Ersatzstab."
+      ]
+     },
+     "veteran": {
+      "title": "Lirroy Jänkins",
+      "ch": "a3",
+      "look": "Ein Abenteurer mit verbeulter Rüstung, der seinen eigenen Namen brüllt.",
+      "lore": "Taucht im dümmsten Moment auf: im Hort, bei der Vorbereitung, im Palast und in der Nacht. Vorbild ist Leeroy Jenkins, der berühmteste Sturmangriff der Spielegeschichte. Er meint es gut.",
+      "fight": "Stürmt los, bevor jemand einen Plan hat. Im Finale räumt er einen Raufbold ab, meistens den falschen.",
+      "weak": [
+       "Wer „Lirroy, warte!“ ruft, erreicht genau das Gegenteil."
       ]
      },
      "thug": {
@@ -6134,6 +6863,147 @@
       },
       "text": "Zählt als Knüppel +1 auf Angriff und Schaden. 1× pro kurzer Rast, Reaktion, Parade: +2 RK gegen einen Nahkampfangriff. Jeder Treffer klingt wie eine Glocke, man hört ihn bis auf die Strasse. Spiegeleier gelingen darin immer."
      },
+     "krug-sternenlaterne": {
+      "name": "Laterne der Sternenleere",
+      "r": "selten",
+      "att": true,
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Sternenleere: Schritt"
+      },
+      "text": "Barnabas' Laterne aus Zimmer 3. Seit dem Unfall ist darin ein Stück Sternenleere gefangen: Sie leuchtet nicht, sie zeigt einen Nachthimmel, der nicht über dieser Welt steht. Solange du sie trägst, siehst du im Dunkeln 18 m weit wie bei Dämmerlicht. 1× pro langer Rast, Bonusaktion: Du trittst durch die Leere und erscheinst an einem freien Ort, den du in 9 m siehst (wie Nebelschritt). Wer länger als eine Minute hineinschaut, schafft WEI SG 13 oder schläft eine Stunde."
+     },
+     "krug-portalkompass": {
+      "name": "Kompass der vier Ebenen",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Hauch der Ebene"
+      },
+      "text": "Barnabas' Messingkompass mit vier Nadeln, eine für jede Ebene. Er zeigt immer, welche Ebene das Portal in Zimmer 3 gerade öffnet. 1× pro langer Rast, Aktion: Für 1 Stunde umgibt dich ein Hauch dieser Ebene. Wasser: Du kannst unter Wasser atmen. Feuer: Resistenz gegen Feuerschaden. Erde: Du kannst nicht umgeworfen werden. Luft: Du fällst sanft wie mit Federfall."
+     },
+     "krug-rudispfeil": {
+      "name": "Rudis Pavillonpfeil",
+      "r": "ungewöhnlich",
+      "text": "Der Pfeil, mit dem Rudi Rostbart vor dreissig Jahren den Pavillon „verwundet“ hat, frisch herausgezogen. Ein Pfeil +1, der nie bricht und nach dem Kampf von selbst wieder in deinem Köcher steckt. Gegen Bauwerke, Türen und Gartenhäuschen verursacht er doppelten Schaden. Rudi will ihn zurück, sobald der Pavillon wieder angreift."
+     },
+     "krug-messingschuppe": {
+      "name": "Glimmerschuppes Schuppe",
+      "r": "selten",
+      "att": true,
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Drachenzunge"
+      },
+      "text": "Eine handgrosse Messingschuppe, warm wie Sand in der Mittagssonne, ein Geschenk der Drachin aus der Wechselstube. Du hast Resistenz gegen Feuerschaden. 1× pro langer Rast kannst du 10 Minuten lang mit jeder Kreatur sprechen, die eine Sprache versteht, und sie versteht dich. Messingdrachen erkennen die Schuppe und reden sehr, sehr lange mit dir."
+     },
+     "krug-lesebrille": {
+      "name": "Lesebrille des Kundendiensts",
+      "r": "ungewöhnlich",
+      "att": true,
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Brille: Unsichtbares sehen"
+      },
+      "text": "Eine der Lesebrillen von Herrn Okulus, für Menschenaugen umgeschliffen. Du kannst jede geschriebene Sprache lesen, auch Kleingedrucktes und Barnabas' Handschrift. 1× pro langer Rast: 1 Minute lang siehst du Unsichtbares und Ätherisches."
+     },
+     "krug-hornkompass": {
+      "name": "Hornigs Labyrinthkappe",
+      "r": "ungewöhnlich",
+      "att": true,
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Labyrinth-Ansturm"
+      },
+      "text": "Eine Messingkappe von Bruno Hornigs Hörnern, als Anhänger. Solange du sie trägst, verirrst du dich nie: Du findest in jedem Gebäude den kürzesten Weg nach draussen und weisst immer, wo der Ort liegt, an dem du heute aufgewacht bist. 1× pro langer Rast: Bewegst du dich 6 m gerade auf ein Ziel zu und triffst es im Nahkampf, verursachst du zusätzlich 2W6 Wucht, und es schafft STÄ SG 13 oder liegt am Boden."
+     },
+     "krug-portalring": {
+      "name": "Ring des Portalbands",
+      "r": "ungewöhnlich",
+      "att": true,
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Durchgang verriegeln"
+      },
+      "text": "Aus dem Rest des Portalbands, mit dem Zimmer 3 abgedichtet wurde. Er summt leise und wird um Mitternacht kalt. 1× pro langer Rast, Reaktion: Öffnet sich in 9 m eine Tür, ein Fenster oder ein magischer Durchgang, schlägst du ihn zu und verriegelst ihn 1 Stunde lang magisch (wie Arkanes Schloss)."
+     },
+     "krug-glutherz": {
+      "name": "Glutherz",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 3,
+       "reset": "long",
+       "name": "Glutherz: Flamme"
+      },
+      "text": "Das Herz eines Glutwichtels, eine faustgrosse Glut in einer Drahtkugel. Bonusaktion: Es macht Feuer, kocht Wasser oder hält Essen warm. 3× pro langer Rast, Aktion: Du schleuderst eine Flamme auf ein Ziel in 9 m, Fernkampfangriff mit GES, 2W6 Feuer. Füttert man es mit einem Stück Zucker, leuchtet es eine Stunde lang wie eine Fackel und schnurrt."
+     },
+     "krug-zuckerrose": {
+      "name": "Zuckerrose der Verwandlung",
+      "r": "ungewöhnlich",
+      "cons": true,
+      "text": "Von Fräulein Zuckerguss, aus gesponnenem Zucker und einem Hauch Feenstaub. Wer sie isst, sieht 1 Stunde lang aus wie eine andere Person seiner Grösse, die er schon einmal gesehen hat (wie Selbstverkleidung). Die Verkleidung riecht leicht nach Vanille: Hunde und Mimiken folgen dir."
+     },
+     "krug-feuerwerkstab": {
+      "name": "Zauberstab der Hochzeitsfeuerwerke",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 7,
+       "reset": "long",
+       "name": "Feuerwerk-Ladungen"
+      },
+      "text": "Der Ersatzstab des Hofmagiers, im Chaos des Festsaals verloren. 7 Ladungen, 1W6+1 kehren bei Sonnenaufgang zurück. 1 Ladung: Tanzende Lichter oder ein Feuerwerkskörper, der alle Blicke in 18 m auf sich zieht (alle anderen haben in der nächsten Runde Vorteil auf Heimlichkeit). 2 Ladungen: Ein Farbenregen im Kegel von 4,5 m, jede Kreatur schafft KON SG 13 oder ist bis Ende ihres nächsten Zugs blind."
+     },
+     "krug-knutshut": {
+      "name": "Knuts Hut der Gewissheit",
+      "r": "ungewöhnlich",
+      "att": true,
+      "text": "Ein Filzhut, innen mit Zinnfolie ausgekleidet. Niemand kann deine Gedanken lesen, und du hast Vorteil auf Rettungswürfe gegen bezaubert. Dafür glaubst du, solange du ihn trägst, an eine Verschwörung deiner Wahl und musst sie mindestens einmal pro Stunde erwähnen. Knut schwört, die Möwen hassen ihn."
+     },
+     "krug-phoenixschale": {
+      "name": "Splitter der Phönixschale",
+      "r": "selten",
+      "cons": true,
+      "text": "Drei goldene Splitter der Eierschale, aus der der Phönix auf Barnabas' Brust geschlüpft ist. Sie glühen noch. Aktion: Zerreibe einen Splitter über einer Kreatur mit 0 TP. Sie erhält 2W8+4 TP zurück und steht sofort auf. Der letzte Splitter kann stattdessen eine Kreatur, die seit höchstens einer Minute tot ist, mit 1 TP zurückholen. Danach ist die Schale verbraucht."
+     },
+     "krug-goldloeffel": {
+      "name": "Der goldene Löffel des Hofkochs",
+      "r": "selten",
+      "att": true,
+      "use": {
+       "n": 1,
+       "reset": "long",
+       "name": "Goldener Löffel: Festmahl"
+      },
+      "text": "Ambrosius schickt ihn am Morgen danach mit einem Zettel: „Für Gorm. Wir sind amüsiert.“ Gorm gibt ihn euch, er hat seine Pinzette. Mit dem Löffel schmeckst du jedes Gift und jeden Zauber in Essen und Trank heraus. 1× pro langer Rast, 1 Stunde Kochen: ein Festmahl für bis zu sechs Kreaturen. Wer davon isst, erhält 2W6 temporäre TP und 8 Stunden lang Vorteil auf Rettungswürfe gegen verängstigt."
+     },
+     "krug-mimiktruhe": {
+      "name": "Hildegards Truhenkind",
+      "r": "selten",
+      "att": true,
+      "text": "Eines von Hildegards Jungen ist über Nacht zu einer Reisetruhe auf vier kurzen Beinen gewachsen und hat sich euch ausgesucht. Sie fasst so viel wie ein Nimmervoller Beutel (250 kg) und läuft dir mit 6 m hinterher. Öffnet sie jemand ausser dir, beisst sie: 2W6 Stich, und er klebt an ihr fest (Befreien SG 13). Füttere sie jeden Tag, sonst frisst sie den Inhalt."
+     },
+     "krug-kraeuterbeutel": {
+      "name": "Mutter Holles Kräuterbeutel",
+      "r": "ungewöhnlich",
+      "use": {
+       "n": 3,
+       "reset": "long",
+       "name": "Holles Umschlag"
+      },
+      "text": "Ein Lederbeutel, der nach Kamille riecht und nie leer wird. 3× pro langer Rast, Aktion: Ein Umschlag auf eine Wunde heilt 1W8+3 TP oder beendet den Zustand vergiftet. Wer ihn benutzt, hört Holle leise „Schätzchen“ sagen."
+     },
+     "krug-zapfhahn": {
+      "name": "Der Zapfhahn des Letzten Krugs",
+      "r": "sehr selten",
+      "att": true,
+      "text": "Der alte Messingzapfhahn, mit dem Barnabas vierzig Jahre lang das erste Fass des Tages angestochen hat. „Jetzt gehört der Krug euch auch.“ Steckt er in einem Fass, wird das Haus zum Zufluchtsort: Wer es mit böser Absicht betreten will, schafft CHA SG 15 oder bleibt an der Tür stehen, und wer dort eine lange Rast macht, erhält zusätzlich 1 Trefferwürfel zurück. Unterwegs zapft er aus jedem Fass einmal am Tag das beste Bier, das der Trinkende je hatte: Vorteil auf den nächsten Rettungswurf gegen verängstigt."
+     },
      "krug-basiliskenei": {
       "name": "Basiliskenei",
       "r": "gewöhnlich",
@@ -6141,7 +7011,7 @@
       "text": "Werfen, Reichweite 6 m: Das getroffene Ziel schafft KON SG 12 oder ist bis Ende seines nächsten Zugs festgesetzt, weil seine Füsse kurz versteinern. Oder Gorm macht daraus das beste Soufflé des Reichs."
      }
     },
-    "srd": "Mimik, Gallertwürfel, Riesenkrabbe, Hobgoblin, Kobold, Rattenschwarm, Schläger und Oger stammen aus dem SRD 5.2.1 (CC-BY-4.0). Alle anderen Werte und Gegenstände sind eigene, einige nach beliebten Ideen aus Foren der D&D-Szene.",
+    "srd": "Mimik, Gallertwürfel, Riesenkrabbe, Hobgoblin, Kobold, Rattenschwarm, Schläger, Oger, Minotaurus, Troll, Medusa, Wache, Magier und Krieger-Veteran stammen aus dem SRD 5.2.1 (CC-BY-4.0). Alle anderen Werte und Gegenstände sind eigene, einige nach beliebten Ideen aus Foren der D&D-Szene.",
     "mobs": [
      {
       "id": "krug-hildegard",
@@ -6431,6 +7301,60 @@
        ]
       ],
       "txt": "Mehrfachangriff: Eine Bratpfanne und eine Fleischgabel. Pfefferwolke (Aufladung 5–6): Kegel von 4,5 m, KON SG 13, 2W6 Gift (halb bei Erfolg) oder blind bis Ende ihres nächsten Zugs. Parade (Reaktion): +2 RK gegen einen Nahkampfangriff, mit der Pfanne. Gute Gastgeberin: Sie greift nie jemanden an, der gerade isst. Schwächen: ✦ Eitelkeit: Ein ehrliches Kompliment über ihre Küche (Überzeugen SG 14) lässt sie zögern, sie verliert ihre nächste Reaktion. ✦ Pfanne: Wird ihr die Pfanne entwunden, kämpft sie nur noch halbherzig (Nachteil auf Angriffe).",
+      "hab": [
+       "stadt"
+      ],
+      "la": 0,
+      "lr": 0
+     },
+     {
+      "id": "krug-glimmerschuppe",
+      "name": "Frau Glimmerschuppe, Messingdrachin",
+      "cr": "3",
+      "ac": 16,
+      "hp": 75,
+      "hd": "10W10+20",
+      "spd": "9 m, Fliegen 18 m, Graben 6 m",
+      "ini": 0,
+      "atks": [
+       [
+        "Biss",
+        5,
+        "2W10+3",
+        "Stich"
+       ],
+       [
+        "Klaue",
+        5,
+        "1W6+3",
+        "Hieb"
+       ]
+      ],
+      "txt": "Mehrfachangriff: Ein Biss und eine Klaue. Schlafatem (Aufladung 5–6): Kegel von 9 m, KON SG 13 oder bewusstlos für 1 Minute oder bis jemand die Kreatur weckt. Feueratem (Aufladung 5–6): Linie von 9 m auf 1,5 m, GES SG 13, 4W6 Feuer (halb bei Erfolg). Gestaltwandel: In Menschengestalt eine elegante Dame mit Goldmonokel. Plaudertasche: Wer ein gutes Gespräch mit ihr führt, ist ihr Freund. Schwächen: ✦ Neugier: Eine gute Geschichte unterbricht jeden Kampf. ✦ Gold: Wirft man Münzen, prüft sie jede mit der Zunge (1 Runde).",
+      "hab": [
+       "stadt"
+      ],
+      "la": 0,
+      "lr": 0
+     },
+     {
+      "id": "krug-phoenixkueken",
+      "name": "Phönixküken",
+      "cr": "1/4",
+      "ac": 13,
+      "hp": 10,
+      "hd": "3W4+3",
+      "spd": "3 m, Fliegen 18 m",
+      "ini": 3,
+      "atks": [
+       [
+        "Glutschnabel",
+        5,
+        "1W4+3",
+        "Feuer"
+       ]
+      ],
+      "txt": "Feuerleib: Wer es berührt oder mit einer Nahkampfwaffe trifft, erleidet 1W4 Feuer. Licht: Es leuchtet hell wie eine Fackel. Wiedergeburt: Bei 0 TP zerfällt es zu Asche und schlüpft beim nächsten Sonnenaufgang neu daraus. Schwächen: ✦ Wasser: Ein Eimer Wasser lässt es 1 Runde lang beleidigt qualmen. ✦ Zucker: Für ein Stück Zucker tut es fast alles.",
       "hab": [
        "stadt"
       ],
