@@ -560,8 +560,10 @@
           "title": "Die Wahrheit hinter dem Tag",
           "items": [
            "**Barnabas Krug**, Wirt des „Letzten Krugs“, ist der Ziehvater der Helden. Er hat sie alle als kleine Kinder von der Strasse aufgelesen und im Wirtshaus grossgezogen. Vor einer Woche wollte er das Portal in Zimmer 3 auf „Frühling“ stellen. Er erwischte „Sternenleere“, einen Hauch aus der Leere zwischen den Ebenen, und fiel in einen Zauberschlaf. Ohne Hilfe wacht er nie wieder auf, und die Heilerin gibt ihm Zeit bis zum nächsten Sonnenaufgang.",
-           "Das einzige Mittel ist ein **Phönixei**, warm an seine Brust gelegt. Im ganzen Reich gibt es genau eines. **König Leopold IV.** hat es gekauft, damit seine Hochzeitstorte heute Nacht leuchtet. Bis zum Fest liegt es in der Schatzkammer. Erst am Abend kommt es in die Hofküche und auf die Torte.",
-           "In die Hofküche kommt nur der **Hoflieferant**. Den bestimmt heute Nachmittag **Oberinspektor Kunibert Zwick**. Er prüft inkognito: Der schmuddelige Wanderer, der am Morgen ein Frühstück will, ist er.",
+           "Das einzige Mittel ist ein **Phönixei**, warm an seine Brust gelegt. Im ganzen Reich gibt es genau eines. **König Leopold IV.** hat es gekauft, für den Höhepunkt seiner Hochzeit: Es liegt oben auf der Torte, und beim Anschnitt lässt der Hofmagier es schlüpfen, ein Phönix als Glücksbringer für das Brautpaar. Danach ist es kein Ei mehr, und ein geschlüpfter Phönix hilft Barnabas nicht. Warten bis nach dem Fest geht also nicht. Bis zum Abend liegt das Ei in der Schatzkammer, erst dann kommt es in die Hofküche.",
+           "Warum gerade ein Phönixei? Ein Phönix schlüpft dort, wo ein Feuer am Erlöschen ist. Auf Barnabas' Brust schlüpft er in seinem fast erloschenen Lebensfeuer und facht es wieder an. Das ist die ganze Magie.",
+           "In die Hofküche kommt nur der **Hoflieferant** mit seinem Personal. Der bisherige, die Grossbäckerei Sauerteig, ist gestern mit dem Vorschuss für das Hochzeitsmahl verschwunden. Darum bestimmt heute Nachmittag **Oberinspektor Kunibert Zwick** einen neuen aus den Häusern, die sich beworben hatten.",
+           "**Zwick** ist Barnabas' ältester Stammgast. Seit vierzig Jahren kommt er jeden Sonntag in Verkleidung, als schmuddeliger Wanderer, isst Haferbrei und zahlt eine Kupfermünze. Die Helden kennen ihn aus ihrer Kindheit als „den Haferbrei-Mann“, ohne zu ahnen, wer er ist. Barnabas wusste es immer. Zwick weiss, dass Barnabas krank ist, und prüft trotzdem streng: Vorschrift ist Vorschrift. Aber er hofft, dass die Kinder bestehen.",
            "**Prunella Schmalz** vom Goldenen Kapaun gegenüber will den Titel auch. Sie hält die Helden für undankbare Ziehkinder, die erst beim Erbe wieder auftauchen, und sabotiert sie den ganzen Tag. Sie ist keine Verbrecherin, nur ehrgeizig und gekränkt. Vor dreissig Jahren waren sie und Barnabas ein Paar.",
            "Der **Hort** ist der grösste Markt des Reichs, ein alter Dungeon, den sein früherer Herr, der Minotaurus Bruno Hornig, zum Einkaufsparadies umgebaut hat. Jeder Wirt kauft dort ein. Die Angestellten sind Monster, und ein paar Monster sind nie gegangen."
           ]
@@ -1153,7 +1155,7 @@
           "title": "Vorlesetext · Die Diagnose",
           "ps": [
            "Die Heilerin legt Barnabas eine Hand auf die Stirn. „Er hat in die Leere geschaut, Schätzchen. In Zimmer 3. Seitdem schläft er, und jeden Tag ein bisschen tiefer. Bis morgen früh hat er noch. Danach wacht er nicht mehr auf.“",
-           "Sie klopft dreimal auf den Bettpfosten. „Es gibt ein Mittel. Ein einziges. Ein Phönixei, warm an seine Brust gelegt. Das Feuer im Ei weckt alles, was schläft. Nur gibt es im ganzen Reich genau eines.“",
+           "Sie klopft dreimal auf den Bettpfosten. „Es gibt ein Mittel. Ein einziges. Ein Phönixei, an seine Brust gelegt. Ein Phönix schlüpft dort, wo ein Feuer am Erlöschen ist, und facht es wieder an. Nur gibt es im ganzen Reich genau eines. Und es muss ein Ei sein, Schätzchen. Ein geschlüpfter Phönix hilft ihm nicht mehr.“",
            "„Und das“, sagt Pünktli und schaut auf seine Uhr, „gehört dem König.“"
           ]
          },
@@ -1166,12 +1168,16 @@
             "Der Schlaf ist magisch, keine Krankheit. Heilzauber halten ihn stabil, wecken ihn aber nicht."
            ],
            [
+            "Eigene Zauber der Helden",
+            "Schwächere Genesung, Fluch brechen, Magie bannen: nichts wirkt. Es ist kein Fluch, keine Krankheit und kein Zauber, sondern ein Hauch Leere. Jeder Versuch lässt Barnabas lächeln und etwas Unverständliches über Socken murmeln."
+           ],
+           [
             "Arkane Kunde SG 13",
             "Sternenleere ist der Hauch zwischen den Ebenen. Gegen sie hilft nur sehr starkes, lebendiges Feuer, etwa ein Phönix."
            ],
            [
             "Geschichte SG 12",
-            "Der König heiratet heute Nacht. Die Torte soll mit einem Phönixei leuchten, das hat die ganze Stadt gehört."
+            "Der König heiratet heute Nacht. Auf der Torte liegt ein Phönixei, und beim Anschnitt soll der Hofmagier es schlüpfen lassen. Das hat die ganze Stadt gehört."
            ],
            [
             "Einsicht SG 10 bei Holle",
@@ -1228,6 +1234,15 @@
           "x": "Die Spieler werden zuerst versuchen, das Ei ehrlich zu bekommen. Lass sie. Jeder Versuch scheitert auf lustige Weise und zeigt: Es geht nur heimlich. Plane dafür höchstens 15 Minuten ein."
          },
          {
+          "t": "dm",
+          "title": "Wenn die Spieler einen ganz anderen Plan haben",
+          "items": [
+           "Gute Spieler finden eigene Wege: als Hofmagier verkleidet, über das Dach, mit einem gefälschten Lieferschein. Sag nicht Nein. Der Weg über den Hoflieferanten ist nur der einfachste, nicht der einzige.",
+           "- Jeder andere Weg führt trotzdem in die Hofküche und zur Tortenkammer (Akt 4). Er ist nur schwerer: Der Verdacht startet bei 2, und Gorm, die Marke und Zwicks Hilfe fehlen.",
+           "- Den Hort brauchen sie trotzdem: für die Fälschung und für Gorm, der ohne Basiliskenei nicht mitkommt."
+          ]
+         },
+         {
           "t": "vorlese",
           "title": "Vorlesetext · Die Hofkanzlei",
           "ps": [
@@ -1278,7 +1293,7 @@
           "title": "Vorlesetext · Der Aushang",
           "ps": [
            "Auf dem Rückweg über den Marktplatz drängen sich Leute vor dem Brunnen. An der Säule hängt ein frischer Aushang mit königlichem Siegel:",
-           "*„Bekanntmachung. Für das Hochzeitsmahl Seiner Majestät wird heute ein letztes Haus als Hoflieferant bestimmt. Oberinspektor Kunibert Zwick prüft am Nachmittag die verbleibenden Bewerber: den Goldenen Kapaun und den Letzten Krug. Der Gewinner liefert heute Abend in die Hofküche.“*",
+           "*„Bekanntmachung. Da der bisherige Hoflieferant unauffindbar ist, wird für das Hochzeitsmahl Seiner Majestät heute ein neues Haus als Hoflieferant bestimmt. Oberinspektor Kunibert Zwick prüft am Nachmittag die verbleibenden Bewerber: den Goldenen Kapaun und den Letzten Krug. Der Gewinner liefert heute Abend in die Hofküche.“*",
            "Pünktli räuspert sich. „Barnabas hat sich vor einem Monat beworben. Er wollte das Wappen einmal über der Tür sehen, bevor er alt wird. Die Bewerbung gilt für das Haus. Also für euch.“",
            "Neben euch seufzt jemand sehr zufrieden. Eine Frau mit hochgesteckten Haaren und einer Bratpfanne in der Hand. Prunella Schmalz von gegenüber. Ihr kennt sie noch, sie hat euch früher heimlich Kuchen zugesteckt. Jetzt lächelt sie kühl. „Ach, die Kleinen sind wieder da. Der Letzte Krug will Hoflieferant werden? Wie herzig. Ich bring euch nachher einen Kuchen. Zum Trösten.“"
           ]
@@ -1608,6 +1623,7 @@
           "title": "Rollenspiel · Der Gast (Oberinspektor Zwick, inkognito)",
           "items": [
            "- **Verrate nichts.** Er ist ein unauffälliger, leicht anstrengender Gast. Die Spieler sollen ihn später wiedererkennen und sich an den Kopf fassen.",
+           "- **Die Helden kennen ihn:** Er ist der Haferbrei-Mann aus ihrer Kindheit, der jeden Sonntag kam. Einsicht oder Wahrnehmung SG 12: „Den kennt ihr doch!“ Erkennen sie ihn, freut er sich still: „Ihr seid gross geworden.“ Wer er wirklich ist, verrät er nicht.",
            "- **Was er prüft:** Wird er freundlich bedient, obwohl er arm aussieht? Bekommt er, was er will? Wie reagieren die Helden, wenn er etwas verschüttet?",
            "- **Sein Ablauf:** Er bestellt Haferbrei, verlangt eine zweite Decke, findet den Brei „etwas zu flüssig“, verschüttet absichtlich seinen Tee, fragt nach dem Abort und schaut dabei in die Küche. Dann zahlt er seine eine Kupfermünze und geht.",
            "- **Typische Sätze:** „Interessant.“ · „Ist das Haus sauber?“ · „Ich habe nur eine Münze. Reicht das?“",
@@ -3517,7 +3533,7 @@
           "ps": [
            "Punkt vier läutet die Türglocke. Herein tritt ein Mann in schwarzer Amtsrobe, ein Monokel im rechten Auge, unter dem Arm ein Notizbuch, so dick wie ein Brot. Er nimmt das Monokel ab, putzt es und setzt es wieder ein.",
            "Dann schaut er euch an, einen nach dem anderen. Und ihr kennt dieses Gesicht. Heute Morgen hatte es eine Kapuze darüber und wollte Haferbrei.",
-           "„Oberinspektor Kunibert Zwick“, sagt er. „Wir kennen uns bereits.“ Er setzt sich an denselben wackligen Tisch wie am Morgen. „Ich bitte um die Speisekarte.“"
+           "„Oberinspektor Kunibert Zwick“, sagt er. „Wir kennen uns bereits. Seit ihr so klein wart.“ Er hält die Hand auf Tischhöhe. Er setzt sich an denselben wackligen Tisch wie am Morgen. „Ich bitte um die Speisekarte.“"
           ]
          },
          {
@@ -4357,7 +4373,7 @@
           "t": "vorlese",
           "title": "Vorlesetext · Im Festsaal, hinter euch",
           "ps": [
-           "Ihr hört, wie der König das Messer ansetzt. Ihr hört, wie die Gäste klatschen. Und ihr hört, je nachdem, was in der Torte steckt, ein entzücktes „Aaah“, ein erschrockenes „Huch“ oder ein sehr lautes „AUA“.",
+           "Ihr hört, wie der König das Messer ansetzt. Ihr hört den Hofmagier feierlich eine Formel sprechen, damit der Phönix schlüpft. Und ihr hört, je nachdem, was in der Torte steckt, ein entzücktes „Aaah“, ein erschrockenes „Huch“ oder ein sehr lautes „AUA“.",
            "Dann seid ihr draussen. Die Nacht riecht nach Feuerwerk. Es ist kurz vor Mitternacht."
           ]
          },
@@ -4531,7 +4547,7 @@
           "title": "Vorlesetext",
           "ps": [
            "Der Letzte Krug ist voll. Die halbe Kupfergasse feiert dort die Hochzeit, Ui steht auf dem Tisch und singt in Vokalen, Rudi tanzt mit seinem Holzbein, Wabbel gleitet mit einem Tablett durch die Menge.",
-           "Und mitten in der Gaststube, die Arme verschränkt, steht ein pelziger Riese in einer bierfleckigen Schürze. Hinter ihm fünf Stammgäste des Goldenen Kapauns mit hochgekrempelten Ärmeln. „Da seid ihr ja“, grollt Knut. „Ihr habt da was, das gehört Prunella. Hat sie gesagt.“",
+           "Und mitten in der Gaststube, die Arme verschränkt, steht ein pelziger Riese in einer bierfleckigen Schürze. Hinter ihm fünf Stammgäste des Goldenen Kapauns mit hochgekrempelten Ärmeln. „Da seid ihr ja“, grollt Knut. „Prunella sagt, ihr habt den König bestohlen. Wir bringen das Ei zurück. Dann ist sie Hoflieferantin, und ihr seid im Kerker.“",
            "Er schaut auf das leuchtende Ei. „Und habt ihr euch nie gefragt, warum Phönixe nie in Rente gehen? Eben.“",
            "Die Treppe zu Barnabas' Kammer ist sechs Meter entfernt. Dazwischen stehen hundert feiernde Leute."
           ]
@@ -5192,8 +5208,12 @@
         "Ehrliche Gastfreundschaft. Er prüft inkognito, weil er wissen will, wie ein Haus mit Fremden umgeht."
        ],
        [
+        "Mit Barnabas",
+        "Sein ältester Stammgast. Seit vierzig Jahren jeden Sonntag Haferbrei, in Verkleidung, für eine Kupfermünze. Die Helden kennen ihn als „den Haferbrei-Mann“ aus ihrer Kindheit."
+       ],
+       [
         "Geheimnis",
-        "Er hat ein Herz für Wirte in Not. Behandelt man ihn am Morgen gut, deckt er die Helden im Palast."
+        "Er weiss, dass Barnabas stirbt, und prüft trotzdem streng, weil Vorschrift Vorschrift ist. Behandelt man ihn am Morgen gut, deckt er die Helden im Palast. Fragt man ihn später, warum, sagt er nur: „Der Haferbrei war immer gut.“"
        ]
       ],
       "quote": "„Interessant.“ (Er schreibt etwas auf. Niemand weiss, was.)"
@@ -5212,7 +5232,7 @@
        ],
        [
         "Will",
-        "Hoflieferantin werden. Seit zwanzig Jahren verliert sie jede Wahl gegen Barnabas. Diesmal nicht."
+        "Hoflieferantin werden. Seit zwanzig Jahren verliert sie jede Wahl gegen Barnabas. Diesmal nicht. Sie ist keine Schurkin: Sieht sie die Helden das Ei stehlen, will sie es dem König zurückbringen, aus Anstand und ein bisschen aus Ehrgeiz."
        ],
        [
         "Weiss nicht",
