@@ -4,8 +4,6 @@ const { C } = require('./krug-cnt');
 
 const a2 = { id: 'a2', kicker: 'Akt 2', title: 'Einkaufen im Hort', sub: 'Mittag · etwa 2 Stunden', level: '4', intro: [
   P('Der Hort ist der grösste Markt des Reichs: ein alter Dungeon in einem Hügel, drei Stockwerke tief, mit Monstern als Personal. Jeder Wirt kauft hier ein, auch Prunella. Lass die Helden frei zwischen den Abteilungen wählen. Zwei Kämpfe sind fest (Frischetheke, Wühltisch), drei freiwillig (Kobolde und Mimik im Möbellabyrinth, Kasse).'),
-  P('**Die Zeit läuft.** Jede Abteilung kostet eine halbe Stunde. Wer alles mitnimmt, kommt zu spät zur Prüfung. Zähl mit und zeig den Spielern den Zähler: Die Spannung entsteht aus dem, was sie auslassen müssen.'),
-  C('hort'),
 ], scenes: [
   { title: 'Der Eingang', blocks: [
     V('Vorlesetext',
@@ -266,8 +264,8 @@ const a2 = { id: 'a2', kicker: 'Akt 2', title: 'Einkaufen im Hort', sub: 'Mittag
     V('Vorlesetext',
       'Das erste Untergeschoss ist ein Labyrinth aus Zimmern: Schlafzimmer, Küchen, Gaststuben, alles fertig eingerichtet, mit Preisschildern. Auf dem Boden kleben Pfeile, die nur in eine Richtung zeigen. Ein Schild: *„Bitte folgen Sie den Pfeilen. Es gibt keine Abkürzungen.“* Daneben eine Tür mit der Aufschrift *„Abkürzung“*.'),
     PROBE('Durch das Labyrinth', [
-      ['Den Pfeilen folgen', 'Sicher, aber lang: kostet eine halbe Stunde im Spiel. Würfle zweimal auf „Begegnungen zwischen den Regalen“.'],
-      ['Die Abkürzung', 'Überleben oder Nachforschungen SG 13. Gelingt es, steht ihr nach zehn Minuten am Ziel (kostet keine Zeit im Hort-Zähler). Misslingt es, steht ihr mitten in der Inventur der Kobolde (unten).'],
+      ['Den Pfeilen folgen', 'Sicher, aber lang und verwinkelt. Würfle zweimal auf „Begegnungen zwischen den Regalen“.'],
+      ['Die Abkürzung', 'Überleben oder Nachforschungen SG 13. Gelingt es, steht ihr gleich am Ziel. Misslingt es, steht ihr mitten in der Inventur der Kobolde (unten).'],
       ['Probesitzen', 'Wer sich irgendwo hinsetzt: Wahrnehmung SG 13, sonst klebt er an einem Mimik fest. Das löst den Kampf aus.'],
       ['Aufbauanleitungen', 'Sie sind auf Zwergisch. Wer sie lesen kann, findet heraus, dass es nur ein Bild gibt: ein lächelnder Zwerg mit einem Hammer.'],
     ]),
@@ -316,7 +314,7 @@ const a2 = { id: 'a2', kicker: 'Akt 2', title: 'Einkaufen im Hort', sub: 'Mittag
       '- **Regel:** Wer sich anstellt, wird freundlich bedient. Wer drängelt, wird umschlungen, bis er bezahlt hat.',
       '- **Typische Sätze:** „Das macht 87 Goldmünzen und 3 Silber. Haben Sie es passend?“ · „Bitte nicht drängeln. Ich sehe alles.“ · „Ihr zehnter Stempel? Herzlichen Glückwunsch, Sie haben … neun.“'),
     DM('Anstellen oder drängeln?',
-      'Anstellen kostet eine halbe Stunde im Spiel. Würfle dabei einmal auf „Durchsagen im Hort“, und Prunella versucht hinter den Helden, den Einkaufswagen-Mimik mit Wurst abzuwerben (Mit Tieren umgehen SG 12, sonst gehört er jetzt ihr).',
+      'Anstellen dauert. Würfle dabei einmal auf „Durchsagen im Hort“, und Prunella versucht hinter den Helden, den Einkaufswagen-Mimik mit Wurst abzuwerben (Mit Tieren umgehen SG 12, sonst gehört er jetzt ihr).',
       'Wer drängelt, löst den Kampf aus. Er endet sofort, sobald jemand bezahlt hat und den Kassenzettel zeigt.'),
     KAMPF('Die Kassenschlange', 'krug-e-kasse', {
       gegner: 'Kassandra, nur wenn jemand drängelt.',

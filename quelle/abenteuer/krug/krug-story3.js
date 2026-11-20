@@ -9,7 +9,6 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
     V('Vorlesetext',
       'Zurück im Letzten Krug riecht es nach Zwiebeln und Aufregung. Gorm schärft Messer, Wabbel spült, Ui poliert Krüge mit einer Hingabe, die man ihm nicht zugetraut hätte. Oben atmet Barnabas langsamer als am Morgen. Holle sitzt an seinem Bett und strickt, ohne hinzuschauen.',
       'Über die Strasse hinweg seht ihr den Goldenen Kapaun. Dort hängen schon Girlanden. Prunella steht in der Tür und winkt.'),
-    P('Wie viel die Helden schaffen, hängt davon ab, wie lange sie im Hort waren. **Hort-Zähler bis 5:** jede Aufgabe einmal. **6 oder 7:** nur eine Aufgabe. **8:** keine, Zwick steht schon in der Tür (−2 Sternepunkte).'),
     TAB(['Aufgabe', 'Probe', 'Folge'], [
       ['Portal abdichten (mit Portalband)', 'Arkane Kunde oder Geschicklichkeit SG 13. Zur Wasserstunde mit Nachteil, zur Luftstunde mit Vorteil.', 'Gelungen: Das Portal ist dicht. Misslungen: Es zischt weiter.'],
       ['Portal ohne Portalband', 'Magie bannen hält es eine Stunde zu, genau während der Prüfung, wenn man den Zeitpunkt richtig abpasst.', 'Gilt als dicht für die Prüfung.'],
@@ -74,7 +73,6 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
       ['Krabben-Vorspeise aus dem Hort', '+1'],
       ['Probeessen: jeder gelungene Gang', '+1 bis +2'],
       ['Pavillon angezündet', '−1'],
-      ['Zu spät aus dem Hort (Hort-Zähler 8)', '−2'],
     ], 'wahl'),
     FLAGS('Was bisher entschieden wurde', ['zwick', 'mimiken', 'basilisk', 'portal', 'hobgoblins', 'gorm', 'pavillon']),
   ] },
@@ -141,9 +139,8 @@ const a3 = { id: 'a3', kicker: 'Akt 3', title: 'Die Prüfung', sub: 'Nachmittag 
 
 const a4 = { id: 'a4', kicker: 'Akt 4', title: 'Die Hofküche', sub: 'Abend · etwa 90 Minuten', level: '4 oder 5', intro: [
   P('Die Hochzeit des Königs. Hunderte Gäste, eine Küche voller Feuer und Geschrei, und in einer Kammer nebenan eine Torte, auf der das einzige Phönixei des Reichs leuchtet. Die Helden müssen kochen, servieren, unauffällig bleiben und im richtigen Moment tauschen.'),
-  P('**Zwei Uhren laufen gegeneinander:** Der Verdacht steigt mit jeder Panne, und mit jedem Gang rückt der Anschnitt näher. Warten die Helden zu lange, müssen sie das Ei vor allen Augen holen. Handeln sie zu früh, fällt der Tausch auf.'),
+  P('Halte den Verdacht im Blick. Er steigt mit jeder Panne. Wann die Helden tauschen, entscheiden sie selbst: Die Torte wird erst angeschnitten, wenn der Tausch geschafft ist oder der Alarm losgeht.'),
   C('verdacht'),
-  C('gaenge'),
 ], scenes: [
   { title: 'Der Dienstboteneingang', blocks: [
     V('Vorlesetext',
@@ -180,7 +177,7 @@ const a4 = { id: 'a4', kicker: 'Akt 4', title: 'Die Hofküche', sub: 'Abend · e
       '- **Schwäche:** ein Gespräch über Zuckerkunst. Wer ihr zuhört und klug fragt (Geschichte oder Überzeugen SG 12), hat ihr Herz und fünf unbewachte Minuten, weil sie ihm ihre Zuckerrosen in der Nebenkammer zeigen will.',
       '- **Typische Sätze:** „Nicht atmen! Die Glasur ist noch nicht gesetzt!“ · „Sie leuchtet so schön, nicht wahr? Wie ein kleiner Sonnenaufgang.“'),
     PROBE('Gruppenprobe · Das Hochzeitsmahl', [
-      ['Ablauf', 'Fünf Gänge, eine Runde pro Gang. In jeder Runde würfelt jeder Held eine Probe für seine Rolle. Jede misslungene Probe: Verdacht +1. Gelingen in einer Runde alle: Verdacht −1. Nach jedem Gang: Gänge-Zähler +1.'],
+      ['Ablauf', 'Fünf Gänge, eine Runde pro Gang. In jeder Runde würfelt jeder Held eine Probe für seine Rolle. Jede misslungene Probe: Verdacht +1. Gelingen in einer Runde alle: Verdacht −1.'],
       ['Koch', 'Kochutensilien oder Überleben SG 13'],
       ['Kellner', 'Geschicklichkeit oder Akrobatik SG 13, mit Kellnerweste oder Schürze Vorteil'],
       ['Spüler', 'Athletik SG 11, mit Wabbel automatisch'],
@@ -314,7 +311,7 @@ const fin = { id: 'f', kicker: 'Finale', title: 'Mitternacht', sub: 'Nacht · et
       '- **Das Ziel ist die Treppe,** nicht der Sieg. Wer das Ei trägt und die Kammer im ersten Stock erreicht, beendet den Kampf. Die Treppe hat sechs Stufen zu je 1,5 m. Wer gepackt ist, kommt nicht weiter.',
       '- **Das Ei** kann geworfen werden (Reichweite 9 m, Fangen: GES SG 10, mit Schürze automatisch). Fällt es zu Boden, rollt es 1W4 Felder in eine zufällige Richtung.',
       '- **Knuts Leute wollen das Ei,** nicht die Helden. Sie packen den Träger, wenn sie können.',
-      '- **Die Hitze** steigt jede Runde um 1. Bei 6 muss das Ei sofort an Barnabas\' Brust.',
+      '- **Die Hitze** steigt um 1, wenn das Ei zu Boden fällt. Bei 6 muss das Ei sofort an Barnabas\' Brust.',
       '- **Hilfe:** Gorm und Wabbel kämpfen mit (als Verbündete einsetzen). Ui wirft Krüge. Rudi verteidigt die Treppe mit seinem Holzbein.',
       '- **Die Bauern-Kanone:** Die Gaststube ist voll von Gästen, die auf der Seite der Helden sind. Wer das Ei hat, kann es als Aktion in die Menge geben. Die Gäste reichen es mit vorbereiteten Aktionen weiter, Hand für Hand: Es wandert 9 m pro Runde in eine Richtung deiner Wahl, auch die Treppe hoch. Knuts Leute können die Kette unterbrechen (Athletik SG 13). Anspielung auf die „Peasant Railgun“, das berüchtigte Gedankenspiel, bei dem tausende Bauern einen Gegenstand so schnell weiterreichen, dass er zur Kanone wird.',
       '- **Tödlicher Spott:** Knut ist bei seinen Verschwörungen empfindlich. Gehässiger Spott über eine seiner Theorien: Er hat Nachteil auf den Rettungswurf. Fällt er durch Spott auf 0 TP, setzt er sich hin, weint und kämpft nicht mehr. Anspielung auf den Forenklassiker, in dem ein Oger an einem Gehässigen Spott stirbt.'),
@@ -360,7 +357,8 @@ const fin = { id: 'f', kicker: 'Finale', title: 'Mitternacht', sub: 'Nacht · et
       'Die Kammer ist dunkel bis auf eine Kerze. Holle sitzt am Bett und hält Barnabas\' Hand. Sein Atem ist kaum noch zu hören.',
       'Ihr legt das Ei auf seine Brust. Für einen Moment passiert nichts.',
       'Dann knackt die Schale. Ein goldenes Licht steigt aus dem Ei, erst ein Funke, dann ein Glühen, dann ein Leuchten, das durch die Fenster fällt, durch die Ritzen im Boden, hinunter in die Gaststube, wo die Schlägerei mitten in der Bewegung erstarrt. Etwas Kleines, Glühendes, Gefiedertes schüttelt sich auf Barnabas\' Brust und gähnt.',
-      'Barnabas öffnet die Augen. Er blinzelt. Er schaut den kleinen Phönix an, dann euch, dann die Heilerin, die weint und so tut, als würde sie nicht weinen.',
+      'Barnabas öffnet die Augen. Er blinzelt. Er schaut den kleinen Phönix an, dann euch, einen nach dem anderen, so wie früher, wenn er abends gezählt hat, ob alle im Bett sind. Die Heilerin weint und tut so, als würde sie nicht weinen.',
+      '„Meine Kinder“, sagt er heiser. „Ihr seid heimgekommen.“',
       'Dann sagt er:'),
     TAB(['Wenn …', 'sagt Barnabas'], [
       ['der Pavillon angegriffen wurde', '„Wer hat meinen Pavillon angegriffen?“'],
@@ -390,10 +388,10 @@ const epilog = { id: 'epilog', kicker: 'Epilog', title: 'Der Morgen danach', sub
       ['Pippo dabei war', 'Gorm nimmt ihn als Küchenlehrling. Seine Eltern finden ihn dort, alle drei Tage.'],
       ['die Fälschung die Mimik war', 'Der König hat das Mimik-Junge adoptiert. Es lebt jetzt im Palast als „die Torte, die beisst“.'],
     ], 'wahl'),
-    LOOT('Danke von allen', ['Der Hoflieferanten-Lohn: 50 GM je Held.', 'Freibier im Letzten Krug, für immer. Barnabas schreibt es an die Wand.', 'Jeder Held bekommt einen Krug mit seinem Namen über der Theke.'], { gmHero: 50 }),
+    LOOT('Danke von allen', ['Der Hoflieferanten-Lohn: 50 GM je Held.', 'Freibier im Letzten Krug, für immer. Barnabas schreibt es an die Wand.', 'Eure alten Krüge mit euren Namen hängen wieder ganz vorne über der Theke, frisch poliert.'], { gmHero: 50 }),
     ITEMS([['krug-kellnerweste', 'Von Barnabas: „Ihr habt euch das verdient.“'], ['krug-glibberpanzer', 'Von Wabbel. Er hat sich gehäutet.'], ['krug-nudelholz', 'Von Prunella, wenn sie geschont wurde: „Für den Fall, dass ihr mal einen richtigen Teig machen wollt.“']]),
     V('Vorlesetext · Zum Schluss',
-      'Barnabas hebt seinen Krug. „Auf die neuen Wirte“, sagt er. „Und auf den Letzten Krug. Möge er nie der letzte sein.“',
+      'Barnabas hebt seinen Krug. „Auf meine Kinder“, sagt er. „Und auf den Letzten Krug. Möge er nie der letzte sein.“',
       'Unter der Tür sickert Wasser durch. Zimmer 3. Barnabas seufzt. „Wer von euch hat das Portalband angebracht?“'),
     DM('Für eine Fortsetzung',
       '- **Zimmer 3:** Das Portal hält, aber es hat angefangen, Post von den Elementarebenen zu bringen. Ein Brief vom Feuerfürsten, der eine Reservierung will.',
