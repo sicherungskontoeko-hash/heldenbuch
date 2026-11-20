@@ -19,7 +19,7 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
 
   /* ---- Bibliothek und Gegenstände (aus) ---- */
   T('Bibliothek zeigt beide eingebauten Abenteuer', await p.evaluate(() => !!document.querySelector('[data-act="advOpen"][data-arg="krug"]') && !!document.querySelector('[data-act="advOpen"][data-arg="machtader"]')));
-  T('59 Gegenstände in MAGIC_ITEMS, alle mit Herkunft „krug“', await p.evaluate(() => Object.keys(MAGIC_ITEMS).filter((k) => /^krug-/.test(k) && MAGIC_ITEMS[k].adv === 'krug').length === 59));
+  T('75 Gegenstände in MAGIC_ITEMS, alle mit Herkunft „krug“', await p.evaluate(() => Object.keys(MAGIC_ITEMS).filter((k) => /^krug-/.test(k) && MAGIC_ITEMS[k].adv === 'krug').length === 75));
   T('Karte: Schalter „Gegenstände aktiv“ ist aus', await p.evaluate(() => { const c = document.querySelector('.advon input[data-arg="krug"]'); return c && !c.checked; }));
   const hidden = await p.evaluate(() => ({ opts: /krug-/.test(itemOpts()), srch: srchIndex().some((x) => x.cat === 'item' && /^krug-/.test(x.id)), vis: itemVis()('krug-kochbeil') }));
   T('Aus: nicht im Bogen, nicht in der Suche', !hidden.opts && !hidden.srch && !hidden.vis, hidden);
@@ -31,7 +31,7 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
   /* ---- Einschalten ---- */
   await p.evaluate(() => { S.view = 'adv'; S.adv = null; render(); document.querySelector('.advon input[data-arg="krug"]').click(); });
   const shown = await p.evaluate(() => ({ on: advActiveIds(), opts: (itemOpts().match(/value="krug-/g) || []).length, star: /✦ Das Kochbeil/.test(itemOpts()), srch: srchIndex().filter((x) => x.cat === 'item' && /^krug-/.test(x.id)).length }));
-  T('Ein: alle 59 im Bogen (mit ✦) und in der Suche', shown.on.includes('krug') && shown.opts === 59 && shown.star && shown.srch === 59, shown);
+  T('Ein: alle 75 im Bogen (mit ✦) und in der Suche', shown.on.includes('krug') && shown.opts === 75 && shown.star && shown.srch === 75, shown);
   await p.evaluate(() => { S.view = 'camp'; render(); });
   T('Ein: Beute-Formular zeigt „✦ Das Kochbeil“', await p.evaluate(() => [...$('#gItem').options].some((o) => o.value === 'krug-kochbeil' && /✦/.test(o.textContent))));
   const loot1 = await p.evaluate(() => { let n = 0; for (let i = 0; i < 400; i++) n += lootGen([{ mid: 'cr4' in BESTIARY ? 'cr4' : 'troll' }], true).items.filter((k) => /^krug-/.test(k)).length; return n; });
@@ -43,7 +43,7 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
   T('Übersicht: Zeitplan-Tabelle und Schalter', await p.evaluate(() => /21:15/.test($('.advtw').textContent) && !!document.querySelector('.advch .advon input:checked')));
   await shot('krug-1-uebersicht.png');
   await p.evaluate(() => XA.advTab(null, 'ch:vor'));
-  T('Vorbereitung: vier Szenen', await p.evaluate(() => document.querySelectorAll('.advscn button').length === 4));
+  T('Vorbereitung: sechs Szenen', await p.evaluate(() => document.querySelectorAll('.advscn button').length === 6));
 
   /* ---- Rollenspiel-Kasten ---- */
   await p.evaluate(() => { XA.advTab(null, 'ch:a2'); XA.advScene(null, 'a2s1'); });
@@ -82,7 +82,7 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
   await p.evaluate(() => { const bt = [...document.querySelectorAll('[data-act="advGive"]')].find((x) => /Kochbeil/.test(x.closest('tr').textContent)); bt.click(); });
   T('Geben (Szene): Kochbeil im Beute-Formular', await p.evaluate(() => S.view === 'camp' && $('#gItem').value === 'krug-kochbeil'));
   await p.evaluate(() => { S.view = 'adv'; XA.advTab(null, 'it'); });
-  T('Reiter Gegenstände: 59 Karten nach Seltenheit, mit Fundort', await p.evaluate(() => document.querySelectorAll('.advit').length === 59 && document.querySelectorAll('.advch h3.advsc').length >= 3 && /Fundort/.test($('.advit').textContent)));
+  T('Reiter Gegenstände: 75 Karten nach Seltenheit, mit Fundort', await p.evaluate(() => document.querySelectorAll('.advit').length === 75 && document.querySelectorAll('.advch h3.advsc').length >= 3 && /Fundort/.test($('.advit').textContent)));
   await shot('krug-4-gegenstaende.png');
   await p.evaluate(() => { S.view = 'adv'; S.adv = null; render(); document.querySelector('.advon input[data-arg="krug"]').click(); S.adv = 'krug'; XA.advTab(null, 'it'); });
   T('Ausschalten wirkt sofort', await p.evaluate(() => !advActiveIds().includes('krug') && !/krug-/.test(itemOpts())));
@@ -95,10 +95,19 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
     return { ac0: a0.ac, ac1: a1.ac, ac2: a2.ac, names, uses: (a1.homebrew || []).length }; });
   T('Schürze am Helden: RK +1, bleibt auch bei ausgeschaltetem Abenteuer', hero.ac1 === hero.ac0 + 1 && hero.ac2 === hero.ac1 && hero.names.length === 2, hero);
 
+  const allIt = await p.evaluate(() => { const errs = []; const ch = newChar({ name: 'Sammler', cls: 'fighter', level: 5 }); ch.weapons = ch.weapons && ch.weapons.length ? ch.weapons : [{ w: 'handaxe' }];
+    ch.items = Object.keys(MAGIC_ITEMS).filter((k) => /^krug-/.test(k)).map((k, i) => ({ uid: 'k' + i, id: k, att: !!MAGIC_ITEMS[k].att && i < 3, eq: true, qty: 1, w: MAGIC_ITEMS[k].wpn ? 0 : '' }));
+    let c; try { c = derive(ch, S.hb); } catch (e) { errs.push('derive: ' + e.message); }
+    try { S.chars[ch.id] = ch; S.cur = ch.id; S.view = 'sheet'; render(); } catch (e) { errs.push('Bogen: ' + e.message); }
+    const t = $('#view').textContent; if (/undefined|NaN/.test(t)) errs.push('Bogen zeigt undefined/NaN');
+    const shown = ch.items.filter((x) => t.includes(MAGIC_ITEMS[x.id].name)).length;
+    delete S.chars[ch.id]; S.view = 'adv'; render();
+    return { errs, n: ch.items.length, shown, ac: c && c.ac }; });
+  T('Alle 75 Gegenstände an einem Helden: Bogen rechnet und zeigt sie fehlerfrei', !allIt.errs.length && allIt.n === 75 && allIt.shown === 75 && allIt.ac > 0, allIt);
   /* ---- Kreaturen ---- */
   await p.evaluate(() => { S.view = 'adv'; S.adv = 'krug'; XA.advTab(null, 'mob'); });
   const cre = await p.evaluate(() => ({ n: document.querySelectorAll('.advmobs.big .advmob').length, srd: ['mimic', 'gelatinous-cube', 'giant-crab', 'hobgoblin', 'swarm-of-rats', 'thug', 'kobold'].every((m) => document.querySelector('.advmob[data-arg="' + m + '"]')), h: document.querySelectorAll('.advch h3.advsc').length }));
-  T('Kreaturen: 18 Karten (11 eigene + 7 aus dem SRD) nach Kapiteln', cre.n === 18 && cre.srd && cre.h >= 5, cre);
+  T('Kreaturen: 27 Karten (13 eigene + 14 aus dem SRD) nach Kapiteln', cre.n === 27 && cre.srd && cre.h >= 5, cre);
   await p.evaluate(() => document.querySelector('[data-act="advMob"][data-arg="mimic"]').click());
   T('SRD-Mimik: Fenster mit Geschichte aus dem Abenteuer', await p.evaluate(() => !$('#modal').hidden && /Geschichte/.test($('#modal').textContent)));
   await p.evaluate(() => { S.modal = null; $('#modal').hidden = true; });
@@ -109,7 +118,7 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
       const e = A.enc.find((x) => x.id === b.enc); const want = e.mobs.reduce((s, m) => s + m.n, 0); const got = ((S.combat || {}).npcs || []).length; res.push([b.enc, want, got]); })));
     return res; });
   T('Alle 12 Kämpfe starten mit der richtigen Zahl Gegner', fights.length === 12 && fights.every(([, w, g]) => w === g), fights);
-  T('Eigene Monster im Bestiarium (11)', await p.evaluate(() => Object.keys(BESTIARY).filter((k) => /^u-krug-/.test(k)).length === 11));
+  T('Eigene Monster im Bestiarium (13)', await p.evaluate(() => Object.keys(BESTIARY).filter((k) => /^u-krug-/.test(k)).length === 13));
   await p.evaluate(() => { S.combat = null; S.view = 'adv'; XA.advTab(null, 'ch:f'); XA.advScene(null, 'fs2'); document.querySelector('.advb.kampf [data-act="advFight"]').click(); S.view = 'adv'; render(); [0, 1].forEach((i) => { S.view = 'adv'; render(); const x = document.querySelector('.advb.kampf [data-act="advAlly"][data-i="' + i + '"]'); if (x) x.click(); }); });
   T('Schlägerei: Gorm (68 TP) und Wabbel als Verbündete', await p.evaluate(() => { const a = S.combat.npcs.filter((x) => x.ally); return a.length === 2 && a.some((x) => x.name === 'Gorm' && x.hp === 68) && a.some((x) => x.name === 'Wabbel'); }), await p.evaluate(() => (S.combat && S.combat.npcs || []).map((x) => x.name + (x.ally ? '*' : ''))));
 
@@ -142,7 +151,7 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
   const all = await p.evaluate(() => { const A = advGet('krug'); let n = 0; const bad = []; S.camp = 'raum'; S.adv = 'krug'; S.view = 'adv';
     A.chapters.forEach((C) => C.scenes.forEach((Sc) => { advSetSt('krug', (s) => { s.tab = 'ch'; s.ch = C.id; s.sc = Sc.id; }); render(); n++; const t = $('#view').textContent; if (!t.includes(Sc.title) || /\*\*|undefined|NaN|\[object/.test(t)) bad.push(Sc.id + ':' + ((t.match(/.{30}(\*\*|undefined|NaN|\[object).{30}/) || [])[0] || 'Titel')); }));
     return { n, bad }; });
-  T('Alle 35 Szenen ohne Rohtext, „undefined“ oder NaN', all.n === 35 && !all.bad.length, all);
+  T('Alle 37 Szenen ohne Rohtext, „undefined“ oder NaN', all.n === 37 && !all.bad.length, all);
 
   /* ---- Sicherung und Datei ---- */
   await p.evaluate(() => { const x = backupExtras(); localStorage.removeItem('hb_adv'); ADV_ON_C = null; window._r = restoreExtras(x); });
@@ -150,7 +159,7 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
   if (fileArg) {
     const text = fs.readFileSync(path.resolve(fileArg), 'utf8'); await setup();
     await p.evaluate((t) => { S.view = 'heroes'; importJson(t); }, text);
-    T('Datei laden: öffnet das Abenteuer, keine Doppelung', await p.evaluate(() => S.view === 'adv' && S.adv === 'krug' && advDb().list.length === 0 && Object.keys(BESTIARY).filter((k) => /^u-krug-/.test(k)).length === 11));
+    T('Datei laden: öffnet das Abenteuer, keine Doppelung', await p.evaluate(() => S.view === 'adv' && S.adv === 'krug' && advDb().list.length === 0 && Object.keys(BESTIARY).filter((k) => /^u-krug-/.test(k)).length === 13));
     const evil = JSON.parse(text); const A = evil.extra.adv[0]; A.ver = 2; A.items = { 'weapon-1': { name: 'Gekapert', r: 'selten', text: 'x' }, 'krug-boese': { name: 'Böse', r: 'quatsch', wpn: 99, text: 'y', use: { n: 500, reset: 'x' }, set: { str: 99, foo: 3 } } }; evil.extra.mobs = []; evil.extra.enc = [];
     await p.evaluate((t) => importJson(t), JSON.stringify(evil));
     const ev = await p.evaluate(() => ({ w: MAGIC_ITEMS['weapon-1'].name, b: MAGIC_ITEMS['krug-boese'] }));

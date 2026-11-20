@@ -3,6 +3,7 @@ const { P, SUB, LAB, V, DM, RP, PROBE, KAMPF, LOOT, MERKE, TAB, ROLL, CNT, CHOIC
 const { C } = require('./krug-cnt');
 
 const a2 = { id: 'a2', kicker: 'Akt 2', title: 'Einkaufen im Hort', sub: 'Mittag · etwa 2 Stunden', level: '4', intro: [
+  DM('Kurz gesagt', '**Ziel:** Basiliskenei, Wild, Portalband, eine Fälschung des Phönixeis und Ofenhandschuhe. **Muss passieren:** die Wahl der Fälschung. Alles andere frei, in beliebiger Reihenfolge, so viel die Spieler wollen.'),
   P('Der Hort ist der grösste Markt des Reichs: ein alter Dungeon in einem Hügel, drei Stockwerke tief, mit Monstern als Personal. Jeder Wirt kauft hier ein, auch Prunella. Lass die Helden frei zwischen den Abteilungen wählen. Zwei Kämpfe sind fest (Frischetheke, Wühltisch), drei freiwillig (Kobolde und Mimik im Möbellabyrinth, Kasse).'),
 ], scenes: [
   { title: 'Der Eingang', blocks: [
@@ -59,6 +60,7 @@ const a2 = { id: 'a2', kicker: 'Akt 2', title: 'Einkaufen im Hort', sub: 'Mittag
       'Der Barde, der den Drachen verführt, ist der älteste Witz über die Klasse. Hier darf er wahr werden. Will ein Held Frau Glimmerschuppe umgarnen, lass es zu: Überzeugen oder Auftreten SG 15, mit der Laute der unpassenden Romantik Vorteil.',
       '- **Gelingt es:** Sie errötet, Rauch steigt aus ihren Nasenlöchern. Sie wechselt Gold zum Freundschaftskurs (die Helden bekommen 20 GM geschenkt) und verrät, dass sie heute Abend als Gesandte der Drachen zur Königshochzeit geht. „Vielleicht sieht man sich, Schätzchen.“ Im Palast hilft sie (Akt 4, Ereignis 12).',
       '- **Misslingt es:** Sie lacht so herzlich, dass ihre Brille beschlägt, und schenkt dem Helden trotzdem einen Kupferling „für den Mut“.'),
+    ITEMS([['krug-messingschuppe', 'Geschenk von Frau Glimmerschuppe, wenn ein Held sie umgarnt hat']]),
     TAB(['Was es zu kaufen gibt', 'Preis', 'Wofür'], [
       ['Basiliskenei (das letzte)', '50 GM', 'Gorms Soufflé'],
       ['Neues Geschirr für 40 Gäste', '25 GM', 'Für die Prüfung'],
@@ -156,7 +158,7 @@ const a2 = { id: 'a2', kicker: 'Akt 2', title: 'Einkaufen im Hort', sub: 'Mittag
       'Die Kundenkarte hat einen Haken: Wer sie hat, bekommt Werbung. Filialleiter Hornig schickt sie per Botschaftszauber, und zwar immer im ungünstigsten Moment. In jedem Kampf ab jetzt würfelst du einmal W6. Bei einer 1 hört der Kartenbesitzer mitten im Getümmel Hornigs Stimme: „Nicht vergessen: Wundfreier Mittwoch! Alle Heiltränke zum halben Preis!“ Er erschrickt und hat Nachteil auf seinen nächsten Wurf.',
       'Das ist ein beliebter Forenklassiker: Ein Zauberladen, der seine Kunden mit Botschaften überhäuft. Das wird schnell zum Dauerwitz am Tisch.'),
     LOOT('Am Kundendienst', ['Das Portalband für Zimmer 3. Damit lässt sich das Portal am Nachmittag abdichten.', 'Ein Stempel auf der Kundenkarte.'], {}),
-    ITEMS([['krug-verwaltungsstab', 'Geschenk von Herrn Okulus für ein ehrliches Danke'], ['krug-kundenkarte', 'Am Kundendienst, gratis für Neukunden'], ['krug-formular', 'Formular V, von Herrn Okulus gestempelt']]),
+    ITEMS([['krug-verwaltungsstab', 'Geschenk von Herrn Okulus für ein ehrliches Danke'], ['krug-kundenkarte', 'Am Kundendienst, gratis für Neukunden'], ['krug-formular', 'Formular V, von Herrn Okulus gestempelt'], ['krug-lesebrille', 'Von Herrn Okulus, wenn die Helden alle drei Formulare richtig ausgefüllt haben: „Sie haben es verdient. Ich habe vier.“']]),
   ] },
   { title: 'Restposten und Fundbüro', blocks: [
     V('Vorlesetext',
@@ -323,6 +325,10 @@ const a2 = { id: 'a2', kicker: 'Akt 2', title: 'Einkaufen im Hort', sub: 'Mittag
       ende: 'Kassenzettel vorzeigen beendet den Kampf. Münzen werfen lenkt sie 1 Runde lang ab, sie zählt.',
     }),
     LOOT('An der Kasse', ['Ein Kassenzettel, mehr als einen Meter lang.', 'Der zehnte Stempel auf der Kundenkarte, wenn die Helden einen weiteren Stempel verdient haben: ein gewöhnlicher Gegenstand aus dem Hort gratis, oder ein Gefallen von Bruno Hornig (etwa: er leiht den Helden für die Nacht einen Einkaufswagen-Mimik).'], {}),
+    V('Vorlesetext · Abschied vom Hort',
+      'Am Ausgang wartet Bruno Hornig, die Hände gefaltet, das Namensschild schief. Er verbeugt sich so tief, dass die Messingkappen seiner Hörner über den Boden kratzen.',
+      '„Ihr seid die Kinder vom alten Barnabas, nicht wahr? Er kauft hier seit dem ersten Tag. Er hat mir damals gesagt, ein Labyrinth sei auch nur ein Laden, in dem man sich verläuft.“ Er schraubt eine der Kappen ab und drückt sie euch in die Hand. „Damit verlauft ihr euch nie. Grüsst ihn von mir. Wenn er wieder wach ist.“'),
+    ITEMS([['krug-hornkompass', 'Geschenk von Bruno Hornig am Ausgang']]),
     DM('Kurze Rast', 'Auf dem Rückweg vom Hort zum Letzten Krug können die Helden eine kurze Rast machen. Es ist früher Nachmittag. Zwick kommt in zwei Stunden.'),
   ] },
 ] };
