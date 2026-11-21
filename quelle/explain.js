@@ -1,7 +1,7 @@
 /* ==== Erklärbare Berechnungen und Nachbessern nach dem Wurf (P07) ==== */
-function explainOn() { if (S.explain === undefined) { try { S.explain = localStorage.getItem('hb_explain') === '1'; } catch (e) { S.explain = false; } } return S.explain; }
+function explainOn() { return typeof hlOn === 'function' ? hlOn('rw') : false; }
 const xpl = (parts) => parts && parts.length ? '<small class="xpl">' + esc(parts.join(' + ').replace(/\+ −/g, '− ').replace(/\+ \+/g, '+ ')) + '</small>' : '';
-XA.explain = () => { S.explain = !explainOn(); try { localStorage.setItem('hb_explain', S.explain ? '1' : '0'); } catch (e) {} render(); };
+XA.explain = () => { hlSet('rw', !hlOn('rw')); render(); };
 function hintBlock(c) { return (c.hints || []).length ? '<div class="notice hints" data-grp="kampf werte gear"><b>Regelhinweis' + (c.hints.length > 1 ? 'e' : '') + ':</b><ul>' + c.hints.map((h) => '<li>' + esc(h) + '</li>').join('') + '</ul></div>' : ''; }
 /* Rechenweg eines Wurfs aus der Wurfart ableiten */
 function partsFor(c, kind) {
@@ -28,6 +28,8 @@ function boostOpts(c, type) {
   ['W4', 'W6', 'W8', 'W10', 'W12'].forEach((d) => o.push({ k: 'x' + d, label: '+1' + d, how: 'add', expr: '1' + d, ext: true }));
   return o;
 }
+/* Automatisch nach einem Wurf nur, wenn „Nachbessern anbieten“ an ist und du etwas Eigenes einsetzen kannst (Einsteiger: immer). */
+function boostAuto(c, type) { if (typeof hlOn !== 'function') return true; if (!hlOn('nach')) return false; return hlOn('tipps') || boostOpts(c, type).some((x) => !x.ext); }
 function showBoost(c, roll) {
   let el = document.getElementById('boostBar'); if (!el) { el = document.createElement('div'); el.id = 'boostBar'; document.body.appendChild(el); }
   const o = boostOpts(c, roll.type); const own = o.filter((x) => !x.ext); const ext = o.filter((x) => x.ext);
@@ -55,5 +57,6 @@ function applyBoost(ch, k, where) {
 Object.assign(XA, {
   boost: (t, a, p, ch) => applyBoost(ch, a, 'roll'),
   boostAtk: (t, a, p, ch) => applyBoost(ch, a, 'atk'),
-  boostX: () => { const el = document.getElementById('boostBar'); if (el) el.hidden = true; }
+  boostX: () => { const el = document.getElementById('boostBar'); if (el) el.hidden = true; },
+  boostOpen: (t, a, p, ch) => { if (!ch || !S.lastRoll || S.lastRoll.type === 'attack') return; const tt = $('#toast'); if (tt) tt.hidden = true; showBoost(derive(ch, S.hb), S.lastRoll); }
 });

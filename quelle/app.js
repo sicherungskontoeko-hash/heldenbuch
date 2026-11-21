@@ -134,9 +134,10 @@ function d20(mod, label, opts = {}) {
   if (k.type === 'init' && S.combat && S.combat.active) setMyInit(total);
   const prts = opts.parts || (c && typeof partsFor === 'function' ? partsFor(c, opts.kind) : null);
   S.lastRoll = { label, mod: mod + bonus - ex, total, type: k.type, nat: use };
+  let boost = 0;
   if (k.type === 'attack') S.lastAtkRoll = S.lastRoll;
-  else if (ch && !opts.noBoost && typeof showBoost === 'function' && c) setTimeout(() => showBoost(c, S.lastRoll), 900);
-  pushLog({ label, total, detail: (how || 'W20 ' + use) + ' ' + sgn(mod) + (prts && prts.length > 1 ? ' (' + prts.join(', ') + ')' : '') + (ex ? ' −' + ex + ' Erschöpfung' : '') + (notes.length ? ' · ' + notes.join(' · ') : ''), crit, fumble, sides: 20, nat: use, pair: st.mode !== 'normal' ? [r1, r2] : null, keep: use === r1 ? 0 : 1, adv: st.mode === 'adv' });
+  else if (ch && !opts.noBoost && typeof showBoost === 'function' && c) { if (typeof boostAuto !== 'function' || boostAuto(c, k.type)) setTimeout(() => showBoost(c, S.lastRoll), 900); else boost = 1; }
+  pushLog({ label, total, detail: (how || 'W20 ' + use) + ' ' + sgn(mod) + (prts && prts.length > 1 ? ' (' + prts.join(', ') + ')' : '') + (ex ? ' −' + ex + ' Erschöpfung' : '') + (notes.length ? ' · ' + notes.join(' · ') : ''), crit, fumble, sides: 20, nat: use, pair: st.mode !== 'normal' ? [r1, r2] : null, keep: use === r1 ? 0 : 1, adv: st.mode === 'adv', boost, kt: k.type });
   return total;
 }
 /* Würfel aus Teilen rollen (Schaden mit Krit, Kampfstilen usw.) */
@@ -165,7 +166,7 @@ function weaponAttack(ch, i, o = {}) {
   if (o.dist === undefined) { const nd = needDist(ch); if (nd === 'ask') return distPrompt(i, o); if (nd) o = Object.assign({}, o, { dist: nd }); }
   S.atkDist = o.dist || null;
   let how = o.how; if (o.off && a.mastery === 'nick' && !onceUsed(ch, 'nick')) how = 'nick';
-  if (o.off && !o.bonusPaid) { const t0 = turnSt(ch); const okOff = t0.lightIdx != null && t0.lightIdx !== a.idx; if (!okOff && !ruleGate(ch, 'Der Zusatzangriff mit einer leichten Waffe setzt voraus, dass du in diesem Zug mit der Angriffsaktion schon mit einer anderen leichten Waffe angegriffen hast.', 'Zweitwaffe nicht möglich')) return; }
+  if (o.off && !o.bonusPaid) { const t0 = turnSt(ch); const okOff = !turnTrack() || (t0.lightIdx != null && t0.lightIdx !== a.idx); if (!okOff && !ruleGate(ch, 'Der Zusatzangriff mit einer leichten Waffe setzt voraus, dass du in diesem Zug mit der Angriffsaktion schon mit einer anderen leichten Waffe angegriffen hast.', 'Zweitwaffe nicht möglich')) return; }
   if (typeof tCountAttack === 'function' && !o.bonusPaid && !tCountAttack(ch, c, how)) return;
   if (!o.off && !o.bonusPaid && (!how || how === 'action') && a.light && a.idx !== undefined) turnSt(ch).lightIdx = a.idx;
   if (how === 'nick') onceMark(ch, 'nick');
@@ -202,7 +203,7 @@ function renderDmgPrompt() {
     const pa = pactAvail(c, getSpell('divine-smite'));
     const choices = (freeLeft ? [['free', 'Gratis (Grad 1)']] : []).concat(lv.map((g) => [String(g), 'Grad ' + g])).concat(pa ? [['pact', 'Paktplatz (Grad ' + pa + ')']] : []);
     const sBlock = inF && rule('strict') ? (tLeft(ch, 'b') <= 0 ? 'Bonusaktion schon verbraucht' : canAct(ch)) : null;
-    const slotBlock = inF && rule('strict') && turnSt(ch).slotSpell && !offTurn();
+    const slotBlock = inF && rule('strict') && turnTrack() && turnSt(ch).slotSpell && !offTurn();
     const ch2 = sBlock ? [] : slotBlock ? choices.filter(([v]) => v === 'free') : choices;
     if (choices.length && !ch2.length) smite = '<div class="dpsm"><span>Göttliches Niederstrecken: nicht möglich – ' + esc(sBlock || 'in diesem Zug wurde schon ein Zauberplatz verbraucht') + '.</span></div>';
     else if (ch2 !== choices) { const keep = ch2.slice(); choices.length = 0; choices.push(...keep); }
@@ -239,7 +240,7 @@ function dmgRoll(ch) {
   let smiteNote = '';
   for (const x of (c.dmgExtras || []).filter((y) => (d.xd || []).includes(y.k))) { if (!XD_MULTI.has(x.k)) { if (onceUsed(ch, 'xd_' + x.k)) continue; once.push('xd_' + x.k); } if (x.res) { const r = c.res.find((y) => y.k === x.res); const used = +P.res[x.res] || 0; if (!r || used >= r.max) continue; P.res[x.res] = used + 1; smiteNote += ' · ' + r.n + ' verbraucht'; } if (x.n) parts.push({ n: x.n, s: x.s, tag: x.label.replace(/ \(.*\)$/, '') + (x.note ? ' (' + x.note + ')' : '') }); if (x.flat) flat += x.flat; }
   if (d.smite) {
-    const inF = inFight(ch); const sb = inF && rule('strict') && (tLeft(ch, 'b') <= 0 || canAct(ch)); const sl = inF && rule('strict') && d.smite !== 'free' && turnSt(ch).slotSpell && !offTurn();
+    const inF = inFight(ch); const sb = inF && rule('strict') && (tLeft(ch, 'b') <= 0 || canAct(ch)); const sl = inF && rule('strict') && turnTrack() && d.smite !== 'free' && turnSt(ch).slotSpell && !offTurn();
     if (sb || sl) { smiteNote += ' · Niederstrecken nicht möglich (' + (sb ? 'keine Bonusaktion' : 'schon ein Zauberplatz in diesem Zug') + ')'; d.smite = 0; }
   }
   if (d.smite) {
@@ -375,9 +376,10 @@ function showToast(e) {
   const final = () => {
     clearInterval(showToast.iv); t.onclick = null;
     const dice = vals.map((v, i) => dieH(v, 'land' + (i === keep ? hl : ' drop'))).join('');
-    t.innerHTML = '<div class="trow"><div class="dice">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer!' : '') + '</div></div></div>';
+    const tip = typeof rollTip === 'function' ? rollTip(e) : '';
+    t.innerHTML = '<div class="trow"><div class="dice">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
     if (use3) { if (fxl !== 'aus') d3snd('land'); if (sides === 20 && (e.crit || e.fumble)) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, e.crit ? 'n20' : 'n1', fxl); d3snd(e.crit ? 'n20' : 'n1'); } }
-    showToast.tm = setTimeout(() => { t.hidden = true; }, 4500);
+    showToast.tm = setTimeout(() => { t.hidden = true; }, tip ? 8000 : e.boost ? 6000 : 4500);
   };
   t.hidden = false; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
@@ -436,7 +438,7 @@ function renderTop() {
   const more = [['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe']]; const moreOn = more.some(([k]) => S.view === k);
   $('#top').innerHTML = '<div class="wrap"><div class="bar"><button class="brand" data-act="view" data-arg="heroes">' + LOGO + 'Heldenbuch</button>' +
     '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') +
-      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '</div></details></nav>' +
+      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<hr><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button></div></details></nav>' +
     '<button class="mbtn mwarn" data-act="warnOpen" hidden aria-label="Offene Punkte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg><b></b></button><button class="mbtn mdice" data-act="drOpen" aria-label="Würfelbecher"><svg viewBox="0 0 64 64" aria-hidden="true"><polygon points="32,4 56,18 56,46 32,60 8,46 8,18"/><polygon points="32,18 46,42 18,42"/></svg></button>' +
     '<button class="tbtn tsearch" data-act="search" title="Suchen (Strg+K oder /)" aria-label="Suchen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>' +
     '<button class="tbtn" data-act="themeOpen" title="Stimmung wählen" aria-label="Stimmung wählen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.2-1-1.6-1-2.6 0-1 .8-1.7 1.9-1.7H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z"/><circle cx="7.5" cy="11" r="1.3"/><circle cx="10.5" cy="7" r="1.3"/><circle cx="15" cy="7.5" r="1.3"/></svg></button>' + (ch ? '<button class="curhero" data-act="view" data-arg="heroes" title="Helden wechseln">' + sigil(ch) + '<span>' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</span></button>' : '') +
@@ -698,19 +700,19 @@ function renderSheet(c) {
   let h = P.dead ? fallenHtml(ch, c) + '<div class="sheet fallen" aria-hidden="true" inert>' : (mgOf(c) === 'alle' ? '<div class="sheet' + (explainOn() ? ' explain' : '') + '">' : '<div class="sheet' + (explainOn() ? ' explain' : '') + '" data-mg="' + mgOf(c) + '">');
   h += '<header class="shead"><div class="who">' + sigil(ch) + '<div><h1><button type="button" class="hrn" data-act="renameHero" title="Namen ändern">' + esc(ch.name) + '<span aria-hidden="true">✎</span></button></h1><p>' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' (' + c.subName + ')' : '') + ' · ' + c.sp.name + ' · ' + esc(c.bg.name) + (ch.alignment ? ' · ' + esc(ch.alignment) + (typeof alignKey === 'function' && alignKey(ch.alignment) ? ' ' + ii('al', alignKey(ch.alignment), ch.alignment) : '') : '') + '</p></div></div>' +
     '<div class="sctl"><div class="seg" role="group" aria-label="Würfelmodus">' + [['dis', 'Nachteil'], ['normal', 'Normal'], ['adv', 'Vorteil']].map(([k, l]) => '<button class="' + (S.mode === k ? 'on' : '') + '" data-act="mode" data-arg="' + k + '">' + l + '</button>').join('') + '</div>' +
-    '<details class="mnu smore"><summary class="btn ghost" aria-label="Rast und weitere Aktionen" title="Rast und weitere Aktionen">Rast · ⋯</summary><div class="mnul"><button data-act="rest" data-arg="short">Kurze Rast</button><button data-act="rest" data-arg="long" data-confirm="Lange Rast: TP, Trefferwürfel, Zauberplätze und alle Ressourcen werden zurückgesetzt.">Lange Rast</button><hr><button data-act="exportOne" data-arg="' + ch.id + '">Exportieren</button><button data-act="print">Drucken</button><button data-act="renameHero">Namen ändern</button><button data-act="diceOpen">Würfel-Set</button></div></details></div></header>';
+    '<details class="mnu smore"><summary class="btn ghost" aria-label="Rast und weitere Aktionen" title="Rast und weitere Aktionen">Rast · ⋯</summary><div class="mnul"><button data-act="rest" data-arg="short">Kurze Rast</button><button data-act="rest" data-arg="long" data-confirm="Lange Rast: TP, Trefferwürfel, Zauberplätze und alle Ressourcen werden zurückgesetzt.">Lange Rast</button><hr><button data-act="exportOne" data-arg="' + ch.id + '">Exportieren</button><button data-act="print">Drucken</button><button data-act="renameHero">Namen ändern</button><button data-act="diceOpen">Würfel-Set</button><hr><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="explain">Rechenweg ' + (explainOn() ? 'ausblenden' : 'anzeigen') + '</button></div></details></div></header>' + hlTip('Würfelmodus: Bei <b>Vorteil</b> würfelst du zwei W20 und nimmst den höheren, bei <b>Nachteil</b> den niedrigeren. Viele Fälle (Zustände, Ziel) erkennt die App selbst – sonst sagt es dir die Spielleitung.', 'p');
   h += sheetNav(c);
   if (typeof hintBlock === 'function') h += hintBlock(c);
   h += '<div class="vitals">' +
     '<div class="vt ac" title="' + esc(c.acParts.join(' + ')) + '"><span>RK</span><b>' + c.ac + '</b>' + xpl(c.acParts) + '</div>' +
     '<div class="vt hp"><span>Trefferpunkte</span><div class="hpline"><b>' + P.hp + '</b><small>/ ' + c.hpMax + (P.temp ? ' · +' + P.temp + ' temp.' : '') + '</small></div><div class="hpbar"><i style="width:' + hpPct + '%"></i></div>' +
-      '<div class="hpctl"><input type="number" id="hpAmt" inputmode="numeric" min="0" placeholder="Wert" aria-label="Betrag"><button class="btn sm dmg" data-act="hp" data-arg="dmg">Schaden</button><button class="btn sm heal" data-act="hp" data-arg="heal">Heilen</button><button class="btn sm ghost" data-act="hp" data-arg="temp">Temp.</button></div></div>' +
+      '<div class="hpctl"><input type="number" id="hpAmt" inputmode="numeric" min="0" placeholder="Wert" aria-label="Betrag"><button class="btn sm dmg" data-act="hp" data-arg="dmg">Schaden</button><button class="btn sm heal" data-act="hp" data-arg="heal">Heilen</button><button class="btn sm ghost" data-act="hp" data-arg="temp">Temp.</button></div>' + hlTip('Zahl eingeben, dann «Schaden» oder «Heilen». Temporäre TP verlierst du zuerst. Bei 0 TP gehst du zu Boden und würfelst Todesrettungswürfe.') + '</div>' +
     '<button class="vt roll" data-act="d20" data-kind="init" data-mod="' + c.init + '" data-label="Initiative"><span>Initiative' + (c.initAdv ? ' (Vorteil)' : '') + '</span><b>' + sgn(c.init) + '</b>' + xpl(c.initParts) + '</button>' +
     '<div class="vt"><span>Bewegung</span><b>' + fmtM(c.speed) + '</b>' + xpl(c.speedParts) + '</div>' +
-    '<div class="vt"><span>Übungsbonus</span><b>' + sgn(c.pb) + '</b></div>' +
-    '<div class="vt"><span>Passive Wahrn.</span><b>' + c.passive + '</b></div>' +
+    '<div class="vt"><span>Übungsbonus</span><b>' + sgn(c.pb) + '</b>' + '</div>' +
+    '<div class="vt"><span>Passive Wahrn.</span><b>' + c.passive + '</b>' + '</div>' +
     '<div class="vt"><span>Trefferwürfel</span><b>' + (c.level - P.hdUsed) + '<small>/' + c.level + ' ' + c.hdPool.map((x) => 'W' + x.d + (c.hdPool.length > 1 ? '×' + x.n : '')).join(' ') + '</small></b>' + (P.hdUsed < c.level ? '<button class="link" data-act="spendHd">einen ausgeben</button>' : '') + '</div>' +
-    '</div>';
+    '</div>' + hlTip('<b>RK</b> muss ein Angriff erreichen, um dich zu treffen. <b>Initiative</b> zu Kampfbeginn antippen: Sie bestimmt, wann du dran bist. <b>Übungsbonus</b> zählt bei allem, worin du geübt bist (schon eingerechnet). <b>Passive Wahrnehmung</b>: was du bemerkst, ohne zu würfeln. <b>Trefferwürfel</b> heilen dich in einer kurzen Rast.', 'p');
   h += xpLine(c);
   if (!P.dead && typeof turnBlock === 'function') h += turnBlock(c);
   if (P.hp <= 0) h += '<div class="death" data-grp="kampf werte zauber faehig gear begleiter notiz"><b>Todesrettungswürfe</b><span>Erfolge</span>' + pips('ds0', 3, P.ds[0]) + '<span>Fehlschläge</span>' + pips('ds1', 3, P.ds[1]) + '<button class="btn sm" data-act="deathRoll">Würfeln</button></div>';
@@ -718,11 +720,11 @@ function renderSheet(c) {
     '<label class="exh">Erschöpfung ' + sel('play.exh', P.exh, [0, 1, 2, 3, 4, 5, 6].map((v) => [v, v ? 'Stufe ' + v + ' (−' + 2 * v + ' auf W20)' : 'keine'])) + '</label></div>';
   h += condBlock(P);
   h += '<div class="cols"><div class="col">';
-  h += '<section class="blk" data-grp="werte"><h2>Attribute & Rettungswürfe</h2><div class="abil">' + AB.map((a) => '<div class="ab"><button class="abm" data-act="d20" data-kind="check:' + a + '" data-mod="' + c.mod[a] + '" data-label="' + AB_DE[a] + '-Wurf"><span>' + AB_K[a] + '</span><b>' + sgn(c.mod[a]) + '</b><small>' + c.abil[a] + '</small></button><button class="sv' + (c.saves[a].prof ? ' p' : '') + '" data-act="d20" data-kind="save:' + a + '" data-mod="' + c.saves[a].val + '" data-label="' + AB_DE[a] + '-Rettungswurf" title="' + esc(c.saves[a].parts.join(' + ')) + '">RW ' + sgn(c.saves[a].val) + '</button>' + xpl(c.breakdown[a]) + xpl(c.saves[a].parts) + '</div>').join('') + '</div></section>';
-  h += '<section class="blk" data-grp="werte"><h2>Fertigkeiten</h2><ul class="skills">' + ALL_SKILLS.map((s) => '<li><button data-act="d20" data-kind="check:' + SKILLS[s][1] + ':' + s + ':' + c.skills[s].prof + '" data-mod="' + c.skills[s].val + '" data-label="' + SKILLS[s][0] + '"><i class="pp p' + c.skills[s].prof + '" aria-label="' + (['ungeübt', 'geübt', 'Expertise'][c.skills[s].prof]) + '"></i><span>' + SKILLS[s][0] + ' <small>' + AB_K[SKILLS[s][1]] + '</small>' + xpl(c.skills[s].parts) + '</span><b>' + sgn(c.skills[s].val) + '</b></button></li>').join('') + '</ul></section>';
+  h += '<section class="blk" data-grp="werte"><h2>Attribute & Rettungswürfe</h2>' + hlTip('Oben antippen: Attributswurf. «RW» antippen: Rettungswurf, wenn du etwas abwehren musst. Hervorgehoben = geübt.', 'p') + '<div class="abil">' + AB.map((a) => '<div class="ab"><button class="abm" data-act="d20" data-kind="check:' + a + '" data-mod="' + c.mod[a] + '" data-label="' + AB_DE[a] + '-Wurf"><span>' + AB_K[a] + '</span><b>' + sgn(c.mod[a]) + '</b><small>' + c.abil[a] + '</small></button><button class="sv' + (c.saves[a].prof ? ' p' : '') + '" data-act="d20" data-kind="save:' + a + '" data-mod="' + c.saves[a].val + '" data-label="' + AB_DE[a] + '-Rettungswurf" title="' + esc(c.saves[a].parts.join(' + ')) + '">RW ' + sgn(c.saves[a].val) + '</button>' + xpl(c.breakdown[a]) + xpl(c.saves[a].parts) + '</div>').join('') + '</div></section>';
+  h += '<section class="blk" data-grp="werte"><h2>Fertigkeiten</h2>' + hlTip('Die Spielleitung sagt, welche Fertigkeit gefragt ist. Antippen würfelt. Gefüllter Kreis = geübt.', 'p') + '<ul class="skills">' + ALL_SKILLS.map((s) => '<li><button data-act="d20" data-kind="check:' + SKILLS[s][1] + ':' + s + ':' + c.skills[s].prof + '" data-mod="' + c.skills[s].val + '" data-label="' + SKILLS[s][0] + '"><i class="pp p' + c.skills[s].prof + '" aria-label="' + (['ungeübt', 'geübt', 'Expertise'][c.skills[s].prof]) + '"></i><span>' + SKILLS[s][0] + ' <small>' + AB_K[SKILLS[s][1]] + '</small>' + xpl(c.skills[s].parts) + '</span><b>' + sgn(c.skills[s].val) + '</b></button></li>').join('') + '</ul></section>';
   h += '<section class="blk" data-grp="werte"><h2>Übungen</h2><dl class="dl"><dt>Rüstung</dt><dd>' + c.profText.armor + '</dd><dt>Waffen</dt><dd>' + c.profText.weapons + '</dd><dt>Werkzeuge</dt><dd>' + esc(c.profText.tools) + '</dd><dt>Sprachen</dt><dd>' + esc(ch.languages) + '</dd>' + (c.dv ? '<dt>Sinne</dt><dd>Dunkelsicht ' + fmtM(c.dv) + '</dd>' : '') + '</dl></section>';
   h += '</div><div class="col wide">';
-  h += '<section class="blk" data-grp="kampf"><h2>Angriffe <small>' + c.attacksPer + ' pro Angriffsaktion' + (c.sneak ? ' · Hinterhältig ' + c.sneak : '') + (c.critRange < 20 ? ' · krit. ab ' + c.critRange : '') + '</small></h2><div class="atks">' + c.attacks.map((a, ai) => {
+  h += '<section class="blk" data-grp="kampf"><h2>Angriffe <small>' + c.attacksPer + ' pro Angriffsaktion' + (c.sneak ? ' · Hinterhältig ' + c.sneak : '') + (c.critRange < 20 ? ' · krit. ab ' + c.critRange : '') + '</small></h2>' + hlTip('Erst den Angriffsbonus antippen. Sagt die Spielleitung «Treffer», würfelst du im Fenster den Schaden.', 'p') + '<div class="atks">' + c.attacks.map((a, ai) => {
     const rage = a.rage && P.raging ? c.rageDmg : 0; const dm = (d) => rage ? d + '+' + rage : d;
     return '<div class="atk"><div class="an"><b>' + esc(a.name) + '</b>' + xpl(a.atkParts ? ['Angriff: ' + a.atkParts.join(' + '), 'Schaden: ' + (a.dmgParts || []).join(' + ')] : null) + '<small>' + esc(a.props) + (a.mastery ? ' · <abbr title="' + esc(MASTERY[a.mastery][1]) + '">' + MASTERY[a.mastery][0] + '</abbr>' : '') + '</small></div>' +
       '<button class="rb" data-act="atk" data-arg="' + ai + '">' + sgn(a.atk) + '</button>' +
@@ -731,7 +733,7 @@ function renderSheet(c) {
   }).join('') + (c.sneak ? '<div class="atk"><div class="an"><b>Hinterhältiger Angriff</b><small>1× pro Zug</small></div><button class="rb dmgb" data-act="dmg" data-expr="' + c.sneak + '" data-label="Hinterhältiger Angriff">' + c.sneak + '</button></div>' : '') + '</div></section>';
   h += slotsMini(c);
   if (c.spell.has || c.extraSpells.length) h += spellBlock(c);
-  if (c.res.length) h += '<section class="blk" data-grp="kampf faehig"><h2>Ressourcen' + (c.classDC && c.classDC.length ? ' <small>' + c.classDC.map(([l, v]) => l + ' ' + v).join(' · ') + '</small>' : '') + '</h2><div class="res">' + c.res.map((r) => {
+  if (c.res.length) h += '<section class="blk" data-grp="kampf faehig"><h2>Ressourcen' + (c.classDC && c.classDC.length ? ' <small>' + c.classDC.map(([l, v]) => l + ' ' + v).join(' · ') + '</small>' : '') + '</h2>' + hlTip('Fähigkeiten mit begrenzten Nutzungen. Gefüllt = noch verfügbar; antippen verbraucht eine. Rasten füllen sie wieder auf.', 'p') + '<div class="res">' + c.res.map((r) => {
     const used = +P.res[r.k] || 0;
     if (r.pool) return '<div class="rs"><div><b>' + esc(r.n) + '</b><small>' + (r.max - used) + ' von ' + r.max + ' · ' + RESET_DE[r.reset] + '</small></div><div class="pool"><input type="number" id="pool_' + r.k + '" min="1" placeholder="TP" aria-label="Punkte"><button class="btn sm" data-act="pool" data-arg="' + r.k + '" data-max="' + r.max + '">Ausgeben</button></div></div>';
     return '<div class="rs"><div><b>' + esc(r.n) + '</b><small>' + RESET_DE[r.reset] + (r.note ? ' · ' + r.note : '') + '</small></div>' + (r.max > 8 ? '<div class="stepper sm"><button data-act="resUse" data-arg="' + r.k + '" data-max="' + r.max + '" data-d="1" aria-label="verbrauchen">−</button><b>' + (r.max - used) + '/' + r.max + '</b><button data-act="resUse" data-arg="' + r.k + '" data-max="' + r.max + '" data-d="-1" aria-label="zurück">+</button></div>' : pips('res.' + r.k, r.max, used)) + '</div>';
@@ -758,7 +760,7 @@ function fxChips(c) {
 function endConc(P) { if (!P.conc) return; const map = { bless: 'bless', 'hunters-mark': 'hm', hex: 'hex', 'divine-favor': 'df' }; const f = map[P.conc.id]; if (f && P.fx) { delete P.fx[f]; if (P.fxDur) delete P.fxDur[f]; } if (P.fxSrc) for (const [k, v] of Object.entries(P.fxSrc)) if (v === P.conc.id) { if (P.fx) delete P.fx[k]; if (P.fxDur) delete P.fxDur[k]; delete P.fxSrc[k]; } const old = P.conc.id; P.conc = null; P.concEff = null; if (typeof effConcEnd === 'function') effConcEnd(old); }
 function condBlock(P) {
   const on = (P.cond || []).filter((k) => COND[k]);
-  let h = '<section class="blk conds" id="conds" data-grp="kampf"><h2>Zustände <small>' + (on.length ? on.length + ' aktiv · wirken automatisch auf deine Würfe' : 'keine') + '</small></h2><div class="chips">' +
+  let h = '<section class="blk conds" id="conds" data-grp="kampf"><h2>Zustände <small>' + (on.length ? on.length + ' aktiv · wirken automatisch auf deine Würfe' : 'keine') + '</small></h2>' + hlTip('Die Spielleitung sagt dir, wenn du einen Zustand bekommst, z. B. «liegend» oder «vergiftet». Hier eintragen – er wirkt dann automatisch auf deine Würfe.', 'p') + '<div class="chips">' +
     on.map((k) => chip(true, COND[k].name + ' ×', 'data-act="cond" data-arg="' + k + '" title="' + esc(COND[k].text) + ' – antippen zum Entfernen"')).join('') +
     '<details class="condpick"' + (S.condOpen ? ' open' : '') + '><summary>+ Zustand</summary><div class="chips">' + Object.entries(COND).filter(([k]) => !on.includes(k)).map(([k, c]) => chip(false, c.name, 'data-act="cond" data-arg="' + k + '" title="' + esc(c.text) + '"')).join('') + '</div></details>' +
     (on.length > 1 ? '<button class="link" data-act="condClear">alle entfernen</button>' : '') + '</div>';
@@ -767,7 +769,7 @@ function condBlock(P) {
 }
 function slotsMini(c) {
   const sc = c.spell, P = c.char.play; if (!sc.has || (!sc.slots.length && !sc.pact)) return '';
-  return '<section class="blk slotmini" data-grp="kampf"><h2>Zauberplätze <small>Zauber über die Zugleiste oder die Seite „Zauber“</small></h2><div class="slrow">' +
+  return '<section class="blk slotmini" data-grp="kampf"><h2>Zauberplätze</h2>' + hlTip('Zauber ab Grad 1 verbrauchen einen Platz, Zaubertricks sind gratis. Wirken über die Zugleiste oder die Seite «Zauber». Nach einer langen Rast ist alles wieder voll.', 'p') + '<div class="slrow">' +
     sc.slots.map((n, i) => '<div class="sl"><small>Grad ' + (i + 1) + '</small>' + pips('slots.' + (i + 1), n, +P.slots[i + 1] || 0) + '</div>').join('') +
     (sc.pact ? '<div class="sl"><small>Pakt (Grad ' + sc.pact.lvl + ')</small>' + pips('pact', sc.pact.n, +P.pact || 0) + '</div>' : '') + '</div></section>';
 }
@@ -775,6 +777,7 @@ function pips(path, max, used) { return '<div class="pips">' + Array.from({ leng
 function spellBlock(c) {
   const ch = c.char, P = ch.play, sc = c.spell;
   let h = '<section class="blk" id="spellsBlk" data-grp="zauber"><h2>Zauber' + (sc.has ? ' <small>' + sc.classes.map((x) => (sc.classes.length > 1 ? x.name + ' ' : '') + 'SG ' + x.dc + ' · Angriff ' + sgn(x.atk) + ' · ' + AB_K[x.ability]).join(' | ') + '</small>' : '') + '</h2>' + (sc.has ? sc.classes.map((x) => xpl(['SG: ' + x.dcParts.join(' + ')]) + xpl(['Angriff: ' + x.atkParts.join(' + ')])).join('') : '');
+  h += hlTip('«Wirken» verbraucht den passenden Zauberplatz und würfelt gleich Angriff oder Schaden. Zaubertricks kosten nichts. Konzentrationszauber: nur einer zugleich.', 'p');
   if (sc.has) {
     h += '<div class="slots">';
     sc.slots.forEach((n, i) => { h += '<div class="sl"><span>Grad ' + (i + 1) + '</span>' + pips('slots.' + (i + 1), n, +(P.slots[i + 1] || 0)) + '</div>'; });

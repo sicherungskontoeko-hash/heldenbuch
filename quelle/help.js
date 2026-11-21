@@ -6,7 +6,16 @@ const HELP = {
     'Angriffe und Zauber zählen automatisch mit. Im Kampf (am Tisch oder mit „⚔ Kampfmodus“) gelten die Zugregeln: Ist etwas verbraucht, blockiert die App die Aktion. Ausserhalb eines Kampfes zählt sie nur mit. Unter Hausregeln → Regeloptionen kannst du „Regeln streng durchsetzen“ ausschalten, dann warnt sie nur.',
     'D&D 2024: Pro Zug darfst du nur einen Zauberplatz verbrauchen (Zaubertricks und Gratiswirkungen zählen nicht). Fähigkeiten „1× pro Zug“ wie Hinterhältiger Angriff oder Kolossjäger lassen sich nur einmal anwählen.',
     'Im Kampf am Tisch kannst du oben ein Ziel wählen. Dann wirken seine Zustände automatisch: z. B. Vorteil gegen ein liegendes Ziel im Nahkampf, kritischer Treffer gegen ein bewusstloses Ziel, Mal des Jägers nur gegen das markierte Ziel.',
-    '„Neuer Zug“ setzt alles zurück. Im Kampf am Tisch passiert das automatisch, wenn du an der Reihe bist.']],
+    '„Neuer Zug“ setzt alles zurück. Im Kampf am Tisch passiert das automatisch, wenn du an der Reihe bist.',
+    'Du willst deinen Zug lieber selbst führen? Unter Mehr → Hilfen die Stufe „Erfahren“ wählen oder nur die Zugleiste ausschalten. Dann zählt und sperrt die App nichts.']],
+  werte: ['Attribute & Rettungswürfe', [
+    'Die sechs Attribute sind Stärke, Geschicklichkeit, Konstitution, Intelligenz, Weisheit und Charisma. Die grosse Zahl ist der Modifikator, der beim Würfeln zählt; die kleine ist der Attributswert.',
+    'Attributswurf: Die Spielleitung verlangt z. B. einen Stärkewurf, um eine Tür aufzudrücken. Tippe auf das Attribut.',
+    'Rettungswurf (RW): Du wehrst etwas ab, etwa Gift (KON), einen Feuerball (GES) oder eine Bezauberung (WEI). Hervorgehobene Rettungswürfe sind geübt, dort zählt dein Übungsbonus mit.']],
+  fert: ['Fertigkeiten', [
+    'Fertigkeiten sind Attributswürfe für bestimmte Aufgaben, z. B. Athletik (STÄ) zum Klettern oder Wahrnehmung (WEI), um etwas zu bemerken.',
+    'Die Spielleitung sagt dir, welche Fertigkeit gefragt ist, und legt einen Schwierigkeitsgrad (SG) fest: leicht 10, mittel 15, schwer 20.',
+    'Bist du geübt, kommt dein Übungsbonus dazu. Mit Expertise zählt er doppelt.']],
   zustand: ['Zustände', [
     'Aktive Zustände stehen als Chips oben. Mit „+ Zustand“ setzt du einen neuen; ein Tipp auf einen Chip entfernt ihn.',
     'Die App berücksichtigt Zustände bei deinen Würfen, z. B. Nachteil bei „vergiftet“ oder automatisch misslungene STÄ- und GES-Rettungswürfe bei „gelähmt“.',
@@ -77,7 +86,7 @@ const HELP = {
     'Der Hintergrund gibt zusätzlich +2/+1 oder dreimal +1 auf die angegebenen Attribute.',
     'Der Modifikator (in Klammern) ist das, was bei Würfen zählt: (Wert − 10) ÷ 2, abgerundet.']]
 };
-function helpBtn(k) { return '<button class="hlp" data-act="help" data-arg="' + k + '" aria-label="Hilfe: ' + esc(HELP[k][0]) + '" title="Erklärung">?</button>'; }
+function helpBtn(k) { if (typeof hlOn === 'function' && !hlOn('erkl')) return ''; return '<button class="hlp" data-act="help" data-arg="' + k + '" aria-label="Hilfe: ' + esc(HELP[k][0]) + '" title="Erklärung">?</button>'; }
 XA.help = (t, a) => {
   const h = HELP[a]; if (!h) return; const m = $('#modal'); S.modal = 'help';
   m.innerHTML = '<div class="dlg helpdlg" role="dialog" aria-modal="true" aria-label="' + esc(h[0]) + '"><div class="dph"><b>' + esc(h[0]) + '</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' + h[1].map((p) => '<p>' + esc(p) + '</p>').join('') + '</div>';
@@ -85,10 +94,14 @@ XA.help = (t, a) => {
 };
 /* nach jedem Rendern die passenden Überschriften mit „?“ versehen */
 const HELP_HEADS = [[/^Zustände/, 'zustand'], [/^Kampf/, 'kampf'], [/^Begegnung planen/, 'planer'], [/^Als Spielleitung/, 'tisch'], [/^Klasse wählen/, 'build'], [/^Unterklasse$/, 'sub'], [/^Attributswerte/, 'attr'], [/^Effekt/, 'effekt'], [/^Regeloptionen/, 'regeln']];
+/* Einsteiger: weitere Abschnitte des Bogens bekommen ein „?“ */
+const HELP_HEADS_NEU = [[/^Angriffe/, 'angriff'], [/^Ressourcen/, 'res'], [/^Zauberplätze/, 'slots'], [/^Attribute/, 'werte'], [/^Fertigkeiten/, 'fert']];
 function addHelp() {
+  if (typeof hlOn === 'function' && !hlOn('erkl')) return;
+  const heads = typeof hlOn === 'function' && hlOn('tipps') ? HELP_HEADS.concat(HELP_HEADS_NEU) : HELP_HEADS;
   document.querySelectorAll('#view h2, #view h3, #modal h3').forEach((h) => {
     if (h.querySelector('.hlp')) return; const tx = h.textContent.trim();
-    const m = HELP_HEADS.find(([re]) => re.test(tx)); if (m) h.insertAdjacentHTML('beforeend', ' ' + helpBtn(m[1]));
+    const m = heads.find(([re]) => re.test(tx)); if (m) h.insertAdjacentHTML('beforeend', ' ' + helpBtn(m[1]));
   });
   const tb = document.querySelector('.turnblk .tbar'); if (tb && !tb.querySelector('.hlp')) tb.insertAdjacentHTML('beforeend', helpBtn('zug'));
   const mx = document.querySelector('.mnav .mexp'); if (mx && !mx.parentNode.querySelector('.hlp[data-arg=rechenweg]')) mx.insertAdjacentHTML('afterend', helpBtn('rechenweg'));

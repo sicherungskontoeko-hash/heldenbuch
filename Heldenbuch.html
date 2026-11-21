@@ -7,7 +7,7 @@
    weil die App ihre Adresse (localhost) dabei nicht wechselt.
    Sicherung: Startet eine heruntergeladene Version nicht sauber, wird sie verworfen und die eingebaute genutzt. */
 (function () {
-  var BUILD = 1795189731, VER = '1.9';
+  var BUILD = 1795263169, VER = '1.9';
   var REMOTE = 'https://sicherungskontoeko-hash.github.io/heldenbuch/';
   var C = window.Capacitor; var native = !!(C && (typeof C.isNativePlatform === 'function' ? C.isNativePlatform() : C.isNative));
   if (window.HB_BOOT_TEST) native = true; /* nur für Tests */
@@ -1148,6 +1148,28 @@ body:has(#modal:not([hidden])) #undoBar,body:has(#prompt:not([hidden])) #undoBar
 .advit>p,.advit>.chips{margin:0 12px;line-height:1.5;font-size:.93rem}
 .advit>.chips{justify-content:flex-start}
 @media (max-width:600px){.advb .advt:not(.roll) tr,.advb .advt:not(.roll) th,.advb .advt:not(.roll) td{display:block;width:auto;min-width:0}.advt.roll th{width:40px;min-width:40px}.advb .advt:not(.roll) td{border-top:0;padding-top:0}.advcho{grid-template-columns:1fr;gap:3px}.advbb{padding:9px 11px}.advpn .btn{max-width:100%;flex:1 1 100%}.adv .advhead h1{font-size:1.5rem}.advt th{min-width:84px}}
+/* Hilfe-Stufe: Einsteiger-Tipps, Zug-Leitfaden, Auswahl */
+.nb{display:block;color:var(--muted);font-size:.8rem;line-height:1.4;font-style:normal;font-weight:400;letter-spacing:0;text-transform:none;margin:2px 0 0}
+p.nb{margin:-4px 0 10px;padding:6px 10px;border-left:3px solid rgba(var(--gold-rgb),.45);background:rgba(var(--gold-rgb),.05);border-radius:0 10px 10px 0;max-width:72ch}
+.shead+p.nb{margin:0 0 12px}.vitals+p.nb{margin:8px 0 4px}
+.tguide{padding:9px 12px;border:1px dashed rgba(var(--gold-rgb),.4);border-radius:12px;background:rgba(var(--gold-rgb),.05);font-size:.86rem;line-height:1.45}
+.tguide>b{font-family:var(--f-display);color:var(--gold-hi);font-size:.95rem}.tguide ol{list-style:none;margin:6px 0;padding:0;display:grid;gap:5px}
+.tguide li{display:flex;gap:8px;align-items:flex-start}.tguide li.done{opacity:.5}.tguide li.done span{text-decoration:line-through}
+.tguide li i{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:var(--gold);color:var(--gold-ink);font-style:normal;font-weight:700;font-size:.78rem}
+.tguide p{margin:4px 0 0;color:var(--muted)}.tfavtip{margin:0}
+.turnblk.slim{padding:10px 14px;gap:6px}.turnblk.slim .tctx{margin-top:0}
+#toast .trow{position:relative}.tplus{flex:none;align-self:center;width:34px;height:34px;min-height:0;padding:0;border-radius:50%;border:1px solid rgba(var(--gold-rgb),.55);background:transparent;color:var(--gold-hi);font-size:1.2rem;line-height:1;cursor:pointer;margin-left:6px}
+#toast .ttip{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:.82rem;line-height:1.4;color:var(--muted)}
+.hllv{display:grid;gap:8px;margin:6px 0 12px}
+.hlc{display:grid;gap:3px;text-align:left;padding:11px 13px;border-radius:14px;border:1px solid var(--line2);background:linear-gradient(180deg,var(--raised),var(--surface));color:var(--ink);cursor:pointer;min-height:0}
+.hlc b{font-family:var(--f-display);font-size:1rem;color:var(--gold-hi)}.hlc small{color:var(--muted);font-size:.84rem;line-height:1.4}
+.hlc.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset,0 0 18px rgba(var(--gold-rgb),.18)}.hlc.part{border-color:rgba(var(--gold-rgb),.6);border-style:dashed}
+.hlc em{font-style:normal;font-size:.7rem;padding:1px 7px;border-radius:8px;background:rgba(var(--gold-rgb),.18);margin-left:6px;font-family:var(--f-body);vertical-align:middle}
+.hlfine{margin:4px 0 10px}.hlfine summary{cursor:pointer;color:var(--gold);font-weight:600;margin-bottom:10px}
+.hldlg{max-width:560px}.hlsec .hllv{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.wlvl .seg{display:flex;width:100%}.wlvl .seg button{flex:1;padding:8px 6px}.wlvl em{font-style:normal}
+@media (max-width:820px){body:has(#toast:not([hidden]) .ttip) #boostBar{bottom:calc(300px + env(safe-area-inset-bottom,0px))}}
+body.hl-erkl0 .sheet .ii,body.hl-erkl0 .hlp,body.hl-erkl0 .slb{display:none!important}
 </style>
 <div id="scene" aria-hidden="true"></div>
 <canvas id="embers" aria-hidden="true"></canvas>
@@ -4220,7 +4242,7 @@ const SHEET_GROUPS = [['kampf', 'Kampf'], ['werte', 'Werte'], ['zauber', 'Zauber
 function sheetNav(c) {
   const g = mgOf(c);
   const list = SHEET_GROUPS.filter(([k]) => k !== 'zauber' || c.spell.has || c.extraSpells.length);
-  return '<nav class="mnav" aria-label="Seiten des Bogens">' + list.map(([k, l]) => '<button class="' + (g === k ? 'on' : '') + '" data-act="mg" data-arg="' + k + '">' + l + '</button>').join('') + '<button class="mexp' + (typeof explainOn === 'function' && explainOn() ? ' on' : '') + '" data-act="explain" title="Rechenweg aller Werte anzeigen">Rechenweg</button>' + '<button class="mall' + (g === 'alle' ? ' on' : '') + '" data-act="mg" data-arg="alle" title="Alles auf einer Seite">Alles</button>' + (typeof S !== 'undefined' ? '<button class="undobtn" data-act="undo" title="Letzte Änderung rückgängig (Strg+Z)"' + (S.undo && S.undo.some((u) => u.id === S.cur) ? '' : ' disabled') + '>↶ <span>Rückgängig</span> <b>' + ((S.undo || []).filter((u) => u.id === S.cur).length || '') + '</b></button>' : '') + '</nav>';
+  return '<nav class="mnav" aria-label="Seiten des Bogens">' + list.map(([k, l]) => '<button class="' + (g === k ? 'on' : '') + '" data-act="mg" data-arg="' + k + '">' + l + '</button>').join('') + '<button class="mall' + (g === 'alle' ? ' on' : '') + '" data-act="mg" data-arg="alle" title="Alles auf einer Seite">Alles</button>' + (typeof S !== 'undefined' ? '<button class="undobtn" data-act="undo" title="Letzte Änderung rückgängig (Strg+Z)"' + (S.undo && S.undo.some((u) => u.id === S.cur) ? '' : ' disabled') + '>↶ <span>Rückgängig</span> <b>' + ((S.undo || []).filter((u) => u.id === S.cur).length || '') + '</b></button>' : '') + '</nav>';
 }
 XA.mg = (t, a) => { S.mg = a; try { localStorage.setItem('heldenbuch_mg', a); } catch (e) {} render(); const n = document.querySelector('.mnav'); if (n) { const top = n.getBoundingClientRect().top + window.scrollY - 70; if (window.scrollY > top) window.scrollTo(0, top); } };
 function mgOf(c) { if (S.mg === undefined) { try { S.mg = localStorage.getItem('heldenbuch_mg') || 'kampf'; } catch (e) { S.mg = 'kampf'; } } if (S.mg === 'alle' && window.innerWidth <= 820) return 'kampf'; return S.mg === 'zauber' && !(c.spell.has || c.extraSpells.length) ? 'kampf' : (S.mg || 'kampf'); }
@@ -4238,7 +4260,7 @@ function bnavHtml() {
   const moreOn = ['spells', 'adv', 'mobs', 'hb', 'help'].includes(S.view);
   const btn = (k, l, act, on) => '<button class="' + (on ? 'on' : '') + '" data-act="' + act + '" data-arg="' + k + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + NAV_ICON[k] + '</svg><span>' + l + '</span>' + (k === 'camp' && S.combat && S.combat.active ? '<i class="dot"></i>' : '') + '</button>';
   return '<div class="bn">' + main.map(([k, l]) => btn(k, l, 'view', S.view === k)).join('') + btn('more', 'Mehr', 'more', moreOn || S.more) + '</div>' +
-    (S.more ? '<div class="bmore">' + [['spells', 'Zauberbuch'], ['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe & Anleitung']].map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<button data-act="themeOpen">Stimmung: ' + THEMES[themeNow()].name + '</button></div>' : '');
+    (S.more ? '<div class="bmore">' + [['spells', 'Zauberbuch'], ['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe & Anleitung']].map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="themeOpen">Stimmung: ' + THEMES[themeNow()].name + '</button></div>' : '');
 }
 XA.more = () => { S.more = !S.more; const bn = $('#bnav'); if (bn) bn.innerHTML = bnavHtml(); };
 
@@ -4247,6 +4269,7 @@ function helpView() {
   const sec = (t, items) => '<section class="blk"><h2>' + t + '</h2><ul class="help">' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></section>';
   const app = typeof APP_MODE !== 'undefined' && APP_MODE === 'app';
   return '<div class="camp helpv"><div class="hero-intro banner" style="' + bannerStyle('magier') + '"><h1>So funktioniert das Heldenbuch</h1><p>Alles Wichtige auf einen Blick. Tippe auf hervorgehobene Werte, um zu würfeln.</p></div>' +
+    '<section class="blk hlsec"><h2>Wie viel Hilfe?</h2><p class="hint">Einsteiger bekommen alles erklärt, Erfahrene sehen nur ihren Bogen. Gilt auf diesem Gerät.</p>' + hlPanel('help') + '</section>' +
     sec('Helden erschaffen', ['Unter <b>Erschaffen</b> gehst du Schritt für Schritt durch Klasse, Herkunft, Attribute, Fertigkeiten, Zauber und Ausrüstung.', 'Rote Hinweise rechts (auf dem Handy oben) zeigen, was noch fehlt – antippen bringt dich direkt zum richtigen Feld.', 'Alle Werte (RK, TP, Angriffe, Zauber-SG, Plätze) rechnet die App automatisch.']) +
     sec('Spielen', ['Auf dem <b>Bogen</b> tippst du Attribute, Fertigkeiten, Rettungswürfe oder Angriffe an – die App würfelt mit Animation und beachtet Vor-/Nachteil und Zustände.', 'Auf dem Handy wechselst du oben im Bogen zwischen <b>Kampf, Werte, Zauber, Fähigkeiten, Ausrüstung, Begleiter</b> und <b>Notizen</b>.', 'Zauber wirken zieht den Platz automatisch ab. Konzentration, Segnen, Mal des Jägers usw. werden verfolgt.', 'Bei 0 TP würfelst du Todesrettungswürfe. Nach drei Fehlschlägen entscheidet die Spielleitung über Gnade.', 'Der Würfelbecher unten links würfelt beliebige Würfel (bis 30 Stück).']) +
     sec('Gemeinsam spielen', [app ? 'Unter <b>Tisch</b> erstellt die Spielleitung einen Raum. Den <b>Raumcode</b> schickst du per WhatsApp – Mitspieler tippen ihn ein und sind verbunden (Handy und PC gemischt).' : 'Unter <b>Tisch</b> treten alle derselben Kampagne bei. Mitspieler musst du einmal per E-Mail als Bearbeiter einladen.', 'Die Spielleitung startet den Kampf, alle würfeln Initiative, und wer am Zug ist, sieht seinen Bildschirm leuchten.', 'Gegner fügt die Spielleitung im Kampf über <b>+ Gegner</b> hinzu (Bestiarium, Zufallsbegegnung oder ohne Werte). Ist ein Gegner am Zug, zeigt ein Kasten seine Angriffe und zählt mit. Spieler sehen bei Gegnern nur den Zustand (z. B. „schwer verletzt“), nicht die genauen TP.', 'Rast, Beute, EP und Handouts verteilt die Spielleitung für alle mit einem Tipp.']) +
@@ -4879,7 +4902,7 @@ function turnReset(ch, keepReaction) {
   const fx = ch.play.fx || {}; delete fx.reckless; delete fx.aim; if (!keepReaction) delete fx.dodge; ch.play.fx = fx;
   if (!keepReaction && typeof startOfTurn === 'function') { try { startOfTurn(ch); } catch (e) {} }
 }
-const tLeft = (ch, k) => { const t = turnSt(ch); return k === 'a' ? t.aMax - t.a : k === 'b' ? 1 - t.b : k === 'r' ? 1 - t.r : 1; };
+const tLeft = (ch, k) => { if (typeof turnTrack === 'function' && !turnTrack()) return 1; const t = turnSt(ch); return k === 'a' ? t.aMax - t.a : k === 'b' ? 1 - t.b : k === 'r' ? 1 - t.r : 1; };
 /* Verbucht Aktion/Bonusaktion/Reaktion. Rückgabe false = blockiert (strenger Modus im Kampf), dann wurde nichts verändert. */
 function tSpend(ch, k, label, force) {
   if (k === 'f') return true;
@@ -5133,6 +5156,7 @@ function tLohPrompt(ch, c) {
 
 /* ---------- Darstellung ---------- */
 function turnBlock(c) {
+  if (typeof hlOn === 'function' && !hlOn('zug')) return turnSlim(c);
   const ch = c.char; const t = turnSt(ch); const favs = (ch.favs || []);
   const opts = turnOpts(c); const byId = Object.fromEntries(opts.map((o) => [o.id, o]));
   const mvMax = c.speed + (t.mvMax || 0); const mvLeft = Math.max(0, mvMax - (t.mv || 0));
@@ -5141,10 +5165,23 @@ function turnBlock(c) {
     '<div class="tmove"><span>Bewegung</span><button class="tm" data-act="tMove" data-arg="1.5" aria-label="1,5 m bewegen">−</button><b>' + fmtM(mvLeft) + '</b><button class="tm" data-act="tMove" data-arg="-1.5" aria-label="1,5 m zurück">+</button></div>' +
     (typeof onlineFight === 'function' && onlineFight() ? '' : '<button class="btn sm ghost tnew" data-act="tNew" title="Zugbeginn: Aktion, Bonusaktion, Reaktion und Bewegung zurücksetzen, Dauer herunterzählen">Neuer Zug</button>') + '</div>' +
     '<div class="tctx">' + (onlineFight() ? '<span class="tinfo">⚔ Kampf am Tisch' + (offTurn() ? ' · nicht dein Zug' : ' · dein Zug') + '</span>' : '<button class="chip' + (ch.play.localFight ? ' on' : '') + '" data-act="tFight" title="Im Kampfmodus gelten die Zugregeln (Aktionen, Bonusaktion, 1 Zauberplatz pro Zug) streng.">⚔ Kampfmodus ' + (ch.play.localFight ? 'an' : 'aus') + '</button>') + tgtSelect(c) + '</div>';
+  if (typeof hlOn === 'function' && hlOn('tipps')) h += turnGuide(c, t, opts, mvLeft);
+  const extra = turnExtras(c, false);
+  if (extra.length) h += '<div class="tnow">' + extra.join('') + '</div>';
+  if (typeof effMineHtml === 'function') h += effMineHtml();
+  const fv = favs.map((id) => byId[id]).filter(Boolean);
+  if (fv.length) h += '<div class="tfav">' + fv.map((o) => '<button class="tq' + (o.empty || tLeft(ch, o.cost) <= 0 ? ' dim' : '') + '" data-act="tUse" data-arg="' + o.id + '"><i class="k' + o.cost + '">' + COST_K[o.cost] + '</i>' + esc(o.n) + (o.left !== null && o.left !== undefined ? '<small>' + o.left + '</small>' : '') + '</button>').join('') + '</div>';
+  else if (typeof hlOn === 'function' && hlOn('tipps')) h += '<p class="nb tfavtip">Mit ☆ im Auswahlfenster legst du Favoriten an. Sie stehen dann hier und sind mit einem Tipp gewürfelt.</p>';
+  h += '</section>';
+  return h;
+}
+/* Laufendes: Angriffsaktion, Kampfunfähigkeit, aktive Wirkungen, Zeit (slim: ohne Zählung der Angriffsaktion) */
+function turnExtras(c, slim) {
+  const ch = c.char; const t = turnSt(ch);
   /* laufende Angriffsaktion */
   const extra = [];
-  if (t.atk > 0 && t.atk < c.attacksPer) extra.push('<span class="tinfo">Angriffsaktion: noch ' + (c.attacksPer - t.atk) + ' Angriff' + (c.attacksPer - t.atk > 1 ? 'e' : '') + '</span>' + c.attacks.filter((a) => !a.name.startsWith('Blutlanze')).map((a, i) => '<button class="chip tq" data-act="tUse" data-arg="atk:' + c.attacks.indexOf(a) + '">' + esc(a.name) + ' ' + sgn(a.atk) + '</button>').join(''));
-  if (t.bonusAtk > 0) extra.push('<span class="tinfo">Schlaghagel: noch ' + t.bonusAtk + ' Schlag</span><button class="chip tq" data-act="tUse" data-arg="bfl:0">Waffenloser Schlag</button>');
+  if (!slim && t.atk > 0 && t.atk < c.attacksPer) extra.push('<span class="tinfo">Angriffsaktion: noch ' + (c.attacksPer - t.atk) + ' Angriff' + (c.attacksPer - t.atk > 1 ? 'e' : '') + '</span>' + c.attacks.filter((a) => !a.name.startsWith('Blutlanze')).map((a, i) => '<button class="chip tq" data-act="tUse" data-arg="atk:' + c.attacks.indexOf(a) + '">' + esc(a.name) + ' ' + sgn(a.atk) + '</button>').join(''));
+  if (!slim && t.bonusAtk > 0) extra.push('<span class="tinfo">Schlaghagel: noch ' + t.bonusAtk + ' Schlag</span><button class="chip tq" data-act="tUse" data-arg="bfl:0">Waffenloser Schlag</button>');
   const incap = (ch.play.cond || []).find((k) => COND[k] && COND[k].fx && COND[k].fx.incap); if (incap) extra.push('<span class="tinfo warnc">' + COND[incap].name + ': keine Aktionen, Bonusaktionen oder Reaktionen.</span>');
   const fx = ch.play.fx || {}; const act = [];
   const FXN = { reckless: 'Tollkühn', aim: 'Ruhiges Zielen', innate: 'Angeborene Zauberei', sacred: 'Heilige Waffe', bless: 'Segnen', hm: 'Mal des Jägers', hex: 'Verhexen', df: 'Göttliche Gunst', shill: 'Shillelagh', flame: 'Flamme in der Hand', vex: 'Bedrängen' };
@@ -5155,11 +5192,35 @@ function turnBlock(c) {
   if (ch.play.ws && typeof WS_STATS !== 'undefined' && WS_STATS[ch.play.ws]) extra.push('<span class="tinfo">' + esc(BESTIARY[ch.play.ws][0]) + ': ' + esc(BESTIARY[ch.play.ws][5]) + ' · ' + esc(WS_STATS[ch.play.ws].senses) + ' ' + slTag('Sinne und Merkmale wie Rudeltaktik wendet ihr am Tisch an – die App rechnet sie nicht automatisch') + '</span>');
   if (act.length) extra.push('<span class="tinfo">Aktiv:</span>' + act.map(([k, n]) => '<button class="chip" data-act="tFxOff" data-arg="' + k + '" title="Beenden">' + esc(n) + ' ×</button>').join(''));
   if (act.length && !inFight(ch) && Object.keys(dur).length) extra.push('<span class="tinfo">Zeit vergeht:</span>' + [[10, '+1 Min.'], [100, '+10 Min.'], [600, '+1 Std.']].map(([r, l]) => '<button class="chip" data-act="tTime" data-arg="' + r + '">' + l + '</button>').join(''));
-  if (extra.length) h += '<div class="tnow">' + extra.join('') + '</div>';
-  if (typeof effMineHtml === 'function') h += effMineHtml();
-  const fv = favs.map((id) => byId[id]).filter(Boolean);
-  h += '<div class="tfav">' + (fv.length ? fv.map((o) => '<button class="tq' + (o.empty || tLeft(ch, o.cost) <= 0 ? ' dim' : '') + '" data-act="tUse" data-arg="' + o.id + '"><i class="k' + o.cost + '">' + COST_K[o.cost] + '</i>' + esc(o.n) + (o.left !== null && o.left !== undefined ? '<small>' + o.left + '</small>' : '') + '</button>').join('') : '<span class="hint">Tippe auf Aktion, Bonusaktion oder Reaktion, um zu sehen, was du kannst. Mit ☆ legst du Favoriten für diese Leiste an.</span>') + '</div></section>';
-  return h;
+  return extra;
+}
+/* Zugleiste aus (Hilfe-Stufe „Erfahren“): keine Zählung, nur was gerade läuft – Wirkungen, Ziel am Tisch, Kampfmodus zum Ausschalten */
+function turnSlim(c) {
+  const ch = c.char; const extra = turnExtras(c, true);
+  const online = typeof onlineFight === 'function' && onlineFight();
+  const ctx = (online ? tgtSelect(c) : '') + (!online && ch.play.localFight ? '<button class="chip on" data-act="tFight" title="Kampfmodus beenden">⚔ Kampfmodus an</button>' : '');
+  const durs = !online && Object.keys(ch.play.fxDur || {}).length > 0;
+  const eff = typeof effMineHtml === 'function' ? effMineHtml() : '';
+  if (!extra.length && !ctx && !durs && !eff) return '';
+  return '<section class="blk turnblk slim" data-grp="kampf">' + (ctx || durs ? '<div class="tctx">' + ctx + (durs ? '<button class="btn sm ghost tnew" data-act="tNew" title="Neue Runde: Dauer laufender Wirkungen herunterzählen">Neuer Zug</button>' : '') + '</div>' : '') + (extra.length ? '<div class="tnow">' + extra.join('') + '</div>' : '') + eff + '</section>';
+}
+/* Einsteiger: Was kann ich in meinem Zug noch tun? */
+function turnGuide(c, t, opts, mvLeft) {
+  const ch = c.char; if (canAct(ch)) return '';
+  if (onlineFight() && offTurn()) return '<div class="nb tguide"><p>Gerade ist jemand anderes am Zug. Du kannst höchstens <b>reagieren (R)</b>, z. B. mit einem Gelegenheitsangriff, wenn ein Gegner deine Reichweite verlässt.</p></div>';
+  const aL = t.aMax - t.a, bL = 1 - t.b;
+  const best = c.attacks.filter((a) => !/^Waffenlos/.test(a.name)).sort((x, y) => y.atk - x.atk)[0] || c.attacks[0];
+  const cant = opts.find((o) => { if (o.cost !== 'a' || o.grp !== 'Zauber' || !/Zaubertrick/.test(o.sub || '')) return false; const d = typeof SPELL_DATA !== 'undefined' && SPELL_DATA[o.id.slice(3)]; return !!(d && d.n && !d.heal); });
+  const bOpt = opts.find((o) => o.cost === 'b' && !o.empty && o.grp !== 'Allgemein' && !/^it:/.test(o.id));
+  const li = (done, k, txt) => '<li' + (done ? ' class="done"' : '') + '><i class="k' + k + '">' + (k === 'm' ? '↔' : COST_K[k]) + '</i><span>' + txt + '</span></li>';
+  const ex = [best ? 'Angriff mit ' + esc(best.name) : '', cant ? 'Zaubertrick ' + esc(cant.n) : ''].filter(Boolean).join(' oder ');
+  const steps = [
+    li(mvLeft <= 0, 'm', mvLeft > 0 ? '<b>Bewegen</b> bis ' + fmtM(mvLeft) + ', gern aufgeteilt vor und nach der Aktion.' : '<b>Bewegung</b> aufgebraucht.'),
+    li(aL <= 0, 'a', aL > 0 ? '<b>Aktion:</b> ' + (ex ? 'z. B. ' + ex + '. ' : '') + 'Tippe auf «Aktion» für alles, auch Spurt, Ausweichen oder Helfen.' : '<b>Aktion</b> erledigt.'),
+    li(bL <= 0, 'b', bL <= 0 ? '<b>Bonusaktion</b> erledigt.' : bOpt ? '<b>Bonusaktion:</b> z. B. ' + esc(bOpt.n) + '.' : '<b>Bonusaktion:</b> hast du nur, wenn dir ein Zauber, eine Fähigkeit oder ein Trank eine gibt.')
+  ];
+  const fertig = aL <= 0 && (bL <= 0 || !bOpt);
+  return '<div class="nb tguide"><b>Dein Zug</b><ol>' + steps.join('') + '</ol><p>' + (fertig ? 'Fertig? ' + (onlineFight() ? 'Sag der Spielleitung «fertig», dann ist der Nächste dran.' : '«Neuer Zug» setzt alles für die nächste Runde zurück.') : 'Die <b>Reaktion (R)</b> bleibt für den Zug der anderen, z. B. für einen Gelegenheitsangriff.') + '</p></div>';
 }
 function openTurnPicker(k) {
   const ch = cur(); if (!ch) return; const c = derive(ch, S.hb); const t = turnSt(ch); const favs = ch.favs || [];
@@ -5329,7 +5390,7 @@ function rulesBlock() {
 }
 
 /* Kennzeichnung: Diese Entscheidung trifft die Spielleitung (nicht die App) */
-function slTag(t) { return '<span class="slb" title="' + (t || 'Entscheidet die Spielleitung – die App rechnet nur') + '">SL entscheidet</span>'; }
+function slTag(t) { if (typeof hlOn === 'function' && !hlOn('erkl')) return ''; return '<span class="slb" title="' + (t || 'Entscheidet die Spielleitung – die App rechnet nur') + '">SL entscheidet</span>'; }
 /* ---------- Kampfstatus ---------- */
 const onlineFight = () => !!(S.camp && S.combat && S.combat.active);
 function inFight(ch) { return onlineFight() || !!(ch && ch.play && ch.play.localFight); }
@@ -5353,7 +5414,9 @@ function ruleGate(ch, msg, title, always) {
 
 /* ---------- Einmal pro Zug ---------- */
 function onceMap(ch) { const t = turnSt(ch); const id = turnKeyNow(ch); if (t.onceId !== id || !t.once) { t.onceId = id; t.once = {}; } return t.once; }
-const onceUsed = (ch, k) => !!onceMap(ch)[k];
+/* Zugleiste aus (Hilfe-Stufe): Die App zählt und prüft den Zug nicht – Aktionen, „1× pro Zug“ und „1 Zauberplatz pro Zug“ verantwortet der Spieler. */
+const turnTrack = () => typeof hlOn !== 'function' || hlOn('zug');
+const onceUsed = (ch, k) => turnTrack() && !!onceMap(ch)[k];
 const onceMark = (ch, k) => { onceMap(ch)[k] = 1; };
 /* Zusatzschaden, der mehrfach pro Zug erlaubt ist (alle anderen: 1× pro Zug) */
 const XD_MULTI = new Set(['arkan', 'sommer', 'glut', 'gfire', 'gfrost', 'lifedr', 'takt', 'taktik', 'bwkrieg']);
@@ -5458,8 +5521,8 @@ function spellCheck(ch, c, s, lvl, mode) {
   const slot = s.lvl > 0 && (mode === 'pact' || !mode || mode === 'slot');
   if (inFight(ch)) {
     const t = turnSt(ch);
-    if (cost && mode !== 'ritual' && tLeft(ch, cost) <= 0) turn.push(COST_DE[cost] + ' schon verbraucht.');
-    if (slot && !offTurn() && t.slotSpell) turn.push('Pro Zug darfst du nur einen Zauberplatz verbrauchen (D&D 2024). Zaubertricks und Gratiswirkungen gehen weiterhin.');
+    if (turnTrack() && cost && mode !== 'ritual' && tLeft(ch, cost) <= 0) turn.push(COST_DE[cost] + ' schon verbraucht.');
+    if (turnTrack() && slot && !offTurn() && t.slotSpell) turn.push('Pro Zug darfst du nur einen Zauberplatz verbrauchen (D&D 2024). Zaubertricks und Gratiswirkungen gehen weiterhin.');
     if (mode === 'ritual') turn.push('Ein Ritual dauert 10 Minuten länger – im Kampf nicht möglich.');
   }
   return { fatal, turn, warn: fatal.concat(turn) };
@@ -6545,9 +6608,9 @@ Object.assign(XA, {
 const _gift0 = XA.gift; XA.gift = function () { const r = _gift0.apply(this, arguments); S.gPre = null; S.loot = null; S.lootSel = null; return r; };
 
 /* ==== Erklärbare Berechnungen und Nachbessern nach dem Wurf (P07) ==== */
-function explainOn() { if (S.explain === undefined) { try { S.explain = localStorage.getItem('hb_explain') === '1'; } catch (e) { S.explain = false; } } return S.explain; }
+function explainOn() { return typeof hlOn === 'function' ? hlOn('rw') : false; }
 const xpl = (parts) => parts && parts.length ? '<small class="xpl">' + esc(parts.join(' + ').replace(/\+ −/g, '− ').replace(/\+ \+/g, '+ ')) + '</small>' : '';
-XA.explain = () => { S.explain = !explainOn(); try { localStorage.setItem('hb_explain', S.explain ? '1' : '0'); } catch (e) {} render(); };
+XA.explain = () => { hlSet('rw', !hlOn('rw')); render(); };
 function hintBlock(c) { return (c.hints || []).length ? '<div class="notice hints" data-grp="kampf werte gear"><b>Regelhinweis' + (c.hints.length > 1 ? 'e' : '') + ':</b><ul>' + c.hints.map((h) => '<li>' + esc(h) + '</li>').join('') + '</ul></div>' : ''; }
 /* Rechenweg eines Wurfs aus der Wurfart ableiten */
 function partsFor(c, kind) {
@@ -6574,6 +6637,8 @@ function boostOpts(c, type) {
   ['W4', 'W6', 'W8', 'W10', 'W12'].forEach((d) => o.push({ k: 'x' + d, label: '+1' + d, how: 'add', expr: '1' + d, ext: true }));
   return o;
 }
+/* Automatisch nach einem Wurf nur, wenn „Nachbessern anbieten“ an ist und du etwas Eigenes einsetzen kannst (Einsteiger: immer). */
+function boostAuto(c, type) { if (typeof hlOn !== 'function') return true; if (!hlOn('nach')) return false; return hlOn('tipps') || boostOpts(c, type).some((x) => !x.ext); }
 function showBoost(c, roll) {
   let el = document.getElementById('boostBar'); if (!el) { el = document.createElement('div'); el.id = 'boostBar'; document.body.appendChild(el); }
   const o = boostOpts(c, roll.type); const own = o.filter((x) => !x.ext); const ext = o.filter((x) => x.ext);
@@ -6601,7 +6666,8 @@ function applyBoost(ch, k, where) {
 Object.assign(XA, {
   boost: (t, a, p, ch) => applyBoost(ch, a, 'roll'),
   boostAtk: (t, a, p, ch) => applyBoost(ch, a, 'atk'),
-  boostX: () => { const el = document.getElementById('boostBar'); if (el) el.hidden = true; }
+  boostX: () => { const el = document.getElementById('boostBar'); if (el) el.hidden = true; },
+  boostOpen: (t, a, p, ch) => { if (!ch || !S.lastRoll || S.lastRoll.type === 'attack') return; const tt = $('#toast'); if (tt) tt.hidden = true; showBoost(derive(ch, S.hb), S.lastRoll); }
 });
 
 /* ==== Bedienkomfort: Rückgängig (P04), Bestätigungen, automatisches Seitenlayout ==== */
@@ -6681,7 +6747,16 @@ const HELP = {
     'Angriffe und Zauber zählen automatisch mit. Im Kampf (am Tisch oder mit „⚔ Kampfmodus“) gelten die Zugregeln: Ist etwas verbraucht, blockiert die App die Aktion. Ausserhalb eines Kampfes zählt sie nur mit. Unter Hausregeln → Regeloptionen kannst du „Regeln streng durchsetzen“ ausschalten, dann warnt sie nur.',
     'D&D 2024: Pro Zug darfst du nur einen Zauberplatz verbrauchen (Zaubertricks und Gratiswirkungen zählen nicht). Fähigkeiten „1× pro Zug“ wie Hinterhältiger Angriff oder Kolossjäger lassen sich nur einmal anwählen.',
     'Im Kampf am Tisch kannst du oben ein Ziel wählen. Dann wirken seine Zustände automatisch: z. B. Vorteil gegen ein liegendes Ziel im Nahkampf, kritischer Treffer gegen ein bewusstloses Ziel, Mal des Jägers nur gegen das markierte Ziel.',
-    '„Neuer Zug“ setzt alles zurück. Im Kampf am Tisch passiert das automatisch, wenn du an der Reihe bist.']],
+    '„Neuer Zug“ setzt alles zurück. Im Kampf am Tisch passiert das automatisch, wenn du an der Reihe bist.',
+    'Du willst deinen Zug lieber selbst führen? Unter Mehr → Hilfen die Stufe „Erfahren“ wählen oder nur die Zugleiste ausschalten. Dann zählt und sperrt die App nichts.']],
+  werte: ['Attribute & Rettungswürfe', [
+    'Die sechs Attribute sind Stärke, Geschicklichkeit, Konstitution, Intelligenz, Weisheit und Charisma. Die grosse Zahl ist der Modifikator, der beim Würfeln zählt; die kleine ist der Attributswert.',
+    'Attributswurf: Die Spielleitung verlangt z. B. einen Stärkewurf, um eine Tür aufzudrücken. Tippe auf das Attribut.',
+    'Rettungswurf (RW): Du wehrst etwas ab, etwa Gift (KON), einen Feuerball (GES) oder eine Bezauberung (WEI). Hervorgehobene Rettungswürfe sind geübt, dort zählt dein Übungsbonus mit.']],
+  fert: ['Fertigkeiten', [
+    'Fertigkeiten sind Attributswürfe für bestimmte Aufgaben, z. B. Athletik (STÄ) zum Klettern oder Wahrnehmung (WEI), um etwas zu bemerken.',
+    'Die Spielleitung sagt dir, welche Fertigkeit gefragt ist, und legt einen Schwierigkeitsgrad (SG) fest: leicht 10, mittel 15, schwer 20.',
+    'Bist du geübt, kommt dein Übungsbonus dazu. Mit Expertise zählt er doppelt.']],
   zustand: ['Zustände', [
     'Aktive Zustände stehen als Chips oben. Mit „+ Zustand“ setzt du einen neuen; ein Tipp auf einen Chip entfernt ihn.',
     'Die App berücksichtigt Zustände bei deinen Würfen, z. B. Nachteil bei „vergiftet“ oder automatisch misslungene STÄ- und GES-Rettungswürfe bei „gelähmt“.',
@@ -6752,7 +6827,7 @@ const HELP = {
     'Der Hintergrund gibt zusätzlich +2/+1 oder dreimal +1 auf die angegebenen Attribute.',
     'Der Modifikator (in Klammern) ist das, was bei Würfen zählt: (Wert − 10) ÷ 2, abgerundet.']]
 };
-function helpBtn(k) { return '<button class="hlp" data-act="help" data-arg="' + k + '" aria-label="Hilfe: ' + esc(HELP[k][0]) + '" title="Erklärung">?</button>'; }
+function helpBtn(k) { if (typeof hlOn === 'function' && !hlOn('erkl')) return ''; return '<button class="hlp" data-act="help" data-arg="' + k + '" aria-label="Hilfe: ' + esc(HELP[k][0]) + '" title="Erklärung">?</button>'; }
 XA.help = (t, a) => {
   const h = HELP[a]; if (!h) return; const m = $('#modal'); S.modal = 'help';
   m.innerHTML = '<div class="dlg helpdlg" role="dialog" aria-modal="true" aria-label="' + esc(h[0]) + '"><div class="dph"><b>' + esc(h[0]) + '</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' + h[1].map((p) => '<p>' + esc(p) + '</p>').join('') + '</div>';
@@ -6760,15 +6835,91 @@ XA.help = (t, a) => {
 };
 /* nach jedem Rendern die passenden Überschriften mit „?“ versehen */
 const HELP_HEADS = [[/^Zustände/, 'zustand'], [/^Kampf/, 'kampf'], [/^Begegnung planen/, 'planer'], [/^Als Spielleitung/, 'tisch'], [/^Klasse wählen/, 'build'], [/^Unterklasse$/, 'sub'], [/^Attributswerte/, 'attr'], [/^Effekt/, 'effekt'], [/^Regeloptionen/, 'regeln']];
+/* Einsteiger: weitere Abschnitte des Bogens bekommen ein „?“ */
+const HELP_HEADS_NEU = [[/^Angriffe/, 'angriff'], [/^Ressourcen/, 'res'], [/^Zauberplätze/, 'slots'], [/^Attribute/, 'werte'], [/^Fertigkeiten/, 'fert']];
 function addHelp() {
+  if (typeof hlOn === 'function' && !hlOn('erkl')) return;
+  const heads = typeof hlOn === 'function' && hlOn('tipps') ? HELP_HEADS.concat(HELP_HEADS_NEU) : HELP_HEADS;
   document.querySelectorAll('#view h2, #view h3, #modal h3').forEach((h) => {
     if (h.querySelector('.hlp')) return; const tx = h.textContent.trim();
-    const m = HELP_HEADS.find(([re]) => re.test(tx)); if (m) h.insertAdjacentHTML('beforeend', ' ' + helpBtn(m[1]));
+    const m = heads.find(([re]) => re.test(tx)); if (m) h.insertAdjacentHTML('beforeend', ' ' + helpBtn(m[1]));
   });
   const tb = document.querySelector('.turnblk .tbar'); if (tb && !tb.querySelector('.hlp')) tb.insertAdjacentHTML('beforeend', helpBtn('zug'));
   const mx = document.querySelector('.mnav .mexp'); if (mx && !mx.parentNode.querySelector('.hlp[data-arg=rechenweg]')) mx.insertAdjacentHTML('afterend', helpBtn('rechenweg'));
   const bb = document.querySelector('#boostBar .bbh'); if (bb && !bb.querySelector('.hlp')) bb.querySelector('.x').insertAdjacentHTML('beforebegin', helpBtn('boost'));
 }
+
+/* ==== Hilfe-Stufe: wie viel die App erklärt, mitzählt und nachfragt (Einsteiger · Standard · Erfahren) ==== */
+/* Eine Stufe setzt fünf Schalter; jeder lässt sich einzeln anpassen. Gilt pro Gerät (localStorage „hb_hilfe“). */
+const HL_KEY = 'hb_hilfe';
+const HL_OPTS = {
+  erkl: ['Erklärknöpfe', '?-Knöpfe, ⓘ und der Hinweis «SL entscheidet».'],
+  tipps: ['Einsteiger-Tipps', 'Kurzerklärungen bei Werten und Abschnitten, ein Zug-Leitfaden und nach jedem W20-Wurf ein Satz, was das Ergebnis bedeutet.'],
+  zug: ['Zugleiste', 'Zählt Aktion, Bonusaktion, Reaktion und Bewegung mit und prüft im Kampf die Zugregeln. Aus: Du führst deinen Zug selbst, die App zählt und sperrt nichts.'],
+  nach: ['Nachbessern anbieten', 'Nach einem Wurf erscheint eine Leiste für Heldeninspiration, Glückskind oder Würfel von Verbündeten – sofern du etwas einsetzen kannst. Aus: nur über ＋ im Würfelfenster.'],
+  rw: ['Rechenweg', 'Unter jedem Wert steht, woraus er sich zusammensetzt.']
+};
+const HL_LEVELS = {
+  neu: { n: 'Einsteiger', t: 'Alles wird erklärt: Kurzerklärungen bei den Werten, ein Zug-Leitfaden und nach jedem Wurf ein Satz, was er bedeutet. Zum Lernen gedacht, dafür voller.', o: { erkl: 1, tipps: 1, zug: 1, nach: 1, rw: 0 } },
+  std: { n: 'Standard', t: 'Zugleiste und ?-Knöpfe. Nachbessern erscheint nur, wenn du etwas einsetzen kannst.', o: { erkl: 1, tipps: 0, zug: 1, nach: 1, rw: 0 } },
+  pro: { n: 'Erfahren', t: 'Nur dein Bogen: tippen, würfeln, fertig. Keine Zugleiste, keine Erklärungen, keine Leisten nach dem Wurf. Du führst deinen Zug selbst.', o: { erkl: 0, tipps: 0, zug: 0, nach: 0, rw: 0 } }
+};
+function hlState() {
+  if (S.hl) return S.hl;
+  let d = null; try { d = JSON.parse(localStorage.getItem(HL_KEY) || 'null'); } catch (e) {}
+  if (d && HL_LEVELS[d.lvl]) { const o = Object.assign({}, HL_LEVELS[d.lvl].o); for (const k of Object.keys(HL_OPTS)) if (d.o && d.o[k] !== undefined) o[k] = d.o[k] ? 1 : 0; S.hl = { lvl: d.lvl, o }; }
+  else { S.hl = { lvl: 'std', o: Object.assign({}, HL_LEVELS.std.o) }; let rw = false; try { rw = localStorage.getItem('hb_explain') === '1'; } catch (e) {} if (rw) S.hl.o.rw = 1; }
+  return S.hl;
+}
+const hlOn = (k) => !!hlState().o[k];
+const hlCustom = () => { const s = hlState(); return Object.keys(HL_OPTS).some((k) => !!s.o[k] !== !!HL_LEVELS[s.lvl].o[k]); };
+const hlLabel = () => HL_LEVELS[hlState().lvl].n + (hlCustom() ? ' (angepasst)' : '');
+function hlSave() { try { localStorage.setItem(HL_KEY, JSON.stringify(S.hl)); } catch (e) {} hlApply(); }
+function hlApply() { const b = document.body; if (!b) return; b.classList.toggle('hl-erkl0', !hlOn('erkl')); b.classList.toggle('hl-tipps', hlOn('tipps')); }
+function hlSetLevel(l) { if (!HL_LEVELS[l]) return; S.hl = { lvl: l, o: Object.assign({}, HL_LEVELS[l].o) }; hlSave(); }
+function hlSet(k, v) { hlState().o[k] = v ? 1 : 0; hlSave(); }
+/* Einsteiger-Tipp: kurze Erklärzeile, nur wenn „Einsteiger-Tipps“ an sind */
+const hlTip = (t, tag) => (hlOn('tipps') ? '<' + (tag || 'small') + ' class="nb">' + t + '</' + (tag || 'small') + '>' : '');
+
+/* Auswahl: drei Stufen als Karten, darunter die Schalter einzeln */
+function hlPanel(where) {
+  const s = hlState(); const cust = hlCustom();
+  return '<div class="hllv" role="radiogroup" aria-label="Hilfe-Stufe">' + Object.entries(HL_LEVELS).map(([k, L]) => '<button type="button" role="radio" aria-checked="' + (s.lvl === k && !cust) + '" class="hlc' + (s.lvl === k ? (cust ? ' part' : ' on') : '') + '" data-act="hlLvl" data-arg="' + k + '" data-where="' + where + '"><b>' + L.n + (s.lvl === k && cust ? ' <em>angepasst</em>' : '') + '</b><small>' + esc(L.t) + '</small></button>').join('') + '</div>' +
+    '<details class="hlfine"' + (cust || S.hlFine ? ' open' : '') + '><summary>Einzeln anpassen</summary><div class="rulelist">' +
+    Object.entries(HL_OPTS).map(([k, o]) => '<label class="rulerow"><input type="checkbox" data-act="hlT" data-arg="' + k + '" data-where="' + where + '"' + (hlOn(k) ? ' checked' : '') + '><span><b>' + esc(o[0]) + '</b><small>' + esc(o[1]) + '</small></span></label>').join('') + '</div></details>';
+}
+function hlOpen() {
+  const m = $('#modal'); S.modal = 'hilfe'; S.more = false; document.querySelectorAll('details.mnu[open]').forEach((d) => { d.open = false; });
+  m.innerHTML = '<div class="dlg hldlg" role="dialog" aria-modal="true" aria-label="Hilfen"><div class="dph"><b>Hilfen</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
+    '<p class="hint">Wie viel soll dir die App erklären und abnehmen? Gilt auf diesem Gerät.</p>' + hlPanel('dlg') +
+    '<div class="chips end"><button class="btn" data-act="closeModal">Fertig</button></div></div>';
+  m.hidden = false; const bn = $('#bnav'); if (bn && typeof bnavHtml === 'function') bn.innerHTML = bnavHtml();
+}
+const hlAfter = (where) => { render(); if (where === 'dlg' && S.modal === 'hilfe') hlOpen(); };
+Object.assign(XA, {
+  hlOpen: () => hlOpen(),
+  hlLvl: (t, a) => { hlSetLevel(a); hlAfter(t.dataset.where); },
+  hlT: (t, a) => { S.hlFine = true; hlSet(a, !hlOn(a)); hlAfter(t.dataset.where); }
+});
+setTimeout(hlApply, 0);
+
+/* Einsteiger: ein Satz im Würfelfenster, was das Ergebnis bedeutet */
+function rollTip(e) {
+  if (!hlOn('tipps') || e.sides !== 20 || !e.kt) return '';
+  const pre = e.pair ? (e.adv ? 'Vorteil: Von zwei W20 zählt der höhere. ' : 'Nachteil: Von zwei W20 zählt der niedrigere. ') : '';
+  if (e.kt === 'attack') return pre + (e.crit ? 'Natürliche 20: kritischer Treffer! Die Schadenswürfel zählen doppelt.' : e.fumble ? 'Natürliche 1: Der Angriff verfehlt immer.' : 'Erreicht das die RK des Ziels, triffst du. Die Spielleitung sagt es dir.');
+  if (e.kt === 'save') return pre + 'Rettungswurf: Er gelingt, wenn du den SG erreichst. Den SG nennt die Spielleitung oder der Zauber.';
+  if (e.kt === 'init') return pre + 'Initiative: Alle kommen in der Reihenfolge dieser Zahlen dran, die höchste zuerst.';
+  if (e.kt === 'check') return pre + 'Nenne der Spielleitung die Zahl. Sie vergleicht mit dem SG: leicht 10, mittel 15, schwer 20.';
+  return '';
+}
+
+/* Willkommen: beim ersten Start die Stufe wählen (ohne Neuzeichnen, damit der eingegebene Name bleibt) */
+function hlWelcomeHtml() {
+  const cur = S.wLvl || hlState().lvl;
+  return '<div class="fld wlvl"><span>Wie viel Hilfe möchtest du?</span><div class="seg" role="radiogroup" aria-label="Hilfe-Stufe">' + Object.entries(HL_LEVELS).map(([k, L]) => '<button type="button" role="radio" aria-checked="' + (k === cur) + '" class="' + (k === cur ? 'on' : '') + '" data-act="wLvl" data-arg="' + k + '">' + L.n + '</button>').join('') + '</div><em id="wLvlT">' + esc(HL_LEVELS[cur].t) + '</em></div>';
+}
+XA.wLvl = (t, a) => { if (!HL_LEVELS[a]) return; S.wLvl = a; document.querySelectorAll('.wlvl .seg button').forEach((b) => { const on = b.dataset.arg === a; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); }); const e = $('#wLvlT'); if (e) e.textContent = HL_LEVELS[a].t; };
 
 /* ==== Zauberbilder: wie man sich das Wirken vorstellt (eigene Texte, keine Regelwirkung) ==== */
 const SPELL_FLAV = {
@@ -8021,6 +8172,7 @@ function welcomeOpen(edit) {
     '<p class="hint">' + (edit ? 'So sehen dich die anderen am Tisch.' : 'Wie heisst du? So sehen dich die anderen am Tisch, z. B. „Lyra (Manu)“. Kein Konto, kein Passwort.') + '</p>' +
     '<label class="fld"><span>Dein Name</span><input type="text" id="wName" maxlength="24" autocomplete="nickname" value="' + esc(myName()) + '"></label>' +
     (room ? '<label class="fld"><span>Raumcode (falls du schon einen hast)</span><input type="text" id="wRoom" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="von deiner Spielleitung"></label>' : '') +
+    (edit || typeof hlWelcomeHtml !== 'function' ? '' : hlWelcomeHtml()) +
     (edit ? '' : '<p class="hint">Deine Helden bleiben auf diesem Gerät. Sichere sie ab und zu mit „Alles sichern“.</p>') +
     '<p class="cstat bad" id="wErr" hidden>Bitte gib deinen Namen ein.</p>' +
     '<div class="chips end">' + (edit ? '<button class="btn ghost" data-act="closeModal">Abbrechen</button>' : '') + '<button class="btn" data-act="welcomeGo">' + (edit ? 'Speichern' : 'Los geht’s') + '</button></div></div>';
@@ -8030,6 +8182,7 @@ XA.welcomeGo = () => {
   const inp = $('#wName'); const v = ((inp || {}).value || '').trim().replace(/\s+/g, ' ').slice(0, 24);
   if (!v) { $('#wErr').hidden = false; if (inp) inp.focus(); return; }
   setMyName(v); const room = (($('#wRoom') || {}).value || '').trim();
+  if (S.wLvl && typeof hlSetLevel === 'function') { hlSetLevel(S.wLvl); S.wLvl = null; }
   S.modal = null; $('#modal').hidden = true;
   if (room) joinCamp(room); else { if (typeof queueMe === 'function') queueMe(); render(); }
 };
@@ -8565,9 +8718,10 @@ function d20(mod, label, opts = {}) {
   if (k.type === 'init' && S.combat && S.combat.active) setMyInit(total);
   const prts = opts.parts || (c && typeof partsFor === 'function' ? partsFor(c, opts.kind) : null);
   S.lastRoll = { label, mod: mod + bonus - ex, total, type: k.type, nat: use };
+  let boost = 0;
   if (k.type === 'attack') S.lastAtkRoll = S.lastRoll;
-  else if (ch && !opts.noBoost && typeof showBoost === 'function' && c) setTimeout(() => showBoost(c, S.lastRoll), 900);
-  pushLog({ label, total, detail: (how || 'W20 ' + use) + ' ' + sgn(mod) + (prts && prts.length > 1 ? ' (' + prts.join(', ') + ')' : '') + (ex ? ' −' + ex + ' Erschöpfung' : '') + (notes.length ? ' · ' + notes.join(' · ') : ''), crit, fumble, sides: 20, nat: use, pair: st.mode !== 'normal' ? [r1, r2] : null, keep: use === r1 ? 0 : 1, adv: st.mode === 'adv' });
+  else if (ch && !opts.noBoost && typeof showBoost === 'function' && c) { if (typeof boostAuto !== 'function' || boostAuto(c, k.type)) setTimeout(() => showBoost(c, S.lastRoll), 900); else boost = 1; }
+  pushLog({ label, total, detail: (how || 'W20 ' + use) + ' ' + sgn(mod) + (prts && prts.length > 1 ? ' (' + prts.join(', ') + ')' : '') + (ex ? ' −' + ex + ' Erschöpfung' : '') + (notes.length ? ' · ' + notes.join(' · ') : ''), crit, fumble, sides: 20, nat: use, pair: st.mode !== 'normal' ? [r1, r2] : null, keep: use === r1 ? 0 : 1, adv: st.mode === 'adv', boost, kt: k.type });
   return total;
 }
 /* Würfel aus Teilen rollen (Schaden mit Krit, Kampfstilen usw.) */
@@ -8596,7 +8750,7 @@ function weaponAttack(ch, i, o = {}) {
   if (o.dist === undefined) { const nd = needDist(ch); if (nd === 'ask') return distPrompt(i, o); if (nd) o = Object.assign({}, o, { dist: nd }); }
   S.atkDist = o.dist || null;
   let how = o.how; if (o.off && a.mastery === 'nick' && !onceUsed(ch, 'nick')) how = 'nick';
-  if (o.off && !o.bonusPaid) { const t0 = turnSt(ch); const okOff = t0.lightIdx != null && t0.lightIdx !== a.idx; if (!okOff && !ruleGate(ch, 'Der Zusatzangriff mit einer leichten Waffe setzt voraus, dass du in diesem Zug mit der Angriffsaktion schon mit einer anderen leichten Waffe angegriffen hast.', 'Zweitwaffe nicht möglich')) return; }
+  if (o.off && !o.bonusPaid) { const t0 = turnSt(ch); const okOff = !turnTrack() || (t0.lightIdx != null && t0.lightIdx !== a.idx); if (!okOff && !ruleGate(ch, 'Der Zusatzangriff mit einer leichten Waffe setzt voraus, dass du in diesem Zug mit der Angriffsaktion schon mit einer anderen leichten Waffe angegriffen hast.', 'Zweitwaffe nicht möglich')) return; }
   if (typeof tCountAttack === 'function' && !o.bonusPaid && !tCountAttack(ch, c, how)) return;
   if (!o.off && !o.bonusPaid && (!how || how === 'action') && a.light && a.idx !== undefined) turnSt(ch).lightIdx = a.idx;
   if (how === 'nick') onceMark(ch, 'nick');
@@ -8633,7 +8787,7 @@ function renderDmgPrompt() {
     const pa = pactAvail(c, getSpell('divine-smite'));
     const choices = (freeLeft ? [['free', 'Gratis (Grad 1)']] : []).concat(lv.map((g) => [String(g), 'Grad ' + g])).concat(pa ? [['pact', 'Paktplatz (Grad ' + pa + ')']] : []);
     const sBlock = inF && rule('strict') ? (tLeft(ch, 'b') <= 0 ? 'Bonusaktion schon verbraucht' : canAct(ch)) : null;
-    const slotBlock = inF && rule('strict') && turnSt(ch).slotSpell && !offTurn();
+    const slotBlock = inF && rule('strict') && turnTrack() && turnSt(ch).slotSpell && !offTurn();
     const ch2 = sBlock ? [] : slotBlock ? choices.filter(([v]) => v === 'free') : choices;
     if (choices.length && !ch2.length) smite = '<div class="dpsm"><span>Göttliches Niederstrecken: nicht möglich – ' + esc(sBlock || 'in diesem Zug wurde schon ein Zauberplatz verbraucht') + '.</span></div>';
     else if (ch2 !== choices) { const keep = ch2.slice(); choices.length = 0; choices.push(...keep); }
@@ -8670,7 +8824,7 @@ function dmgRoll(ch) {
   let smiteNote = '';
   for (const x of (c.dmgExtras || []).filter((y) => (d.xd || []).includes(y.k))) { if (!XD_MULTI.has(x.k)) { if (onceUsed(ch, 'xd_' + x.k)) continue; once.push('xd_' + x.k); } if (x.res) { const r = c.res.find((y) => y.k === x.res); const used = +P.res[x.res] || 0; if (!r || used >= r.max) continue; P.res[x.res] = used + 1; smiteNote += ' · ' + r.n + ' verbraucht'; } if (x.n) parts.push({ n: x.n, s: x.s, tag: x.label.replace(/ \(.*\)$/, '') + (x.note ? ' (' + x.note + ')' : '') }); if (x.flat) flat += x.flat; }
   if (d.smite) {
-    const inF = inFight(ch); const sb = inF && rule('strict') && (tLeft(ch, 'b') <= 0 || canAct(ch)); const sl = inF && rule('strict') && d.smite !== 'free' && turnSt(ch).slotSpell && !offTurn();
+    const inF = inFight(ch); const sb = inF && rule('strict') && (tLeft(ch, 'b') <= 0 || canAct(ch)); const sl = inF && rule('strict') && turnTrack() && d.smite !== 'free' && turnSt(ch).slotSpell && !offTurn();
     if (sb || sl) { smiteNote += ' · Niederstrecken nicht möglich (' + (sb ? 'keine Bonusaktion' : 'schon ein Zauberplatz in diesem Zug') + ')'; d.smite = 0; }
   }
   if (d.smite) {
@@ -8806,9 +8960,10 @@ function showToast(e) {
   const final = () => {
     clearInterval(showToast.iv); t.onclick = null;
     const dice = vals.map((v, i) => dieH(v, 'land' + (i === keep ? hl : ' drop'))).join('');
-    t.innerHTML = '<div class="trow"><div class="dice">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer!' : '') + '</div></div></div>';
+    const tip = typeof rollTip === 'function' ? rollTip(e) : '';
+    t.innerHTML = '<div class="trow"><div class="dice">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
     if (use3) { if (fxl !== 'aus') d3snd('land'); if (sides === 20 && (e.crit || e.fumble)) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, e.crit ? 'n20' : 'n1', fxl); d3snd(e.crit ? 'n20' : 'n1'); } }
-    showToast.tm = setTimeout(() => { t.hidden = true; }, 4500);
+    showToast.tm = setTimeout(() => { t.hidden = true; }, tip ? 8000 : e.boost ? 6000 : 4500);
   };
   t.hidden = false; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
@@ -8867,7 +9022,7 @@ function renderTop() {
   const more = [['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe']]; const moreOn = more.some(([k]) => S.view === k);
   $('#top').innerHTML = '<div class="wrap"><div class="bar"><button class="brand" data-act="view" data-arg="heroes">' + LOGO + 'Heldenbuch</button>' +
     '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') +
-      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '</div></details></nav>' +
+      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<hr><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button></div></details></nav>' +
     '<button class="mbtn mwarn" data-act="warnOpen" hidden aria-label="Offene Punkte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg><b></b></button><button class="mbtn mdice" data-act="drOpen" aria-label="Würfelbecher"><svg viewBox="0 0 64 64" aria-hidden="true"><polygon points="32,4 56,18 56,46 32,60 8,46 8,18"/><polygon points="32,18 46,42 18,42"/></svg></button>' +
     '<button class="tbtn tsearch" data-act="search" title="Suchen (Strg+K oder /)" aria-label="Suchen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>' +
     '<button class="tbtn" data-act="themeOpen" title="Stimmung wählen" aria-label="Stimmung wählen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.2-1-1.6-1-2.6 0-1 .8-1.7 1.9-1.7H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z"/><circle cx="7.5" cy="11" r="1.3"/><circle cx="10.5" cy="7" r="1.3"/><circle cx="15" cy="7.5" r="1.3"/></svg></button>' + (ch ? '<button class="curhero" data-act="view" data-arg="heroes" title="Helden wechseln">' + sigil(ch) + '<span>' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</span></button>' : '') +
@@ -9129,19 +9284,19 @@ function renderSheet(c) {
   let h = P.dead ? fallenHtml(ch, c) + '<div class="sheet fallen" aria-hidden="true" inert>' : (mgOf(c) === 'alle' ? '<div class="sheet' + (explainOn() ? ' explain' : '') + '">' : '<div class="sheet' + (explainOn() ? ' explain' : '') + '" data-mg="' + mgOf(c) + '">');
   h += '<header class="shead"><div class="who">' + sigil(ch) + '<div><h1><button type="button" class="hrn" data-act="renameHero" title="Namen ändern">' + esc(ch.name) + '<span aria-hidden="true">✎</span></button></h1><p>' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' (' + c.subName + ')' : '') + ' · ' + c.sp.name + ' · ' + esc(c.bg.name) + (ch.alignment ? ' · ' + esc(ch.alignment) + (typeof alignKey === 'function' && alignKey(ch.alignment) ? ' ' + ii('al', alignKey(ch.alignment), ch.alignment) : '') : '') + '</p></div></div>' +
     '<div class="sctl"><div class="seg" role="group" aria-label="Würfelmodus">' + [['dis', 'Nachteil'], ['normal', 'Normal'], ['adv', 'Vorteil']].map(([k, l]) => '<button class="' + (S.mode === k ? 'on' : '') + '" data-act="mode" data-arg="' + k + '">' + l + '</button>').join('') + '</div>' +
-    '<details class="mnu smore"><summary class="btn ghost" aria-label="Rast und weitere Aktionen" title="Rast und weitere Aktionen">Rast · ⋯</summary><div class="mnul"><button data-act="rest" data-arg="short">Kurze Rast</button><button data-act="rest" data-arg="long" data-confirm="Lange Rast: TP, Trefferwürfel, Zauberplätze und alle Ressourcen werden zurückgesetzt.">Lange Rast</button><hr><button data-act="exportOne" data-arg="' + ch.id + '">Exportieren</button><button data-act="print">Drucken</button><button data-act="renameHero">Namen ändern</button><button data-act="diceOpen">Würfel-Set</button></div></details></div></header>';
+    '<details class="mnu smore"><summary class="btn ghost" aria-label="Rast und weitere Aktionen" title="Rast und weitere Aktionen">Rast · ⋯</summary><div class="mnul"><button data-act="rest" data-arg="short">Kurze Rast</button><button data-act="rest" data-arg="long" data-confirm="Lange Rast: TP, Trefferwürfel, Zauberplätze und alle Ressourcen werden zurückgesetzt.">Lange Rast</button><hr><button data-act="exportOne" data-arg="' + ch.id + '">Exportieren</button><button data-act="print">Drucken</button><button data-act="renameHero">Namen ändern</button><button data-act="diceOpen">Würfel-Set</button><hr><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="explain">Rechenweg ' + (explainOn() ? 'ausblenden' : 'anzeigen') + '</button></div></details></div></header>' + hlTip('Würfelmodus: Bei <b>Vorteil</b> würfelst du zwei W20 und nimmst den höheren, bei <b>Nachteil</b> den niedrigeren. Viele Fälle (Zustände, Ziel) erkennt die App selbst – sonst sagt es dir die Spielleitung.', 'p');
   h += sheetNav(c);
   if (typeof hintBlock === 'function') h += hintBlock(c);
   h += '<div class="vitals">' +
     '<div class="vt ac" title="' + esc(c.acParts.join(' + ')) + '"><span>RK</span><b>' + c.ac + '</b>' + xpl(c.acParts) + '</div>' +
     '<div class="vt hp"><span>Trefferpunkte</span><div class="hpline"><b>' + P.hp + '</b><small>/ ' + c.hpMax + (P.temp ? ' · +' + P.temp + ' temp.' : '') + '</small></div><div class="hpbar"><i style="width:' + hpPct + '%"></i></div>' +
-      '<div class="hpctl"><input type="number" id="hpAmt" inputmode="numeric" min="0" placeholder="Wert" aria-label="Betrag"><button class="btn sm dmg" data-act="hp" data-arg="dmg">Schaden</button><button class="btn sm heal" data-act="hp" data-arg="heal">Heilen</button><button class="btn sm ghost" data-act="hp" data-arg="temp">Temp.</button></div></div>' +
+      '<div class="hpctl"><input type="number" id="hpAmt" inputmode="numeric" min="0" placeholder="Wert" aria-label="Betrag"><button class="btn sm dmg" data-act="hp" data-arg="dmg">Schaden</button><button class="btn sm heal" data-act="hp" data-arg="heal">Heilen</button><button class="btn sm ghost" data-act="hp" data-arg="temp">Temp.</button></div>' + hlTip('Zahl eingeben, dann «Schaden» oder «Heilen». Temporäre TP verlierst du zuerst. Bei 0 TP gehst du zu Boden und würfelst Todesrettungswürfe.') + '</div>' +
     '<button class="vt roll" data-act="d20" data-kind="init" data-mod="' + c.init + '" data-label="Initiative"><span>Initiative' + (c.initAdv ? ' (Vorteil)' : '') + '</span><b>' + sgn(c.init) + '</b>' + xpl(c.initParts) + '</button>' +
     '<div class="vt"><span>Bewegung</span><b>' + fmtM(c.speed) + '</b>' + xpl(c.speedParts) + '</div>' +
-    '<div class="vt"><span>Übungsbonus</span><b>' + sgn(c.pb) + '</b></div>' +
-    '<div class="vt"><span>Passive Wahrn.</span><b>' + c.passive + '</b></div>' +
+    '<div class="vt"><span>Übungsbonus</span><b>' + sgn(c.pb) + '</b>' + '</div>' +
+    '<div class="vt"><span>Passive Wahrn.</span><b>' + c.passive + '</b>' + '</div>' +
     '<div class="vt"><span>Trefferwürfel</span><b>' + (c.level - P.hdUsed) + '<small>/' + c.level + ' ' + c.hdPool.map((x) => 'W' + x.d + (c.hdPool.length > 1 ? '×' + x.n : '')).join(' ') + '</small></b>' + (P.hdUsed < c.level ? '<button class="link" data-act="spendHd">einen ausgeben</button>' : '') + '</div>' +
-    '</div>';
+    '</div>' + hlTip('<b>RK</b> muss ein Angriff erreichen, um dich zu treffen. <b>Initiative</b> zu Kampfbeginn antippen: Sie bestimmt, wann du dran bist. <b>Übungsbonus</b> zählt bei allem, worin du geübt bist (schon eingerechnet). <b>Passive Wahrnehmung</b>: was du bemerkst, ohne zu würfeln. <b>Trefferwürfel</b> heilen dich in einer kurzen Rast.', 'p');
   h += xpLine(c);
   if (!P.dead && typeof turnBlock === 'function') h += turnBlock(c);
   if (P.hp <= 0) h += '<div class="death" data-grp="kampf werte zauber faehig gear begleiter notiz"><b>Todesrettungswürfe</b><span>Erfolge</span>' + pips('ds0', 3, P.ds[0]) + '<span>Fehlschläge</span>' + pips('ds1', 3, P.ds[1]) + '<button class="btn sm" data-act="deathRoll">Würfeln</button></div>';
@@ -9149,11 +9304,11 @@ function renderSheet(c) {
     '<label class="exh">Erschöpfung ' + sel('play.exh', P.exh, [0, 1, 2, 3, 4, 5, 6].map((v) => [v, v ? 'Stufe ' + v + ' (−' + 2 * v + ' auf W20)' : 'keine'])) + '</label></div>';
   h += condBlock(P);
   h += '<div class="cols"><div class="col">';
-  h += '<section class="blk" data-grp="werte"><h2>Attribute & Rettungswürfe</h2><div class="abil">' + AB.map((a) => '<div class="ab"><button class="abm" data-act="d20" data-kind="check:' + a + '" data-mod="' + c.mod[a] + '" data-label="' + AB_DE[a] + '-Wurf"><span>' + AB_K[a] + '</span><b>' + sgn(c.mod[a]) + '</b><small>' + c.abil[a] + '</small></button><button class="sv' + (c.saves[a].prof ? ' p' : '') + '" data-act="d20" data-kind="save:' + a + '" data-mod="' + c.saves[a].val + '" data-label="' + AB_DE[a] + '-Rettungswurf" title="' + esc(c.saves[a].parts.join(' + ')) + '">RW ' + sgn(c.saves[a].val) + '</button>' + xpl(c.breakdown[a]) + xpl(c.saves[a].parts) + '</div>').join('') + '</div></section>';
-  h += '<section class="blk" data-grp="werte"><h2>Fertigkeiten</h2><ul class="skills">' + ALL_SKILLS.map((s) => '<li><button data-act="d20" data-kind="check:' + SKILLS[s][1] + ':' + s + ':' + c.skills[s].prof + '" data-mod="' + c.skills[s].val + '" data-label="' + SKILLS[s][0] + '"><i class="pp p' + c.skills[s].prof + '" aria-label="' + (['ungeübt', 'geübt', 'Expertise'][c.skills[s].prof]) + '"></i><span>' + SKILLS[s][0] + ' <small>' + AB_K[SKILLS[s][1]] + '</small>' + xpl(c.skills[s].parts) + '</span><b>' + sgn(c.skills[s].val) + '</b></button></li>').join('') + '</ul></section>';
+  h += '<section class="blk" data-grp="werte"><h2>Attribute & Rettungswürfe</h2>' + hlTip('Oben antippen: Attributswurf. «RW» antippen: Rettungswurf, wenn du etwas abwehren musst. Hervorgehoben = geübt.', 'p') + '<div class="abil">' + AB.map((a) => '<div class="ab"><button class="abm" data-act="d20" data-kind="check:' + a + '" data-mod="' + c.mod[a] + '" data-label="' + AB_DE[a] + '-Wurf"><span>' + AB_K[a] + '</span><b>' + sgn(c.mod[a]) + '</b><small>' + c.abil[a] + '</small></button><button class="sv' + (c.saves[a].prof ? ' p' : '') + '" data-act="d20" data-kind="save:' + a + '" data-mod="' + c.saves[a].val + '" data-label="' + AB_DE[a] + '-Rettungswurf" title="' + esc(c.saves[a].parts.join(' + ')) + '">RW ' + sgn(c.saves[a].val) + '</button>' + xpl(c.breakdown[a]) + xpl(c.saves[a].parts) + '</div>').join('') + '</div></section>';
+  h += '<section class="blk" data-grp="werte"><h2>Fertigkeiten</h2>' + hlTip('Die Spielleitung sagt, welche Fertigkeit gefragt ist. Antippen würfelt. Gefüllter Kreis = geübt.', 'p') + '<ul class="skills">' + ALL_SKILLS.map((s) => '<li><button data-act="d20" data-kind="check:' + SKILLS[s][1] + ':' + s + ':' + c.skills[s].prof + '" data-mod="' + c.skills[s].val + '" data-label="' + SKILLS[s][0] + '"><i class="pp p' + c.skills[s].prof + '" aria-label="' + (['ungeübt', 'geübt', 'Expertise'][c.skills[s].prof]) + '"></i><span>' + SKILLS[s][0] + ' <small>' + AB_K[SKILLS[s][1]] + '</small>' + xpl(c.skills[s].parts) + '</span><b>' + sgn(c.skills[s].val) + '</b></button></li>').join('') + '</ul></section>';
   h += '<section class="blk" data-grp="werte"><h2>Übungen</h2><dl class="dl"><dt>Rüstung</dt><dd>' + c.profText.armor + '</dd><dt>Waffen</dt><dd>' + c.profText.weapons + '</dd><dt>Werkzeuge</dt><dd>' + esc(c.profText.tools) + '</dd><dt>Sprachen</dt><dd>' + esc(ch.languages) + '</dd>' + (c.dv ? '<dt>Sinne</dt><dd>Dunkelsicht ' + fmtM(c.dv) + '</dd>' : '') + '</dl></section>';
   h += '</div><div class="col wide">';
-  h += '<section class="blk" data-grp="kampf"><h2>Angriffe <small>' + c.attacksPer + ' pro Angriffsaktion' + (c.sneak ? ' · Hinterhältig ' + c.sneak : '') + (c.critRange < 20 ? ' · krit. ab ' + c.critRange : '') + '</small></h2><div class="atks">' + c.attacks.map((a, ai) => {
+  h += '<section class="blk" data-grp="kampf"><h2>Angriffe <small>' + c.attacksPer + ' pro Angriffsaktion' + (c.sneak ? ' · Hinterhältig ' + c.sneak : '') + (c.critRange < 20 ? ' · krit. ab ' + c.critRange : '') + '</small></h2>' + hlTip('Erst den Angriffsbonus antippen. Sagt die Spielleitung «Treffer», würfelst du im Fenster den Schaden.', 'p') + '<div class="atks">' + c.attacks.map((a, ai) => {
     const rage = a.rage && P.raging ? c.rageDmg : 0; const dm = (d) => rage ? d + '+' + rage : d;
     return '<div class="atk"><div class="an"><b>' + esc(a.name) + '</b>' + xpl(a.atkParts ? ['Angriff: ' + a.atkParts.join(' + '), 'Schaden: ' + (a.dmgParts || []).join(' + ')] : null) + '<small>' + esc(a.props) + (a.mastery ? ' · <abbr title="' + esc(MASTERY[a.mastery][1]) + '">' + MASTERY[a.mastery][0] + '</abbr>' : '') + '</small></div>' +
       '<button class="rb" data-act="atk" data-arg="' + ai + '">' + sgn(a.atk) + '</button>' +
@@ -9162,7 +9317,7 @@ function renderSheet(c) {
   }).join('') + (c.sneak ? '<div class="atk"><div class="an"><b>Hinterhältiger Angriff</b><small>1× pro Zug</small></div><button class="rb dmgb" data-act="dmg" data-expr="' + c.sneak + '" data-label="Hinterhältiger Angriff">' + c.sneak + '</button></div>' : '') + '</div></section>';
   h += slotsMini(c);
   if (c.spell.has || c.extraSpells.length) h += spellBlock(c);
-  if (c.res.length) h += '<section class="blk" data-grp="kampf faehig"><h2>Ressourcen' + (c.classDC && c.classDC.length ? ' <small>' + c.classDC.map(([l, v]) => l + ' ' + v).join(' · ') + '</small>' : '') + '</h2><div class="res">' + c.res.map((r) => {
+  if (c.res.length) h += '<section class="blk" data-grp="kampf faehig"><h2>Ressourcen' + (c.classDC && c.classDC.length ? ' <small>' + c.classDC.map(([l, v]) => l + ' ' + v).join(' · ') + '</small>' : '') + '</h2>' + hlTip('Fähigkeiten mit begrenzten Nutzungen. Gefüllt = noch verfügbar; antippen verbraucht eine. Rasten füllen sie wieder auf.', 'p') + '<div class="res">' + c.res.map((r) => {
     const used = +P.res[r.k] || 0;
     if (r.pool) return '<div class="rs"><div><b>' + esc(r.n) + '</b><small>' + (r.max - used) + ' von ' + r.max + ' · ' + RESET_DE[r.reset] + '</small></div><div class="pool"><input type="number" id="pool_' + r.k + '" min="1" placeholder="TP" aria-label="Punkte"><button class="btn sm" data-act="pool" data-arg="' + r.k + '" data-max="' + r.max + '">Ausgeben</button></div></div>';
     return '<div class="rs"><div><b>' + esc(r.n) + '</b><small>' + RESET_DE[r.reset] + (r.note ? ' · ' + r.note : '') + '</small></div>' + (r.max > 8 ? '<div class="stepper sm"><button data-act="resUse" data-arg="' + r.k + '" data-max="' + r.max + '" data-d="1" aria-label="verbrauchen">−</button><b>' + (r.max - used) + '/' + r.max + '</b><button data-act="resUse" data-arg="' + r.k + '" data-max="' + r.max + '" data-d="-1" aria-label="zurück">+</button></div>' : pips('res.' + r.k, r.max, used)) + '</div>';
@@ -9189,7 +9344,7 @@ function fxChips(c) {
 function endConc(P) { if (!P.conc) return; const map = { bless: 'bless', 'hunters-mark': 'hm', hex: 'hex', 'divine-favor': 'df' }; const f = map[P.conc.id]; if (f && P.fx) { delete P.fx[f]; if (P.fxDur) delete P.fxDur[f]; } if (P.fxSrc) for (const [k, v] of Object.entries(P.fxSrc)) if (v === P.conc.id) { if (P.fx) delete P.fx[k]; if (P.fxDur) delete P.fxDur[k]; delete P.fxSrc[k]; } const old = P.conc.id; P.conc = null; P.concEff = null; if (typeof effConcEnd === 'function') effConcEnd(old); }
 function condBlock(P) {
   const on = (P.cond || []).filter((k) => COND[k]);
-  let h = '<section class="blk conds" id="conds" data-grp="kampf"><h2>Zustände <small>' + (on.length ? on.length + ' aktiv · wirken automatisch auf deine Würfe' : 'keine') + '</small></h2><div class="chips">' +
+  let h = '<section class="blk conds" id="conds" data-grp="kampf"><h2>Zustände <small>' + (on.length ? on.length + ' aktiv · wirken automatisch auf deine Würfe' : 'keine') + '</small></h2>' + hlTip('Die Spielleitung sagt dir, wenn du einen Zustand bekommst, z. B. «liegend» oder «vergiftet». Hier eintragen – er wirkt dann automatisch auf deine Würfe.', 'p') + '<div class="chips">' +
     on.map((k) => chip(true, COND[k].name + ' ×', 'data-act="cond" data-arg="' + k + '" title="' + esc(COND[k].text) + ' – antippen zum Entfernen"')).join('') +
     '<details class="condpick"' + (S.condOpen ? ' open' : '') + '><summary>+ Zustand</summary><div class="chips">' + Object.entries(COND).filter(([k]) => !on.includes(k)).map(([k, c]) => chip(false, c.name, 'data-act="cond" data-arg="' + k + '" title="' + esc(c.text) + '"')).join('') + '</div></details>' +
     (on.length > 1 ? '<button class="link" data-act="condClear">alle entfernen</button>' : '') + '</div>';
@@ -9198,7 +9353,7 @@ function condBlock(P) {
 }
 function slotsMini(c) {
   const sc = c.spell, P = c.char.play; if (!sc.has || (!sc.slots.length && !sc.pact)) return '';
-  return '<section class="blk slotmini" data-grp="kampf"><h2>Zauberplätze <small>Zauber über die Zugleiste oder die Seite „Zauber“</small></h2><div class="slrow">' +
+  return '<section class="blk slotmini" data-grp="kampf"><h2>Zauberplätze</h2>' + hlTip('Zauber ab Grad 1 verbrauchen einen Platz, Zaubertricks sind gratis. Wirken über die Zugleiste oder die Seite «Zauber». Nach einer langen Rast ist alles wieder voll.', 'p') + '<div class="slrow">' +
     sc.slots.map((n, i) => '<div class="sl"><small>Grad ' + (i + 1) + '</small>' + pips('slots.' + (i + 1), n, +P.slots[i + 1] || 0) + '</div>').join('') +
     (sc.pact ? '<div class="sl"><small>Pakt (Grad ' + sc.pact.lvl + ')</small>' + pips('pact', sc.pact.n, +P.pact || 0) + '</div>' : '') + '</div></section>';
 }
@@ -9206,6 +9361,7 @@ function pips(path, max, used) { return '<div class="pips">' + Array.from({ leng
 function spellBlock(c) {
   const ch = c.char, P = ch.play, sc = c.spell;
   let h = '<section class="blk" id="spellsBlk" data-grp="zauber"><h2>Zauber' + (sc.has ? ' <small>' + sc.classes.map((x) => (sc.classes.length > 1 ? x.name + ' ' : '') + 'SG ' + x.dc + ' · Angriff ' + sgn(x.atk) + ' · ' + AB_K[x.ability]).join(' | ') + '</small>' : '') + '</h2>' + (sc.has ? sc.classes.map((x) => xpl(['SG: ' + x.dcParts.join(' + ')]) + xpl(['Angriff: ' + x.atkParts.join(' + ')])).join('') : '');
+  h += hlTip('«Wirken» verbraucht den passenden Zauberplatz und würfelt gleich Angriff oder Schaden. Zaubertricks kosten nichts. Konzentrationszauber: nur einer zugleich.', 'p');
   if (sc.has) {
     h += '<div class="slots">';
     sc.slots.forEach((n, i) => { h += '<div class="sl"><span>Grad ' + (i + 1) + '</span>' + pips('slots.' + (i + 1), n, +(P.slots[i + 1] || 0)) + '</div>'; });

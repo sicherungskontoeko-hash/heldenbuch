@@ -1,17 +1,17 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-10-24T11:11:16+02:00
-- Revision (SHA-256 von index.html, gekürzt): f3116a29d8633093
-- Node: v22.22.0 · Playwright: 1.56.0
-- Browser: Chromium 141.0.7390.37
-- System: Linux 6.18.44-fc-v153
+- Zeitpunkt: 2026-11-21T13:14:39+01:00
+- Revision (SHA-256 von index.html, gekürzt): aef39b20086a231e
+- Node: v22.23.5 · Playwright: 1.63.0
+- Browser: Chromium 157.0.8103.78
+- System: Linux 6.18.44-fc-v726
 
 | Suite | Exit-Code | Ergebnis |
 |---|---|---|
 | Regeltests (rules.test.js) | 0 | ✔ Import bereinigt unbekannte Zauber 48 / 48 Tests bestanden  |
-| Regressionen HB-01–HB-11 (hb.test.js) | 0 | ✔ HB-11 Bewusstlos ausserhalb des Kampfes: kein Zauber 27 / 27 bestanden · /home/claude/heldenbuch/index.html  |
+| Regressionen HB-01–HB-11 (hb.test.js) | 0 | ✔ HB-11 Bewusstlos ausserhalb des Kampfes: kein Zauber 27 / 27 bestanden · /home/claude/heldenbuch/quelle/index.html  |
 | Robustheit & Sonderfälle (cases.test.js) | 0 | ✔ HB-26 Fluchklinge: zweite Bonusaktion blockiert, keine Ressource verbraucht 23 / 23 bestanden  |
-| Kritischer Audit A01–A06 (audit2.test.js) | 0 | ✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/heldenbuch/index.html  |
+| Kritischer Audit A01–A06 (audit2.test.js) | 0 | ✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/heldenbuch/quelle/index.html  |
 | Erklärkarten ⓘ (info.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 41 / 41 bestanden  |
 | Layout: ⚠ offene Punkte, Menüs (layout.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 29 / 29 bestanden  |
 | Würfel-Designs (dice.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 50 / 50 bestanden  |
@@ -26,6 +26,7 @@
 | Sicherung: alles sichern und wiederherstellen (backup.test.js) | 0 | ✔ Keine Skriptfehler 11 / 11 bestanden  |
 | Willkommen: Name beim ersten Start (welcome.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Willkommen in der App (welcome.test.js app) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
+| Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
 | Gegnerzug: Angriffe zählen, Zug beenden (npcturn.test.js) | 0 | ✔ Keine Skriptfehler 11 / 11 bestanden  |
 | Monsterbilder (mobpics.test.js) | 0 | ✔ Keine Skriptfehler 10 / 10 bestanden  |
 | Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
@@ -34,6 +35,8 @@
 | Rettungswürfe der Monster (mobsaves.test.js) | 0 | ✔ Keine Skriptfehler 7 / 7 bestanden  |
 | Leistung: Zwischenspeicher, ruhige Listen, Spieltisch, Effekte (perf.test.js) | 0 | ✔ Keine Skriptfehler 18 / 18 bestanden  |
 | Gesinnung: neun Gesinnungen mit Erklärung (align.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
+| Abenteuer: Machtader, Kampf auf Knopfdruck, Entscheidungen, Laden (adventure.test.js) | 0 | ✔ Keine Seitenfehler 36/36 Prüfungen bestanden  |
+| Abenteuer: Wirtshaus zum letzten Krug (krug.test.js) | 0 | ✔ Keine Seitenfehler 44/44 Prüfungen bestanden  |
 | Klicktest kurz (ui.test.js) | 0 | ✔ Desktop 1280 ✔ Handy 390 (Touch)  |
 | Abnahme-Klicktest (ui-full.test.js) | 0 | ✔ Chromium Desktop 1280: 165/165 Prüfungen ✔ Chromium Handy 390 (Touch): 165/165 Prüfungen  |
 | Kombinationen Klasse×Unterklasse×Stufe (combos.test.js) | 0 | checked 1280 bad 0  |

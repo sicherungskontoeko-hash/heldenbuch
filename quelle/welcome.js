@@ -11,6 +11,7 @@ function welcomeOpen(edit) {
     '<p class="hint">' + (edit ? 'So sehen dich die anderen am Tisch.' : 'Wie heisst du? So sehen dich die anderen am Tisch, z. B. „Lyra (Manu)“. Kein Konto, kein Passwort.') + '</p>' +
     '<label class="fld"><span>Dein Name</span><input type="text" id="wName" maxlength="24" autocomplete="nickname" value="' + esc(myName()) + '"></label>' +
     (room ? '<label class="fld"><span>Raumcode (falls du schon einen hast)</span><input type="text" id="wRoom" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="von deiner Spielleitung"></label>' : '') +
+    (edit || typeof hlWelcomeHtml !== 'function' ? '' : hlWelcomeHtml()) +
     (edit ? '' : '<p class="hint">Deine Helden bleiben auf diesem Gerät. Sichere sie ab und zu mit „Alles sichern“.</p>') +
     '<p class="cstat bad" id="wErr" hidden>Bitte gib deinen Namen ein.</p>' +
     '<div class="chips end">' + (edit ? '<button class="btn ghost" data-act="closeModal">Abbrechen</button>' : '') + '<button class="btn" data-act="welcomeGo">' + (edit ? 'Speichern' : 'Los geht’s') + '</button></div></div>';
@@ -20,6 +21,7 @@ XA.welcomeGo = () => {
   const inp = $('#wName'); const v = ((inp || {}).value || '').trim().replace(/\s+/g, ' ').slice(0, 24);
   if (!v) { $('#wErr').hidden = false; if (inp) inp.focus(); return; }
   setMyName(v); const room = (($('#wRoom') || {}).value || '').trim();
+  if (S.wLvl && typeof hlSetLevel === 'function') { hlSetLevel(S.wLvl); S.wLvl = null; }
   S.modal = null; $('#modal').hidden = true;
   if (room) joinCamp(room); else { if (typeof queueMe === 'function') queueMe(); render(); }
 };

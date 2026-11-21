@@ -16,7 +16,7 @@ function rulesBlock() {
 }
 
 /* Kennzeichnung: Diese Entscheidung trifft die Spielleitung (nicht die App) */
-function slTag(t) { return '<span class="slb" title="' + (t || 'Entscheidet die Spielleitung – die App rechnet nur') + '">SL entscheidet</span>'; }
+function slTag(t) { if (typeof hlOn === 'function' && !hlOn('erkl')) return ''; return '<span class="slb" title="' + (t || 'Entscheidet die Spielleitung – die App rechnet nur') + '">SL entscheidet</span>'; }
 /* ---------- Kampfstatus ---------- */
 const onlineFight = () => !!(S.camp && S.combat && S.combat.active);
 function inFight(ch) { return onlineFight() || !!(ch && ch.play && ch.play.localFight); }
@@ -40,7 +40,9 @@ function ruleGate(ch, msg, title, always) {
 
 /* ---------- Einmal pro Zug ---------- */
 function onceMap(ch) { const t = turnSt(ch); const id = turnKeyNow(ch); if (t.onceId !== id || !t.once) { t.onceId = id; t.once = {}; } return t.once; }
-const onceUsed = (ch, k) => !!onceMap(ch)[k];
+/* Zugleiste aus (Hilfe-Stufe): Die App zählt und prüft den Zug nicht – Aktionen, „1× pro Zug“ und „1 Zauberplatz pro Zug“ verantwortet der Spieler. */
+const turnTrack = () => typeof hlOn !== 'function' || hlOn('zug');
+const onceUsed = (ch, k) => turnTrack() && !!onceMap(ch)[k];
 const onceMark = (ch, k) => { onceMap(ch)[k] = 1; };
 /* Zusatzschaden, der mehrfach pro Zug erlaubt ist (alle anderen: 1× pro Zug) */
 const XD_MULTI = new Set(['arkan', 'sommer', 'glut', 'gfire', 'gfrost', 'lifedr', 'takt', 'taktik', 'bwkrieg']);
@@ -145,8 +147,8 @@ function spellCheck(ch, c, s, lvl, mode) {
   const slot = s.lvl > 0 && (mode === 'pact' || !mode || mode === 'slot');
   if (inFight(ch)) {
     const t = turnSt(ch);
-    if (cost && mode !== 'ritual' && tLeft(ch, cost) <= 0) turn.push(COST_DE[cost] + ' schon verbraucht.');
-    if (slot && !offTurn() && t.slotSpell) turn.push('Pro Zug darfst du nur einen Zauberplatz verbrauchen (D&D 2024). Zaubertricks und Gratiswirkungen gehen weiterhin.');
+    if (turnTrack() && cost && mode !== 'ritual' && tLeft(ch, cost) <= 0) turn.push(COST_DE[cost] + ' schon verbraucht.');
+    if (turnTrack() && slot && !offTurn() && t.slotSpell) turn.push('Pro Zug darfst du nur einen Zauberplatz verbrauchen (D&D 2024). Zaubertricks und Gratiswirkungen gehen weiterhin.');
     if (mode === 'ritual') turn.push('Ein Ritual dauert 10 Minuten länger – im Kampf nicht möglich.');
   }
   return { fatal, turn, warn: fatal.concat(turn) };
