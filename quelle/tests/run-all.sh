@@ -39,6 +39,7 @@ run "Abfragen und Ziele: nichts verdrängt, Ziel festgehalten (flow.test.js)" no
 run "Sicherung: alles sichern und wiederherstellen (backup.test.js)" node tests/backup.test.js
 run "Willkommen: Name beim ersten Start (welcome.test.js)" node tests/welcome.test.js
 run "Willkommen in der App (welcome.test.js app)" node tests/welcome.test.js app/Heldenbuch.html
+run "Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js)" node tests/hilfe.test.js
 run "Gegnerzug: Angriffe zählen, Zug beenden (npcturn.test.js)" node tests/npcturn.test.js
 run "Monsterbilder (mobpics.test.js)" node tests/mobpics.test.js
 run "Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js)" node tests/initcall.test.js
@@ -48,6 +49,7 @@ run "Rettungswürfe der Monster (mobsaves.test.js)" node tests/mobsaves.test.js
 run "Leistung: Zwischenspeicher, ruhige Listen, Spieltisch, Effekte (perf.test.js)" node tests/perf.test.js
 run "Gesinnung: neun Gesinnungen mit Erklärung (align.test.js)" node tests/align.test.js
 run "Abenteuer: Machtader, Kampf auf Knopfdruck, Entscheidungen, Laden (adventure.test.js)" node tests/adventure.test.js
+run "Abenteuer: Wirtshaus zum letzten Krug (krug.test.js)" node tests/krug.test.js
 run "Klicktest kurz (ui.test.js)" bash -c "node tests/ui.test.js || (echo Wiederholung; node tests/ui.test.js)"
 run "Abnahme-Klicktest (ui-full.test.js)" node tests/ui-full.test.js
 run "Kombinationen Klasse×Unterklasse×Stufe (combos.test.js)" node tests/combos.test.js

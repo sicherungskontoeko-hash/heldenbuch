@@ -25,7 +25,7 @@ async function run(b, label, ctxOpt) {
   /* Zugleiste: Kampfmodus, Aktion wählen */
   await tap('button[data-act=tFight]'); await tap('button[data-act=tPick][data-arg=b]'); ok('Zug-Auswahl öffnet', await p.locator('#modal:not([hidden])').count() === 1); await p.keyboard.press('Escape'); await p.evaluate(() => { document.getElementById('modal').hidden = true; S.modal = null; }); await tap('button[data-act=tFight]');
   /* Hilfe-Knöpfe */
-  const hl = await p.locator('#view .hlp').count(); ok('Hilfe-Knöpfe vorhanden', hl >= 3);
+  const hl = await p.locator('#view .hlp').count(); ok('Hilfe-Knöpfe vorhanden', hl >= 2); /* Standard: Zugleiste, Zustände (Rechenweg-? entfiel mit dem Knopf) */
   for (let i = 0; i < Math.min(hl, 6); i++) { await tap('#view .hlp', i); ok('Hilfe-Dialog ' + i, await p.locator('.helpdlg').count() === 1); await tap('.helpdlg .x'); }
   /* Kurze Rast mit Trefferwürfeln, lange Rast mit Bestätigung */
   await tap('.smore summary'); await tap('button[data-act=rest][data-arg=short]'); ok('Kurze-Rast-Dialog', await p.locator('#modal [data-act=srDone]').count() === 1); await tap('#modal [data-act=srDone]');

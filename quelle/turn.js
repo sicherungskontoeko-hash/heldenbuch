@@ -13,7 +13,7 @@ function turnReset(ch, keepReaction) {
   const fx = ch.play.fx || {}; delete fx.reckless; delete fx.aim; if (!keepReaction) delete fx.dodge; ch.play.fx = fx;
   if (!keepReaction && typeof startOfTurn === 'function') { try { startOfTurn(ch); } catch (e) {} }
 }
-const tLeft = (ch, k) => { const t = turnSt(ch); return k === 'a' ? t.aMax - t.a : k === 'b' ? 1 - t.b : k === 'r' ? 1 - t.r : 1; };
+const tLeft = (ch, k) => { if (typeof turnTrack === 'function' && !turnTrack()) return 1; const t = turnSt(ch); return k === 'a' ? t.aMax - t.a : k === 'b' ? 1 - t.b : k === 'r' ? 1 - t.r : 1; };
 /* Verbucht Aktion/Bonusaktion/Reaktion. Rückgabe false = blockiert (strenger Modus im Kampf), dann wurde nichts verändert. */
 function tSpend(ch, k, label, force) {
   if (k === 'f') return true;
@@ -267,6 +267,7 @@ function tLohPrompt(ch, c) {
 
 /* ---------- Darstellung ---------- */
 function turnBlock(c) {
+  if (typeof hlOn === 'function' && !hlOn('zug')) return turnSlim(c);
   const ch = c.char; const t = turnSt(ch); const favs = (ch.favs || []);
   const opts = turnOpts(c); const byId = Object.fromEntries(opts.map((o) => [o.id, o]));
   const mvMax = c.speed + (t.mvMax || 0); const mvLeft = Math.max(0, mvMax - (t.mv || 0));
@@ -275,10 +276,23 @@ function turnBlock(c) {
     '<div class="tmove"><span>Bewegung</span><button class="tm" data-act="tMove" data-arg="1.5" aria-label="1,5 m bewegen">−</button><b>' + fmtM(mvLeft) + '</b><button class="tm" data-act="tMove" data-arg="-1.5" aria-label="1,5 m zurück">+</button></div>' +
     (typeof onlineFight === 'function' && onlineFight() ? '' : '<button class="btn sm ghost tnew" data-act="tNew" title="Zugbeginn: Aktion, Bonusaktion, Reaktion und Bewegung zurücksetzen, Dauer herunterzählen">Neuer Zug</button>') + '</div>' +
     '<div class="tctx">' + (onlineFight() ? '<span class="tinfo">⚔ Kampf am Tisch' + (offTurn() ? ' · nicht dein Zug' : ' · dein Zug') + '</span>' : '<button class="chip' + (ch.play.localFight ? ' on' : '') + '" data-act="tFight" title="Im Kampfmodus gelten die Zugregeln (Aktionen, Bonusaktion, 1 Zauberplatz pro Zug) streng.">⚔ Kampfmodus ' + (ch.play.localFight ? 'an' : 'aus') + '</button>') + tgtSelect(c) + '</div>';
+  if (typeof hlOn === 'function' && hlOn('tipps')) h += turnGuide(c, t, opts, mvLeft);
+  const extra = turnExtras(c, false);
+  if (extra.length) h += '<div class="tnow">' + extra.join('') + '</div>';
+  if (typeof effMineHtml === 'function') h += effMineHtml();
+  const fv = favs.map((id) => byId[id]).filter(Boolean);
+  if (fv.length) h += '<div class="tfav">' + fv.map((o) => '<button class="tq' + (o.empty || tLeft(ch, o.cost) <= 0 ? ' dim' : '') + '" data-act="tUse" data-arg="' + o.id + '"><i class="k' + o.cost + '">' + COST_K[o.cost] + '</i>' + esc(o.n) + (o.left !== null && o.left !== undefined ? '<small>' + o.left + '</small>' : '') + '</button>').join('') + '</div>';
+  else if (typeof hlOn === 'function' && hlOn('tipps')) h += '<p class="nb tfavtip">Mit ☆ im Auswahlfenster legst du Favoriten an. Sie stehen dann hier und sind mit einem Tipp gewürfelt.</p>';
+  h += '</section>';
+  return h;
+}
+/* Laufendes: Angriffsaktion, Kampfunfähigkeit, aktive Wirkungen, Zeit (slim: ohne Zählung der Angriffsaktion) */
+function turnExtras(c, slim) {
+  const ch = c.char; const t = turnSt(ch);
   /* laufende Angriffsaktion */
   const extra = [];
-  if (t.atk > 0 && t.atk < c.attacksPer) extra.push('<span class="tinfo">Angriffsaktion: noch ' + (c.attacksPer - t.atk) + ' Angriff' + (c.attacksPer - t.atk > 1 ? 'e' : '') + '</span>' + c.attacks.filter((a) => !a.name.startsWith('Blutlanze')).map((a, i) => '<button class="chip tq" data-act="tUse" data-arg="atk:' + c.attacks.indexOf(a) + '">' + esc(a.name) + ' ' + sgn(a.atk) + '</button>').join(''));
-  if (t.bonusAtk > 0) extra.push('<span class="tinfo">Schlaghagel: noch ' + t.bonusAtk + ' Schlag</span><button class="chip tq" data-act="tUse" data-arg="bfl:0">Waffenloser Schlag</button>');
+  if (!slim && t.atk > 0 && t.atk < c.attacksPer) extra.push('<span class="tinfo">Angriffsaktion: noch ' + (c.attacksPer - t.atk) + ' Angriff' + (c.attacksPer - t.atk > 1 ? 'e' : '') + '</span>' + c.attacks.filter((a) => !a.name.startsWith('Blutlanze')).map((a, i) => '<button class="chip tq" data-act="tUse" data-arg="atk:' + c.attacks.indexOf(a) + '">' + esc(a.name) + ' ' + sgn(a.atk) + '</button>').join(''));
+  if (!slim && t.bonusAtk > 0) extra.push('<span class="tinfo">Schlaghagel: noch ' + t.bonusAtk + ' Schlag</span><button class="chip tq" data-act="tUse" data-arg="bfl:0">Waffenloser Schlag</button>');
   const incap = (ch.play.cond || []).find((k) => COND[k] && COND[k].fx && COND[k].fx.incap); if (incap) extra.push('<span class="tinfo warnc">' + COND[incap].name + ': keine Aktionen, Bonusaktionen oder Reaktionen.</span>');
   const fx = ch.play.fx || {}; const act = [];
   const FXN = { reckless: 'Tollkühn', aim: 'Ruhiges Zielen', innate: 'Angeborene Zauberei', sacred: 'Heilige Waffe', bless: 'Segnen', hm: 'Mal des Jägers', hex: 'Verhexen', df: 'Göttliche Gunst', shill: 'Shillelagh', flame: 'Flamme in der Hand', vex: 'Bedrängen' };
@@ -289,11 +303,35 @@ function turnBlock(c) {
   if (ch.play.ws && typeof WS_STATS !== 'undefined' && WS_STATS[ch.play.ws]) extra.push('<span class="tinfo">' + esc(BESTIARY[ch.play.ws][0]) + ': ' + esc(BESTIARY[ch.play.ws][5]) + ' · ' + esc(WS_STATS[ch.play.ws].senses) + ' ' + slTag('Sinne und Merkmale wie Rudeltaktik wendet ihr am Tisch an – die App rechnet sie nicht automatisch') + '</span>');
   if (act.length) extra.push('<span class="tinfo">Aktiv:</span>' + act.map(([k, n]) => '<button class="chip" data-act="tFxOff" data-arg="' + k + '" title="Beenden">' + esc(n) + ' ×</button>').join(''));
   if (act.length && !inFight(ch) && Object.keys(dur).length) extra.push('<span class="tinfo">Zeit vergeht:</span>' + [[10, '+1 Min.'], [100, '+10 Min.'], [600, '+1 Std.']].map(([r, l]) => '<button class="chip" data-act="tTime" data-arg="' + r + '">' + l + '</button>').join(''));
-  if (extra.length) h += '<div class="tnow">' + extra.join('') + '</div>';
-  if (typeof effMineHtml === 'function') h += effMineHtml();
-  const fv = favs.map((id) => byId[id]).filter(Boolean);
-  h += '<div class="tfav">' + (fv.length ? fv.map((o) => '<button class="tq' + (o.empty || tLeft(ch, o.cost) <= 0 ? ' dim' : '') + '" data-act="tUse" data-arg="' + o.id + '"><i class="k' + o.cost + '">' + COST_K[o.cost] + '</i>' + esc(o.n) + (o.left !== null && o.left !== undefined ? '<small>' + o.left + '</small>' : '') + '</button>').join('') : '<span class="hint">Tippe auf Aktion, Bonusaktion oder Reaktion, um zu sehen, was du kannst. Mit ☆ legst du Favoriten für diese Leiste an.</span>') + '</div></section>';
-  return h;
+  return extra;
+}
+/* Zugleiste aus (Hilfe-Stufe „Erfahren“): keine Zählung, nur was gerade läuft – Wirkungen, Ziel am Tisch, Kampfmodus zum Ausschalten */
+function turnSlim(c) {
+  const ch = c.char; const extra = turnExtras(c, true);
+  const online = typeof onlineFight === 'function' && onlineFight();
+  const ctx = (online ? tgtSelect(c) : '') + (!online && ch.play.localFight ? '<button class="chip on" data-act="tFight" title="Kampfmodus beenden">⚔ Kampfmodus an</button>' : '');
+  const durs = !online && Object.keys(ch.play.fxDur || {}).length > 0;
+  const eff = typeof effMineHtml === 'function' ? effMineHtml() : '';
+  if (!extra.length && !ctx && !durs && !eff) return '';
+  return '<section class="blk turnblk slim" data-grp="kampf">' + (ctx || durs ? '<div class="tctx">' + ctx + (durs ? '<button class="btn sm ghost tnew" data-act="tNew" title="Neue Runde: Dauer laufender Wirkungen herunterzählen">Neuer Zug</button>' : '') + '</div>' : '') + (extra.length ? '<div class="tnow">' + extra.join('') + '</div>' : '') + eff + '</section>';
+}
+/* Einsteiger: Was kann ich in meinem Zug noch tun? */
+function turnGuide(c, t, opts, mvLeft) {
+  const ch = c.char; if (canAct(ch)) return '';
+  if (onlineFight() && offTurn()) return '<div class="nb tguide"><p>Gerade ist jemand anderes am Zug. Du kannst höchstens <b>reagieren (R)</b>, z. B. mit einem Gelegenheitsangriff, wenn ein Gegner deine Reichweite verlässt.</p></div>';
+  const aL = t.aMax - t.a, bL = 1 - t.b;
+  const best = c.attacks.filter((a) => !/^Waffenlos/.test(a.name)).sort((x, y) => y.atk - x.atk)[0] || c.attacks[0];
+  const cant = opts.find((o) => { if (o.cost !== 'a' || o.grp !== 'Zauber' || !/Zaubertrick/.test(o.sub || '')) return false; const d = typeof SPELL_DATA !== 'undefined' && SPELL_DATA[o.id.slice(3)]; return !!(d && d.n && !d.heal); });
+  const bOpt = opts.find((o) => o.cost === 'b' && !o.empty && o.grp !== 'Allgemein' && !/^it:/.test(o.id));
+  const li = (done, k, txt) => '<li' + (done ? ' class="done"' : '') + '><i class="k' + k + '">' + (k === 'm' ? '↔' : COST_K[k]) + '</i><span>' + txt + '</span></li>';
+  const ex = [best ? 'Angriff mit ' + esc(best.name) : '', cant ? 'Zaubertrick ' + esc(cant.n) : ''].filter(Boolean).join(' oder ');
+  const steps = [
+    li(mvLeft <= 0, 'm', mvLeft > 0 ? '<b>Bewegen</b> bis ' + fmtM(mvLeft) + ', gern aufgeteilt vor und nach der Aktion.' : '<b>Bewegung</b> aufgebraucht.'),
+    li(aL <= 0, 'a', aL > 0 ? '<b>Aktion:</b> ' + (ex ? 'z. B. ' + ex + '. ' : '') + 'Tippe auf «Aktion» für alles, auch Spurt, Ausweichen oder Helfen.' : '<b>Aktion</b> erledigt.'),
+    li(bL <= 0, 'b', bL <= 0 ? '<b>Bonusaktion</b> erledigt.' : bOpt ? '<b>Bonusaktion:</b> z. B. ' + esc(bOpt.n) + '.' : '<b>Bonusaktion:</b> hast du nur, wenn dir ein Zauber, eine Fähigkeit oder ein Trank eine gibt.')
+  ];
+  const fertig = aL <= 0 && (bL <= 0 || !bOpt);
+  return '<div class="nb tguide"><b>Dein Zug</b><ol>' + steps.join('') + '</ol><p>' + (fertig ? 'Fertig? ' + (onlineFight() ? 'Sag der Spielleitung «fertig», dann ist der Nächste dran.' : '«Neuer Zug» setzt alles für die nächste Runde zurück.') : 'Die <b>Reaktion (R)</b> bleibt für den Zug der anderen, z. B. für einen Gelegenheitsangriff.') + '</p></div>';
 }
 function openTurnPicker(k) {
   const ch = cur(); if (!ch) return; const c = derive(ch, S.hb); const t = turnSt(ch); const favs = ch.favs || [];
