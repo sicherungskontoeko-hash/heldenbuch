@@ -453,7 +453,7 @@ function bnavHtml() {
   const moreOn = ['spells', 'adv', 'mobs', 'hb', 'help'].includes(S.view);
   const btn = (k, l, act, on) => '<button class="' + (on ? 'on' : '') + '" data-act="' + act + '" data-arg="' + k + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + NAV_ICON[k] + '</svg><span>' + l + '</span>' + (k === 'camp' && S.combat && S.combat.active ? '<i class="dot"></i>' : '') + '</button>';
   return '<div class="bn">' + main.map(([k, l]) => btn(k, l, 'view', S.view === k)).join('') + btn('more', 'Mehr', 'more', moreOn || S.more) + '</div>' +
-    (S.more ? '<div class="bmore">' + [['spells', 'Zauberbuch'], ['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe & Anleitung']].map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="themeOpen">Stimmung: ' + THEMES[themeNow()].name + '</button></div>' : '');
+    (S.more ? '<div class="bmore">' + [['spells', 'Zauberbuch'], ['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe & Anleitung']].map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<button data-act="histOpen">Würfelverlauf</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="themeOpen">Stimmung: ' + THEMES[themeNow()].name + '</button></div>' : '');
 }
 XA.more = () => { S.more = !S.more; const bn = $('#bnav'); if (bn) bn.innerHTML = bnavHtml(); };
 

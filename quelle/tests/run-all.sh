@@ -41,6 +41,7 @@ run "Willkommen: Name beim ersten Start (welcome.test.js)" node tests/welcome.te
 run "Willkommen in der App (welcome.test.js app)" node tests/welcome.test.js app/Heldenbuch.html
 run "Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js)" node tests/hilfe.test.js
 run "Aufgeräumter Bogen: Kopfleiste, Kampfseite, Heldenliste (bogen.test.js)" node tests/bogen.test.js
+run "Würfelverlauf (verlauf.test.js)" node tests/verlauf.test.js
 run "Gegnerzug: Angriffe zählen, Zug beenden (npcturn.test.js)" node tests/npcturn.test.js
 run "Monsterbilder (mobpics.test.js)" node tests/mobpics.test.js
 run "Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js)" node tests/initcall.test.js

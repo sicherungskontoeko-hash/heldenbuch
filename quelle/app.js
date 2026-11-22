@@ -285,7 +285,7 @@ function saHit() {
   saNext();
 }
 function rollDmg(expr, label) { const r = rollExpr(expr); const m = /W(\d+)/.exec(String(expr)); const g = /\[([\d,]+)\]/.exec(r.detail); pushLog({ label, groups: r.groups, total: r.total, detail: r.detail, sides: m ? +m[1] : 0, nat: g ? g[1].split(',').reduce((a, b) => a + +b, 0) : r.total }); }
-function pushLog(e) { e.t = Date.now(); if (S.secret) e.secret = true; if (e.sides && !e.dset && typeof d3setOf === 'function') e.dset = d3setOf(cur()); const d3on = typeof d3fx === 'function' && d3ok(e.sides) && d3fx() !== 'aus'; if (!d3on && e.sides === 20 && (e.nat === 20 || e.crit || e.nat === 1) && typeof themeBurst === 'function') { const k = e.nat === 1 || e.fumble ? 'fumble' : 'crit'; setTimeout(() => themeBurst(k), 820); } S.log.unshift(e); S.log = S.log.slice(0, 30); showToast(e); const l = $('#log'); if (l) l.innerHTML = logHtml(); if ((e.sides || e.share) && !e.preview) shareRoll(e); }
+function pushLog(e) { e.t = Date.now(); if (S.secret) e.secret = true; if (e.sides && !e.dset && typeof d3setOf === 'function') e.dset = d3setOf(cur()); const d3on = typeof d3fx === 'function' && d3ok(e.sides) && d3fx() !== 'aus'; if (!d3on && e.sides === 20 && (e.nat === 20 || e.crit || e.nat === 1) && typeof themeBurst === 'function') { const k = e.nat === 1 || e.fumble ? 'fumble' : 'crit'; setTimeout(() => themeBurst(k), 820); } S.log.unshift(e); S.log = S.log.slice(0, 30); if (typeof histAdd === 'function') histAdd(e); showToast(e); const l = $('#log'); if (l) l.innerHTML = logHtml(); if ((e.sides || e.share) && !e.preview) shareRoll(e); }
 /* ---------- Würfelschale: viele Würfel über den Bildschirm ---------- */
 function showMulti(e, flat) {
   const t = $('#toast'); const tray = $('#tray');
@@ -319,7 +319,7 @@ function showMulti(e, flat) {
   t.hidden = false; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
   t.innerHTML = '<div class="tt">' + head + '<div class="tv dim">…</div></div>';
   const land = () => {
-    clearInterval(showMulti.iv); t.onclick = null;
+    clearInterval(showMulti.iv); t.onclick = () => { t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
     els.forEach((el, i) => { const d = list[i]; const pair = (e.pairVals || []).includes(d.v); const cls = pair ? ' pair' : d.v === d.sides ? ' crit' : d.v === 1 ? ' fum' : '';
       if (el.dataset.d3) { if (el._h) el._h.skip(); el.innerHTML = d3h(d, d.v, 'land' + cls + (d.neg ? ' neg' : '')); return; }
       const tx = el.querySelector('text'); if (tx) tx.textContent = d.v; el.firstChild.className = 'die land' + cls + (d.neg ? ' neg' : ''); });
@@ -330,7 +330,7 @@ function showMulti(e, flat) {
     let sb = tray.querySelector('.tsum'); if (!sb) { sb = document.createElement('div'); sb.className = 'tsum'; tray.appendChild(sb); }
     sb.innerHTML = '<span>' + esc(e.label) + '</span><b>' + esc(e.total) + '</b>';
     showMulti.fade = setTimeout(() => { tray.classList.add('fade'); setTimeout(() => { tray.hidden = true; tray.innerHTML = ''; }, 600); }, 3600);
-    showToast.tm = setTimeout(() => { t.hidden = true; }, 5000);
+    showToast.tm = setTimeout(() => { t.hidden = true; }, 7000);
   };
   if (reduce) return land();
   if (has3) { d3snd('roll', n); t.onclick = () => { clearTimeout(showMulti.st); t.onclick = null; land(); }; }
@@ -342,7 +342,7 @@ function showMulti(e, flat) {
 function renderDicePanel() {
   const d = S.dr || (S.dr = { n: 1, d: 20, mod: 0 });
   const expr = d.n + 'W' + d.d + (d.mod ? sgn(d.mod).replace('−', '-') : '');
-  $('#dicePanel').innerHTML = '<div class="dph"><h3>Würfelbecher</h3><button class="x" data-act="drClose" aria-label="Schliessen">×</button></div>' +
+  $('#dicePanel').innerHTML = '<div class="dph"><h3>Würfelbecher</h3><button class="link" data-act="histOpen">Verlauf</button><button class="x" data-act="drClose" aria-label="Schliessen">×</button></div>' +
     '<div class="chips">' + [4, 6, 8, 10, 12, 20, 100].map((s) => chip(d.d === s, 'W' + s, 'data-act="drDie" data-arg="' + s + '"')).join('') + '</div>' +
     '<div class="dprow"><span>Anzahl</span><div class="stepper"><button data-act="drN" data-arg="-1" aria-label="weniger">−</button><b>' + d.n + '</b><button data-act="drN" data-arg="1" aria-label="mehr">+</button></div><div class="chips">' + [2, 4, 6, 8, 10, 20, 30].map((v) => chip(d.n === v, String(v), 'data-act="drSet" data-arg="' + v + '"')).join('') + '</div></div>' +
     '<div class="dprow"><span>Bonus</span><div class="stepper"><button data-act="drM" data-arg="-1" aria-label="weniger">−</button><b>' + sgn(d.mod) + '</b><button data-act="drM" data-arg="1" aria-label="mehr">+</button></div></div>' +
@@ -374,12 +374,12 @@ function showToast(e) {
   const use3 = typeof d3ok === 'function' && d3ok(sides); const set = use3 ? (e.dset || d3setOf(cur())) : ''; const fxl = use3 ? d3fx() : 'aus';
   const dieH = (v, cls) => use3 ? '<span class="die d3 ' + cls + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(sides, v, set, { gold: / crit/.test(cls) && sides === 20, dead: / fum/.test(cls) && sides === 20, cracks: / fum/.test(cls) && sides === 20 }) + '</span>' : dieSvg(sides, v, cls);
   const final = () => {
-    clearInterval(showToast.iv); t.onclick = null;
+    clearInterval(showToast.iv); t.onclick = (ev) => { if (ev.target.closest('[data-act]')) return; t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
     const dice = vals.map((v, i) => dieH(v, 'land' + (i === keep ? hl : ' drop'))).join('');
     const tip = typeof rollTip === 'function' ? rollTip(e) : '';
     t.innerHTML = '<div class="trow"><div class="dice">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
     if (use3) { if (fxl !== 'aus') d3snd('land'); if (sides === 20 && (e.crit || e.fumble)) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, e.crit ? 'n20' : 'n1', fxl); d3snd(e.crit ? 'n20' : 'n1'); } }
-    showToast.tm = setTimeout(() => { t.hidden = true; }, tip ? 8000 : e.boost ? 6000 : 4500);
+    showToast.tm = setTimeout(() => { t.hidden = true; }, tip ? 9000 : 6500);
   };
   t.hidden = false; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
@@ -438,7 +438,7 @@ function renderTop() {
   const more = [['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe']]; const moreOn = more.some(([k]) => S.view === k);
   $('#top').innerHTML = '<div class="wrap"><div class="bar"><button class="brand" data-act="view" data-arg="heroes">' + LOGO + 'Heldenbuch</button>' +
     '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') +
-      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<hr><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button></div></details></nav>' +
+      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<hr><button data-act="histOpen">Würfelverlauf</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button></div></details></nav>' +
     '<button class="mbtn mwarn" data-act="warnOpen" hidden aria-label="Offene Punkte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg><b></b></button><button class="mbtn mdice" data-act="drOpen" aria-label="Würfelbecher"><svg viewBox="0 0 64 64" aria-hidden="true"><polygon points="32,4 56,18 56,46 32,60 8,46 8,18"/><polygon points="32,18 46,42 18,42"/></svg></button>' +
     '<button class="tbtn tsearch" data-act="search" title="Suchen (Strg+K oder /)" aria-label="Suchen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>' +
     '<button class="tbtn" data-act="themeOpen" title="Stimmung wählen" aria-label="Stimmung wählen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.2-1-1.6-1-2.6 0-1 .8-1.7 1.9-1.7H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z"/><circle cx="7.5" cy="11" r="1.3"/><circle cx="10.5" cy="7" r="1.3"/><circle cx="15" cy="7.5" r="1.3"/></svg></button>' + (ch ? '<button class="curhero" data-act="view" data-arg="heroes" title="Helden wechseln">' + sigil(ch) + '<span>' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</span></button>' : '') +
@@ -787,7 +787,7 @@ function renderSheet(c) {
   h += '<section class="blk" data-grp="faehig"><h2>Merkmale & Talente</h2>' + featList(c.features) + '</section>';
   h += '<section class="blk gear" data-grp="gear">' + gearBlock(c) + '</section>';
   h += '<section class="blk" data-grp="notiz"><h2>Notizen</h2>' + area('notes', ch.notes, 'Notizen, Hintergrund, Kampagne …', 6) + '</section>';
-  h += '</div></div><div class="logs" data-grp="notiz kampf">' + (S.camp ? '<section class="blk logblk"><h2>Am Tisch <small>' + esc(S.camp) + '</small></h2><div id="tableBox">' + tableBox(6) + '</div></section>' : '') + '<section class="blk logblk"><h2>Dein Verlauf</h2><ul id="log" class="log">' + logHtml() + '</ul></section></div></div>';
+  h += '</div></div><div class="logs" data-grp="notiz kampf">' + (S.camp ? '<section class="blk logblk"><h2>Am Tisch <small>' + esc(S.camp) + '</small></h2><div id="tableBox">' + tableBox(6) + '</div></section>' : '') + '<section class="blk logblk"><h2>Dein Verlauf <button class="link" data-act="histOpen">alle Würfe</button></h2><ul id="log" class="log">' + logHtml() + '</ul></section></div></div>';
   return h;
 }
 function fxChips(c) {
@@ -980,7 +980,9 @@ function orbPrompt(html) {
     if (S.hitPend && html.indexOf('data-act="hitApply"') < 0) { S.hitQ = [S.hitPend].concat(S.hitQ || []); S.hitPend = null; }
     if (S.reqPend && html.indexOf('data-act="reqRoll"') < 0) S.reqPend = null;
   }
-  p.innerHTML = html; p.hidden = false;
+  if (p.hidden) { const e = S.log[0]; orbPrompt.roll = e && e.sides && !e.preview && Date.now() - e.t < 4000 ? e : null; }
+  const r = orbPrompt.roll;
+  p.innerHTML = (r ? '<div class="prroll" data-act="histOpen" title="Würfelverlauf öffnen"><span>' + esc(r.label) + '</span><b' + (r.crit ? ' class="crit"' : r.fumble ? ' class="fum"' : '') + '>' + esc(String(r.total)) + '</b><small>' + esc(r.detail || '') + '</small></div>' : '') + html; p.hidden = false;
 }
 const promptOpen = () => { const p = $('#prompt'); return !!(p && !p.hidden); };
 function promptIdle() { if (promptOpen()) return; if (typeof hitFlush === 'function') hitFlush(); if (!promptOpen() && typeof reqCheck === 'function') reqCheck(); }
@@ -1088,7 +1090,7 @@ function joinCamp(v, silent) {
     const table = {};
     snap.docs.forEach((d) => { const v = d.data(); if (v) table[d.id] = v; });
     setTimeout(() => { if (typeof d3conflict === 'function') try { d3conflict(); } catch (e) {} }, 0);
-    for (const [uid, p] of Object.entries(table)) for (const r of p.rolls || []) { const k = uid + ':' + r.t; if (!seen.has(k)) { seen.add(k); if (uid !== UID && r.t > campJoinedAt && (!r.secret || isDM())) miniToast(p, r); } }
+    for (const [uid, p] of Object.entries(table)) for (const r of p.rolls || []) { const k = uid + ':' + r.t; if (!seen.has(k)) { seen.add(k); if (uid !== UID && r.t > campJoinedAt && (!r.secret || isDM())) { miniToast(p, r); if (typeof histAdd === 'function') histAdd(r, p.char, true); } } }
     S.table = table; paintCamp();
   }, (e) => { S.campErr = 'fail'; paintCamp(); });
   writeMe(); subCombat(); subMeta();
@@ -1112,7 +1114,7 @@ function miniToast(p, r) {
   const el = document.createElement('div'); el.className = 'mt';
   const md = r.sides && typeof d3ok === 'function' && d3ok(r.sides) && d3fx() !== 'aus' ? '<span class="mdie" style="--dg:' + (D3_SETS[r.dset] || D3_SETS.klassik).glow + '">' + d3svg(r.sides, r.nat || (typeof r.total === 'number' ? r.total : 1), r.dset || 'klassik', { gold: r.crit && r.sides === 20, cracks: r.fumble && r.sides === 20, dead: r.fumble && r.sides === 20, thin: true }) + '</span>' : '';
   el.innerHTML = psig(p) + '<div><small>' + esc(p.char) + ' · ' + esc(r.label) + '</small><b class="' + (r.crit ? 'crit' : r.fumble ? 'fum' : '') + '">' + esc(r.total) + '</b></div>' + md;
-  m.prepend(el); setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 4500);
+  m.prepend(el); setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 7000);
   while (m.children.length > 3) m.lastChild.remove();
 }
 function campStatus() {
