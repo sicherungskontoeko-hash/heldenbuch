@@ -4,7 +4,9 @@ export NODE_PATH="/tmp/claude-0/npmt/node_modules:$(npm root -g)${NODE_PATH:+:$N
 # Voraussetzung: npm install (Playwright 1.56, aedes, websocket-stream) und ein Chromium für Playwright.
 cd "$(dirname "$0")/.."
 bash build.sh >/dev/null || { echo "Build fehlgeschlagen"; exit 1; }
-python3 build_app.py >/dev/null 2>&1 || echo "Hinweis: App-Version (für net.test.js) nicht gebaut"
+# App-Version bauen: braucht app/fonts und app/assets (Verweise auf quelle/fonts und www/icons)
+mkdir -p app; [ -e app/fonts ] || ln -s ../fonts app/fonts; [ -e app/assets ] || ln -s ../../www/icons app/assets
+python3 build_app.py >/dev/null 2>&1 || echo "Hinweis: App-Version nicht gebaut – die App-Tests schlagen dann fehl"
 OUT=tests/RESULTS.md
 REV=$(sha256sum index.html | cut -c1-16)
 {
@@ -39,6 +41,8 @@ run "Abfragen und Ziele: nichts verdrängt, Ziel festgehalten (flow.test.js)" no
 run "Sicherung: alles sichern und wiederherstellen (backup.test.js)" node tests/backup.test.js
 run "Willkommen: Name beim ersten Start (welcome.test.js)" node tests/welcome.test.js
 run "Willkommen in der App (welcome.test.js app)" node tests/welcome.test.js app/Heldenbuch.html
+run "Spielabend sichern, Stolpersteine (pflege.test.js)" node tests/pflege.test.js
+run "Spielabend sichern, Stolpersteine, Server (pflege.test.js app)" node tests/pflege.test.js app/Heldenbuch.html
 run "Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js)" node tests/hilfe.test.js
 run "Aufgeräumter Bogen: Kopfleiste, Kampfseite, Heldenliste (bogen.test.js)" node tests/bogen.test.js
 run "Würfelverlauf (verlauf.test.js)" node tests/verlauf.test.js
@@ -58,6 +62,6 @@ run "Klicktest kurz (ui.test.js)" bash -c "node tests/ui.test.js || (echo Wieder
 run "Abnahme-Klicktest (ui-full.test.js)" node tests/ui-full.test.js
 run "Kombinationen Klasse×Unterklasse×Stufe (combos.test.js)" node tests/combos.test.js
 for c in bar brd cle dru fig mon pal ran rog sor wlk wiz rk bw fk ma; do run "Zugleisten-Fuzz $c" node tests/turnfuzz.test.js $c; done
-if [ -f app/www/index.html ]; then run "Online-Tisch (net.test.js)" node tests/net.test.js; run "Selbst-Update Android-App (boot.test.js)" node tests/boot.test.js; run "Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js)" node tests/multi.test.js ; run "Spielabend mit Abenteuer: SL + 2 Spieler (sitzung.test.js)" node tests/sitzung.test.js; fi
+if [ -f app/www/index.html ]; then run "Online-Tisch (net.test.js)" node tests/net.test.js; run "Selbst-Update Android-App (boot.test.js)" node tests/boot.test.js; run "Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js)" node tests/multi.test.js ; run "Spielabend mit Abenteuer: SL + 2 Spieler (sitzung.test.js)" node tests/sitzung.test.js; else run "App-Version fehlt: Online-Tisch, Selbst-Update, Mehrgeräte und Spielabend nicht geprüft" false; fi
 echo "" >> $OUT; echo "Gesamtergebnis: $([ $fail = 0 ] && echo 'alle Suiten bestanden' || echo 'mindestens eine Suite fehlgeschlagen')" >> $OUT
 echo; cat $OUT; exit $fail

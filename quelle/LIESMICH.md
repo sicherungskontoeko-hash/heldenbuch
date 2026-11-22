@@ -45,6 +45,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/undo.test.js | Rückgängig, Wiederholen, Zug zurückspulen |
 | tests/slhelfer.test.js | Claude-Helfer: Lagebericht, Kopieren, Assistent (nachgebildet) |
 | tests/sitzung.test.js | Spielabend mit Abenteuer über den Online-Tisch: Handout, Kampf, Monsterangriff, Beute, geheime Tabellen |
+| tests/pflege.test.js | Rückfrage zur Sicherung, Stolpersteine (Handy und PC), Server-Umstellung Mosquitto → HiveMQ (App) |
 | tests/verlauf.test.js | Würfelverlauf: Aufzeichnung, Speicherung, Filter, Wurf in Rückfragen |
 | tests/bogen.test.js | aufgeräumter Bogen: Kopfleiste mit Kernwerten, Kampfseite ohne Reiterwechsel, Heldenliste |
 | tests/hilfe.test.js | Hilfe-Stufen: was sichtbar ist, Regelprüfung ohne Zugleiste, Dialog, Willkommen |
@@ -83,6 +84,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | help.js | Kontexthilfe |
 | chronik.js | Abenteuerverfolgung: Chronik der Spielleitung (automatisch + Notizen, je Abenteuer/Tisch), Ansagen der Spieler (Feld „Was tust du?“, Tisch-Dokument ans, Meta ansSeen), Mikrofon in claude.ai (dictation) |
 | slhelfer.js | Claude als Helfer der Spielleitung: Lagebericht (Szene, Gruppe, Kampf, Würfe) zum Kopieren/Teilen; in claude.ai direkte Antworten (Fähigkeit „sample“) |
+| pflege.js | Speicher absichern (navigator.storage.persist), Rückfrage «Spielabend sichern?» beim Start (≥ 10 eigene Würfe seit der letzten Sicherung, älter als 20 h, höchstens 1× pro Tag), Stolpersteine mit Ort und Zeit (hb_stolper, 100) |
 | verlauf.js | Würfelverlauf: alle Würfe (Held, Kreaturen, Mitspieler) mit Details, auf dem Gerät gespeichert (200) |
 | hilfe.js | Hilfe-Stufe (Einsteiger · Standard · Erfahren): Erklärknöpfe, Einsteiger-Tipps, Zug-Leitfaden, Wurferklärung, Zugleiste an/aus, Nachbessern, Rechenweg |
 | spellflav.js | Zauberbilder: wie man sich jeden Zauber vorstellt |
@@ -98,3 +100,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 ## Datenformat
 Helden tragen ein Feld `v` (Schemaversion, aktuell 2). `migrateChar()` in rules.js hebt ältere Stände an;
 vor der ersten Migration legt die App eine Sicherung unter `localStorage['heldenbuch_backup_v1']` an.
+
+## App-Dateien bauen
+
+`bash quelle/build_www.sh` baut `www/` und `Heldenbuch.html` frisch aus den Quelldateien. Die automatische Veröffentlichung (GitHub Actions, Schritt «Web-Dateien aus den Quellen bauen») macht das vor jedem Android-, PC- und Web-Build selbst; die Dateien im Repo sind nur noch ein Abbild für den lokalen Gebrauch.
