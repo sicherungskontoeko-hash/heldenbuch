@@ -81,6 +81,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | explain.js | Rechenweg, Nachbessern nach dem Wurf |
 | ux.js | Rückgängig, Bestätigungen, Layout |
 | help.js | Kontexthilfe |
+| chronik.js | Abenteuerverfolgung: Chronik der Spielleitung (automatisch + Notizen, je Abenteuer/Tisch), Ansagen der Spieler (Feld „Was tust du?“, Tisch-Dokument ans, Meta ansSeen), Mikrofon in claude.ai (dictation) |
 | slhelfer.js | Claude als Helfer der Spielleitung: Lagebericht (Szene, Gruppe, Kampf, Würfe) zum Kopieren/Teilen; in claude.ai direkte Antworten (Fähigkeit „sample“) |
 | verlauf.js | Würfelverlauf: alle Würfe (Held, Kreaturen, Mitspieler) mit Details, auf dem Gerät gespeichert (200) |
 | hilfe.js | Hilfe-Stufe (Einsteiger · Standard · Erfahren): Erklärknöpfe, Einsteiger-Tipps, Zug-Leitfaden, Wurferklärung, Zugleiste an/aus, Nachbessern, Rechenweg |
