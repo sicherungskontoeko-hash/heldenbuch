@@ -42,6 +42,8 @@ run "Willkommen in der App (welcome.test.js app)" node tests/welcome.test.js app
 run "Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js)" node tests/hilfe.test.js
 run "Aufgeräumter Bogen: Kopfleiste, Kampfseite, Heldenliste (bogen.test.js)" node tests/bogen.test.js
 run "Würfelverlauf (verlauf.test.js)" node tests/verlauf.test.js
+run "Rückgängig, Wiederholen, Zug zurückspulen (undo.test.js)" node tests/undo.test.js
+run "Claude als Helfer der Spielleitung (slhelfer.test.js)" node tests/slhelfer.test.js
 run "Gegnerzug: Angriffe zählen, Zug beenden (npcturn.test.js)" node tests/npcturn.test.js
 run "Monsterbilder (mobpics.test.js)" node tests/mobpics.test.js
 run "Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js)" node tests/initcall.test.js
@@ -56,6 +58,6 @@ run "Klicktest kurz (ui.test.js)" bash -c "node tests/ui.test.js || (echo Wieder
 run "Abnahme-Klicktest (ui-full.test.js)" node tests/ui-full.test.js
 run "Kombinationen Klasse×Unterklasse×Stufe (combos.test.js)" node tests/combos.test.js
 for c in bar brd cle dru fig mon pal ran rog sor wlk wiz rk bw fk ma; do run "Zugleisten-Fuzz $c" node tests/turnfuzz.test.js $c; done
-if [ -f app/www/index.html ]; then run "Online-Tisch (net.test.js)" node tests/net.test.js; run "Selbst-Update Android-App (boot.test.js)" node tests/boot.test.js; run "Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js)" node tests/multi.test.js; fi
+if [ -f app/www/index.html ]; then run "Online-Tisch (net.test.js)" node tests/net.test.js; run "Selbst-Update Android-App (boot.test.js)" node tests/boot.test.js; run "Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js)" node tests/multi.test.js ; run "Spielabend mit Abenteuer: SL + 2 Spieler (sitzung.test.js)" node tests/sitzung.test.js; fi
 echo "" >> $OUT; echo "Gesamtergebnis: $([ $fail = 0 ] && echo 'alle Suiten bestanden' || echo 'mindestens eine Suite fehlgeschlagen')" >> $OUT
 echo; cat $OUT; exit $fail

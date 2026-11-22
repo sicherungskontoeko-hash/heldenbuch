@@ -1080,6 +1080,23 @@ body:has(#modal:not([hidden])) #undoBar,body:has(#prompt:not([hidden])) #undoBar
 .advit>p,.advit>.chips{margin:0 12px;line-height:1.5;font-size:.93rem}
 .advit>.chips{justify-content:flex-start}
 @media (max-width:600px){.advb .advt:not(.roll) tr,.advb .advt:not(.roll) th,.advb .advt:not(.roll) td{display:block;width:auto;min-width:0}.advt.roll th{width:40px;min-width:40px}.advb .advt:not(.roll) td{border-top:0;padding-top:0}.advcho{grid-template-columns:1fr;gap:3px}.advbb{padding:9px 11px}.advpn .btn{max-width:100%;flex:1 1 100%}.adv .advhead h1{font-size:1.5rem}.advt th{min-width:84px}}
+.pchp{width:60px;height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;flex:none}.pchp i{display:block;height:100%;background:#7fbf7f}.pchp.low i{background:#e0b15a}.pchp.crit i,.pchp.down i{background:#d0634f}
+details.invbar{margin:6px 0 0}details.invbar summary{cursor:pointer;color:var(--gold);font-size:.88rem}details.invbar[open]{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.dmd>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}.dmd>summary::-webkit-details-marker{display:none}.dmd>summary::before{content:'▸';color:var(--gold);transition:transform .15s}.dmd[open]>summary::before{transform:rotate(90deg)}.dmd[open]>summary{margin-bottom:8px}
+/* Claude als Helfer der Spielleitung */
+.sldlg{max-width:640px}.sldlg textarea{width:100%;min-height:76px;margin:6px 0 8px}.slq{margin:4px 0 6px}.slq .chip{font-size:.82rem;padding:5px 10px}
+.slchat{max-height:46vh;overflow:auto;display:grid;gap:8px;margin:6px 0 10px;padding:2px}
+.slm{padding:9px 12px;border-radius:14px;line-height:1.5;font-size:.92rem}.slm p{margin:0 0 6px}.slm p:last-child{margin-bottom:0}
+.slm.q{justify-self:end;max-width:88%;background:rgba(var(--gold-rgb),.14);border:1px solid rgba(var(--gold-rgb),.35)}
+.slm.a{background:linear-gradient(180deg,var(--raised),var(--surface));border:1px solid var(--line2)}.slm .chips{margin-top:8px}
+.sllage summary{cursor:pointer;color:var(--muted);font-size:.86rem;margin-top:6px}.sllage pre{white-space:pre-wrap;font-size:.76rem;max-height:30vh;overflow:auto;background:var(--surface);padding:10px;border-radius:10px;border:1px solid var(--line)}
+.slrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px}.slrow .hint{margin:0}
+.advhead{display:flex;justify-content:space-between;align-items:center;gap:10px}.advhead .advkick{margin:0}.slbtn{border-color:rgba(var(--gold-rgb),.55)}
+/* Rückgängig/Wiederholen fest am rechten Rand der Reiterleiste */
+.mnav .udo{position:sticky;right:0;margin-left:auto;display:flex;gap:4px;padding-left:8px;background:linear-gradient(90deg,transparent,rgba(var(--bg-rgb),.96) 10px)}
+.mnav .udo button{display:inline-flex;gap:3px;align-items:center;min-width:42px;justify-content:center;font-size:1.05rem}.mnav .udo b{font-size:.7rem;color:var(--gold-hi)}.mnav .udo [disabled]{opacity:.35;cursor:default}
+.mnav .mall{margin-left:0}
+.tblist{margin:6px 0 10px;padding-left:20px;max-height:40vh;overflow:auto}.tblist li{margin:2px 0}
 /* Würfelverlauf und Wurf in Rückfragen */
 .histdlg{max-width:560px}.histdlg .hf{margin:4px 0 8px}
 .hist{list-style:none;margin:0 0 10px;padding:0;max-height:min(62vh,560px);overflow:auto;border-top:1px solid var(--line)}
