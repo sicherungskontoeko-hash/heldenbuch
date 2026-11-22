@@ -59,6 +59,11 @@ function slLage(q) {
     L.push('', '## Kampf · Runde ' + (S.combat.round || 1) + (now ? ' · am Zug: ' + now.name : ''));
     o.forEach((x) => L.push('- ' + x.v + ' ' + x.name + (x.npc ? (x.ally ? ' (Verbündeter)' : ' (Gegner)') + ': TP ' + x.hp + '/' + x.hpMax + ', RK ' + x.ac + (x.cond && x.cond.length ? ', ' + x.cond.map((k) => (COND[k] || {}).name || k).join(', ') : '') : ': TP ' + x.hp + '/' + x.hpMax) + (x.dead ? ', tot' : '')));
   }
+  /* Ansagen der Spieler und Chronik */
+  const AO = typeof ansOpenList === 'function' ? ansOpenList() : [];
+  if (AO.length) L.push('', '## Ansagen der Spieler (offen)', ...AO.map((a) => '- ' + a.who + ': ' + a.x));
+  const CT = typeof chrText === 'function' ? chrText(40) : '';
+  if (CT) L.push('', '## Chronik (was bisher geschah, neueste zuletzt)', CT);
   /* Würfe */
   const H = typeof histLoad === 'function' ? histLoad().slice(0, 10) : [];
   if (H.length) L.push('', '## Letzte Würfe', ...H.map((x) => '- ' + histTime(x.t) + ' ' + (x.who ? x.who + ': ' : '') + x.label + ' = ' + x.total + (x.detail ? ' (' + x.detail + ')' : '')));

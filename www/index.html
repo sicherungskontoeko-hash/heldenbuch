@@ -7,7 +7,7 @@
    weil die App ihre Adresse (localhost) dabei nicht wechselt.
    Sicherung: Startet eine heruntergeladene Version nicht sauber, wird sie verworfen und die eingebaute genutzt. */
 (function () {
-  var BUILD = 1795369071, VER = '1.9';
+  var BUILD = 1795370486, VER = '1.9';
   var REMOTE = 'https://sicherungskontoeko-hash.github.io/heldenbuch/';
   var C = window.Capacitor; var native = !!(C && (typeof C.isNativePlatform === 'function' ? C.isNativePlatform() : C.isNative));
   if (window.HB_BOOT_TEST) native = true; /* nur für Tests */
@@ -1151,6 +1151,24 @@ body:has(#modal:not([hidden])) #undoBar,body:has(#prompt:not([hidden])) #undoBar
 .advit>p,.advit>.chips{margin:0 12px;line-height:1.5;font-size:.93rem}
 .advit>.chips{justify-content:flex-start}
 @media (max-width:600px){.advb .advt:not(.roll) tr,.advb .advt:not(.roll) th,.advb .advt:not(.roll) td{display:block;width:auto;min-width:0}.advt.roll th{width:40px;min-width:40px}.advb .advt:not(.roll) td{border-top:0;padding-top:0}.advcho{grid-template-columns:1fr;gap:3px}.advbb{padding:9px 11px}.advpn .btn{max-width:100%;flex:1 1 100%}.adv .advhead h1{font-size:1.5rem}.advt th{min-width:84px}}
+.pchp{width:60px;height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;flex:none}.pchp i{display:block;height:100%;background:#7fbf7f}.pchp.low i{background:#e0b15a}.pchp.crit i,.pchp.down i{background:#d0634f}
+details.invbar{margin:6px 0 0}details.invbar summary{cursor:pointer;color:var(--gold);font-size:.88rem}details.invbar[open]{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.dmd>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}.dmd>summary::-webkit-details-marker{display:none}.dmd>summary::before{content:'▸';color:var(--gold);transition:transform .15s}.dmd[open]>summary::before{transform:rotate(90deg)}.dmd[open]>summary{margin-bottom:8px}
+/* Chronik und Ansagen */
+.chrdlg{max-width:620px}.chr{list-style:none;margin:6px 0 10px;padding:0;max-height:52vh;overflow:auto;border-top:1px solid var(--line)}
+.chr .cabend{position:sticky;top:0;z-index:1;background:var(--raised);padding:7px 4px;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.chr .ce{display:grid;grid-template-columns:42px 22px minmax(0,1fr) auto;gap:6px;align-items:start;padding:6px 4px;border-bottom:1px solid var(--line);font-size:.9rem}
+.chr time{font-size:.74rem;color:var(--faint);padding-top:2px;font-variant-numeric:tabular-nums}.chr .ci{text-align:center}.chr .cx{overflow-wrap:anywhere}.chr .x{width:26px;height:26px;font-size:.9rem;opacity:.55}
+.chradd{display:flex;gap:6px;align-items:center;margin:6px 0}.chradd input{flex:1;min-width:0}
+.ansbox{margin:0 0 12px;padding:10px 12px;border:1px solid rgba(var(--gold-rgb),.45);border-radius:14px;background:linear-gradient(180deg,rgba(var(--gold-rgb),.08),rgba(var(--gold-rgb),.02))}
+.ansbox label{display:block;margin-bottom:6px}.ansbox label small{color:var(--muted);font-weight:400}
+.ansrow{display:flex;gap:6px;align-items:center}.ansrow input{flex:1;min-width:0}
+.ansmine{list-style:none;margin:8px 0 0;padding:0;font-size:.84rem;color:var(--muted)}.ansmine li{margin:2px 0}.ansmine small{color:var(--gold)}
+.ansdm{margin:0 0 12px;padding:10px 12px;border:1px solid var(--gold);border-radius:14px;background:rgba(var(--gold-rgb),.08);box-shadow:var(--glow)}
+.ansdm .cnt{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:11px;background:var(--gold);color:var(--gold-ink);font-size:.78rem;margin-left:4px}
+.ansdm ul{list-style:none;margin:8px 0;padding:0;display:grid;gap:6px}.ansdm li{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:7px 9px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}.ansdm li small{color:var(--faint)}
+.micbtn{flex:none;width:38px;height:38px;border-radius:50%;border:1px solid var(--line2);background:var(--surface);cursor:pointer;font-size:1rem;padding:0}.micbtn.on{border-color:#d0634f;box-shadow:0 0 0 3px rgba(208,99,79,.35);animation:micpulse 1.2s infinite}@keyframes micpulse{0%,100%{box-shadow:0 0 0 3px rgba(208,99,79,.35)}50%{box-shadow:0 0 0 8px rgba(208,99,79,.08)}}
+.advhead .chips{margin:0;gap:6px}
 /* Claude als Helfer der Spielleitung */
 .sldlg{max-width:640px}.sldlg textarea{width:100%;min-height:76px;margin:6px 0 8px}.slq{margin:4px 0 6px}.slq .chip{font-size:.82rem;padding:5px 10px}
 .slchat{max-height:46vh;overflow:auto;display:grid;gap:8px;margin:6px 0 10px;padding:2px}
@@ -4171,13 +4189,14 @@ function dmTools() {
   const M = S.meta; const ps = Object.entries(S.table);
   let h = '';
   if (isDM()) {
+    const dmo = (k, def) => (S.dmOpen && S.dmOpen[k] != null ? S.dmOpen[k] : def) ? ' open' : '';
     h += '<section class="blk dmtools"><h2>Spielleitung</h2><div class="dmgrid">';
     h += '<div class="fgrp tdm"><b>Stimmung der Runde</b><div class="chips"><span>' + esc((THEMES[(S.meta && S.meta.theme) || themeNow()] || { name: '–' }).name) + '</span><button class="btn sm ghost" data-act="themeOpen">Ändern</button></div></div>';
-    h += '<div class="fgrp"><b>Rast für die ganze Gruppe</b><p class="hint">Kurze Rast: Jeder Spieler wird gefragt, ob er Trefferwürfel ausgibt. Lange Rast: alles zurück.</p><div class="chips"><button class="btn sm ghost" data-act="grpRest" data-arg="short">Kurze Rast</button><button class="btn sm ghost" data-act="grpRest" data-arg="long">Lange Rast</button></div></div>';
+    h += '<details class="fgrp dmd" data-k="rest"' + dmo('rest', false) + '><summary><b>Rast für die ganze Gruppe</b></summary><p class="hint">Kurze Rast: Jeder Spieler wird gefragt, ob er Trefferwürfel ausgibt. Lange Rast: alles zurück.</p><div class="chips"><button class="btn sm ghost" data-act="grpRest" data-arg="short">Kurze Rast</button><button class="btn sm ghost" data-act="grpRest" data-arg="long">Lange Rast</button></div></details>';
     const G = S.gPre || {}; const gv = (k) => (G[k] != null && G[k] !== '' ? ' value="' + esc(G[k]) + '"' : '');
-    h += '<div class="fgrp gift"><b>Beute & Erfahrung verteilen</b>' + (typeof lootBox === 'function' ? lootBox() : '') + '<div class="row">' + field('An', '<select id="gTo"><option value="all">Alle am Tisch</option>' + ps.filter(([u]) => u !== UID).map(([u, p]) => '<option value="' + u + '"' + (G.to === u ? ' selected' : '') + '>' + esc(p.char) + '</option>').join('') + '</select>') + field('EP (je Held)', '<input type="number" id="gXp" min="0" placeholder="0"' + gv('xp') + '>') + field('Gold (je Held)', '<input type="number" id="gGm" min="0" placeholder="0"' + gv('gm') + '>') + '</div><div class="row">' + field('Gegenstand', (() => { const vis = itemVis(); return '<select id="gItem"><option value="">— kein Gegenstand —</option>' + Object.entries(MAGIC_ITEMS).filter(([k]) => vis(k) || G.item === k).map(([k, d]) => '<option value="' + k + '"' + (G.item === k ? ' selected' : '') + '>' + esc((d.adv ? '✦ ' : '') + d.name) + '</option>').join('') + '</select>'; })()) + field('Oder freier Eintrag', '<input type="text" id="gText" placeholder="z. B. Karte zur Schwarzen Feste"' + gv('text') + '>') + '</div><div class="chips"><button class="btn sm" data-act="gift">Verteilen</button></div></div>';
-    h += '<div class="fgrp"><b>Handout teilen</b><div class="row">' + field('Titel', '<input type="text" id="hoT" placeholder="z. B. Brief des Barons">') + '</div>' + field('Text', '<textarea id="hoX" rows="3" placeholder="Was die Gruppe lesen soll …"></textarea>') + '<div class="chips"><button class="btn sm" data-act="hoAdd">Teilen</button></div></div>';
-    h += '<div class="fgrp"><b>Deine Notizen <small>nur für dich</small></b>' + '<textarea id="dmNote" rows="5" placeholder="Geheimnisse, Pläne, Werte …">' + esc(dmNoteGet()) + '</textarea></div>';
+    h += '<details class="fgrp gift dmd" data-k="gift"' + (S.gPre ? ' open' : dmo('gift', false)) + '><summary><b>Beute und Erfahrung verteilen</b></summary>' + (typeof lootBox === 'function' ? lootBox() : '') + '<div class="row">' + field('An', '<select id="gTo"><option value="all">Alle am Tisch</option>' + ps.filter(([u]) => u !== UID).map(([u, p]) => '<option value="' + u + '"' + (G.to === u ? ' selected' : '') + '>' + esc(p.char) + '</option>').join('') + '</select>') + field('EP (je Held)', '<input type="number" id="gXp" min="0" placeholder="0"' + gv('xp') + '>') + field('Gold (je Held)', '<input type="number" id="gGm" min="0" placeholder="0"' + gv('gm') + '>') + '</div><div class="row">' + field('Gegenstand', (() => { const vis = itemVis(); return '<select id="gItem"><option value="">— kein Gegenstand —</option>' + Object.entries(MAGIC_ITEMS).filter(([k]) => vis(k) || G.item === k).map(([k, d]) => '<option value="' + k + '"' + (G.item === k ? ' selected' : '') + '>' + esc((d.adv ? '✦ ' : '') + d.name) + '</option>').join('') + '</select>'; })()) + field('Oder freier Eintrag', '<input type="text" id="gText" placeholder="z. B. Karte zur Schwarzen Feste"' + gv('text') + '>') + '</div><div class="chips"><button class="btn sm" data-act="gift">Verteilen</button></div></details>';
+    h += '<details class="fgrp dmd" data-k="ho"' + dmo('ho', false) + '><summary><b>Handout teilen</b></summary><div class="row">' + field('Titel', '<input type="text" id="hoT" placeholder="z. B. Brief des Barons">') + '</div>' + field('Text', '<textarea id="hoX" rows="3" placeholder="Was die Gruppe lesen soll …"></textarea>') + '<div class="chips"><button class="btn sm" data-act="hoAdd">Teilen</button></div></details>';
+    h += '<details class="fgrp dmd" data-k="note"' + dmo('note', !!dmNoteGet()) + '><summary><b>Deine Notizen <small>nur für dich</small></b></summary>' + '<textarea id="dmNote" rows="5" placeholder="Geheimnisse, Pläne, Werte …">' + esc(dmNoteGet()) + '</textarea></details>';
     h += '</div></section>';
   }
   const ho = (M.handouts || []).slice().reverse();
@@ -4334,7 +4353,7 @@ function bnavHtml() {
   const moreOn = ['spells', 'adv', 'mobs', 'hb', 'help'].includes(S.view);
   const btn = (k, l, act, on) => '<button class="' + (on ? 'on' : '') + '" data-act="' + act + '" data-arg="' + k + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + NAV_ICON[k] + '</svg><span>' + l + '</span>' + (k === 'camp' && S.combat && S.combat.active ? '<i class="dot"></i>' : '') + '</button>';
   return '<div class="bn">' + main.map(([k, l]) => btn(k, l, 'view', S.view === k)).join('') + btn('more', 'Mehr', 'more', moreOn || S.more) + '</div>' +
-    (S.more ? '<div class="bmore">' + [['spells', 'Zauberbuch'], ['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe & Anleitung']].map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<button data-act="histOpen">Würfelverlauf</button><button data-act="slOpen">✦ Claude fragen</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="themeOpen">Stimmung: ' + THEMES[themeNow()].name + '</button></div>' : '');
+    (S.more ? '<div class="bmore">' + [['spells', 'Zauberbuch'], ['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe & Anleitung']].map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<button data-act="histOpen">Würfelverlauf</button><button data-act="chrOpen">📜 Chronik</button><button data-act="slOpen">✦ Claude fragen</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="themeOpen">Stimmung: ' + THEMES[themeNow()].name + '</button></div>' : '');
 }
 XA.more = () => { S.more = !S.more; const bn = $('#bnav'); if (bn) bn.innerHTML = bnavHtml(); };
 
@@ -4345,8 +4364,8 @@ function helpView() {
   return '<div class="camp helpv"><div class="hero-intro banner" style="' + bannerStyle('magier') + '"><h1>So funktioniert das Heldenbuch</h1><p>Alles Wichtige auf einen Blick. Tippe auf hervorgehobene Werte, um zu würfeln.</p></div>' +
     '<section class="blk hlsec"><h2>Wie viel Hilfe?</h2><p class="hint">Einsteiger bekommen alles erklärt, Erfahrene sehen nur ihren Bogen. Gilt auf diesem Gerät.</p>' + hlPanel('help') + '</section>' +
     sec('Helden erschaffen', ['Unter <b>Erschaffen</b> gehst du Schritt für Schritt durch Klasse, Herkunft, Attribute, Fertigkeiten, Zauber und Ausrüstung.', 'Rote Hinweise rechts (auf dem Handy oben) zeigen, was noch fehlt – antippen bringt dich direkt zum richtigen Feld.', 'Alle Werte (RK, TP, Angriffe, Zauber-SG, Plätze) rechnet die App automatisch.']) +
-    sec('Spielen', ['Auf dem <b>Bogen</b> tippst du Attribute, Fertigkeiten, Rettungswürfe oder Angriffe an – die App würfelt mit Animation und beachtet Vor-/Nachteil und Zustände.', 'Auf dem Handy wechselst du oben im Bogen zwischen <b>Kampf, Werte, Zauber, Fähigkeiten, Ausrüstung, Begleiter</b> und <b>Notizen</b>.', 'Zauber wirken zieht den Platz automatisch ab. Konzentration, Segnen, Mal des Jägers usw. werden verfolgt.', 'Bei 0 TP würfelst du Todesrettungswürfe. Nach drei Fehlschlägen entscheidet die Spielleitung über Gnade.', 'Der Würfelbecher unten links würfelt beliebige Würfel (bis 30 Stück).']) +
-    sec('Gemeinsam spielen', [app ? 'Unter <b>Tisch</b> erstellt die Spielleitung einen Raum. Den <b>Raumcode</b> schickst du per WhatsApp – Mitspieler tippen ihn ein und sind verbunden (Handy und PC gemischt).' : 'Unter <b>Tisch</b> treten alle derselben Kampagne bei. Mitspieler musst du einmal per E-Mail als Bearbeiter einladen.', 'Die Spielleitung startet den Kampf, alle würfeln Initiative, und wer am Zug ist, sieht seinen Bildschirm leuchten.', 'Gegner fügt die Spielleitung im Kampf über <b>+ Gegner</b> hinzu (Bestiarium, Zufallsbegegnung oder ohne Werte). Ist ein Gegner am Zug, zeigt ein Kasten seine Angriffe und zählt mit. Spieler sehen bei Gegnern nur den Zustand (z. B. „schwer verletzt“), nicht die genauen TP.', 'Rast, Beute, EP und Handouts verteilt die Spielleitung für alle mit einem Tipp.']) +
+    sec('Spielen', ['Auf dem <b>Bogen</b> tippst du Attribute, Fertigkeiten, Rettungswürfe oder Angriffe an – die App würfelt mit Animation und beachtet Vor-/Nachteil und Zustände.', 'Oben im Bogen wechselst du zwischen <b>Kampf, Werte, Zauber, Fähigkeiten, Ausrüstung, Begleiter</b> und <b>Notizen</b>. Darunter stehen immer TP, RK, Initiative und Bewegung – TP antippen trägt Schaden oder Heilung ein.', 'Vertan? <b>↶</b> rechts in der Reiterleiste nimmt den letzten Schritt zurück, <b>↷</b> holt ihn wieder. <b>⟲ Zug</b> (Zugleiste oder ⋯) spult alles seit Beginn deines Zuges zurück.', 'Jeder Wurf landet im <b>Würfelverlauf</b> (Würfelfenster antippen oder Mehr → Würfelverlauf), auch die der Kreaturen und Mitspieler.', 'Zauber wirken zieht den Platz automatisch ab. Konzentration, Segnen, Mal des Jägers usw. werden verfolgt.', 'Bei 0 TP würfelst du Todesrettungswürfe. Nach drei Fehlschlägen entscheidet die Spielleitung über Gnade.', 'Der Würfelbecher unten links würfelt beliebige Würfel (bis 30 Stück).']) +
+    sec('Gemeinsam spielen', [app ? 'Unter <b>Tisch</b> erstellt die Spielleitung einen Raum. Den <b>Raumcode</b> schickst du per WhatsApp – Mitspieler tippen ihn ein und sind verbunden (Handy und PC gemischt).' : 'Unter <b>Tisch</b> treten alle derselben Kampagne bei. Mitspieler musst du einmal per E-Mail als Bearbeiter einladen.', 'Die Spielleitung startet den Kampf, alle würfeln Initiative, und wer am Zug ist, sieht seinen Bildschirm leuchten.', 'Gegner fügt die Spielleitung im Kampf über <b>+ Gegner</b> hinzu (Bestiarium, Zufallsbegegnung oder ohne Werte). Ist ein Gegner am Zug, zeigt ein Kasten seine Angriffe und zählt mit. Spieler sehen bei Gegnern nur den Zustand (z. B. „schwer verletzt“), nicht die genauen TP.', 'Rast, Beute, EP und Handouts verteilt die Spielleitung für alle mit einem Tipp.', 'Abenteuer leitet die Spielleitung unter <b>Abenteuer</b>: Vorlesetext als Handout teilen, Kampf mit einem Tipp beginnen, Beute ins Formular übernehmen. Würfeltabellen der Spielleitung bleiben geheim.', '<b>✦ Claude fragen</b> (Tisch, Abenteuer oder Mehr) fasst Szene, Gruppe, Kampf und letzte Würfe zusammen. In claude.ai antwortet Claude direkt, in der App kopierst du die Lage in die Claude-App.']) +
     sec('Sichern', [app ? 'Deine Helden werden auf diesem Gerät gespeichert. Unter <b>Helden</b> sicherst du mit <b>Alles sichern</b> Helden, Hausregeln, eigene Monster und Notizen in einer Datei.' : 'Deine Helden werden in deinem Claude-Konto gespeichert. Unter <b>Helden</b> erhältst du mit <b>Alles sichern</b> zusätzlich eine Datei mit allem.', 'Beim ersten Start fragt die App nach deinem Namen. So sehen die anderen am Tisch, wer welchen Helden spielt.']) +
     '<p class="hint">Regeln nach dem SRD 5.2.1 (CC-BY-4.0), eigene deutsche Zusammenfassung. Mit ✦ markierte Inhalte sind eigene Erfindungen.</p>' + (typeof window.HB_VER === 'string' ? '<p class="hint">Version ' + esc(window.HB_VER) + '</p>' : '') + '</div>';
 }
@@ -4418,6 +4437,9 @@ function gearOpts() {
   if (gearOpts.k === GEAR.length) return gearOpts.h; gearOpts.k = GEAR.length;
   return (gearOpts.h = '<select id="addGear"><option value="">— Vorlage wählen —</option>' + [...new Set(GEAR.map((g) => g[3]))].map((cat) => '<optgroup label="' + esc(cat) + '">' + GEAR.map((g, i) => [g, i]).filter(([g]) => g[3] === cat).map(([[n, k, pr], i]) => '<option value="' + i + '">' + esc(n) + ' · ' + (pr || '') + (k ? ' · ' + String(k).replace('.', ',') + ' kg' : '') + '</option>').join('') + '</optgroup>').join('') + '</select>');
 }
+
+/* Werkzeuge der Spielleitung: auf- und zugeklappt bleibt, wie man es verlassen hat */
+document.addEventListener('toggle', (ev) => { const d = ev.target; if (d && d.classList && d.classList.contains('dmd') && d.dataset.k) { S.dmOpen = S.dmOpen || {}; S.dmOpen[d.dataset.k] = d.open; } }, true);
 
 /* ---------- Weitere magische Gegenstände aus dem SRD 5.2.1 (eigene deutsche Kurzfassung) ----------
    Felder wie in MAGIC_ITEMS: r = Seltenheit, att = Einstimmung, wpn/arm/shd/ac/save/atk/set = wird eingerechnet,
@@ -8617,7 +8639,7 @@ function advOverview(A, st, X) {
 }
 function advChapter(A, st, X) {
   const C = advCh(A, st.ch); const ci = A.chapters.indexOf(C); const Sc = advSc(C, st.sc); const si = C.scenes.indexOf(Sc);
-  let h = '<section class="blk advch"><div class="advhead"><div class="advkick">' + esc(C.kicker) + (C.level && !/Stufe/.test(C.sub || '') ? ' · Stufe ' + esc(C.level) : '') + '</div>' + (typeof slBtn === 'function' ? slBtn() : '') + '</div><h2>' + esc(C.title) + '</h2>' + (C.sub ? '<p class="hint">' + esc(C.sub) + '</p>' : '');
+  let h = '<section class="blk advch"><div class="advhead"><div class="advkick">' + esc(C.kicker) + (C.level && !/Stufe/.test(C.sub || '') ? ' · Stufe ' + esc(C.level) : '') + '</div><div class="chips">' + (typeof ansOpenList === 'function' && S.camp && typeof isDM === 'function' && isDM() && ansOpenList().length ? '<button class="btn sm" data-act="ansOpen">💬 Ansagen ' + ansOpenList().length + '</button>' : '') + '<button class="btn sm ghost" data-act="chrOpen" title="Was bisher geschah">📜 Chronik</button>' + (typeof slBtn === 'function' ? slBtn() : '') + '</div></div><h2>' + esc(C.title) + '</h2>' + (C.sub ? '<p class="hint">' + esc(C.sub) + '</p>' : '');
   h += (C.intro || []).map((b, bi) => advBlock(A, b, ci + '.i.' + bi, st, X, C)).join('');
   if (C.scenes.length > 1) h += '<nav class="advscn" aria-label="Szenen">' + C.scenes.map((s, i) => '<button class="' + (i === si ? 'on' : '') + '" data-act="advScene" data-arg="' + esc(s.id) + '"><span>' + (i + 1) + '</span>' + esc(s.title) + '</button>').join('') + '</nav>';
   h += '<h3 class="advsc" id="advSc">' + (C.scenes.length > 1 ? '<small>Szene ' + (si + 1) + ' von ' + C.scenes.length + '</small>' : '') + esc(Sc.title) + '</h3>';
@@ -8793,6 +8815,11 @@ function slLage(q) {
     L.push('', '## Kampf · Runde ' + (S.combat.round || 1) + (now ? ' · am Zug: ' + now.name : ''));
     o.forEach((x) => L.push('- ' + x.v + ' ' + x.name + (x.npc ? (x.ally ? ' (Verbündeter)' : ' (Gegner)') + ': TP ' + x.hp + '/' + x.hpMax + ', RK ' + x.ac + (x.cond && x.cond.length ? ', ' + x.cond.map((k) => (COND[k] || {}).name || k).join(', ') : '') : ': TP ' + x.hp + '/' + x.hpMax) + (x.dead ? ', tot' : '')));
   }
+  /* Ansagen der Spieler und Chronik */
+  const AO = typeof ansOpenList === 'function' ? ansOpenList() : [];
+  if (AO.length) L.push('', '## Ansagen der Spieler (offen)', ...AO.map((a) => '- ' + a.who + ': ' + a.x));
+  const CT = typeof chrText === 'function' ? chrText(40) : '';
+  if (CT) L.push('', '## Chronik (was bisher geschah, neueste zuletzt)', CT);
   /* Würfe */
   const H = typeof histLoad === 'function' ? histLoad().slice(0, 10) : [];
   if (H.length) L.push('', '## Letzte Würfe', ...H.map((x) => '- ' + histTime(x.t) + ' ' + (x.who ? x.who + ': ' : '') + x.label + ' = ' + x.total + (x.detail ? ' (' + x.detail + ')' : '')));
@@ -8853,6 +8880,141 @@ Object.assign(XA, {
 /* Knopf für die Spielleitung am Tisch und im Abenteuer */
 const slBtn = (cls) => '<button class="btn sm ghost slbtn ' + (cls || '') + '" data-act="slOpen" title="Claude als Helfer der Spielleitung">✦ Claude fragen</button>';
 if (typeof dmTools === 'function') { const _slDm0 = dmTools; dmTools = function () { const h = _slDm0.apply(this, arguments); return h && typeof isDM === 'function' && isDM() ? '<div class="slrow">' + slBtn() + '<span class="hint">Szene, Gruppe, Kampf und Würfe gehen mit.</span></div>' + h : h; }; }
+
+/* ==== Abenteuerverfolgung: Chronik der Spielleitung und Ansagen der Spieler ====
+   Chronik: schreibt auf dem Gerät der Spielleitung automatisch mit, was passiert (Szenen, Handouts, Kämpfe, Beute,
+   Entscheidungen, Rasten, Helden am Boden, Stufenaufstiege, erledigte Ansagen) – je Abenteuer bzw. Tisch, in localStorage „hb_chronik“.
+   Ansagen: Spieler schreiben oder diktieren (Tastatur-Mikrofon) „Was tust du?“; das geht über ihr Tisch-Dokument (Feld ans) an die Spielleitung.
+   Erledigte Ansagen markiert die Spielleitung (Meta ansSeen), die Spieler sehen „✓ gesehen“. Beides fliesst in die Claude-Lage. */
+const CHR_KEY = 'hb_chronik', CHR_MAX = 400;
+const CHR_ICON = { abend: '📅', szene: '📖', handout: '📜', kampf: '⚔', kende: '🏁', beute: '💰', wahl: '⚖', rast: '☾', ansage: '💬', notiz: '✎', stufe: '⬆', boden: '✚', tod: '✝' };
+function chrDb() { try { const d = JSON.parse(localStorage.getItem(CHR_KEY) || '{}'); return d && typeof d === 'object' ? d : {}; } catch (e) { return {}; } }
+function chrSaveDb(d) { try { localStorage.setItem(CHR_KEY, JSON.stringify(d)); } catch (e) {} }
+/* Wohin gehört ein Eintrag? Zum zuletzt geöffneten Abenteuer, sonst zum Tisch */
+function chrWhere() { let a = ''; try { a = typeof advDb === 'function' ? advDb().last : ''; } catch (e) {} if (a && typeof advGet === 'function' && advGet(a)) return { key: 'adv:' + a, name: advGet(a).title }; if (S.camp) return { key: 'tisch:' + S.camp, name: 'Tisch ' + S.camp }; return { key: 'frei', name: 'Ohne Abenteuer' }; }
+function chrList(key) { const d = chrDb(); return Array.isArray(d[key || chrWhere().key]) ? d[key || chrWhere().key] : []; }
+const chrMine = () => !S.camp || (typeof isDM === 'function' && isDM()); /* nur die Spielleitung (oder ohne Tisch) schreibt mit */
+function chrAdd(k, x, force) {
+  if (!x || (!force && !chrMine())) return; const w = chrWhere(); const d = chrDb(); const L = Array.isArray(d[w.key]) ? d[w.key] : []; const now = Date.now();
+  const last = L[L.length - 1];
+  if (last && last.k === k && last.x === x && now - last.t < 15 * 60000) return; /* doppelt */
+  if (k === 'szene') { const ls = [...L].reverse().find((e) => e.k === 'szene'); if (ls && ls.x === x && !L.slice(L.indexOf(ls) + 1).some((e) => e.k === 'abend')) return; }
+  if (k !== 'abend' && (!last || now - last.t > 6 * 3600000)) L.push({ id: uidX(), t: now, k: 'abend', x: 'Spielabend · ' + new Date(now).toLocaleDateString('de-CH', { weekday: 'long', day: 'numeric', month: 'long' }) });
+  L.push({ id: uidX(), t: now, k, x: String(x).slice(0, 400) }); if (L.length > CHR_MAX) L.splice(0, L.length - CHR_MAX);
+  d[w.key] = L; chrSaveDb(d); if (S.modal === 'chronik') chrOpen(true);
+}
+/* Text für Claude und zum Kopieren */
+function chrText(n, key) { const L = chrList(key).slice(-(n || 999)); return L.map((e) => (e.k === 'abend' ? '\n' + e.x : '- ' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + ' ' + e.x)).join('\n').trim(); }
+function chrOpen(keep) {
+  const w = chrWhere(); const L = chrList(w.key); const m = $('#modal'); S.modal = 'chronik'; S.more = false; document.querySelectorAll('details.mnu[open]').forEach((d) => { d.open = false; });
+  const rows = L.map((e) => e.k === 'abend' ? '<li class="cabend">' + esc(e.x) + '</li>' : '<li class="ce"><time>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</time><span class="ci" aria-hidden="true">' + (CHR_ICON[e.k] || '•') + '</span><span class="cx">' + esc(e.x) + '</span><button class="x" data-act="chrDel" data-arg="' + e.id + '" aria-label="Eintrag löschen">×</button></li>').join('');
+  m.innerHTML = '<div class="dlg chrdlg" role="dialog" aria-modal="true" aria-label="Chronik"><div class="dph"><b>Chronik · ' + esc(w.name) + '</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
+    (L.length ? '<ul class="chr" id="chrList">' + rows + '</ul>' : '<p class="hint">Noch nichts aufgeschrieben. Die Chronik füllt sich von selbst: Szenen, Handouts, Kämpfe, Beute, Entscheidungen, Rasten, Stufenaufstiege und erledigte Ansagen. Eigene Notizen kannst du unten ergänzen.</p>') +
+    '<div class="chradd"><input id="chrN" type="text" placeholder="Notiz, z. B. «Die Helden haben Prunella die Wahrheit gesagt»" enterkeyhint="done">' + micBtn('chrN') + '<button class="btn sm" data-act="chrNote">Eintragen</button></div>' +
+    '<div class="chips end"><button class="btn ghost sm" data-act="chrAbend">Neuer Spielabend</button><button class="btn ghost sm" data-act="chrCopy"' + (L.length ? '' : ' disabled') + '>Kopieren</button><button class="btn sm" data-act="chrRecap"' + (L.length ? '' : ' disabled') + '>✦ Was bisher geschah</button></div></div>';
+  m.hidden = false; const l = $('#chrList'); if (l) l.scrollTop = l.scrollHeight;
+}
+
+/* ---------- Ansagen der Spieler ---------- */
+function ansStoreKey() { return 'hb_ans_' + (S.camp || ''); }
+function ansMine() { if (!S.camp) return []; if (!S.myAns) { try { S.myAns = JSON.parse(localStorage.getItem(ansStoreKey()) || '[]'); } catch (e) { S.myAns = []; } if (!Array.isArray(S.myAns)) S.myAns = []; } return S.myAns.slice(-5); }
+const ansSeen = () => (S.meta && Array.isArray(S.meta.ansSeen) ? S.meta.ansSeen : []);
+/* Offene Ansagen aller Spieler (für die Spielleitung), älteste zuerst */
+function ansOpenList() {
+  const seen = ansSeen(); const out = [];
+  if (typeof players === 'function') for (const [u, p] of players()) for (const a of (p && Array.isArray(p.ans) ? p.ans : [])) if (a && a.id && !seen.includes(a.id) && (!S.ansHidden || !S.ansHidden.includes(a.id))) out.push({ uid: u, who: p.char || '?', id: a.id, t: a.t, x: String(a.x || '').slice(0, 400) });
+  return out.sort((a, b) => a.t - b.t);
+}
+function ansBox(where) {
+  if (!S.camp || (typeof isDM === 'function' && isDM())) return '';
+  const mine = ansMine(); const seen = ansSeen();
+  return '<div class="ansbox"' + (where === 'sheet' ? ' data-grp="kampf"' : '') + '><label for="ansX"><b>Was tust du?</b> <small>Ansage an die Spielleitung</small></label><div class="ansrow"><input id="ansX" type="text" enterkeyhint="send" autocomplete="off" placeholder="z. B. «Ich verwirre den Elch mit einem Spiegel»">' + micBtn('ansX') + '<button class="btn sm" data-act="ansSend">Ansagen</button></div>' +
+    hlTip('Sprechen statt tippen: im Textfeld das Mikrofon der Handytastatur antippen.') +
+    (mine.length ? '<ul class="ansmine">' + mine.slice(-2).reverse().map((a) => '<li>' + esc(a.x) + ' <small>' + (seen.includes(a.id) ? '✓ gesehen' : 'gesendet ' + ago(a.t)) + '</small></li>').join('') + '</ul>' : '') + '</div>';
+}
+function ansDmHtml(compact) {
+  const L = ansOpenList(); if (!L.length) return compact ? '' : '<p class="hint">Keine offenen Ansagen.</p>';
+  return '<div class="ansdm"><b>Ansagen <span class="cnt">' + L.length + '</span></b><ul>' + L.map((a) => '<li><span><b>' + esc(a.who) + '</b> <small>' + ago(a.t) + '</small><br>' + esc(a.x) + '</span><button class="chip" data-act="ansOk" data-arg="' + a.id + '" title="Erledigt – kommt in die Chronik">✓</button></li>').join('') + '</ul><div class="chips"><button class="btn sm" data-act="ansClaude">✦ An Claude</button>' + (L.length > 1 ? '<button class="btn sm ghost" data-act="ansAll">Alle ✓</button>' : '') + '</div></div>';
+}
+function ansMark(ids) {
+  const L = ansOpenList().filter((a) => ids.includes(a.id)); if (!L.length) return;
+  L.forEach((a) => chrAdd('ansage', a.who + ': ' + a.x));
+  S.ansHidden = (S.ansHidden || []).concat(ids);
+  if (typeof saveMeta === 'function' && S.camp) saveMeta({ ansSeen: ansSeen().concat(ids).slice(-120) });
+  if (typeof paintCamp === 'function') paintCamp(); if (S.modal === 'ansagen') ansModal();
+}
+function ansModal() { const m = $('#modal'); S.modal = 'ansagen'; m.innerHTML = '<div class="dlg" role="dialog" aria-modal="true" aria-label="Ansagen"><div class="dph"><b>Ansagen der Spieler</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' + ansDmHtml(false) + '</div>'; m.hidden = false; }
+
+/* ---------- Mikrofon (nur in claude.ai mit der Fähigkeit „dictation“; sonst das Mikrofon der Tastatur) ---------- */
+let HB_DICT = null;
+const micBtn = (id) => '<button type="button" class="micbtn" data-act="mic" data-arg="' + id + '"' + (HB_DICT ? '' : ' hidden') + ' aria-label="Sprechen" title="Sprechen">🎤</button>';
+setTimeout(() => { try { if (typeof isApp === 'function' && isApp()) return; if (window.claude && window.claude.use) window.claude.use('dictation').then((d) => { if (!d) return; HB_DICT = d; let base = '';
+  d.onPartial(({ text }) => { const el = S.micEl && document.getElementById(S.micEl); if (el) el.value = base + text; });
+  d.onFinal(({ text }) => { const el = S.micEl && document.getElementById(S.micEl); if (el) { base = base + text + ' '; el.value = base; } });
+  d.onState(({ state }) => { S.micOn = state === 'listening'; document.querySelectorAll('.micbtn').forEach((b) => b.classList.toggle('on', S.micOn && b.dataset.arg === S.micEl)); if (S.micOn) { const el = document.getElementById(S.micEl); base = el && el.value ? el.value.replace(/\s*$/, ' ') : ''; } });
+  document.querySelectorAll('.micbtn').forEach((b) => { b.hidden = false; }); }).catch(() => {}); } catch (e) {} }, 0);
+
+/* ---------- Aktionen ---------- */
+Object.assign(XA, {
+  chrOpen: () => chrOpen(),
+  chrDel: (t, a) => { const w = chrWhere(); const d = chrDb(); d[w.key] = (d[w.key] || []).filter((e) => e.id !== a); chrSaveDb(d); chrOpen(true); },
+  chrNote: () => { const el = $('#chrN'); const v = el && el.value.trim(); if (!v) { if (el) el.focus(); return; } chrAdd('notiz', v, true); chrOpen(true); const n = $('#chrN'); if (n) n.focus(); },
+  chrAbend: () => { const w = chrWhere(); const d = chrDb(); const L = d[w.key] || []; L.push({ id: uidX(), t: Date.now(), k: 'abend', x: 'Spielabend · ' + new Date().toLocaleDateString('de-CH', { weekday: 'long', day: 'numeric', month: 'long' }) }); d[w.key] = L; chrSaveDb(d); chrOpen(true); },
+  chrCopy: async () => { const ok = typeof slCopy === 'function' && await slCopy('Chronik · ' + chrWhere().name + '\n' + chrText()); bannerToast(ok ? 'Chronik kopiert' : 'Kopieren nicht möglich', ''); },
+  chrRecap: () => { S.slQ = 'Schreibe einen Rückblick «Was bisher geschah» zum Vorlesen am Anfang des Spielabends: 6–8 Sätze, lebendig erzählt, nur was die Helden selbst wissen (keine Geheimnisse der Spielleitung), mit einem Satz am Schluss, wo sie jetzt stehen. Grundlage ist die Chronik.'; if (typeof slOpen === 'function') slOpen(); },
+  ansSend: () => { const el = $('#ansX'); const v = el && el.value.trim(); if (!v) { if (el) el.focus(); return; } ansMine(); S.myAns.push({ id: uidX(), t: Date.now(), x: v.slice(0, 400) }); S.myAns = S.myAns.slice(-10); try { localStorage.setItem(ansStoreKey(), JSON.stringify(S.myAns)); } catch (e) {}
+    if (S.micOn && HB_DICT) HB_DICT.stop().catch(() => {}); el.value = ''; if (typeof queueMe === 'function') queueMe(); bannerToast('Angesagt', 'Die Spielleitung sieht deine Ansage.'); render(); },
+  ansOk: (t, a) => ansMark([a]),
+  ansAll: () => ansMark(ansOpenList().map((a) => a.id)),
+  ansOpen: () => ansModal(),
+  ansClaude: () => { const L = ansOpenList(); S.slQ = 'Die Spieler sagen an:\n' + L.map((a) => '- ' + a.who + ': ' + a.x).join('\n') + '\nWas passiert? Nenne pro Held die nötige Probe mit SG (falls eine nötig ist) und was bei Erfolg und Misserfolg geschieht. Kurz.'; if (typeof slOpen === 'function') slOpen(); },
+  mic: (t, a) => { const d = HB_DICT; if (!d) return; if (S.micOn) { d.stop().catch(() => {}); return; } S.micEl = a; d.start().catch((e) => { if (e && e.code === 'not_granted') { HB_DICT = null; document.querySelectorAll('.micbtn').forEach((b) => { b.hidden = true; }); } }); }
+});
+/* Enter sendet Ansage bzw. Notiz */
+document.addEventListener('keydown', (ev) => { if (ev.key !== 'Enter' || ev.isComposing) return; const id = ev.target && ev.target.id; if (id === 'ansX') { ev.preventDefault(); XA.ansSend(); } else if (id === 'chrN') { ev.preventDefault(); XA.chrNote(); } });
+
+/* ---------- Automatisch mitschreiben: nach den Aktionen der Spielleitung ---------- */
+function chrScene() { try { const A = advCurA && advCurA(); if (!A) return ''; const st = advSt(A.id); if (st.tab !== 'ch') return ''; const C = advCh(A, st.ch); const Sc = advSc(C, st.sc); return (C.kicker || C.title) + ' · ' + Sc.title; } catch (e) { return ''; } }
+function chrFight(c) { const n = {}; (c.npcs || []).filter((x) => !x.reserve && !x.ally).forEach((x) => { const b = String(x.name).replace(/\s+\d+$/, ''); n[b] = (n[b] || 0) + 1; }); return Object.entries(n).map(([k, v]) => (v > 1 ? v + '× ' : '') + k).join(', '); }
+let chrPre = null;
+document.addEventListener('click', (ev) => {
+  const t = ev.target.closest && ev.target.closest('[data-act]'); if (!t) return; const a = t.dataset.act;
+  if (a === 'fightEnd' && S.combat && S.combat.active) chrPre = JSON.parse(JSON.stringify(S.combat));
+  setTimeout(() => {
+    try {
+      if (!chrMine()) return;
+      if (a === 'advScene' || a === 'advStep' || (a === 'advTab' && /^ch:/.test(t.dataset.arg || ''))) { const s = chrScene(); if (s) chrAdd('szene', s); }
+      else if (a === 'advHo' || a === 'hoAdd') { const h = ((S.meta && S.meta.handouts) || []).slice(-1)[0]; if (h && Date.now() - h.t < 5000) chrAdd('handout', 'Handout geteilt: ' + (h.title || 'ohne Titel')); }
+      else if (a === 'fightGo' && S.combat && S.combat.active) { const pc = typeof players === 'function' ? players().filter(([u, p]) => p.init && p.init.cid === S.combat.id && !p.init.away).map(([, p]) => p.char) : []; const f = chrFight(S.combat); chrAdd('kampf', 'Kampf beginnt' + (pc.length ? ': ' + pc.join(', ') : '') + (f ? ' gegen ' + f : '')); }
+      else if (a === 'advFight' && S.combat && S.combat.active && !S.camp) { const f = chrFight(S.combat); if (f) chrAdd('kampf', 'Kampf: ' + f); }
+      else if (a === 'fightEnd' && chrPre) { const c = chrPre; chrPre = null; const foes = (c.npcs || []).filter((x) => !x.reserve && !x.ally && x.hpMax); const down = foes.filter((x) => x.hp <= 0).length;
+        const pcs = typeof players === 'function' ? players().filter(([, p]) => p.hp <= 0).map(([, p]) => p.char) : [];
+        chrAdd('kende', 'Kampf vorbei nach ' + (c.round || 1) + (c.round > 1 ? ' Runden' : ' Runde') + (foes.length ? ': ' + down + ' von ' + foes.length + ' Gegnern besiegt' : '') + (pcs.length ? '; am Boden: ' + pcs.join(', ') : '')); }
+      else if (a === 'gift') { const g = ((S.meta && S.meta.gifts) || []).slice(-1)[0]; if (g && Date.now() - g.t < 5000) chrAdd('beute', 'Beute an ' + (g.to === 'all' ? 'alle' : ((S.table[g.to] || {}).char || '?')) + ': ' + [g.xp && g.xp + ' EP', g.gm && g.gm + ' GM', g.item && MAGIC_ITEMS[g.item] && MAGIC_ITEMS[g.item].name, g.text].filter(Boolean).join(', ')); }
+      else if (a === 'grpRest') chrAdd('rast', t.dataset.arg === 'long' ? 'Lange Rast' : 'Kurze Rast');
+      else if (a === 'advFlag') { const A = advCurA(); const f = A && (A.flags || []).find((x) => x.id === t.dataset.arg); const v = A && advSt(A.id).flags[t.dataset.arg]; if (f && v) chrAdd('wahl', f.label + ': ' + v); }
+      else if (a === 'advChoice') { const A = advCurA(); const r = A && advBlockAt(A, t.dataset.arg); const st = A && advSt(A.id); const i = r && st.choice[r.b.key]; if (r && i != null && r.b.rows[i]) chrAdd('wahl', (r.b.title || 'Entscheidung') + ': ' + advPlain(r.b.rows[i].a || '')); }
+    } catch (e) {}
+  }, 60);
+}, true);
+/* Am Tisch beobachten: Helden am Boden, Tod, Stufenaufstieg, neue Ansagen */
+function chrWatch() {
+  if (!S.camp || !(typeof isDM === 'function' && isDM()) || typeof players !== 'function') return;
+  S.chrSeen = S.chrSeen || {}; const fresh = !S.chrInit; S.chrInit = true;
+  for (const [u, p] of players()) {
+    if (!p || !p.char) continue; const prev = S.chrSeen[u];
+    if (prev && !fresh) {
+      if (p.hp <= 0 && prev.hp > 0 && !p.dead) chrAdd('boden', p.char + ' geht zu Boden');
+      if (p.dead && !prev.dead) chrAdd('tod', p.char + ' stirbt');
+      if (+p.level > +prev.level) chrAdd('stufe', p.char + ' erreicht Stufe ' + p.level);
+      for (const a of p.ans || []) if (!(prev.ans || []).includes(a.id) && !ansSeen().includes(a.id)) bannerToast('Ansage von ' + p.char, String(a.x).slice(0, 120));
+    }
+    S.chrSeen[u] = { hp: p.hp, dead: !!p.dead, level: p.level, ans: (p.ans || []).map((a) => a.id) };
+  }
+}
+setTimeout(() => { if (typeof paintCamp === 'function') { const p0 = paintCamp; paintCamp = function () { const r = p0.apply(this, arguments); try { chrWatch(); } catch (e) {} return r; }; } }, 0);
+/* Werkzeuge der Spielleitung: Ansagen und Chronik oben; für Spieler das Ansagefeld */
+if (typeof dmTools === 'function') { const _chDm0 = dmTools; dmTools = function () { const h = _chDm0.apply(this, arguments); if (!S.camp) return h; if (typeof isDM === 'function' && isDM()) return ansDmHtml(true) + '<div class="slrow chrrow"><button class="btn sm ghost" data-act="chrOpen">📜 Chronik <small>' + chrList().filter((e) => e.k !== 'abend').length + '</small></button></div>' + h; return ansBox('camp') + h; }; }
 
 /* ==== Heldenbuch – Oberfläche ==== */
 const S = { chars: {}, hb: {}, cur: null, view: 'heroes', step: 0, mode: 'normal', log: [], sf: { q: '', lvl: 'all', cls: 'all' }, hbEdit: null, confirm: null, open: {}, store: 'local', saving: '', camp: '', share: true, table: {}, campErr: '', combat: null, myInit: null, logOpen: false, logFilter: 'all', npcRoll: false, meta: { dm: null, mercy: {} }, mercyQ: [] };
@@ -9294,7 +9456,7 @@ function renderTop() {
   const more = [['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe']]; const moreOn = more.some(([k]) => S.view === k);
   $('#top').innerHTML = '<div class="wrap"><div class="bar"><button class="brand" data-act="view" data-arg="heroes">' + LOGO + 'Heldenbuch</button>' +
     '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') +
-      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<hr><button data-act="histOpen">Würfelverlauf</button><button data-act="slOpen">✦ Claude fragen</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button></div></details></nav>' +
+      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<hr><button data-act="histOpen">Würfelverlauf</button><button data-act="chrOpen">📜 Chronik</button><button data-act="slOpen">✦ Claude fragen</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button></div></details></nav>' +
     '<button class="mbtn mwarn" data-act="warnOpen" hidden aria-label="Offene Punkte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg><b></b></button><button class="mbtn mdice" data-act="drOpen" aria-label="Würfelbecher"><svg viewBox="0 0 64 64" aria-hidden="true"><polygon points="32,4 56,18 56,46 32,60 8,46 8,18"/><polygon points="32,18 46,42 18,42"/></svg></button>' +
     '<button class="tbtn tsearch" data-act="search" title="Suchen (Strg+K oder /)" aria-label="Suchen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>' +
     '<button class="tbtn" data-act="themeOpen" title="Stimmung wählen" aria-label="Stimmung wählen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.2-1-1.6-1-2.6 0-1 .8-1.7 1.9-1.7H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z"/><circle cx="7.5" cy="11" r="1.3"/><circle cx="10.5" cy="7" r="1.3"/><circle cx="15" cy="7.5" r="1.3"/></svg></button>' + (ch ? '<button class="curhero" data-act="view" data-arg="heroes" title="Helden wechseln">' + sigil(ch) + '<span>' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</span></button>' : '') +
@@ -9612,6 +9774,7 @@ function renderSheet(c) {
   h += '<div class="shbar' + (S.hpOpen || P.hp <= 0 ? ' hpo' : '') + '">' + sheetNav(c) + vbarHtml(c) + '</div>';
   if (typeof hintBlock === 'function') h += hintBlock(c);
   if (!P.dead && typeof turnBlock === 'function') h += turnBlock(c);
+  if (S.camp && typeof ansBox === 'function') h += ansBox('sheet');
   if (P.hp <= 0) h += '<div class="death" data-grp="kampf werte zauber faehig gear begleiter notiz"><b>Todesrettungswürfe</b><span>Erfolge</span>' + pips('ds0', 3, P.ds[0]) + '<span>Fehlschläge</span>' + pips('ds1', 3, P.ds[1]) + '<button class="btn sm" data-act="deathRoll">Würfeln</button></div>';
   h += '<div class="strow" data-grp="kampf"><div class="chips">' + chip(P.insp, 'Heldeninspiration', 'data-act="flip" data-path="play.insp"') + (c.lv('bar') ? chip(P.raging, P.raging ? 'Kampfrausch aktiv (+' + c.rageDmg + ' Schaden)' : 'Kampfrausch beginnen', 'data-act="rage"') : '') + fxChips(c) + (P.conc ? '<span class="concchip">Konzentration: <b>' + esc(P.conc.name) + '</b><button class="x" data-act="concEnd" aria-label="Konzentration beenden">×</button></span>' : '') + '</div>' +
     '</div>';
@@ -9924,7 +10087,7 @@ function myRolls() { return S.log.filter((e) => (e.sides || e.share) && !e.previ
 function meDoc() {
   const ch = cur(); let c = null; try { c = derive(ch, S.hb); } catch (e) {}
   return { char: ch.name.replace(/^Beispiel:\s*/, ''), pl: typeof myName === 'function' ? myName() : '', cls: ch.cls, pas: c ? [c.passive, 10 + c.skills.ins.val, 10 + c.skills.inv.val] : null, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: ch.play.hp ?? (c ? c.hpMax : 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0, dodge: !!(ch.play.fx || {}).dodge,
-    cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, dice: ch.dice || '', diceAt: ch.diceAt || 0, t: Date.now() };
+    cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], ans: typeof ansMine === 'function' ? ansMine() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, dice: ch.dice || '', diceAt: ch.diceAt || 0, t: Date.now() };
 }
 function queueMe() { if (!S.camp || !DB || !cur()) return; clearTimeout(meTimer); meTimer = setTimeout(writeMe, 250); }
 async function writeMe() {
@@ -9999,7 +10162,7 @@ function renderCamp() {
       '<h3>So holst du deine Mitspieler dazu</h3><ol class="steps2"><li>Öffne oben rechts im Heldenbuch das Menü <b>Teilen</b>.</li><li>Lade jeden Mitspieler per E-Mail als <b>Bearbeiter</b> ein. Nur dann dürfen ihre Würfe am Tisch erscheinen.</li><li>Alle öffnen das Heldenbuch, legen ihren Helden an und treten mit demselben Namen bei.</li></ol><p class="hint">Den Link und den Kampagnennamen kannst du danach per WhatsApp verschicken.</p><p class="hint">Jeder sieht nur seine eigenen Helden. Am Tisch geteilt werden nur Name, Klasse, TP, RK, Zustände und die Würfe.</p></section></div>';
   }
   return '<div class="camp"><header class="shead"><div><h1>' + esc(S.camp) + '</h1><div id="campStat">' + campStatus() + '</div>' + myNameLine() + '<div id="dmBox" class="dmbox">' + dmHtml() + '</div></div><div class="sctl">' + chip(S.share, !S.share ? 'Verdeckt würfeln' : S.secret ? 'Nur Spielleitung sieht Würfe' : 'Würfe teilen: an', 'data-act="campShare" title="Antippen zum Wechseln: alle sehen – nur die Spielleitung sieht – niemand sieht"') + '<button class="btn ghost" data-act="view" data-arg="sheet">Zum Bogen</button><button class="btn ghost" data-act="campLeave">Verlassen</button></div></header>' +
-    '<div class="invbar"><span class="hint" style="margin:0">Mitspieler einladen:</span>' + inviteHtml() + '</div>' +
+    (players().length ? '<details class="invbar small"><summary>Mitspieler einladen</summary>' + inviteHtml() + '</details>' : '<div class="invbar"><span class="hint" style="margin:0">Mitspieler einladen:</span>' + inviteHtml() + '</div>') +
     '<section class="blk fight" id="fightBox">' + fightHtml() + '</section>' + '<div id="dmTools">' + dmTools() + '</div>' +
     '<div class="cols"><section class="blk"><h2>Die Gruppe</h2><div id="partyBox">' + partyHtml() + '</div></section><section class="blk"><h2>Würfe am Tisch</h2><div id="tableBox">' + tableBox(12) + '</div></section></div></div>';
 }
@@ -10106,7 +10269,13 @@ async function saveCombat(c) {
   S.combatPend = { base, ours: c, at: Date.now() };
   S.combat = c; paintCamp(); try { await combatRef().set(c); } catch (e) { S.campErr = 'noaccess'; paintCamp(); }
 }
-function setMyInit(v) { S.myInit = { v: +v, cid: S.combat.id }; queueMe(); setTimeout(paintCamp, 50); }
+function setMyInit(v) { S.myInit = { v: +v, cid: S.combat.id }; if (S.modal === 'initcall') { S.modal = null; const m = $('#modal'); if (m) m.hidden = true; } queueMe(); setTimeout(paintCamp, 50); }
+/* Helden in der Initiative: TP auf einen Blick (wie bei den Gegnern) */
+function pcBits(x) {
+  if (!x.hpMax) return ''; const pct = Math.max(0, Math.min(100, (x.hp / x.hpMax) * 100));
+  const p = (S.table || {})[x.key.slice(2)] || {}; const cond = (p.cond || []).map((n) => '<span class="ncond">' + esc(n) + '</span>').join('');
+  return '<span class="pchp' + (x.hp <= 0 ? ' down' : pct <= 25 ? ' crit' : pct <= 50 ? ' low' : '') + '"><i style="width:' + pct + '%"></i></span><span class="nhp">TP ' + x.hp + '/' + x.hpMax + (p.ac ? ' · RK ' + p.ac : '') + '</span>' + cond;
+}
 function order() {
   const c = S.combat; if (!c || !c.active) return [];
   const list = [];
@@ -10145,7 +10314,7 @@ function fightHtml() {
     (!c.turn && lead ? '<button class="btn" data-act="fightGo"' + (o.length ? '' : ' disabled') + '>Ersten Zug starten</button>' : '') +
     (lead && c.turn ? '<button class="btn ghost sm" data-act="fightReset" data-confirm="Neue Begegnung? Alle würfeln neu Initiative, Runde, Zug und Effekte werden zurückgesetzt. Besiegte Gegner verschwinden, die übrigen bleiben." title="Neuer Kampf mit denselben Teilnehmern – alle würfeln neu Initiative">Neue Begegnung</button>' : '') + (lead ? '<button class="btn ghost sm" data-act="fightEnd" data-confirm="Kampf beenden? Initiative, Gegner und Effekte werden für alle gelöscht.">Kampf beenden</button>' : '') + '</div></div>';
   if (lead && cur && cur.npc && typeof npcTurnBox === 'function') h += npcTurnBox(c, cur);
-  h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + x.v + '</span>' + (x.npc ? ((typeof mobPic === 'function' && mobPic(x.mid, 'sigil npc pic')) || '<span class="sigil npc" aria-hidden="true">⚔</span>') : sigil({ name: x.name, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : '') + (typeof effBadges === 'function' ? effBadges(x.key, lead) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
+  h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + x.v + '</span>' + (x.npc ? ((typeof mobPic === 'function' && mobPic(x.mid, 'sigil npc pic')) || '<span class="sigil npc" aria-hidden="true">⚔</span>') : sigil({ name: x.name, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : pcBits(x)) + (typeof effBadges === 'function' ? effBadges(x.key, lead) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
   if (c.log && c.log.length) h += '<details class="clog"><summary>Verlauf <small>' + c.log.length + '</small></summary><ul>' + c.log.slice().reverse().slice(0, 12).map((e) => '<li><span>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</span>' + esc(e.x) + '</li>').join('') + '</ul></details>';
   if (w.length) h += '<p class="hint">Würfelt noch: ' + w.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + '</p>';
   if (lead && !c.turn && players().length) h += '<div class="fgrp"><b>Überrascht? <small>Nachteil auf den Initiativewurf</small></b><div class="chips">' + players().map(([u, p]) => chip((c.surp || []).includes(u), esc(p.char || '?'), 'data-act="surpTog" data-arg="' + u + '"')).join('') + '</div><p class="hint">Gegner überrascht: beim Hinzufügen „überrascht“ ankreuzen.</p></div>';

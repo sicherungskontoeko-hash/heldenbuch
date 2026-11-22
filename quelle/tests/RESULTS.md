@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-22T18:40:50+01:00
-- Revision (SHA-256 von index.html, gekürzt): 391e9d182699cf75
+- Zeitpunkt: 2026-11-22T19:05:48+01:00
+- Revision (SHA-256 von index.html, gekürzt): 03570c5a962b0ea1
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v726
@@ -63,6 +63,6 @@
 | Online-Tisch (net.test.js) | 0 | ✔ Nach Verbindungsabbruch: Spieler verbindet neu, Würfe kommen an 7 / 7 bestanden  |
 | Selbst-Update Android-App (boot.test.js) | 0 | ✔ Im normalen Browser: keine Update-Logik 16 / 16 bestanden  |
 | Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js) | 0 | ✔ Handy: kein Querscrollen bei den Spielern 18 / 18 bestanden  |
-| Spielabend mit Abenteuer: SL + 2 Spieler (sitzung.test.js) | 0 | ✔ Laptop der SL: kein Querscrollen (Tisch, Abenteuer) 21 / 21 bestanden  |
+| Spielabend mit Abenteuer: SL + 2 Spieler (sitzung.test.js) | 0 | ✔ Laptop der SL: kein Querscrollen (Tisch, Abenteuer) 41 / 41 bestanden  |
 
 Gesamtergebnis: alle Suiten bestanden

@@ -1083,6 +1083,21 @@ body:has(#modal:not([hidden])) #undoBar,body:has(#prompt:not([hidden])) #undoBar
 .pchp{width:60px;height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;flex:none}.pchp i{display:block;height:100%;background:#7fbf7f}.pchp.low i{background:#e0b15a}.pchp.crit i,.pchp.down i{background:#d0634f}
 details.invbar{margin:6px 0 0}details.invbar summary{cursor:pointer;color:var(--gold);font-size:.88rem}details.invbar[open]{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .dmd>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}.dmd>summary::-webkit-details-marker{display:none}.dmd>summary::before{content:'▸';color:var(--gold);transition:transform .15s}.dmd[open]>summary::before{transform:rotate(90deg)}.dmd[open]>summary{margin-bottom:8px}
+/* Chronik und Ansagen */
+.chrdlg{max-width:620px}.chr{list-style:none;margin:6px 0 10px;padding:0;max-height:52vh;overflow:auto;border-top:1px solid var(--line)}
+.chr .cabend{position:sticky;top:0;z-index:1;background:var(--raised);padding:7px 4px;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.chr .ce{display:grid;grid-template-columns:42px 22px minmax(0,1fr) auto;gap:6px;align-items:start;padding:6px 4px;border-bottom:1px solid var(--line);font-size:.9rem}
+.chr time{font-size:.74rem;color:var(--faint);padding-top:2px;font-variant-numeric:tabular-nums}.chr .ci{text-align:center}.chr .cx{overflow-wrap:anywhere}.chr .x{width:26px;height:26px;font-size:.9rem;opacity:.55}
+.chradd{display:flex;gap:6px;align-items:center;margin:6px 0}.chradd input{flex:1;min-width:0}
+.ansbox{margin:0 0 12px;padding:10px 12px;border:1px solid rgba(var(--gold-rgb),.45);border-radius:14px;background:linear-gradient(180deg,rgba(var(--gold-rgb),.08),rgba(var(--gold-rgb),.02))}
+.ansbox label{display:block;margin-bottom:6px}.ansbox label small{color:var(--muted);font-weight:400}
+.ansrow{display:flex;gap:6px;align-items:center}.ansrow input{flex:1;min-width:0}
+.ansmine{list-style:none;margin:8px 0 0;padding:0;font-size:.84rem;color:var(--muted)}.ansmine li{margin:2px 0}.ansmine small{color:var(--gold)}
+.ansdm{margin:0 0 12px;padding:10px 12px;border:1px solid var(--gold);border-radius:14px;background:rgba(var(--gold-rgb),.08);box-shadow:var(--glow)}
+.ansdm .cnt{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:11px;background:var(--gold);color:var(--gold-ink);font-size:.78rem;margin-left:4px}
+.ansdm ul{list-style:none;margin:8px 0;padding:0;display:grid;gap:6px}.ansdm li{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:7px 9px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}.ansdm li small{color:var(--faint)}
+.micbtn{flex:none;width:38px;height:38px;border-radius:50%;border:1px solid var(--line2);background:var(--surface);cursor:pointer;font-size:1rem;padding:0}.micbtn.on{border-color:#d0634f;box-shadow:0 0 0 3px rgba(208,99,79,.35);animation:micpulse 1.2s infinite}@keyframes micpulse{0%,100%{box-shadow:0 0 0 3px rgba(208,99,79,.35)}50%{box-shadow:0 0 0 8px rgba(208,99,79,.08)}}
+.advhead .chips{margin:0;gap:6px}
 /* Claude als Helfer der Spielleitung */
 .sldlg{max-width:640px}.sldlg textarea{width:100%;min-height:76px;margin:6px 0 8px}.slq{margin:4px 0 6px}.slq .chip{font-size:.82rem;padding:5px 10px}
 .slchat{max-height:46vh;overflow:auto;display:grid;gap:8px;margin:6px 0 10px;padding:2px}

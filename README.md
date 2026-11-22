@@ -14,6 +14,7 @@ Dieses Repository baut automatisch (siehe *Actions*):
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
 
 ## Neu in Version 1.9
+- **Abenteuerverfolgung:** Die **Chronik** der Spielleitung schreibt automatisch mit (Szenen, Handouts, Kämpfe mit Bilanz, Beute, Entscheidungen, Rasten, Helden am Boden, Stufenaufstiege, erledigte Ansagen), mit eigenen Notizen und Spielabenden; «✦ Was bisher geschah» macht mit Claude einen Rückblick zum Vorlesen. **Ansagen:** Spieler sagen am Tisch oder auf dem Bogen an, was ihr Held tut (tippen oder Tastatur-Mikrofon); die Spielleitung sieht sie oben, hakt ab oder schickt sie «An Claude». Chronik und offene Ansagen stehen in jeder Claude-Lage.
 - **✦ Claude fragen** für die Spielleitung (Tisch, Abenteuer, Mehr): fasst Abenteuer-Szene, Gruppe mit TP, Kampf und letzte Würfe zusammen. In der claude.ai-Fassung antwortet Claude direkt (Antwort auch als Handout teilbar), in der App wird die Lage kopiert oder geteilt und in der Claude-App eingefügt.
 - **Rückgängig und Wiederholen** fest am rechten Rand der Reiterleiste (↶ ↷, Strg+Z/Strg+Y), dazu **⟲ Zug zurückspulen** mit Vorschau aller Schritte seit Zugbeginn.
 - **Spielleitung aufgeräumt:** Rast, Beute, Handout und Notizen zum Aufklappen (Zustand bleibt), Einladen eingeklappt sobald Spieler da sind, TP und RK der Helden direkt in der Initiative; Würfeltabellen der Spielleitung bleiben geheim; das Initiative-Fenster schliesst sich, sobald man auf dem Bogen würfelt.

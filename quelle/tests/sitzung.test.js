@@ -33,6 +33,7 @@ const ROOT = path.resolve(__dirname, '..', 'app', 'www');
   const path0 = await SL.p.evaluate(() => { advSetOn('krug', true); S.adv = 'krug'; advSetSt('krug', (st) => { st.tab = 'ch'; st.ch = 'prolog'; st.sc = 'prologs1'; return st; }); const d = advDb(); d.last = 'krug'; advSave(d); S.view = 'adv'; render(); const A = advGet('krug'); const ci = A.chapters.findIndex((c) => c.id === 'prolog'); const bi = A.chapters[ci].scenes[0].blocks.findIndex((b) => b.t === 'vorlese'); return ci + '.0.' + bi; });
   T('SL: Knopf «Als Handout teilen» beim Vorlesetext', await SL.p.evaluate(() => !!document.querySelector('[data-act="advHo"]')));
   await act(SL.p, 'advHo', path0); await w(1800);
+  await act(SL.p, 'advScene', 'prologs1'); await w(150);
   T('Spieler bekommen das Handout (Meldung und Liste am Tisch)', (await Promise.all([B, C].map((x) => x.p.evaluate(() => { S.view = 'camp'; render(); return (S.meta.handouts || []).length === 1 && !!document.querySelector('details.ho') && /Brief|Kupfergasse|Gorm/.test(document.querySelector('details.ho').textContent); })))).every(Boolean));
 
   /* Geheime Würfeltabelle der SL */
@@ -40,15 +41,30 @@ const ROOT = path.resolve(__dirname, '..', 'app', 'www');
   await act(SL.p, 'advRoll', pathR); await w(1800);
   const sec = await Promise.all([B, C].map((x) => x.p.evaluate(() => !tableRolls().some((r) => /Spontane Namen|Zwischenfälle/.test(r.label)) && !histLoad().some((h) => /Spontane Namen|Zwischenfälle/.test(h.label)))));
   T('Würfeltabelle der SL bleibt geheim (Spieler sehen sie nicht)', sec.every(Boolean) && await SL.p.evaluate(() => histLoad().some((h) => /Spontane Namen|Zwischenfälle/.test(h.label))), sec);
+  T('Chronik: Handout steht drin', await SL.p.evaluate(() => chrList().some((e) => e.k === 'handout' && /Handout geteilt/.test(e.x))), await SL.p.evaluate(() => chrList()));
+  T('Chronik: Spielabend-Kopf automatisch', await SL.p.evaluate(() => chrList()[0].k === 'abend'));
+  T('Spieler schreiben keine Chronik', (await Promise.all([B, C].map((x) => x.p.evaluate(() => chrList().length === 0)))).every(Boolean));
+  /* Ansage vom Handy (Tisch), Enter sendet */
+  await B.p.evaluate(() => { S.view = 'camp'; render(); });
+  T('Spieler: Ansagefeld am Tisch', await B.p.evaluate(() => !!document.querySelector('.ansbox #ansX')));
+  await B.p.fill('#ansX', 'Ich verwirre den Elch mit einem Spiegel'); await B.p.press('#ansX', 'Enter'); await w(1800);
+  T('SL sieht die Ansage oben in den Werkzeugen', await SL.p.evaluate(() => { S.view = 'camp'; render(); const a = document.querySelector('.ansdm'); return !!a && /Ilva/.test(a.textContent) && /Elch mit einem Spiegel/.test(a.textContent); }));
+  T('Ansage steht in der Claude-Lage', await SL.p.evaluate(() => /## Ansagen der Spieler \(offen\)\n- Ilva: Ich verwirre den Elch/.test(slLage(''))));
+  await SL.p.evaluate(() => document.querySelector('.ansdm [data-act="ansClaude"]').click()); await w(200);
+  T('«An Claude» füllt die Frage mit den Ansagen', await SL.p.evaluate(() => S.modal === 'slh' && /Ilva: Ich verwirre den Elch/.test($('#slQ').value)));
+  await SL.p.evaluate(() => { S.modal = null; $('#modal').hidden = true; document.querySelector('.ansdm [data-act="ansOk"]').click(); }); await w(1800);
+  T('Erledigt: weg bei der SL, in der Chronik, beim Spieler «✓ gesehen»', await SL.p.evaluate(() => !document.querySelector('.ansdm') && chrList().some((e) => e.k === 'ansage' && /Ilva: Ich verwirre/.test(e.x))) && await B.p.evaluate(() => { render(); return /✓ gesehen/.test(document.querySelector('.ansmine').textContent); }));
 
   /* Kampf aus dem Abenteuer */
-  const pathK = await SL.p.evaluate(() => { const A = advGet('krug'); for (let ci = 0; ci < A.chapters.length; ci++) for (let si = 0; si < A.chapters[ci].scenes.length; si++) { const bi = A.chapters[ci].scenes[si].blocks.findIndex((b) => b.t === 'kampf'); if (bi >= 0) { advSetSt('krug', (st) => { st.ch = A.chapters[ci].id; st.sc = A.chapters[ci].scenes[si].id; return st; }); render(); return ci + '.' + si + '.' + bi; } } return ''; });
+  const pathK = await SL.p.evaluate(() => { S.view = 'adv'; const A = advGet('krug'); for (let ci = 0; ci < A.chapters.length; ci++) for (let si = 0; si < A.chapters[ci].scenes.length; si++) { const bi = A.chapters[ci].scenes[si].blocks.findIndex((b) => b.t === 'kampf'); if (bi >= 0) { advSetSt('krug', (st) => { st.ch = A.chapters[ci].id; st.sc = A.chapters[ci].scenes[si].id; return st; }); render(); return ci + '.' + si + '.' + bi; } } return ''; });
   T('SL: Knopf «Kampf beginnen» im Abenteuer', await SL.p.evaluate(() => !!document.querySelector('[data-act="advFight"]')));
   await act(SL.p, 'advFight', pathK); await w(1800);
-  await B.p.evaluate(() => setMyInit(19)); await C.p.evaluate(() => setMyInit(3)); await w(1500);
+  await B.p.evaluate(() => setMyInit(40)); await C.p.evaluate(() => setMyInit(-5)); await w(1500);
   const ord = await Promise.all(all.map((x) => x.p.evaluate(() => order().map((o) => o.name))));
   T('Abenteuer-Gegner stehen bei allen in der Reihenfolge', ord.every((o) => o.join() === ord[0].join()) && ord[0].length >= 3 && ord[0][0] === 'Ilva', ord[0]);
   await act(SL.p, 'fightGo'); await w(1500);
+  T('Chronik: Kampf beginnt mit Teilnehmern und Gegnern', await SL.p.evaluate(() => chrList().some((e) => e.k === 'kampf' && /Ilva, Brakk gegen/.test(e.x) && /Mimik|Hildegard|×/.test(e.x))), await SL.p.evaluate(() => chrList().filter((e) => e.k === 'kampf')));
+  T('Brakk (nicht am Zug) sieht das Ansagefeld auf dem Bogen', await C.p.evaluate(() => { S.view = 'sheet'; S.mg = 'kampf'; render(); const a = document.querySelector('.ansbox'); return !!a && a.offsetParent !== null; }));
   T('Spieler sehen am Tisch, wer am Zug ist', (await Promise.all([B, C].map((x) => x.p.evaluate(() => { S.view = 'camp'; render(); return /Am Zug: Ilva/.test(document.querySelector('#fightBox').textContent) && !!document.querySelector('.order li.now'); })))).every(Boolean));
   T('Ilva sieht auf dem Bogen «dein Zug», Brakk «nicht dein Zug»', await B.p.evaluate(() => { S.view = 'sheet'; S.mg = 'kampf'; render(); return /dein Zug/.test(document.querySelector('.turnblk').textContent) && !/nicht dein Zug/.test(document.querySelector('.turnblk').textContent); }) && await C.p.evaluate(() => { S.view = 'sheet'; S.mg = 'kampf'; render(); return /nicht dein Zug/.test(document.querySelector('.turnblk').textContent); }));
   /* Ilva wirkt Feuerpfeil von der Kampfseite (Zaubertrick bei den Angriffen) */
@@ -69,8 +85,12 @@ const ROOT = path.resolve(__dirname, '..', 'app', 'www');
   /* Claude-Lage für die SL */
   const L = await SL.p.evaluate(() => slLage('Was tut der Gegner jetzt?'));
   T('Claude-Lage: Abenteuer, Kampf, Gruppe mit aktuellen TP', /Wirtshaus zum letzten Krug/.test(L) && /## Kampf · Runde/.test(L) && new RegExp('Brakk.*TP ' + hp1 + '/').test(L) && /Ilva/.test(L), L.slice(0, 300));
+  await C.p.evaluate(() => { orbPrompt(''); hpChange(cur(), 'dmg', cur().play.hp + 1); }); await w(1800);
+  T('Chronik: Brakk geht zu Boden', await SL.p.evaluate(() => chrList().some((e) => e.k === 'boden' && /Brakk/.test(e.x))));
+  await C.p.evaluate(() => { orbPrompt(''); hpChange(cur(), 'heal', 10); }); await w(1200);
   await act(SL.p, 'fightEnd'); await SL.p.evaluate(() => { const y = document.querySelector('.cfdlg button.btn:not(.ghost)'); if (y) y.click(); }); await w(1800);
   T('Kampf beendet überall', (await Promise.all(all.map((x) => x.p.evaluate(() => !S.combat || !S.combat.active)))).every(Boolean));
+  T('Chronik: Kampfende mit Runden und Bilanz', await SL.p.evaluate(() => chrList().some((e) => e.k === 'kende' && /Kampf vorbei nach \d+ Runde/.test(e.x) && /von \d+ Gegnern besiegt/.test(e.x))), await SL.p.evaluate(() => chrList().filter((e) => e.k === 'kende')));
 
   /* Beute aus dem Abenteuer: Gold für alle, ein Abenteuer-Gegenstand für Ilva */
   const pathL = await SL.p.evaluate(() => { S.view = 'adv'; const A = advGet('krug'); const ci = A.chapters.findIndex((c) => c.id === 'prolog'); const bi = A.chapters[ci].scenes[0].blocks.findIndex((b) => b.t === 'loot'); advSetSt('krug', (st) => { st.ch = 'prolog'; st.sc = 'prologs1'; return st; }); render(); return ci + '.0.' + bi; });
@@ -85,6 +105,22 @@ const ROOT = path.resolve(__dirname, '..', 'app', 'www');
   await act(SL.p, 'advGiveK', key); await w(300);
   await SL.p.evaluate((u) => { $('#gTo').value = u; document.querySelector('[data-act="gift"]').click(); }, uid.B); await w(1800);
   T('Ilva bekommt den Abenteuer-Gegenstand, Brakk nicht', await B.p.evaluate((k) => (cur().items || []).some((i) => i.id === k), key) && !(await C.p.evaluate((k) => (cur().items || []).some((i) => i.id === k), key)));
+  T('Chronik: Beute mit Empfänger', await SL.p.evaluate(() => chrList().filter((e) => e.k === 'beute').length >= 2 && chrList().some((e) => e.k === 'beute' && /an alle: \d+ GM/.test(e.x)) && chrList().some((e) => e.k === 'beute' && /an Ilva/.test(e.x))));
+  await act(SL.p, 'grpRest', 'short'); await w(1200);
+  T('Chronik: Rast', await SL.p.evaluate(() => chrList().some((e) => e.k === 'rast' && /Kurze Rast/.test(e.x))));
+  await C.p.evaluate(() => { const m = $('#modal'); if (m) m.hidden = true; S.modal = null; orbPrompt(''); const ch = cur(); ch.level = 5; commit(); }); await w(1800);
+  T('Chronik: Stufenaufstieg', await SL.p.evaluate(() => chrList().some((e) => e.k === 'stufe' && /Brakk erreicht Stufe 5/.test(e.x))));
+  await SL.p.evaluate(() => { S.view = 'adv'; render(); document.querySelector('.advhead [data-act="chrOpen"]').click(); }); await w(200);
+  T('Chronik-Fenster: Einträge in Reihenfolge, Spielabend-Kopf', await SL.p.evaluate(() => S.modal === 'chronik' && document.querySelectorAll('.chr .ce').length >= 8 && !!document.querySelector('.chr .cabend')));
+  await SL.p.fill('#chrN', 'Die Helden haben Prunella die Wahrheit gesagt'); await SL.p.press('#chrN', 'Enter'); await w(150);
+  T('Chronik: eigene Notiz per Enter', await SL.p.evaluate(() => chrList().slice(-1)[0].k === 'notiz' && /Prunella/.test(document.querySelector('.chr').textContent)));
+  const n0 = await SL.p.evaluate(() => chrList().length); await SL.p.evaluate(() => [...document.querySelectorAll('.chr .ce [data-act="chrDel"]')].pop().click()); await w(100);
+  T('Chronik: Eintrag löschen', await SL.p.evaluate((n) => chrList().length === n - 1, n0));
+  await SL.p.evaluate(() => document.querySelector('[data-act="chrRecap"]').click()); await w(200);
+  T('«Was bisher geschah» geht mit Chronik an Claude', await SL.p.evaluate(() => S.modal === 'slh' && /Was bisher geschah/.test($('#slQ').value) && /## Chronik/.test(slLage($('#slQ').value)) && /Kampf vorbei/.test(slLage(''))));
+  await SL.p.evaluate(() => { S.modal = null; $('#modal').hidden = true; });
+  await SL.p.reload(); await w(1500);
+  T('Chronik bleibt nach Neustart', await SL.p.evaluate(() => chrList().length >= 8));
   T('Ilvas Bogen zeigt den Gegenstand fehlerfrei', await B.p.evaluate((k) => { S.view = 'sheet'; S.mg = 'gear'; render(); return document.querySelector('.sheet').textContent.includes(MAGIC_ITEMS[k].name); }, key));
   T('Handy: kein Querscrollen (Tisch, Bogen) bei den Spielern', (await Promise.all([B, C].map((x) => x.p.evaluate(() => { const ok = []; for (const v of ['camp', 'sheet']) { S.view = v; render(); ok.push(document.documentElement.scrollWidth <= 391); } return ok.every(Boolean); })))).every(Boolean));
   T('Laptop der SL: kein Querscrollen (Tisch, Abenteuer)', await SL.p.evaluate(() => { const ok = []; for (const v of ['camp', 'adv']) { S.view = v; render(); ok.push(document.documentElement.scrollWidth <= innerWidth + 1); } return ok.every(Boolean); }));
