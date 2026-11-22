@@ -25,7 +25,7 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     if (dev.m) {
       await p.evaluate(() => { const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; S.view = 'sheet'; S.mg = 'kampf'; render(); weaponAttack(cur(), 1, { dist: 'melee' }); });
       await p.waitForTimeout(1600);
-      T(d + 'Rückfrage nach dem Angriff zeigt den Wurf', await p.evaluate(() => { const r = document.querySelector('#prompt .prroll'); return !!r && getComputedStyle(r).display !== 'none' && /W20/.test(r.textContent) && r.querySelector('b').textContent === String(S.log[0].total); }));
+      T(d + 'Rückfrage nach dem Angriff zeigt den Wurf', await p.evaluate(() => { const r = document.querySelector('#prompt .prroll'); if (!r || getComputedStyle(r).display === 'none' || !/W20/.test(r.textContent)) return false; return r.classList.contains('mini') ? $('#prompt').textContent.includes(String(S.log[0].total)) && !r.querySelector('b') : r.querySelector('b').textContent === String(S.log[0].total); }));
       await p.evaluate(() => { orbPrompt(''); S.dp = null; });
     }
     T(d + 'Menü enthält «Würfelverlauf»', await p.evaluate(() => { if (innerWidth <= 820) { XA.more(); return !!document.querySelector('#bnav .bmore [data-act="histOpen"]'); } return !!document.querySelector('#top [data-act="histOpen"]'); }));

@@ -66,6 +66,21 @@ const ROOT = path.resolve(__dirname, '..', 'app', 'www');
   T('Chronik: Kampf beginnt mit Teilnehmern und Gegnern', await SL.p.evaluate(() => chrList().some((e) => e.k === 'kampf' && /(Ilva, Brakk|Brakk, Ilva) gegen/.test(e.x) && /Mimik|Hildegard|×/.test(e.x))), await SL.p.evaluate(() => chrList().filter((e) => e.k === 'kampf')));
   T('Brakk (nicht am Zug) sieht das Ansagefeld auf dem Bogen', await C.p.evaluate(() => { S.view = 'sheet'; S.mg = 'kampf'; render(); const a = document.querySelector('.ansbox'); return !!a && a.offsetParent !== null; }));
   T('Spieler sehen am Tisch, wer am Zug ist', (await Promise.all([B, C].map((x) => x.p.evaluate(() => { S.view = 'camp'; render(); return /Am Zug: Ilva/.test(document.querySelector('#fightBox').textContent) && !!document.querySelector('.order li.now'); })))).every(Boolean));
+  /* Überdeckungen im Kampf am Tisch: SL am Laptop (Tisch, Abenteuer), Spieler am Handy (Tisch, Bogen) */
+  { const { scan } = require('./overlap-lib'); const ovBad = [];
+    for (const [x, nm, views] of [[SL, 'SL', ['camp', 'adv']], [B, 'Ilva', ['camp', 'sheet']], [C, 'Brakk', ['camp', 'sheet']]]) for (const v of views) {
+      await x.p.evaluate((v) => { S.view = v; if (v === 'sheet') S.mg = 'kampf'; render(); window.scrollTo(0, 0); }, v); await x.p.waitForTimeout(150);
+      const r = await scan(x.p, nm + ' ' + v); if (r.covered.length || r.cut.length || r.hscroll) ovBad.push(r); }
+    T('Kampf am Tisch: nichts dauerhaft verdeckt oder abgeschnitten (SL-Laptop, Spieler-Handys)', !ovBad.length, ovBad.map((r) => ({ wo: r.name, v: r.covered.slice(0, 4), a: r.cut.slice(0, 3), q: r.hscroll }))); }
+  /* Kampagnenbuch: SL legt Personen an, gibt eine frei; Spieler sehen nur Freigegebenes, nie die geheime Notiz */
+  await SL.p.evaluate(() => { XA.chrOpen(); XA.kbTab(null, 'p');
+    const add = (n, frei) => { $('#kbN').value = n; XA.kbAdd(); const x = kbList().find((y) => y.n === n); const g = document.querySelector('[data-kb="g"][data-id="' + x.id + '"]'); g.value = 'Geheim: ' + n + ' lügt'; g.dispatchEvent(new Event('input', { bubbles: true })); const d = document.querySelector('[data-kb="d"][data-id="' + x.id + '"]'); d.value = n + ' kennt den Keller'; d.dispatchEvent(new Event('change', { bubbles: true })); if (frei) { const cb = document.querySelector('[data-kb="frei"][data-id="' + x.id + '"]'); cb.checked = true; cb.dispatchEvent(new Event('change', { bubbles: true })); } };
+    add('Prunella', true); add('Der Schattenmann', false); XA.closeModal ? XA.closeModal() : (S.modal = null, $('#modal').hidden = true); });
+  await w(1800);
+  const kbp = await Promise.all([B, C].map((x) => x.p.evaluate(() => { S.view = 'camp'; render(); const bx = document.querySelector('.kbp'); return { box: !!bx, txt: bx ? bx.textContent : '', meta: JSON.stringify(S.meta.kb || []) }; })));
+  T('Spieler sehen freigegebene Person am Tisch (eingeklappt unter «Bekannt»)', kbp.every((k) => k.box && /Prunella/.test(k.txt) && /kennt den Keller/.test(k.txt)), kbp);
+  T('Nicht freigegebene Person und geheime Notizen erreichen die Spieler nie', kbp.every((k) => !/Schattenmann/.test(k.txt + k.meta) && !/Geheim|lügt/.test(k.txt + k.meta)), kbp.map((k) => k.meta));
+  T('Chronik der SL vermerkt die Freigabe', await SL.p.evaluate(() => chrList().some((e) => e.k === 'person' && /kennen jetzt: Prunella/.test(e.x))));
   T('Ilva sieht auf dem Bogen «dein Zug», Brakk «nicht dein Zug»', await B.p.evaluate(() => { S.view = 'sheet'; S.mg = 'kampf'; render(); return /dein Zug/.test(document.querySelector('.turnblk').textContent) && !/nicht dein Zug/.test(document.querySelector('.turnblk').textContent); }) && await C.p.evaluate(() => { S.view = 'sheet'; S.mg = 'kampf'; render(); return /nicht dein Zug/.test(document.querySelector('.turnblk').textContent); }));
   /* Ilva wirkt Feuerpfeil von der Kampfseite (Zaubertrick bei den Angriffen) */
   T('Ilva: Feuerpfeil direkt auf der Kampfseite', await B.p.evaluate(() => { const ch = cur(); if (!ch.cantrips.includes('fire-bolt')) { ch.cantrips[0] = 'fire-bolt'; commit(); } render(); return !!document.querySelector('.atkcant [data-act="castSp"]'); }));
@@ -122,7 +137,8 @@ const ROOT = path.resolve(__dirname, '..', 'app', 'www');
   await SL.p.reload(); await w(1500);
   T('Chronik bleibt nach Neustart', await SL.p.evaluate(() => chrList().length >= 8));
   T('Ilvas Bogen zeigt den Gegenstand fehlerfrei', await B.p.evaluate((k) => { S.view = 'sheet'; S.mg = 'gear'; render(); return document.querySelector('.sheet').textContent.includes(MAGIC_ITEMS[k].name); }, key));
-  T('Handy: kein Querscrollen (Tisch, Bogen) bei den Spielern', (await Promise.all([B, C].map((x) => x.p.evaluate(() => { const ok = []; for (const v of ['camp', 'sheet']) { S.view = v; render(); ok.push(document.documentElement.scrollWidth <= 391); } return ok.every(Boolean); })))).every(Boolean));
+  { const qs = await Promise.all([B, C].map((x) => x.p.evaluate(() => { const bad = []; for (const v of ['camp', 'sheet']) { S.view = v; render(); if (document.documentElement.scrollWidth > innerWidth + 1) { const wide = [...document.querySelectorAll('body *')].filter((e) => e.getBoundingClientRect().right > innerWidth + 1).slice(-3).map((e) => e.tagName + '.' + e.className + ' ' + Math.round(e.getBoundingClientRect().right)); bad.push(v + ' ' + document.documentElement.scrollWidth + ' ' + wide.join(' | ')); } } return bad; })));
+    T('Handy: kein Querscrollen (Tisch, Bogen) bei den Spielern', qs.every((q) => !q.length), qs); }
   T('Laptop der SL: kein Querscrollen (Tisch, Abenteuer)', await SL.p.evaluate(() => { const ok = []; for (const v of ['camp', 'adv']) { S.view = v; render(); ok.push(document.documentElement.scrollWidth <= innerWidth + 1); } return ok.every(Boolean); }));
   await done();
 })();

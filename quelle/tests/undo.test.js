@@ -9,10 +9,11 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     await p.goto('file://' + target); await p.waitForTimeout(450); const d = dev.n + ': ';
     const click = async (sel) => { if (dev.m) await p.tap(sel); else await p.click(sel); await p.waitForTimeout(80); };
     await p.evaluate(() => { localStorage.setItem('hb_dice_fx', 'aus'); const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; S.view = 'sheet'; S.mg = 'kampf'; S.undo = []; S.redo = []; render(); });
-    T(d + '↶ sichtbar am Rand der Reiterleiste (auch ohne Wischen)', await p.evaluate(() => { const u = document.querySelector('.mnav .udo .undobtn'); const r = u.getBoundingClientRect(); return !!u && r.right <= innerWidth + 1 && r.left >= 0 && u.disabled; }));
+    T(d + 'Nichts zu tun: kein ↶ in der Reiterleiste (mehr Platz für die Reiter)', await p.evaluate(() => !document.querySelector('.mnav .udo')));
     const hp0 = await p.evaluate(() => cur().play.hp);
     await p.evaluate(() => { S.hpOpen = true; render(); }); await p.fill('#hpAmt', '7'); await click('.hpctl [data-arg="dmg"]'); await p.waitForTimeout(80);
     T(d + 'Schaden eingetragen, ↶ aktiv', await p.evaluate((h) => cur().play.hp === h - 7 && !document.querySelector('.mnav .undobtn').disabled, hp0));
+    T(d + '↶ am Rand der Reiterleiste sichtbar (ohne Wischen), leuchtet kurz auf, keine schwebende Leiste', await p.evaluate(() => { const u = document.querySelector('.mnav .udo .undobtn'); const r = u.getBoundingClientRect(); const bar = document.getElementById('undoBar'); return r.right <= innerWidth + 1 && r.left >= 0 && u.classList.contains('neu') && (!bar || bar.hidden); }));
     await click('.mnav .undobtn');
     T(d + 'Rückgängig stellt TP wieder her', await p.evaluate((h) => cur().play.hp === h, hp0));
     T(d + '↷ erscheint nach Rückgängig', await p.evaluate(() => !!document.querySelector('.mnav .redobtn')));

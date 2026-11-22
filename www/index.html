@@ -7,7 +7,7 @@
    weil die App ihre Adresse (localhost) dabei nicht wechselt.
    Sicherung: Startet eine heruntergeladene Version nicht sauber, wird sie verworfen und die eingebaute genutzt. */
 (function () {
-  var BUILD = 1795377362, VER = '1.9';
+  var BUILD = 1795383014, VER = '1.9';
   var REMOTE = 'https://sicherungskontoeko-hash.github.io/heldenbuch/';
   var C = window.Capacitor; var native = !!(C && (typeof C.isNativePlatform === 'function' ? C.isNativePlatform() : C.isNative));
   if (window.HB_BOOT_TEST) native = true; /* nur für Tests */
@@ -1269,6 +1269,52 @@ p.nb{margin:-4px 0 10px;padding:6px 10px;border-left:3px solid rgba(var(--gold-r
 .wlvl .seg{display:flex;width:100%}.wlvl .seg button{flex:1;padding:8px 6px}.wlvl em{font-style:normal}
 @media (max-width:820px){body:has(#toast:not([hidden]) .ttip) #boostBar{bottom:calc(300px + env(safe-area-inset-bottom,0px))}}
 body.hl-erkl0 .sheet .ii,body.hl-erkl0 .hlp,body.hl-erkl0 .slb{display:none!important}
+/* Kampagnenbuch: Personen, Orte, Aufträge */
+.kbbar{display:grid;gap:6px;margin:0 0 8px}.kbbook{display:flex;gap:8px;align-items:center;font-size:.82rem;color:var(--muted)}.kbbook select{flex:1;min-width:0}
+.dlg .kbtabs{flex-wrap:wrap;justify-content:flex-start;gap:6px}.dlg .kbtabs .chip{padding:6px 11px;font-size:.86rem;min-height:0}.kbtabs .chip small{opacity:.75;margin-left:3px}
+.kbed input,.kbed textarea{font:inherit}.dlg .kbed .chips:not(.end){justify-content:flex-start}
+.kbl{list-style:none;margin:0 0 8px;padding:0;max-height:min(56vh,520px);overflow:auto;border-top:1px solid var(--line)}
+.kbi{border-bottom:1px solid var(--line)}.kbi.dim summary .kbn b{opacity:.6}
+.kbi summary{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:9px 4px;cursor:pointer;list-style:none}.kbi summary::-webkit-details-marker{display:none}
+.kbn{display:grid;min-width:0}.kbn b{font-weight:600;overflow-wrap:anywhere}.kbn small{font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}
+.kbst{font-size:.72rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line2);color:var(--muted);white-space:nowrap}
+.kbst.st-freund,.kbst.st-erledigt,.kbst.st-besucht{color:#9fd49a;border-color:rgba(159,212,154,.45)}.kbst.st-feind,.kbst.st-gescheitert{color:#f0a08a;border-color:rgba(240,160,138,.45)}.kbst.st-tot{color:var(--faint)}.kbst.st-offen{color:var(--gold);border-color:rgba(var(--gold-rgb),.45)}
+.kbeye{font-size:.9rem}
+.kbed{display:grid;gap:8px;padding:2px 4px 12px}.kbed label{display:grid;gap:4px;font-size:.8rem;color:var(--muted)}.kbed label small{font-size:.74rem;color:var(--faint)}.kbed textarea{min-height:56px}
+.kbed .kbfrei{display:flex;gap:8px;align-items:center;color:var(--ink);font-size:.88rem}.kbed .kbfrei input{width:20px;height:20px}
+.kbp summary{cursor:pointer}.kbp summary small{color:var(--muted);margin-left:6px}.kbpb h4{margin:10px 0 4px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kbpl{list-style:none;margin:0;padding:0;display:grid;gap:6px}.kbpl li{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:center}.kbpl li small{grid-column:1/-1;color:var(--muted);font-size:.82rem}.kbpl li .kbst{justify-self:start}.kbpl li.dim b{opacity:.6}
+/* ---- Lesbarkeit (1.9.29): Leisten deckend, nichts scheint durch, kleine Handys ohne Überlappung ---- */
+body{margin:0}
+#top,.shbar,#bnav{background:rgb(var(--bg-rgb));-webkit-backdrop-filter:none;backdrop-filter:none}
+.mnav{background:rgb(var(--bg-rgb))}
+.mnav .udo{padding-left:14px;background:linear-gradient(90deg,rgba(var(--bg-rgb),0),rgb(var(--bg-rgb)) 12px)}
+.mnav .udo [disabled]{opacity:1;color:var(--faint);border-color:var(--line)}
+@media (max-width:820px){
+  #top{position:relative;top:auto}
+  .shbar,.mnav{top:env(safe-area-inset-top,0px)}
+}
+.mnav .udo .undobtn.neu{box-shadow:0 0 0 2px var(--gold),0 0 14px rgba(var(--gold-rgb),.55)}
+@media (max-width:820px){.prroll.mini{grid-template-columns:minmax(0,1fr) auto;padding:5px 12px;margin:0 0 4px}.prroll.mini small{font-size:.78rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.prroll.mini i{font-style:normal;font-size:.74rem;color:var(--gold)}}
+.card b{overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
+.d3row{flex-wrap:wrap}.d3row .d3pv,.d3row .btn{flex:none}.d3row>div{flex:1 1 140px;min-width:0}
+.vt span{-webkit-hyphens:auto;hyphens:auto}
+@media (max-width:380px){
+  .tbar .tmove,.tbar .tnew{grid-column:1/-1}
+  .vitals,.kwerte .vitals{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .vt span{letter-spacing:.05em}
+}
+/* Würfelfenster auf dem Handy: schmaler Streifen über der unteren Leiste statt grosser Karte (verdeckt weniger) */
+@media (max-width:820px){
+  #toast{left:10px!important;right:10px!important;padding:6px 10px 6px 6px;border-radius:14px}
+  #toast .trow{display:flex;gap:8px;align-items:center}
+  #toast .dice{width:46px;height:46px;flex:none}#toast .dice .die,#toast .dice svg{width:46px;height:46px}
+  #toast .tt{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center}
+  #toast .tl{grid-column:1;grid-row:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #toast .td{grid-column:1;grid-row:2}
+  #toast .tv{grid-column:2;grid-row:1/3;font-size:2.1rem}
+  #toast .ttip{margin-top:6px;padding-top:6px}
+}
 </style>
 <div id="scene" aria-hidden="true"></div>
 <canvas id="embers" aria-hidden="true"></canvas>
@@ -4361,7 +4407,7 @@ function bnavHtml() {
   const moreOn = ['spells', 'adv', 'mobs', 'hb', 'help'].includes(S.view);
   const btn = (k, l, act, on) => '<button class="' + (on ? 'on' : '') + '" data-act="' + act + '" data-arg="' + k + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + NAV_ICON[k] + '</svg><span>' + l + '</span>' + (k === 'camp' && S.combat && S.combat.active ? '<i class="dot"></i>' : '') + '</button>';
   return '<div class="bn">' + main.map(([k, l]) => btn(k, l, 'view', S.view === k)).join('') + btn('more', 'Mehr', 'more', moreOn || S.more) + '</div>' +
-    (S.more ? '<div class="bmore">' + [['spells', 'Zauberbuch'], ['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe & Anleitung']].map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<button data-act="histOpen">Würfelverlauf</button><button data-act="chrOpen">📜 Chronik</button><button data-act="slOpen">✦ Claude fragen</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="stOpen">Stolperstein melden</button><button data-act="themeOpen">Stimmung: ' + THEMES[themeNow()].name + '</button></div>' : '');
+    (S.more ? '<div class="bmore">' + [['spells', 'Zauberbuch'], ['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe & Anleitung']].map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<button data-act="histOpen">Würfelverlauf</button><button data-act="chrOpen">📜 Chronik und Personen</button><button data-act="slOpen">✦ Claude fragen</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="stOpen">Stolperstein melden</button><button data-act="themeOpen">Stimmung: ' + THEMES[themeNow()].name + '</button></div>' : '');
 }
 XA.more = () => { S.more = !S.more; const bn = $('#bnav'); if (bn) bn.innerHTML = bnavHtml(); };
 
@@ -4373,7 +4419,7 @@ function helpView() {
     '<section class="blk hlsec"><h2>Wie viel Hilfe?</h2><p class="hint">Einsteiger bekommen alles erklärt, Erfahrene sehen nur ihren Bogen. Gilt auf diesem Gerät.</p>' + hlPanel('help') + '</section>' +
     sec('Helden erschaffen', ['Unter <b>Erschaffen</b> gehst du Schritt für Schritt durch Klasse, Herkunft, Attribute, Fertigkeiten, Zauber und Ausrüstung.', 'Rote Hinweise rechts (auf dem Handy oben) zeigen, was noch fehlt – antippen bringt dich direkt zum richtigen Feld.', 'Alle Werte (RK, TP, Angriffe, Zauber-SG, Plätze) rechnet die App automatisch.']) +
     sec('Spielen', ['Auf dem <b>Bogen</b> tippst du Attribute, Fertigkeiten, Rettungswürfe oder Angriffe an – die App würfelt mit Animation und beachtet Vor-/Nachteil und Zustände.', 'Oben im Bogen wechselst du zwischen <b>Kampf, Werte, Zauber, Fähigkeiten, Ausrüstung, Begleiter</b> und <b>Notizen</b>. Darunter stehen immer TP, RK, Initiative und Bewegung – TP antippen trägt Schaden oder Heilung ein.', 'Vertan? <b>↶</b> rechts in der Reiterleiste nimmt den letzten Schritt zurück, <b>↷</b> holt ihn wieder. <b>⟲ Zug</b> (Zugleiste oder ⋯) spult alles seit Beginn deines Zuges zurück.', 'Jeder Wurf landet im <b>Würfelverlauf</b> (Würfelfenster antippen oder Mehr → Würfelverlauf), auch die der Kreaturen und Mitspieler.', 'Zauber wirken zieht den Platz automatisch ab. Konzentration, Segnen, Mal des Jägers usw. werden verfolgt.', 'Bei 0 TP würfelst du Todesrettungswürfe. Nach drei Fehlschlägen entscheidet die Spielleitung über Gnade.', 'Der Würfelbecher unten links würfelt beliebige Würfel (bis 30 Stück).']) +
-    sec('Gemeinsam spielen', [app ? 'Unter <b>Tisch</b> erstellt die Spielleitung einen Raum. Den <b>Raumcode</b> schickst du per WhatsApp – Mitspieler tippen ihn ein und sind verbunden (Handy und PC gemischt).' : 'Unter <b>Tisch</b> treten alle derselben Kampagne bei. Mitspieler musst du einmal per E-Mail als Bearbeiter einladen.', 'Die Spielleitung startet den Kampf, alle würfeln Initiative, und wer am Zug ist, sieht seinen Bildschirm leuchten.', 'Gegner fügt die Spielleitung im Kampf über <b>+ Gegner</b> hinzu (Bestiarium, Zufallsbegegnung oder ohne Werte). Ist ein Gegner am Zug, zeigt ein Kasten seine Angriffe und zählt mit. Spieler sehen bei Gegnern nur den Zustand (z. B. „schwer verletzt“), nicht die genauen TP.', 'Rast, Beute, EP und Handouts verteilt die Spielleitung für alle mit einem Tipp.', 'Abenteuer leitet die Spielleitung unter <b>Abenteuer</b>: Vorlesetext als Handout teilen, Kampf mit einem Tipp beginnen, Beute ins Formular übernehmen. Würfeltabellen der Spielleitung bleiben geheim.', '<b>Was tust du?</b> Spieler sagen am Tisch oder auf dem Bogen an, was ihr Held tut – tippen oder mit dem Mikrofon der Handytastatur sprechen. Die Spielleitung sieht die Ansagen oben, hakt sie ab (✓) oder gibt sie mit «An Claude» weiter.', 'Die <b>Chronik</b> der Spielleitung schreibt von selbst mit: Szenen, Handouts, Kämpfe, Beute, Entscheidungen, Rasten, Stufenaufstiege und erledigte Ansagen. «Was bisher geschah» macht daraus mit Claude einen Rückblick zum Vorlesen.', '<b>✦ Claude fragen</b> (Tisch, Abenteuer oder Mehr) fasst Szene, Gruppe, Kampf und letzte Würfe zusammen. In claude.ai antwortet Claude direkt, in der App kopierst du die Lage in die Claude-App.']) +
+    sec('Gemeinsam spielen', [app ? 'Unter <b>Tisch</b> erstellt die Spielleitung einen Raum. Den <b>Raumcode</b> schickst du per WhatsApp – Mitspieler tippen ihn ein und sind verbunden (Handy und PC gemischt).' : 'Unter <b>Tisch</b> treten alle derselben Kampagne bei. Mitspieler musst du einmal per E-Mail als Bearbeiter einladen.', 'Die Spielleitung startet den Kampf, alle würfeln Initiative, und wer am Zug ist, sieht seinen Bildschirm leuchten.', 'Gegner fügt die Spielleitung im Kampf über <b>+ Gegner</b> hinzu (Bestiarium, Zufallsbegegnung oder ohne Werte). Ist ein Gegner am Zug, zeigt ein Kasten seine Angriffe und zählt mit. Spieler sehen bei Gegnern nur den Zustand (z. B. „schwer verletzt“), nicht die genauen TP.', 'Rast, Beute, EP und Handouts verteilt die Spielleitung für alle mit einem Tipp.', 'Abenteuer leitet die Spielleitung unter <b>Abenteuer</b>: Vorlesetext als Handout teilen, Kampf mit einem Tipp beginnen, Beute ins Formular übernehmen. Würfeltabellen der Spielleitung bleiben geheim.', '<b>Was tust du?</b> Spieler sagen am Tisch oder auf dem Bogen an, was ihr Held tut – tippen oder mit dem Mikrofon der Handytastatur sprechen. Die Spielleitung sieht die Ansagen oben, hakt sie ab (✓) oder gibt sie mit «An Claude» weiter.', 'Die <b>Chronik</b> der Spielleitung schreibt von selbst mit: Szenen, Handouts, Kämpfe, Beute, Entscheidungen, Rasten, Stufenaufstiege und erledigte Ansagen. «Was bisher geschah» macht daraus mit Claude einen Rückblick zum Vorlesen.', '<b>✦ Claude fragen</b> (Tisch, Abenteuer oder Mehr) fasst Szene, Gruppe, Kampf und letzte Würfe zusammen. In claude.ai antwortet Claude direkt, in der App kopierst du die Lage in die Claude-App.', 'Unter <b>📜 Chronik</b> schreibt die App mit, was am Spielabend passiert. Daneben liegen die Reiter <b>Personen</b>, <b>Orte</b> und <b>Aufträge</b>: Name, ein Satz, eine geheime Notiz und der Stand (z. B. verbündet, erledigt). Setzt die Spielleitung «Die Spieler wissen davon», sehen die Spieler den Eintrag am Tisch unter <b>Bekannt</b> – die geheime Notiz nie.']) +
     sec('Sichern', [app ? 'Deine Helden werden auf diesem Gerät gespeichert. Unter <b>Helden</b> sicherst du mit <b>Alles sichern</b> Helden, Hausregeln, eigene Monster und Notizen in einer Datei.' : 'Deine Helden werden in deinem Claude-Konto gespeichert. Unter <b>Helden</b> erhältst du mit <b>Alles sichern</b> zusätzlich eine Datei mit allem.', 'Beim ersten Start fragt die App nach deinem Namen. So sehen die anderen am Tisch, wer welchen Helden spielt.', 'Hast du seit der letzten Sicherung viel gespielt, fragt die App beim nächsten Start einmal, ob sie eine Sicherungsdatei anlegen soll.', 'Stört dich am Spielabend etwas, tippe im Menü <b>⋯</b> auf <b>Stolperstein melden</b>. Ein Satz genügt; die App merkt sich, wo du warst. Danach kopierst du alle Einträge und schickst sie Claude.']) +
     '<p class="hint">Regeln nach dem SRD 5.2.1 (CC-BY-4.0), eigene deutsche Zusammenfassung. Mit ✦ markierte Inhalte sind eigene Erfindungen.</p>' + (typeof window.HB_VER === 'string' ? '<p class="hint">Version ' + esc(window.HB_VER) + '</p>' : '') + '</div>';
 }
@@ -6791,12 +6837,22 @@ function undoBefore(act) {
     undoBar();
   }, 30);
 }
+function undoBtnsRefresh(flash) {
+  const nav = document.querySelector('.mnav[aria-label="Seiten des Bogens"]'); if (!nav) return false;
+  const ub = nav.querySelector('.udo'); const h = undoBtns();
+  if (ub) { if (h) ub.outerHTML = h; else ub.remove(); } else if (h) nav.insertAdjacentHTML('beforeend', h);
+  if (flash) { const b = nav.querySelector('.undobtn'); if (b) { b.classList.add('neu'); setTimeout(() => b.classList.remove('neu'), 1200); } }
+  return nav.getClientRects().length > 0;
+}
+/* Nach einer Änderung: Auf dem Bogen leuchtet der feste Rückgängig-Knopf kurz auf (keine schwebende Leiste, die Inhalt verdeckt).
+   In anderen Ansichten erscheint die kleine Leiste unten für 6 Sekunden. */
 function undoBar() {
   let el = document.getElementById('undoBar'); if (!el) { el = document.createElement('div'); el.id = 'undoBar'; document.body.appendChild(el); }
-  S.undo = S.undo || []; const last = S.undo.filter((u) => u.id === S.cur).pop(); if (!last) { el.hidden = true; return; }
+  S.undo = S.undo || []; const last = S.undo.filter((u) => u.id === S.cur).pop();
+  const onSheet = undoBtnsRefresh(!!last) && S.view === 'sheet';
+  if (!last || onSheet) { el.hidden = true; return; }
   el.innerHTML = '<span>' + esc(last.label) + '</span><button data-act="undo">↶ Rückgängig</button>'; el.hidden = false; el.classList.remove('out'); void el.offsetWidth;
   clearTimeout(undoBar.tm); undoBar.tm = setTimeout(() => { el.classList.add('out'); setTimeout(() => { el.hidden = true; }, 350); }, 6000);
-  const ub = document.querySelector('.mnav .udo'); if (ub) ub.outerHTML = undoBtns();
 }
 function undoApply(ch, snap) { const d = JSON.parse(snap); Object.assign(ch, { play: d.play, items: d.items, inv: d.inv, comps: d.comps, xp: d.xp, level: d.level, multi: d.multi, hpRolls: d.hpRolls }); if (d.coins) ch.coins = d.coins; if (typeof orbPrompt === 'function') { S.dp = null; S.sa = null; orbPrompt(''); } }
 const undoN = () => (S.undo || []).filter((u) => u.id === S.cur).length, redoN = () => (S.redo || []).filter((u) => u.id === S.cur).length;
@@ -6841,6 +6897,7 @@ XA.turnBackGo = () => turnBackGo();
 /* Rückgängig/Wiederholen fest in der Reiterleiste (bleibt am rechten Rand sichtbar) */
 function undoBtns() {
   if (typeof S === 'undefined') return ''; const u = undoN(), r = redoN();
+  if (!u && !r) return ''; /* nichts rückgängig zu machen: kein Knopf, mehr Platz für die Reiter */
   return '<span class="udo"><button class="undobtn" data-act="undo" title="Letzte Änderung rückgängig (Strg+Z)" aria-label="Rückgängig"' + (u ? '' : ' disabled') + '>↶<b>' + (u || '') + '</b></button>' + (r ? '<button class="redobtn" data-act="redo" title="Wiederholen (Strg+Y)" aria-label="Wiederholen">↷<b>' + r + '</b></button>' : '') + '</span>';
 }
 
@@ -8647,7 +8704,7 @@ function advOverview(A, st, X) {
 }
 function advChapter(A, st, X) {
   const C = advCh(A, st.ch); const ci = A.chapters.indexOf(C); const Sc = advSc(C, st.sc); const si = C.scenes.indexOf(Sc);
-  let h = '<section class="blk advch"><div class="advhead"><div class="advkick">' + esc(C.kicker) + (C.level && !/Stufe/.test(C.sub || '') ? ' · Stufe ' + esc(C.level) : '') + '</div><div class="chips">' + (typeof ansOpenList === 'function' && S.camp && typeof isDM === 'function' && isDM() && ansOpenList().length ? '<button class="btn sm" data-act="ansOpen">💬 Ansagen ' + ansOpenList().length + '</button>' : '') + '<button class="btn sm ghost" data-act="chrOpen" title="Was bisher geschah">📜 Chronik</button>' + (typeof slBtn === 'function' ? slBtn() : '') + '</div></div><h2>' + esc(C.title) + '</h2>' + (C.sub ? '<p class="hint">' + esc(C.sub) + '</p>' : '');
+  let h = '<section class="blk advch"><div class="advhead"><div class="advkick">' + esc(C.kicker) + (C.level && !/Stufe/.test(C.sub || '') ? ' · Stufe ' + esc(C.level) : '') + '</div><div class="chips">' + (typeof ansOpenList === 'function' && S.camp && typeof isDM === 'function' && isDM() && ansOpenList().length ? '<button class="btn sm" data-act="ansOpen">💬 Ansagen ' + ansOpenList().length + '</button>' : '') + '<button class="btn sm ghost" data-act="chrOpen" title="Chronik, Personen, Orte und Aufträge">📜 Chronik</button>' + (typeof slBtn === 'function' ? slBtn() : '') + '</div></div><h2>' + esc(C.title) + '</h2>' + (C.sub ? '<p class="hint">' + esc(C.sub) + '</p>' : '');
   h += (C.intro || []).map((b, bi) => advBlock(A, b, ci + '.i.' + bi, st, X, C)).join('');
   if (C.scenes.length > 1) h += '<nav class="advscn" aria-label="Szenen">' + C.scenes.map((s, i) => '<button class="' + (i === si ? 'on' : '') + '" data-act="advScene" data-arg="' + esc(s.id) + '"><span>' + (i + 1) + '</span>' + esc(s.title) + '</button>').join('') + '</nav>';
   h += '<h3 class="advsc" id="advSc">' + (C.scenes.length > 1 ? '<small>Szene ' + (si + 1) + ' von ' + C.scenes.length + '</small>' : '') + esc(Sc.title) + '</h3>';
@@ -8895,11 +8952,11 @@ if (typeof dmTools === 'function') { const _slDm0 = dmTools; dmTools = function 
    Ansagen: Spieler schreiben oder diktieren (Tastatur-Mikrofon) „Was tust du?“; das geht über ihr Tisch-Dokument (Feld ans) an die Spielleitung.
    Erledigte Ansagen markiert die Spielleitung (Meta ansSeen), die Spieler sehen „✓ gesehen“. Beides fliesst in die Claude-Lage. */
 const CHR_KEY = 'hb_chronik', CHR_MAX = 400;
-const CHR_ICON = { abend: '📅', szene: '📖', handout: '📜', kampf: '⚔', kende: '🏁', beute: '💰', wahl: '⚖', rast: '☾', ansage: '💬', notiz: '✎', stufe: '⬆', boden: '✚', tod: '✝' };
+const CHR_ICON = { abend: '📅', szene: '📖', handout: '📜', kampf: '⚔', kende: '🏁', beute: '💰', wahl: '⚖', rast: '☾', ansage: '💬', notiz: '✎', stufe: '⬆', boden: '✚', tod: '✝', person: '☺', ort: '⌂', auftrag: '❖' };
 function chrDb() { try { const d = JSON.parse(localStorage.getItem(CHR_KEY) || '{}'); return d && typeof d === 'object' ? d : {}; } catch (e) { return {}; } }
 function chrSaveDb(d) { try { localStorage.setItem(CHR_KEY, JSON.stringify(d)); } catch (e) {} }
 /* Wohin gehört ein Eintrag? Zum zuletzt geöffneten Abenteuer, sonst zum Tisch */
-function chrWhere() { let a = ''; try { a = typeof advDb === 'function' ? advDb().last : ''; } catch (e) {} if (a && typeof advGet === 'function' && advGet(a)) return { key: 'adv:' + a, name: advGet(a).title }; if (S.camp) return { key: 'tisch:' + S.camp, name: 'Tisch ' + S.camp }; return { key: 'frei', name: 'Ohne Abenteuer' }; }
+function chrWhere() { if (S.kbKey && S.modal === 'chronik' && typeof kbKeyName === 'function') return { key: S.kbKey, name: kbKeyName(S.kbKey) }; let a = ''; try { a = typeof advDb === 'function' ? advDb().last : ''; } catch (e) {} if (a && typeof advGet === 'function' && advGet(a)) return { key: 'adv:' + a, name: advGet(a).title }; if (S.camp) return { key: 'tisch:' + S.camp, name: 'Tisch ' + S.camp }; return { key: 'frei', name: 'Ohne Abenteuer' }; }
 function chrList(key) { const d = chrDb(); return Array.isArray(d[key || chrWhere().key]) ? d[key || chrWhere().key] : []; }
 const chrMine = () => !S.camp || (typeof isDM === 'function' && isDM()); /* nur die Spielleitung (oder ohne Tisch) schreibt mit */
 function chrAdd(k, x, force) {
@@ -8916,7 +8973,7 @@ function chrText(n, key) { const L = chrList(key).slice(-(n || 999)); return L.m
 function chrOpen(keep) {
   const w = chrWhere(); const L = chrList(w.key); const m = $('#modal'); S.modal = 'chronik'; S.more = false; document.querySelectorAll('details.mnu[open]').forEach((d) => { d.open = false; });
   const rows = L.map((e) => e.k === 'abend' ? '<li class="cabend">' + esc(e.x) + '</li>' : '<li class="ce"><time>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</time><span class="ci" aria-hidden="true">' + (CHR_ICON[e.k] || '•') + '</span><span class="cx">' + esc(e.x) + '</span><button class="x" data-act="chrDel" data-arg="' + e.id + '" aria-label="Eintrag löschen">×</button></li>').join('');
-  m.innerHTML = '<div class="dlg chrdlg" role="dialog" aria-modal="true" aria-label="Chronik"><div class="dph"><b>Chronik · ' + esc(w.name) + '</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
+  m.innerHTML = '<div class="dlg chrdlg" role="dialog" aria-modal="true" aria-label="Chronik"><div class="dph"><b>Chronik · ' + esc(w.name) + '</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' + (typeof kbTabs === 'function' ? kbTabs() : '') +
     (L.length ? '<ul class="chr" id="chrList">' + rows + '</ul>' : '<p class="hint">Noch nichts aufgeschrieben. Die Chronik füllt sich von selbst: Szenen, Handouts, Kämpfe, Beute, Entscheidungen, Rasten, Stufenaufstiege und erledigte Ansagen. Eigene Notizen kannst du unten ergänzen.</p>') +
     '<div class="chradd"><input id="chrN" type="text" placeholder="Notiz, z. B. «Die Helden haben Prunella die Wahrheit gesagt»" enterkeyhint="done">' + micBtn('chrN') + '<button class="btn sm" data-act="chrNote">Eintragen</button></div>' +
     '<div class="chips end"><button class="btn ghost sm" data-act="chrAbend">Neuer Spielabend</button><button class="btn ghost sm" data-act="chrCopy"' + (L.length ? '' : ' disabled') + '>Kopieren</button><button class="btn sm" data-act="chrRecap"' + (L.length ? '' : ' disabled') + '>✦ Was bisher geschah</button></div></div>';
@@ -9022,9 +9079,141 @@ function chrWatch() {
 }
 setTimeout(() => { if (typeof paintCamp === 'function') { const p0 = paintCamp; paintCamp = function () { const r = p0.apply(this, arguments); try { chrWatch(); } catch (e) {} return r; }; } }, 0);
 /* Werkzeuge der Spielleitung: Ansagen und Chronik oben; für Spieler das Ansagefeld */
-if (typeof dmTools === 'function') { const _chDm0 = dmTools; dmTools = function () { const h = _chDm0.apply(this, arguments); if (!S.camp) return h; if (typeof isDM === 'function' && isDM()) { const cb = '<button class="btn sm ghost" data-act="chrOpen">📜 Chronik <small>' + chrList().filter((e) => e.k !== 'abend').length + '</small></button>'; return ansDmHtml(true) + (h.indexOf('<div class="slrow">') >= 0 ? h.replace('<div class="slrow">', '<div class="slrow">' + cb) : '<div class="slrow">' + cb + '</div>' + h); } return ansBox('camp') + h; }; }
+if (typeof dmTools === 'function') { const _chDm0 = dmTools; dmTools = function () { const h = _chDm0.apply(this, arguments); if (!S.camp) return h; if (typeof isDM === 'function' && isDM()) { const cb = '<button class="btn sm ghost" data-act="chrOpen" title="Chronik, Personen, Orte und Aufträge">📜 Chronik <small>' + chrList().filter((e) => e.k !== 'abend').length + '</small></button>'; return ansDmHtml(true) + (h.indexOf('<div class="slrow">') >= 0 ? h.replace('<div class="slrow">', '<div class="slrow">' + cb) : '<div class="slrow">' + cb + '</div>' + h); } return ansBox('camp') + h; }; }
+
+/* ==== Kampagnenbuch: Personen, Orte und Aufträge (Reiter im Chronik-Fenster) ====
+   Je Buch (Abenteuer, Tisch oder «Ohne Abenteuer», wie die Chronik) in localStorage «hb_kbuch».
+   Jeder Eintrag: Name, Kurzbeschreibung, geheime Notiz (nur Spielleitung), Stand, Schalter «Spieler wissen davon».
+   Freigegebene Einträge gehen über das Tisch-Dokument (Meta kb) an die Spieler: Name, Kurzbeschreibung, Stand.
+   Statuswechsel bei Aufträgen und Freigaben landen in der Chronik; alles fliesst in die Claude-Lage und in «Alles sichern». */
+const KB_KEY = 'hb_kbuch', KB_MAX = 300, KB_PUB_MAX = 80;
+const KB_TYP = { p: ['Personen', 'Person'], o: ['Orte', 'Ort'], a: ['Aufträge', 'Auftrag'] };
+const KB_ST = {
+  p: [['neutral', 'Neutral'], ['freund', 'Verbündet'], ['feind', 'Feindlich'], ['tot', 'Tot']],
+  o: [['offen', 'Nicht besucht'], ['besucht', 'Besucht']],
+  a: [['offen', 'Offen'], ['erledigt', 'Erledigt'], ['gescheitert', 'Gescheitert']]
+};
+const KB_HINT = { p: 'z. B. «Brannok Hornhand, Schmied in Felsbruck»', o: 'z. B. «Wirtshaus zum letzten Krug»', a: 'z. B. «Die gestohlene Glocke zurückbringen»' };
+const kbStName = (x) => ((KB_ST[x.typ] || []).find(([k]) => k === x.st) || [0, ''])[1];
+function kbDb() { try { const d = JSON.parse(localStorage.getItem(KB_KEY) || '{}'); return d && typeof d === 'object' ? d : {}; } catch (e) { return {}; } }
+function kbSaveDb(d) { try { localStorage.setItem(KB_KEY, JSON.stringify(d)); } catch (e) { if (typeof bannerToast === 'function') bannerToast('Speichern fehlgeschlagen', 'Der Speicher ist voll. Sichere jetzt über «Alles sichern».'); } }
+function kbKeyName(k) {
+  if (/^adv:/.test(k)) { const A = typeof advGet === 'function' ? advGet(k.slice(4)) : null; return A ? A.title : 'Abenteuer'; }
+  if (/^tisch:/.test(k)) return 'Tisch ' + k.slice(6);
+  return 'Ohne Abenteuer';
+}
+function kbKey() { if (S.kbKey) return S.kbKey; const w = typeof chrWhere === 'function' ? chrWhere() : { key: 'frei' }; return w.key; }
+function kbList(key) { const d = kbDb(); const L = d[key || kbKey()]; return Array.isArray(L) ? L : []; }
+function kbSave(key, L) { const d = kbDb(); d[key] = L.slice(-KB_MAX); kbSaveDb(d); }
+/* Alle Bücher, in denen etwas steht, dazu das aktuelle */
+function kbBooks() {
+  const ks = new Set(Object.keys(kbDb()).filter((k) => kbList(k).length));
+  try { Object.keys(chrDb()).forEach((k) => { if (chrList(k).length) ks.add(k); }); } catch (e) {}
+  S.kbKey0 = S.kbKey0 || (typeof chrWhere === 'function' ? chrWhere().key : 'frei'); ks.add(S.kbKey0); if (S.camp) ks.add('tisch:' + S.camp);
+  return [...ks].map((k) => [k, kbKeyName(k)]);
+}
+function kbTabs() {
+  const key = kbKey(); const t = S.kbTab || 'chr'; const L = kbList(key);
+  const n = (typ) => L.filter((x) => x.typ === typ && (typ !== 'a' || x.st === 'offen')).length;
+  const bk = kbBooks();
+  return '<div class="kbbar">' + (bk.length > 1 ? '<label class="kbbook">Buch <select id="kbBook" aria-label="Buch wählen">' + bk.map(([k, nm]) => '<option value="' + esc(k) + '"' + (k === key ? ' selected' : '') + '>' + esc(nm) + '</option>').join('') + '</select></label>' : '') +
+    '<div class="chips kbtabs" role="tablist">' + chip(t === 'chr', 'Chronik', 'role="tab" data-act="kbTab" data-arg="chr"') +
+    ['p', 'o', 'a'].map((k) => chip(t === k, KB_TYP[k][0] + (n(k) ? ' <small>' + n(k) + '</small>' : ''), 'role="tab" data-act="kbTab" data-arg="' + k + '"')).join('') + '</div></div>';
+}
+function kbSort(L, typ) {
+  const rank = (x) => (typ === 'a' ? { offen: 0, erledigt: 1, gescheitert: 2 }[x.st] || 0 : x.st === 'tot' ? 1 : 0);
+  return L.slice().sort((a, b) => rank(a) - rank(b) || (typ === 'a' ? (b.u || 0) - (a.u || 0) : String(a.n).localeCompare(String(b.n), 'de')));
+}
+function kbItem(x) {
+  const open = S.kbOpenId === x.id; const dm = !S.camp || (typeof isDM === 'function' && isDM());
+  return '<li class="kbi' + (x.st === 'tot' || x.st === 'gescheitert' || x.st === 'erledigt' ? ' dim' : '') + '"><details data-kbid="' + x.id + '"' + (open ? ' open' : '') + '><summary><span class="kbn"><b>' + esc(x.n) + '</b>' + (x.d ? '<small>' + esc(x.d) + '</small>' : '') + '</span>' +
+    '<span class="kbst st-' + esc(x.st) + '">' + esc(kbStName(x)) + '</span>' + (x.frei ? '<span class="kbeye" title="Die Spieler wissen davon" aria-label="Spieler wissen davon">👁</span>' : '') + '</summary>' +
+    '<div class="kbed"><label>Kurz <small>' + (dm && S.camp ? '(sehen die Spieler, wenn freigegeben)' : '') + '</small><input type="text" maxlength="160" data-kb="d" data-id="' + x.id + '" value="' + esc(x.d || '') + '" placeholder="Wer, was, wo – ein Satz"></label>' +
+    '<label>Geheime Notiz <small>(nur auf diesem Gerät)</small><textarea rows="2" maxlength="600" data-kb="g" data-id="' + x.id + '" placeholder="Was die Helden noch nicht wissen">' + esc(x.g || '') + '</textarea></label>' +
+    '<div class="chips">' + (KB_ST[x.typ] || []).map(([k, l]) => chip(x.st === k, l, 'data-act="kbSt" data-arg="' + x.id + ':' + k + '"')).join('') + '</div>' +
+    '<label class="kbfrei"><input type="checkbox" data-kb="frei" data-id="' + x.id + '"' + (x.frei ? ' checked' : '') + '> Die Spieler wissen davon' + (S.camp && dm ? ' <small>(am Tisch sichtbar)</small>' : '') + '</label>' +
+    '<div class="chips end"><button class="btn ghost sm" data-act="kbDel" data-arg="' + x.id + '" data-confirm="«' + esc(x.n) + '» löschen?">Löschen</button></div></div></details></li>';
+}
+function kbRender(keep) {
+  const t = S.kbTab; const key = kbKey(); const L = kbSort(kbList(key).filter((x) => x.typ === t), t); const m = $('#modal');
+  S.modal = 'chronik'; S.more = false; document.querySelectorAll('details.mnu[open]').forEach((d) => { d.open = false; });
+  const sy = keep ? (m.querySelector('.kbl') || {}).scrollTop || 0 : 0;
+  m.innerHTML = '<div class="dlg chrdlg kbdlg" role="dialog" aria-modal="true" aria-label="' + KB_TYP[t][0] + '"><div class="dph"><b>' + KB_TYP[t][0] + ' · ' + esc(kbKeyName(key)) + '</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' + kbTabs() +
+    '<div class="chradd"><input id="kbN" type="text" maxlength="80" enterkeyhint="done" autocomplete="off" placeholder="' + esc(KB_HINT[t]) + '">' + (typeof micBtn === 'function' ? micBtn('kbN') : '') + '<button class="btn sm" data-act="kbAdd">Hinzufügen</button></div>' +
+    (L.length ? '<ul class="kbl">' + L.map(kbItem).join('') + '</ul>' : '<p class="hint">Noch keine ' + KB_TYP[t][0] + '. Name eintippen und «Hinzufügen». Danach kannst du eine Kurzbeschreibung, eine geheime Notiz und den Stand festhalten' + (S.camp ? ' und entscheiden, ob die Spieler davon wissen' : '') + '.</p>') +
+    (L.some((x) => x.frei) && S.camp ? '<p class="hint">👁 Die Spieler sehen am Tisch Name, Kurzbeschreibung und Stand. Geheime Notizen bleiben bei dir.</p>' : '') + '</div>';
+  m.hidden = false; const l = m.querySelector('.kbl'); if (l && sy) l.scrollTop = sy;
+}
+/* Chronik-Fenster: Reiter Personen, Orte, Aufträge */
+if (typeof chrOpen === 'function') { const _kbChr0 = chrOpen; chrOpen = function (keep) { if (S.kbTab && S.kbTab !== 'chr') return kbRender(keep); return _kbChr0.apply(this, arguments); }; }
+
+/* «📜 Chronik» öffnet immer die Chronik; die gewählte Buchseite (Personen …) bleibt über die Reiter erreichbar */
+if (XA.chrOpen) { const _kbXa0 = XA.chrOpen; XA.chrOpen = function () { S.kbTab = 'chr'; return _kbXa0.apply(this, arguments); }; }
+
+/* Freigegebene Einträge an den Tisch (nur Spielleitung) */
+function kbShare() {
+  if (!S.camp || !(typeof isDM === 'function' && isDM()) || typeof saveMeta !== 'function') return;
+  clearTimeout(kbShare.tm); kbShare.tm = setTimeout(() => {
+    const pub = kbList(kbKey()).filter((x) => x.frei).slice(-KB_PUB_MAX).map((x) => ({ id: x.id, typ: x.typ, n: x.n, d: String(x.d || '').slice(0, 160), st: x.st }));
+    if (JSON.stringify(pub) !== JSON.stringify((S.meta && S.meta.kb) || [])) saveMeta({ kb: pub });
+  }, 500);
+}
+function kbFind(id) { const key = kbKey(); const L = kbList(key); return { key, L, x: L.find((y) => y.id === id) }; }
+function kbChr(x, why) {
+  if (typeof chrAdd !== 'function') return; const k = { p: 'person', o: 'ort', a: 'auftrag' }[x.typ];
+  if (why === 'neu' && x.typ === 'a') chrAdd(k, 'Neuer Auftrag: ' + x.n);
+  else if (why === 'st') chrAdd(k, (x.typ === 'a' ? 'Auftrag ' + kbStName(x).toLowerCase() + ': ' : x.n + ': ') + (x.typ === 'a' ? x.n : kbStName(x)));
+  else if (why === 'frei') chrAdd(k, (x.typ === 'a' ? 'Die Helden kennen den Auftrag: ' : x.typ === 'o' ? 'Die Helden kennen den Ort: ' : 'Die Helden kennen jetzt: ') + x.n);
+}
+Object.assign(XA, {
+  kbOpen: (t, a) => { S.kbTab = a || 'p'; S.kbKey = S.kbKey || null; chrOpen(); },
+  kbTab: (t, a) => { S.kbTab = a; S.kbOpenId = null; chrOpen(true); },
+  kbAdd: () => {
+    const el = $('#kbN'); const v = el && el.value.trim(); if (!v) { if (el) el.focus(); return; }
+    const key = kbKey(); const L = kbList(key); const now = Date.now(); const typ = S.kbTab || 'p';
+    const x = { id: uidX(), typ, n: v.slice(0, 80), d: '', g: '', st: KB_ST[typ][0][0], frei: false, t: now, u: now };
+    L.push(x); kbSave(key, L); S.kbOpenId = x.id; kbChr(x, 'neu'); kbRender(true);
+    const d = document.querySelector('[data-kb="d"][data-id="' + x.id + '"]'); if (d) d.focus();
+  },
+  kbSt: (t, a) => { const [id, st] = String(a).split(':'); const f = kbFind(id); if (!f.x || f.x.st === st) return; f.x.st = st; f.x.u = Date.now(); kbSave(f.key, f.L); S.kbOpenId = id; kbChr(f.x, 'st'); if (f.x.frei) kbShare(); kbRender(true); },
+  kbDel: (t, a) => { const f = kbFind(a); if (!f.x) return; kbSave(f.key, f.L.filter((y) => y.id !== a)); if (f.x.frei) kbShare(); S.kbOpenId = null; kbRender(true); }
+});
+/* Eingaben im Buch: Text sofort speichern, Freigabe-Schalter, Buchwahl, Aufklappen merken, Enter fügt hinzu */
+function kbField(el, final) {
+  const f = kbFind(el.dataset.id); if (!f.x) return; const k = el.dataset.kb;
+  if (k === 'frei') { f.x.frei = el.checked; f.x.u = Date.now(); kbSave(f.key, f.L); if (f.x.frei) kbChr(f.x, 'frei'); kbShare(); if (final) kbRender(true); return; }
+  f.x[k] = String(el.value).slice(0, k === 'g' ? 600 : 160); f.x.u = Date.now(); kbSave(f.key, f.L); if (k === 'd' && f.x.frei) kbShare();
+  if (final && k === 'd') { const s = el.closest('details') && el.closest('details').querySelector('summary .kbn small'); if (s) s.textContent = f.x.d; else if (f.x.d) { const b = el.closest('details').querySelector('summary .kbn'); if (b) b.insertAdjacentHTML('beforeend', '<small>' + esc(f.x.d) + '</small>'); } }
+}
+document.addEventListener('input', (ev) => { const el = ev.target; if (el && el.dataset && el.dataset.kb && el.dataset.kb !== 'frei') kbField(el, false); });
+document.addEventListener('change', (ev) => {
+  const el = ev.target; if (!el) return;
+  if (el.dataset && el.dataset.kb) kbField(el, true);
+  else if (el.id === 'kbBook') { S.kbKey = el.value; S.kbOpenId = null; chrOpen(true); }
+});
+document.addEventListener('toggle', (ev) => { const d = ev.target; if (d && d.dataset && d.dataset.kbid) { if (d.open) S.kbOpenId = d.dataset.kbid; else if (S.kbOpenId === d.dataset.kbid) S.kbOpenId = null; } }, true);
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && !ev.isComposing && ev.target && ev.target.id === 'kbN') { ev.preventDefault(); XA.kbAdd(); } });
+
+/* Spieler am Tisch: was die Spielleitung freigegeben hat, eingeklappt unter dem Ansagefeld */
+function kbPlayerBox() {
+  const L = ((S.meta && S.meta.kb) || []).filter((x) => x && x.n && KB_TYP[x.typ]); if (!L.length) return '';
+  const open = L.filter((x) => x.typ === 'a' && x.st === 'offen').length;
+  const grp = ['a', 'p', 'o'].map((t) => { const g = kbSort(L.filter((x) => x.typ === t), t); return g.length ? '<h4>' + KB_TYP[t][0] + '</h4><ul class="kbpl">' + g.map((x) => '<li class="' + (x.st === 'tot' || x.st === 'gescheitert' || x.st === 'erledigt' ? 'dim' : '') + '"><b>' + esc(x.n) + '</b> <span class="kbst st-' + esc(x.st) + '">' + esc(kbStName(x)) + '</span>' + (x.d ? '<small>' + esc(x.d) + '</small>' : '') + '</li>').join('') + '</ul>' : ''; }).join('');
+  return '<details class="fgrp kbp"' + (S.kbpOpen ? ' open' : '') + '><summary><b>Bekannt</b> <small>Personen, Orte, Aufträge' + (open ? ' · ' + open + ' offen' : '') + '</small></summary><div class="kbpb">' + grp + '</div></details>';
+}
+document.addEventListener('toggle', (ev) => { const d = ev.target; if (d && d.classList && d.classList.contains('kbp')) S.kbpOpen = d.open; }, true);
+if (typeof dmTools === 'function') { const _kbDm0 = dmTools; dmTools = function () { const h = _kbDm0.apply(this, arguments); if (!S.camp || (typeof isDM === 'function' && isDM())) return h; return h + kbPlayerBox(); }; }
+
+/* Für Claude: Personen, Orte, Aufträge des aktuellen Buchs (mit geheimen Notizen – die Lage liest nur die Spielleitung) */
+function kbText(key) {
+  const L = kbList(key); if (!L.length) return '';
+  return ['a', 'p', 'o'].map((t) => { const g = kbSort(L.filter((x) => x.typ === t), t); return g.length ? KB_TYP[t][0] + ':\n' + g.slice(0, 30).map((x) => '- ' + x.n + ' [' + kbStName(x) + (x.frei ? ', den Spielern bekannt' : ', den Spielern unbekannt') + ']' + (x.d ? ': ' + x.d : '') + (x.g ? ' (geheim: ' + x.g + ')' : '')).join('\n') : ''; }).filter(Boolean).join('\n');
+}
+if (typeof slLage === 'function') { const _kbSl0 = slLage; slLage = function (q) { const s = _kbSl0.apply(this, arguments); let k = 'frei'; try { k = S.kbKey && S.modal === 'chronik' ? S.kbKey : chrWhere().key; } catch (e) {} const t = kbText(k); if (!t) return s; const i = s.indexOf('\n## Letzte Würfe'); const add = '\n## Personen, Orte, Aufträge\n' + t + '\n'; return i >= 0 ? s.slice(0, i) + add + s.slice(i) : s + '\n' + add; }; }
 
 /* ==== Pflege: Speicher absichern, Sicherung nach dem Spielabend anbieten, Stolpersteine sammeln ==== */
+/* Sprache der Seite: für Silbentrennung langer Wörter (z. B. «Drachenblütiger» auf kleinen Karten) und Vorlesefunktionen */
+try { if (!document.documentElement.lang) document.documentElement.lang = 'de-CH'; } catch (e) {}
 
 /* Dauerhaften Speicher anfragen. Ohne diese Zusage darf der Browser die Daten einer Web-App bei Platznot oder nach
    längerer Pause löschen (v. a. Safari). Chrome und Safari fragen nicht nach; Firefox zeigt eine Rückfrage,
@@ -9558,7 +9747,7 @@ function renderTop() {
   const more = [['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe']]; const moreOn = more.some(([k]) => S.view === k);
   $('#top').innerHTML = '<div class="wrap"><div class="bar"><button class="brand" data-act="view" data-arg="heroes">' + LOGO + 'Heldenbuch</button>' +
     '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') +
-      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<hr><button data-act="histOpen">Würfelverlauf</button><button data-act="chrOpen">📜 Chronik</button><button data-act="slOpen">✦ Claude fragen</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="stOpen">Stolperstein melden</button></div></details></nav>' +
+      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<hr><button data-act="histOpen">Würfelverlauf</button><button data-act="chrOpen">📜 Chronik und Personen</button><button data-act="slOpen">✦ Claude fragen</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="stOpen">Stolperstein melden</button></div></details></nav>' +
     '<button class="mbtn mwarn" data-act="warnOpen" hidden aria-label="Offene Punkte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg><b></b></button><button class="mbtn mdice" data-act="drOpen" aria-label="Würfelbecher"><svg viewBox="0 0 64 64" aria-hidden="true"><polygon points="32,4 56,18 56,46 32,60 8,46 8,18"/><polygon points="32,18 46,42 18,42"/></svg></button>' +
     '<button class="tbtn tsearch" data-act="search" title="Suchen (Strg+K oder /)" aria-label="Suchen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>' +
     '<button class="tbtn" data-act="themeOpen" title="Stimmung wählen" aria-label="Stimmung wählen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.2-1-1.6-1-2.6 0-1 .8-1.7 1.9-1.7H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z"/><circle cx="7.5" cy="11" r="1.3"/><circle cx="10.5" cy="7" r="1.3"/><circle cx="15" cy="7.5" r="1.3"/></svg></button>' + (ch ? '<button class="curhero" data-act="view" data-arg="heroes" title="Helden wechseln">' + sigil(ch) + '<span>' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</span></button>' : '') +
@@ -9592,13 +9781,19 @@ function exportData(list, full) { const d = { heldenbuch: 1, exportiert: new Dat
 /* „Alles sichern“: neben Helden und Hausregeln auch eigene Monster, gespeicherte Begegnungen und SL-Notizen (liegen sonst nur im Browser) */
 function backupExtras() { const notes = {}; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.indexOf('heldenbuch_dm_') === 0 && localStorage.getItem(k)) notes[k.slice(14)] = localStorage.getItem(k); } } catch (e) {}
   const ad = typeof advDb === 'function' ? advDb() : null;
-  return { mobs: typeof ownMobs === 'function' ? ownMobs() : [], enc: typeof encLoad === 'function' ? encLoad() : [], dmNotes: notes, player: typeof myName === 'function' ? myName() : '', adv: ad ? ad.list : [], advSt: ad ? ad.st : {} }; }
+  return { mobs: typeof ownMobs === 'function' ? ownMobs() : [], enc: typeof encLoad === 'function' ? encLoad() : [], dmNotes: notes, player: typeof myName === 'function' ? myName() : '', adv: ad ? ad.list : [], advSt: ad ? ad.st : {}, chr: typeof chrDb === 'function' ? chrDb() : {}, kb: typeof kbDb === 'function' ? kbDb() : {} }; }
 function restoreExtras(x) {
   if (!x || typeof x !== 'object') return []; const done = [];
   if (typeof x.player === 'string' && x.player.trim() && typeof myName === 'function' && !myName()) { setMyName(x.player.trim().slice(0, 24)); done.push('dein Name'); }
   if (Array.isArray(x.mobs) && x.mobs.length && typeof ownMobsStore === 'function') { const list = ownMobs(); let n = 0; x.mobs.forEach((o) => { if (!o || !o.id || !o.name || !CR_XP[o.cr]) return; const i = list.findIndex((y) => y.id === o.id); if (i >= 0) list[i] = o; else list.push(o); n++; }); ownMobsStore(list); ownMobsLoad(); if (n) done.push(n + ' eigene Monster'); }
   if (Array.isArray(x.enc) && x.enc.length && typeof encStore === 'function') { const list = encLoad(); let n = 0; x.enc.forEach((e) => { if (!e || !e.id || !Array.isArray(e.mobs) || list.some((y) => y.id === e.id)) return; list.push(e); n++; }); encStore(list.slice(0, 60)); if (n) done.push(n + ' Begegnungen'); }
   if (x.dmNotes && typeof x.dmNotes === 'object') { let n = 0; Object.entries(x.dmNotes).forEach(([room, txt]) => { if (typeof txt !== 'string' || !txt) return; try { const k = 'heldenbuch_dm_' + room; const cur0 = localStorage.getItem(k) || ''; if (cur0 === txt) return; localStorage.setItem(k, cur0 ? cur0 + '\n\n— aus der Sicherung —\n' + txt : txt); n++; } catch (e) {} }); if (n) done.push('SL-Notizen (' + n + ' Runde' + (n > 1 ? 'n' : '') + ')'); }
+  /* Chronik und Kampagnenbuch: Einträge je Buch zusammenführen (nach id), nichts Vorhandenes überschreiben */
+  for (const [f, rd, wr, lab] of [['chr', 'chrDb', 'chrSaveDb', 'Chronik'], ['kb', 'kbDb', 'kbSaveDb', 'Personen, Orte, Aufträge']]) {
+    if (!x[f] || typeof x[f] !== 'object' || typeof window[rd] !== 'function') continue; const d = window[rd](); let n = 0;
+    Object.entries(x[f]).forEach(([k, L]) => { if (!Array.isArray(L) || !/^(adv:[a-z0-9-]{1,40}|tisch:.{1,60}|frei)$/.test(k)) return; const have = new Set((d[k] || []).map((e) => e && e.id)); const add = L.filter((e) => e && e.id && typeof e.t === 'number' && !have.has(e.id)); if (add.length) { d[k] = (d[k] || []).concat(add).sort((a, b) => a.t - b.t); n += add.length; } });
+    if (n) { window[wr](d); done.push(lab + ' (' + n + ')'); }
+  }
   if (Array.isArray(x.adv) && x.adv.length && typeof advImport === 'function') { const n = advImport(x.adv); if (n) done.push(n === 1 ? 'das Abenteuer „' + String((x.adv.find((a) => a && a.title) || {}).title || '').slice(0, 40) + '“' : n + ' Abenteuer'); }
   if (x.advSt && typeof x.advSt === 'object' && typeof advDb === 'function') { const d = advDb(); let n = 0; Object.entries(x.advSt).forEach(([id, st]) => { if (!st || typeof st !== 'object' || !/^[a-z0-9-]{1,40}$/.test(id)) return; if (d.st[id] && (+d.st[id].t || 0) >= (+st.t || 0)) return; d.st[id] = st; n++; }); if (n) { advSave(d); done.push('Abenteuer-Fortschritt'); } }
   return done;
@@ -10103,7 +10298,11 @@ function orbPrompt(html) {
   }
   if (p.hidden) { const e = S.log[0]; orbPrompt.roll = e && e.sides && !e.preview && Date.now() - e.t < 4000 ? e : null; }
   const r = orbPrompt.roll;
-  p.innerHTML = (r ? '<div class="prroll" data-act="histOpen" title="Würfelverlauf öffnen"><span>' + esc(r.label) + '</span><b' + (r.crit ? ' class="crit"' : r.fumble ? ' class="fum"' : '') + '>' + esc(String(r.total)) + '</b><small>' + esc(r.detail || '') + '</small></div>' : '') + html; p.hidden = false;
+  /* Steht Wurf und Ergebnis schon in der Rückfrage, zeigt der Streifen nur noch die Würfeldetails (eine Zeile statt Doppelung) */
+  const ptxt = r ? html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').toLowerCase() : '';
+  const dup = r && ptxt.includes(String(r.total).toLowerCase()) && ptxt.includes(String(r.label).toLowerCase().slice(0, 14));
+  p.innerHTML = (r ? (dup ? '<div class="prroll mini" data-act="histOpen" title="Würfelverlauf öffnen"><small>' + esc(r.detail || '') + '</small><i>Verlauf ›</i></div>'
+    : '<div class="prroll" data-act="histOpen" title="Würfelverlauf öffnen"><span>' + esc(r.label) + '</span><b' + (r.crit ? ' class="crit"' : r.fumble ? ' class="fum"' : '') + '>' + esc(String(r.total)) + '</b><small>' + esc(r.detail || '') + '</small></div>') : '') + html; p.hidden = false;
 }
 const promptOpen = () => { const p = $('#prompt'); return !!(p && !p.hidden); };
 function promptIdle() { if (promptOpen()) return; if (typeof hitFlush === 'function') hitFlush(); if (!promptOpen() && typeof reqCheck === 'function') reqCheck(); }

@@ -43,6 +43,10 @@ run "Willkommen: Name beim ersten Start (welcome.test.js)" node tests/welcome.te
 run "Willkommen in der App (welcome.test.js app)" node tests/welcome.test.js app/Heldenbuch.html
 run "Spielabend sichern, Stolpersteine (pflege.test.js)" node tests/pflege.test.js
 run "Spielabend sichern, Stolpersteine, Server (pflege.test.js app)" node tests/pflege.test.js app/Heldenbuch.html
+run "Kampagnenbuch: Personen, Orte, Aufträge (kbuch.test.js)" node tests/kbuch.test.js
+run "Kampagnenbuch in der App (kbuch.test.js app)" node tests/kbuch.test.js app/Heldenbuch.html
+run "Überdeckungen: 9 Bildschirmgrössen, alle Ansichten (overlap.test.js)" node tests/overlap.test.js
+run "Überdeckungen in der App (overlap.test.js app)" node tests/overlap.test.js app/Heldenbuch.html
 run "Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js)" node tests/hilfe.test.js
 run "Aufgeräumter Bogen: Kopfleiste, Kampfseite, Heldenliste (bogen.test.js)" node tests/bogen.test.js
 run "Würfelverlauf (verlauf.test.js)" node tests/verlauf.test.js

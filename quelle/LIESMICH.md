@@ -45,6 +45,8 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/undo.test.js | Rückgängig, Wiederholen, Zug zurückspulen |
 | tests/slhelfer.test.js | Claude-Helfer: Lagebericht, Kopieren, Assistent (nachgebildet) |
 | tests/sitzung.test.js | Spielabend mit Abenteuer über den Online-Tisch: Handout, Kampf, Monsterangriff, Beute, geheime Tabellen |
+| tests/kbuch.test.js | Kampagnenbuch: anlegen, bearbeiten, Stand, Freigabe, Chronik, Buchwahl, Sicherung/Wiederherstellung, Claude-Lage (Handy und PC); Teilen am Tisch prüft sitzung.test.js |
+| tests/overlap.test.js, tests/overlap-lib.js | Überdeckungen: 9 Bildschirmgrössen × alle Ansichten und Fenster – jedes Bedienelement und jeder Text muss in einer Scrollposition unverdeckt sichtbar sein, keine abgeschnittenen Knöpfe, kein Querscrollen, deckende Leisten; auch im Kampf am Tisch (sitzung.test.js) |
 | tests/pflege.test.js | Rückfrage zur Sicherung, Stolpersteine (Handy und PC), Server-Umstellung Mosquitto → HiveMQ (App) |
 | tests/verlauf.test.js | Würfelverlauf: Aufzeichnung, Speicherung, Filter, Wurf in Rückfragen |
 | tests/bogen.test.js | aufgeräumter Bogen: Kopfleiste mit Kernwerten, Kampfseite ohne Reiterwechsel, Heldenliste |
@@ -84,6 +86,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | help.js | Kontexthilfe |
 | chronik.js | Abenteuerverfolgung: Chronik der Spielleitung (automatisch + Notizen, je Abenteuer/Tisch), Ansagen der Spieler (Feld „Was tust du?“, Tisch-Dokument ans, Meta ansSeen), Mikrofon in claude.ai (dictation) |
 | slhelfer.js | Claude als Helfer der Spielleitung: Lagebericht (Szene, Gruppe, Kampf, Würfe) zum Kopieren/Teilen; in claude.ai direkte Antworten (Fähigkeit „sample“) |
+| kbuch.js | Kampagnenbuch: Personen, Orte, Aufträge als Reiter im Chronik-Fenster (hb_kbuch je Buch wie die Chronik), Freigabe an den Tisch (Meta kb, ohne geheime Notiz), Chronik-Einträge bei Stand/Freigabe, Spieleransicht «Bekannt», Abschnitt in der Claude-Lage |
 | pflege.js | Speicher absichern (navigator.storage.persist), Rückfrage «Spielabend sichern?» beim Start (≥ 10 eigene Würfe seit der letzten Sicherung, älter als 20 h, höchstens 1× pro Tag), Stolpersteine mit Ort und Zeit (hb_stolper, 100) |
 | verlauf.js | Würfelverlauf: alle Würfe (Held, Kreaturen, Mitspieler) mit Details, auf dem Gerät gespeichert (200) |
 | hilfe.js | Hilfe-Stufe (Einsteiger · Standard · Erfahren): Erklärknöpfe, Einsteiger-Tipps, Zug-Leitfaden, Wurferklärung, Zugleiste an/aus, Nachbessern, Rechenweg |

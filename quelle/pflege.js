@@ -1,4 +1,6 @@
 /* ==== Pflege: Speicher absichern, Sicherung nach dem Spielabend anbieten, Stolpersteine sammeln ==== */
+/* Sprache der Seite: für Silbentrennung langer Wörter (z. B. «Drachenblütiger» auf kleinen Karten) und Vorlesefunktionen */
+try { if (!document.documentElement.lang) document.documentElement.lang = 'de-CH'; } catch (e) {}
 
 /* Dauerhaften Speicher anfragen. Ohne diese Zusage darf der Browser die Daten einer Web-App bei Platznot oder nach
    längerer Pause löschen (v. a. Safari). Chrome und Safari fragen nicht nach; Firefox zeigt eine Rückfrage,
