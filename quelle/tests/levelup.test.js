@@ -8,7 +8,7 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     const ctx = await b.newContext({ viewport: dev.vp, isMobile: !!dev.m, hasTouch: !!dev.m }); const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(dev.n + ': ' + e.message));
     await p.goto('file://' + target); await p.waitForTimeout(400);
     const tap = async (sel) => { const el = p.locator(sel).first(); if (dev.m) await el.tap(); else await el.click(); await p.waitForTimeout(150); };
-    await p.evaluate(() => { localStorage.setItem('hb_dice_fx', 'ruhig'); const n = newChar({ name: 'Brakk', cls: 'fig', level: 2 }); n.styles = ['defense']; S.chars[n.id] = n; S.cur = n.id; S.view = 'sheet'; render(); });
+    await p.evaluate(() => { localStorage.setItem('hb_dice_fx', 'ruhig'); const n = newChar({ name: 'Brakk', cls: 'fig', level: 2 }); n.styles = ['defense']; S.chars[n.id] = n; S.cur = n.id; S.view = 'sheet'; S.mg = 'werte'; render(); });
     await tap('[data-act="lvlUp"]');
     T(dev.n + ': Schritt 1 zeigt Stufe 2 → 3 und TP', await p.evaluate(() => /Stufe 2 → 3/.test($('.luwiz').textContent) && /TP/.test($('.luhp').textContent)));
     if (shots) await p.screenshot({ path: path.join(shots, 'lu-' + dev.n + '-1.png') });

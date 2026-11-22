@@ -103,7 +103,7 @@ function addHelp() {
     if (h.querySelector('.hlp')) return; const tx = h.textContent.trim();
     const m = heads.find(([re]) => re.test(tx)); if (m) h.insertAdjacentHTML('beforeend', ' ' + helpBtn(m[1]));
   });
-  const tb = document.querySelector('.turnblk .tbar'); if (tb && !tb.querySelector('.hlp')) tb.insertAdjacentHTML('beforeend', helpBtn('zug'));
+  const tb = document.querySelector('.turnblk .tctx'); if (tb && !document.querySelector('.turnblk .hlp')) tb.insertAdjacentHTML('beforeend', helpBtn('zug'));
   const mx = document.querySelector('.mnav .mexp'); if (mx && !mx.parentNode.querySelector('.hlp[data-arg=rechenweg]')) mx.insertAdjacentHTML('afterend', helpBtn('rechenweg'));
   const bb = document.querySelector('#boostBar .bbh'); if (bb && !bb.querySelector('.hlp')) bb.querySelector('.x').insertAdjacentHTML('beforebegin', helpBtn('boost'));
 }

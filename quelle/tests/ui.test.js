@@ -33,7 +33,7 @@ async function run(b, label, ctxOpt) {
   /* Rückgängig */
   const und = p.locator('.undobtn'); if (await und.count() && await und.isEnabled()) await und.click();
   /* Stufenaufstieg-Dialog */
-  const lu = p.locator('button[data-act=lvlUp]'); if (await lu.count()) { await lu.first().click(); await p.waitForTimeout(150); ok('Stufenaufstieg-Dialog', await p.locator('.lvlup').count() === 1); await p.evaluate(() => { document.getElementById('modal').hidden = true; S.modal = null; }); }
+  await p.evaluate(() => { S.mg = 'werte'; render(); }); /* EP und Stufenaufstieg stehen unter „Werte“ */ const lu = p.locator('button[data-act=lvlUp]'); if (await lu.count()) { await lu.first().click(); await p.waitForTimeout(150); ok('Stufenaufstieg-Dialog', await p.locator('.lvlup').count() === 1); await p.evaluate(() => { document.getElementById('modal').hidden = true; S.modal = null; }); }
   /* Suche */
   await tap('.tsearch'); await p.fill('#srchQ', 'Feuerball'); await p.waitForTimeout(200); ok('Suche findet Feuerball', /Feuerball/.test(await p.locator('#modal').textContent())); await p.evaluate(() => { document.getElementById('modal').hidden = true; S.modal = null; });
   /* Würfelbecher */

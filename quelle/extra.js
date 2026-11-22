@@ -339,7 +339,7 @@ function doRest(ch, kind, silent, fromDialog) {
 /* ---------- Erfahrung & Stufenaufstieg ---------- */
 function xpLine(c) {
   const ch = c.char; const xp = +ch.xp || 0; const L = c.level; const nx = XP_LV[L] ?? null; const ready = nx != null && xp >= nx;
-  return '<div class="xpline" data-grp="kampf faehig"><span>EP <b>' + xp.toLocaleString('de-CH') + '</b>' + (nx != null ? ' / ' + nx.toLocaleString('de-CH') + ' für Stufe ' + (L + 1) : ' · Höchststufe') + '</span><input type="number" id="xpAdd" min="0" placeholder="EP" aria-label="Erfahrungspunkte hinzufügen"><button class="btn sm ghost" data-act="xpAdd">Hinzufügen</button>' + (L < 20 ? '<button class="btn sm' + (ready ? ' glowbtn' : ' ghost') + '" data-act="lvlUp">Stufenaufstieg' + (ready ? ' möglich!' : '') + '</button>' : '') + '</div>';
+  return '<div class="xpline" data-grp="werte"><span>EP <b>' + xp.toLocaleString('de-CH') + '</b>' + (nx != null ? ' / ' + nx.toLocaleString('de-CH') + ' für Stufe ' + (L + 1) : ' · Höchststufe') + '</span><input type="number" id="xpAdd" min="0" placeholder="EP" aria-label="Erfahrungspunkte hinzufügen"><button class="btn sm ghost" data-act="xpAdd">Hinzufügen</button>' + (L < 20 ? '<button class="btn sm' + (ready ? ' glowbtn' : ' ghost') + '" data-act="lvlUp">Stufenaufstieg' + (ready ? ' möglich!' : '') + '</button>' : '') + '</div>';
 }
 
 /* ---------- Klassenoptionen einsetzen (Runen, Riten, Flüche, Module) ---------- */
@@ -438,7 +438,7 @@ function sheetNav(c) {
   return '<nav class="mnav" aria-label="Seiten des Bogens">' + list.map(([k, l]) => '<button class="' + (g === k ? 'on' : '') + '" data-act="mg" data-arg="' + k + '">' + l + '</button>').join('') + '<button class="mall' + (g === 'alle' ? ' on' : '') + '" data-act="mg" data-arg="alle" title="Alles auf einer Seite">Alles</button>' + (typeof S !== 'undefined' ? '<button class="undobtn" data-act="undo" title="Letzte Änderung rückgängig (Strg+Z)"' + (S.undo && S.undo.some((u) => u.id === S.cur) ? '' : ' disabled') + '>↶ <span>Rückgängig</span> <b>' + ((S.undo || []).filter((u) => u.id === S.cur).length || '') + '</b></button>' : '') + '</nav>';
 }
 XA.mg = (t, a) => { S.mg = a; try { localStorage.setItem('heldenbuch_mg', a); } catch (e) {} render(); const n = document.querySelector('.mnav'); if (n) { const top = n.getBoundingClientRect().top + window.scrollY - 70; if (window.scrollY > top) window.scrollTo(0, top); } };
-function mgOf(c) { if (S.mg === undefined) { try { S.mg = localStorage.getItem('heldenbuch_mg') || 'kampf'; } catch (e) { S.mg = 'kampf'; } } if (S.mg === 'alle' && window.innerWidth <= 820) return 'kampf'; return S.mg === 'zauber' && !(c.spell.has || c.extraSpells.length) ? 'kampf' : (S.mg || 'kampf'); }
+function mgOf(c) { if (S.mg === undefined) { try { S.mg = localStorage.getItem('heldenbuch_mg') || 'kampf'; } catch (e) { S.mg = 'kampf'; } } return S.mg === 'zauber' && !(c.spell.has || c.extraSpells.length) ? 'kampf' : (S.mg || 'kampf'); }
 
 /* ---------- Untere Navigation (Handy) ---------- */
 const NAV_ICON = {
