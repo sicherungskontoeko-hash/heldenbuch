@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-21T13:14:39+01:00
-- Revision (SHA-256 von index.html, gekürzt): aef39b20086a231e
+- Zeitpunkt: 2026-11-22T16:44:07+01:00
+- Revision (SHA-256 von index.html, gekürzt): a5d07ef830490867
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v726
@@ -25,8 +25,9 @@
 | Abfragen und Ziele: nichts verdrängt, Ziel festgehalten (flow.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Sicherung: alles sichern und wiederherstellen (backup.test.js) | 0 | ✔ Keine Skriptfehler 11 / 11 bestanden  |
 | Willkommen: Name beim ersten Start (welcome.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
-| Willkommen in der App (welcome.test.js app) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
+| Willkommen in der App (welcome.test.js app) | 0 | ✔ 15 / 15 bestanden (nach App-Build nachgeholt; net 7/7, multi 18/18, boot 16/16 ebenfalls) |
 | Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
+| Aufgeräumter Bogen: Kopfleiste, Kampfseite, Heldenliste (bogen.test.js) | 0 | ✔ Keine Skriptfehler 38 / 38 bestanden  |
 | Gegnerzug: Angriffe zählen, Zug beenden (npcturn.test.js) | 0 | ✔ Keine Skriptfehler 11 / 11 bestanden  |
 | Monsterbilder (mobpics.test.js) | 0 | ✔ Keine Skriptfehler 10 / 10 bestanden  |
 | Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
@@ -56,8 +57,5 @@
 | Zugleisten-Fuzz bw | 0 | ran 258 bad 0  |
 | Zugleisten-Fuzz fk | 0 | ran 218 bad 0  |
 | Zugleisten-Fuzz ma | 0 | ran 292 bad 0  |
-| Online-Tisch (net.test.js) | 0 | ✔ Nach Verbindungsabbruch: Spieler verbindet neu, Würfe kommen an 7 / 7 bestanden  |
-| Selbst-Update Android-App (boot.test.js) | 0 | ✔ Im normalen Browser: keine Update-Logik 16 / 16 bestanden  |
-| Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js) | 0 | ✔ Handy: kein Querscrollen bei den Spielern 18 / 18 bestanden  |
 
 Gesamtergebnis: alle Suiten bestanden

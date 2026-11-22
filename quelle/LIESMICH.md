@@ -42,6 +42,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/ui.test.js, tests/ui-full.test.js | Klicktests Desktop + Handy (alle Klassen, Unterklassen, Spezies, Schritte, Export/Import, Offline-Neustart) |
 | tests/combos.test.js | alle Klassen × Unterklassen × Stufen 1–20 |
 | tests/turnfuzz.test.js | jede Zugleisten-Option je Klasse einmal ausführen |
+| tests/bogen.test.js | aufgeräumter Bogen: Kopfleiste mit Kernwerten, Kampfseite ohne Reiterwechsel, Heldenliste |
 | tests/hilfe.test.js | Hilfe-Stufen: was sichtbar ist, Regelprüfung ohne Zugleiste, Dialog, Willkommen |
 | tests/net.test.js | Online-Tisch mit lokalem Broker: Verschlüsselung, Fremdzugriff, Manipulation, Wiederverbindung (braucht `python3 build_app.py`) |
 | tests/boot.test.js | Selbst-Update der Android-App: neue Version laden, Helden behalten, kaputte Version verwerfen, offline (braucht `python3 build_app.py`) |
