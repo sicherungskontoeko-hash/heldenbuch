@@ -14,12 +14,22 @@ function undoBefore(act) {
     undoBar();
   }, 30);
 }
+function undoBtnsRefresh(flash) {
+  const nav = document.querySelector('.mnav[aria-label="Seiten des Bogens"]'); if (!nav) return false;
+  const ub = nav.querySelector('.udo'); const h = undoBtns();
+  if (ub) { if (h) ub.outerHTML = h; else ub.remove(); } else if (h) nav.insertAdjacentHTML('beforeend', h);
+  if (flash) { const b = nav.querySelector('.undobtn'); if (b) { b.classList.add('neu'); setTimeout(() => b.classList.remove('neu'), 1200); } }
+  return nav.getClientRects().length > 0;
+}
+/* Nach einer Änderung: Auf dem Bogen leuchtet der feste Rückgängig-Knopf kurz auf (keine schwebende Leiste, die Inhalt verdeckt).
+   In anderen Ansichten erscheint die kleine Leiste unten für 6 Sekunden. */
 function undoBar() {
   let el = document.getElementById('undoBar'); if (!el) { el = document.createElement('div'); el.id = 'undoBar'; document.body.appendChild(el); }
-  S.undo = S.undo || []; const last = S.undo.filter((u) => u.id === S.cur).pop(); if (!last) { el.hidden = true; return; }
+  S.undo = S.undo || []; const last = S.undo.filter((u) => u.id === S.cur).pop();
+  const onSheet = undoBtnsRefresh(!!last) && S.view === 'sheet';
+  if (!last || onSheet) { el.hidden = true; return; }
   el.innerHTML = '<span>' + esc(last.label) + '</span><button data-act="undo">↶ Rückgängig</button>'; el.hidden = false; el.classList.remove('out'); void el.offsetWidth;
   clearTimeout(undoBar.tm); undoBar.tm = setTimeout(() => { el.classList.add('out'); setTimeout(() => { el.hidden = true; }, 350); }, 6000);
-  const ub = document.querySelector('.mnav .udo'); if (ub) ub.outerHTML = undoBtns();
 }
 function undoApply(ch, snap) { const d = JSON.parse(snap); Object.assign(ch, { play: d.play, items: d.items, inv: d.inv, comps: d.comps, xp: d.xp, level: d.level, multi: d.multi, hpRolls: d.hpRolls }); if (d.coins) ch.coins = d.coins; if (typeof orbPrompt === 'function') { S.dp = null; S.sa = null; orbPrompt(''); } }
 const undoN = () => (S.undo || []).filter((u) => u.id === S.cur).length, redoN = () => (S.redo || []).filter((u) => u.id === S.cur).length;
@@ -64,6 +74,7 @@ XA.turnBackGo = () => turnBackGo();
 /* Rückgängig/Wiederholen fest in der Reiterleiste (bleibt am rechten Rand sichtbar) */
 function undoBtns() {
   if (typeof S === 'undefined') return ''; const u = undoN(), r = redoN();
+  if (!u && !r) return ''; /* nichts rückgängig zu machen: kein Knopf, mehr Platz für die Reiter */
   return '<span class="udo"><button class="undobtn" data-act="undo" title="Letzte Änderung rückgängig (Strg+Z)" aria-label="Rückgängig"' + (u ? '' : ' disabled') + '>↶<b>' + (u || '') + '</b></button>' + (r ? '<button class="redobtn" data-act="redo" title="Wiederholen (Strg+Y)" aria-label="Wiederholen">↷<b>' + r + '</b></button>' : '') + '</span>';
 }
 

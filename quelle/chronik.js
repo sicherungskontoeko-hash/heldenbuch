@@ -4,11 +4,11 @@
    Ansagen: Spieler schreiben oder diktieren (Tastatur-Mikrofon) „Was tust du?“; das geht über ihr Tisch-Dokument (Feld ans) an die Spielleitung.
    Erledigte Ansagen markiert die Spielleitung (Meta ansSeen), die Spieler sehen „✓ gesehen“. Beides fliesst in die Claude-Lage. */
 const CHR_KEY = 'hb_chronik', CHR_MAX = 400;
-const CHR_ICON = { abend: '📅', szene: '📖', handout: '📜', kampf: '⚔', kende: '🏁', beute: '💰', wahl: '⚖', rast: '☾', ansage: '💬', notiz: '✎', stufe: '⬆', boden: '✚', tod: '✝' };
+const CHR_ICON = { abend: '📅', szene: '📖', handout: '📜', kampf: '⚔', kende: '🏁', beute: '💰', wahl: '⚖', rast: '☾', ansage: '💬', notiz: '✎', stufe: '⬆', boden: '✚', tod: '✝', person: '☺', ort: '⌂', auftrag: '❖' };
 function chrDb() { try { const d = JSON.parse(localStorage.getItem(CHR_KEY) || '{}'); return d && typeof d === 'object' ? d : {}; } catch (e) { return {}; } }
 function chrSaveDb(d) { try { localStorage.setItem(CHR_KEY, JSON.stringify(d)); } catch (e) {} }
 /* Wohin gehört ein Eintrag? Zum zuletzt geöffneten Abenteuer, sonst zum Tisch */
-function chrWhere() { let a = ''; try { a = typeof advDb === 'function' ? advDb().last : ''; } catch (e) {} if (a && typeof advGet === 'function' && advGet(a)) return { key: 'adv:' + a, name: advGet(a).title }; if (S.camp) return { key: 'tisch:' + S.camp, name: 'Tisch ' + S.camp }; return { key: 'frei', name: 'Ohne Abenteuer' }; }
+function chrWhere() { if (S.kbKey && S.modal === 'chronik' && typeof kbKeyName === 'function') return { key: S.kbKey, name: kbKeyName(S.kbKey) }; let a = ''; try { a = typeof advDb === 'function' ? advDb().last : ''; } catch (e) {} if (a && typeof advGet === 'function' && advGet(a)) return { key: 'adv:' + a, name: advGet(a).title }; if (S.camp) return { key: 'tisch:' + S.camp, name: 'Tisch ' + S.camp }; return { key: 'frei', name: 'Ohne Abenteuer' }; }
 function chrList(key) { const d = chrDb(); return Array.isArray(d[key || chrWhere().key]) ? d[key || chrWhere().key] : []; }
 const chrMine = () => !S.camp || (typeof isDM === 'function' && isDM()); /* nur die Spielleitung (oder ohne Tisch) schreibt mit */
 function chrAdd(k, x, force) {
@@ -25,7 +25,7 @@ function chrText(n, key) { const L = chrList(key).slice(-(n || 999)); return L.m
 function chrOpen(keep) {
   const w = chrWhere(); const L = chrList(w.key); const m = $('#modal'); S.modal = 'chronik'; S.more = false; document.querySelectorAll('details.mnu[open]').forEach((d) => { d.open = false; });
   const rows = L.map((e) => e.k === 'abend' ? '<li class="cabend">' + esc(e.x) + '</li>' : '<li class="ce"><time>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</time><span class="ci" aria-hidden="true">' + (CHR_ICON[e.k] || '•') + '</span><span class="cx">' + esc(e.x) + '</span><button class="x" data-act="chrDel" data-arg="' + e.id + '" aria-label="Eintrag löschen">×</button></li>').join('');
-  m.innerHTML = '<div class="dlg chrdlg" role="dialog" aria-modal="true" aria-label="Chronik"><div class="dph"><b>Chronik · ' + esc(w.name) + '</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
+  m.innerHTML = '<div class="dlg chrdlg" role="dialog" aria-modal="true" aria-label="Chronik"><div class="dph"><b>Chronik · ' + esc(w.name) + '</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' + (typeof kbTabs === 'function' ? kbTabs() : '') +
     (L.length ? '<ul class="chr" id="chrList">' + rows + '</ul>' : '<p class="hint">Noch nichts aufgeschrieben. Die Chronik füllt sich von selbst: Szenen, Handouts, Kämpfe, Beute, Entscheidungen, Rasten, Stufenaufstiege und erledigte Ansagen. Eigene Notizen kannst du unten ergänzen.</p>') +
     '<div class="chradd"><input id="chrN" type="text" placeholder="Notiz, z. B. «Die Helden haben Prunella die Wahrheit gesagt»" enterkeyhint="done">' + micBtn('chrN') + '<button class="btn sm" data-act="chrNote">Eintragen</button></div>' +
     '<div class="chips end"><button class="btn ghost sm" data-act="chrAbend">Neuer Spielabend</button><button class="btn ghost sm" data-act="chrCopy"' + (L.length ? '' : ' disabled') + '>Kopieren</button><button class="btn sm" data-act="chrRecap"' + (L.length ? '' : ' disabled') + '>✦ Was bisher geschah</button></div></div>';
@@ -131,4 +131,4 @@ function chrWatch() {
 }
 setTimeout(() => { if (typeof paintCamp === 'function') { const p0 = paintCamp; paintCamp = function () { const r = p0.apply(this, arguments); try { chrWatch(); } catch (e) {} return r; }; } }, 0);
 /* Werkzeuge der Spielleitung: Ansagen und Chronik oben; für Spieler das Ansagefeld */
-if (typeof dmTools === 'function') { const _chDm0 = dmTools; dmTools = function () { const h = _chDm0.apply(this, arguments); if (!S.camp) return h; if (typeof isDM === 'function' && isDM()) { const cb = '<button class="btn sm ghost" data-act="chrOpen">📜 Chronik <small>' + chrList().filter((e) => e.k !== 'abend').length + '</small></button>'; return ansDmHtml(true) + (h.indexOf('<div class="slrow">') >= 0 ? h.replace('<div class="slrow">', '<div class="slrow">' + cb) : '<div class="slrow">' + cb + '</div>' + h); } return ansBox('camp') + h; }; }
+if (typeof dmTools === 'function') { const _chDm0 = dmTools; dmTools = function () { const h = _chDm0.apply(this, arguments); if (!S.camp) return h; if (typeof isDM === 'function' && isDM()) { const cb = '<button class="btn sm ghost" data-act="chrOpen" title="Chronik, Personen, Orte und Aufträge">📜 Chronik <small>' + chrList().filter((e) => e.k !== 'abend').length + '</small></button>'; return ansDmHtml(true) + (h.indexOf('<div class="slrow">') >= 0 ? h.replace('<div class="slrow">', '<div class="slrow">' + cb) : '<div class="slrow">' + cb + '</div>' + h); } return ansBox('camp') + h; }; }
