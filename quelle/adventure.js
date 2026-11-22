@@ -237,7 +237,7 @@ function advOverview(A, st, X) {
 }
 function advChapter(A, st, X) {
   const C = advCh(A, st.ch); const ci = A.chapters.indexOf(C); const Sc = advSc(C, st.sc); const si = C.scenes.indexOf(Sc);
-  let h = '<section class="blk advch"><div class="advkick">' + esc(C.kicker) + (C.level && !/Stufe/.test(C.sub || '') ? ' · Stufe ' + esc(C.level) : '') + '</div><h2>' + esc(C.title) + '</h2>' + (C.sub ? '<p class="hint">' + esc(C.sub) + '</p>' : '');
+  let h = '<section class="blk advch"><div class="advhead"><div class="advkick">' + esc(C.kicker) + (C.level && !/Stufe/.test(C.sub || '') ? ' · Stufe ' + esc(C.level) : '') + '</div>' + (typeof slBtn === 'function' ? slBtn() : '') + '</div><h2>' + esc(C.title) + '</h2>' + (C.sub ? '<p class="hint">' + esc(C.sub) + '</p>' : '');
   h += (C.intro || []).map((b, bi) => advBlock(A, b, ci + '.i.' + bi, st, X, C)).join('');
   if (C.scenes.length > 1) h += '<nav class="advscn" aria-label="Szenen">' + C.scenes.map((s, i) => '<button class="' + (i === si ? 'on' : '') + '" data-act="advScene" data-arg="' + esc(s.id) + '"><span>' + (i + 1) + '</span>' + esc(s.title) + '</button>').join('') + '</nav>';
   h += '<h3 class="advsc" id="advSc">' + (C.scenes.length > 1 ? '<small>Szene ' + (si + 1) + ' von ' + C.scenes.length + '</small>' : '') + esc(Sc.title) + '</h3>';
@@ -342,7 +342,7 @@ Object.assign(XA, {
     advSetSt(A.id, (s) => { const v = advCntVal(b, s) + (+t.dataset.d || 0); s.cnt[b.id] = Math.max(b.min != null ? +b.min : -99, Math.min(b.max != null ? +b.max : 99, v)); }); render(); },
   advRoll: (t, a) => { const A = advCurA(); const r = A && advBlockAt(A, a); if (!r || r.b.t !== 'roll') return; const n = 1 + Math.floor(rnd() * (+r.b.die || 6));
     S.advRoll = Object.assign({}, S.advRoll, { [a]: n }); const row = r.b.rows.find((x) => { const [lo, hi] = advRange(x[0]); return n >= lo && n <= hi; });
-    if (typeof pushLog === 'function') pushLog({ label: r.b.title, total: n, detail: 'W' + r.b.die + (row ? ' · ' + advPlain(row[1]).slice(0, 140) : ''), sides: +r.b.die, nat: n });
+    if (typeof pushLog === 'function') pushLog({ label: r.b.title, total: n, detail: 'W' + r.b.die + (row ? ' · ' + advPlain(row[1]).slice(0, 140) : ''), sides: +r.b.die, nat: n, secret: true }); /* Tabellen der Spielleitung verraten nichts am Tisch */
     render(); },
   advBest: (t, a) => { const A = advCurA(); advMobsInstall(A); S.modal = null; $('#modal').hidden = true; S.mq = a; S.mhab = 'own'; S.view = 'mobs'; render(); window.scrollTo(0, 0); },
   advPrep: () => { const A = advCurA(); if (!A) return; const m = advMobsInstall(A); const e = advEncInstall(A);

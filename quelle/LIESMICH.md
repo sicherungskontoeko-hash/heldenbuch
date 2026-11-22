@@ -42,6 +42,9 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/ui.test.js, tests/ui-full.test.js | Klicktests Desktop + Handy (alle Klassen, Unterklassen, Spezies, Schritte, Export/Import, Offline-Neustart) |
 | tests/combos.test.js | alle Klassen × Unterklassen × Stufen 1–20 |
 | tests/turnfuzz.test.js | jede Zugleisten-Option je Klasse einmal ausführen |
+| tests/undo.test.js | Rückgängig, Wiederholen, Zug zurückspulen |
+| tests/slhelfer.test.js | Claude-Helfer: Lagebericht, Kopieren, Assistent (nachgebildet) |
+| tests/sitzung.test.js | Spielabend mit Abenteuer über den Online-Tisch: Handout, Kampf, Monsterangriff, Beute, geheime Tabellen |
 | tests/verlauf.test.js | Würfelverlauf: Aufzeichnung, Speicherung, Filter, Wurf in Rückfragen |
 | tests/bogen.test.js | aufgeräumter Bogen: Kopfleiste mit Kernwerten, Kampfseite ohne Reiterwechsel, Heldenliste |
 | tests/hilfe.test.js | Hilfe-Stufen: was sichtbar ist, Regelprüfung ohne Zugleiste, Dialog, Willkommen |
@@ -78,6 +81,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | explain.js | Rechenweg, Nachbessern nach dem Wurf |
 | ux.js | Rückgängig, Bestätigungen, Layout |
 | help.js | Kontexthilfe |
+| slhelfer.js | Claude als Helfer der Spielleitung: Lagebericht (Szene, Gruppe, Kampf, Würfe) zum Kopieren/Teilen; in claude.ai direkte Antworten (Fähigkeit „sample“) |
 | verlauf.js | Würfelverlauf: alle Würfe (Held, Kreaturen, Mitspieler) mit Details, auf dem Gerät gespeichert (200) |
 | hilfe.js | Hilfe-Stufe (Einsteiger · Standard · Erfahren): Erklärknöpfe, Einsteiger-Tipps, Zug-Leitfaden, Wurferklärung, Zugleiste an/aus, Nachbessern, Rechenweg |
 | spellflav.js | Zauberbilder: wie man sich jeden Zauber vorstellt |

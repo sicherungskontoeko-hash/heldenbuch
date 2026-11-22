@@ -12,6 +12,7 @@ function turnReset(ch, keepReaction) {
   ch.play.turn = { a: 0, aMax: 1, b: 0, r: keepReaction ? r : 0, atk: 0, mv: 0, mvMax: 0, bonusAtk: 0, bSpell: false, slotSpell: false, lightIdx: null };
   const fx = ch.play.fx || {}; delete fx.reckless; delete fx.aim; if (!keepReaction) delete fx.dodge; ch.play.fx = fx;
   if (!keepReaction && typeof startOfTurn === 'function') { try { startOfTurn(ch); } catch (e) {} }
+  if (!keepReaction && typeof turnMark === 'function') setTimeout(() => turnMark(ch), 40); /* nach der Undo-Erfassung von „Neuer Zug“ */
 }
 const tLeft = (ch, k) => { if (typeof turnTrack === 'function' && !turnTrack()) return 1; const t = turnSt(ch); return k === 'a' ? t.aMax - t.a : k === 'b' ? 1 - t.b : k === 'r' ? 1 - t.r : 1; };
 /* Verbucht Aktion/Bonusaktion/Reaktion. Rückgabe false = blockiert (strenger Modus im Kampf), dann wurde nichts verändert. */
@@ -274,7 +275,7 @@ function turnBlock(c) {
   const pill = (k, label, left, max) => '<button class="tpill' + (left <= 0 ? ' used' : '') + '" data-act="tPick" data-arg="' + k + '" aria-label="' + label + ' wählen"><i>' + COST_K[k] + '</i><span>' + label + '</span><b>' + (max > 1 ? left + '/' + max : left > 0 ? 'frei' : 'weg') + '</b></button>';
   let h = '<section class="blk turnblk" data-grp="kampf"><div class="tbar">' + pill('a', 'Aktion', t.aMax - t.a, t.aMax) + pill('b', 'Bonusaktion', 1 - t.b, 1) + pill('r', 'Reaktion', 1 - t.r, 1) +
     '<div class="tmove"><span>Bewegung</span><button class="tm" data-act="tMove" data-arg="1.5" aria-label="1,5 m bewegen">−</button><b>' + fmtM(mvLeft) + '</b><button class="tm" data-act="tMove" data-arg="-1.5" aria-label="1,5 m zurück">+</button></div>' +
-    (typeof onlineFight === 'function' && onlineFight() ? '' : '<button class="btn sm ghost tnew" data-act="tNew" title="Zugbeginn: Aktion, Bonusaktion, Reaktion und Bewegung zurücksetzen, Dauer herunterzählen">Neuer Zug</button>') + '</div>' +
+    (typeof onlineFight === 'function' && onlineFight() ? '' : '<button class="btn sm ghost tnew" data-act="tNew" title="Zugbeginn: Aktion, Bonusaktion, Reaktion und Bewegung zurücksetzen, Dauer herunterzählen">Neuer Zug</button>') + (typeof turnSince === 'function' && turnSince(ch).length ? '<button class="btn sm ghost tback" data-act="turnBack" title="Alles seit Beginn deines Zuges zurücknehmen">⟲ Zug</button>' : '') + '</div>' +
     '<div class="tctx">' + (onlineFight() ? '<span class="tinfo">⚔ Kampf am Tisch' + (offTurn() ? ' · nicht dein Zug' : ' · dein Zug') + '</span>' : '<button class="chip' + (ch.play.localFight ? ' on' : '') + '" data-act="tFight" title="Im Kampfmodus gelten die Zugregeln (Aktionen, Bonusaktion, 1 Zauberplatz pro Zug) streng.">⚔ Kampfmodus ' + (ch.play.localFight ? 'an' : 'aus') + '</button>') + tgtSelect(c) + '</div>';
   if (typeof hlOn === 'function' && hlOn('tipps')) h += turnGuide(c, t, opts, mvLeft);
   const extra = turnExtras(c, false);
