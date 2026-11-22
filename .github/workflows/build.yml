@@ -1,6 +1,7 @@
 # Baut bei jedem Hochladen automatisch alle Apps:
 #   Android (APK), Windows (Installer + portable EXE), macOS (DMG), Linux (AppImage)
-# und veröffentlicht die Web-App (für iPhone & Browser) auf GitHub Pages.
+# und veröffentlicht die Web-App (für iPhone und Browser) auf GitHub Pages.
+# Die App-Dateien (www/, Heldenbuch.html) baut der erste Schritt immer frisch aus quelle/.
 name: Heldenbuch bauen
 
 on:
@@ -14,11 +15,38 @@ permissions:
   id-token: write
 
 jobs:
+  web:
+    name: Web-Dateien aus den Quellen bauen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: App-Dateien bauen (www/ und Heldenbuch.html)
+        run: bash quelle/build_www.sh
+      - name: Abgleich mit dem Repo (nur Hinweis)
+        run: |
+          if ! git diff --quiet -I 'var BUILD = ' -- www/index.html Heldenbuch.html; then
+            echo "::warning::www/ im Repo war nicht aktuell. Veröffentlicht wird der frische Build aus quelle/."
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: |
+            www
+            Heldenbuch.html
+
   android:
     name: Android-App
+    needs: [web]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: .
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -48,6 +76,7 @@ jobs:
 
   desktop:
     name: PC-App (${{ matrix.os }})
+    needs: [web]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -55,6 +84,10 @@ jobs:
         os: [windows-latest, ubuntu-latest]
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: .
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -74,12 +107,17 @@ jobs:
 
   pages:
     name: Web-App (GitHub Pages)
+    needs: [web]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: .
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -130,6 +168,10 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: .
       - uses: actions/setup-node@v5
         with:
           node-version: 22

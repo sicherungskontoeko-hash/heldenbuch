@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-22T19:05:48+01:00
-- Revision (SHA-256 von index.html, gekürzt): 03570c5a962b0ea1
+- Zeitpunkt: 2026-11-22T20:46:06+01:00
+- Revision (SHA-256 von index.html, gekürzt): 212dcf5c21ab57e1
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v726
@@ -26,6 +26,8 @@
 | Sicherung: alles sichern und wiederherstellen (backup.test.js) | 0 | ✔ Keine Skriptfehler 11 / 11 bestanden  |
 | Willkommen: Name beim ersten Start (welcome.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Willkommen in der App (welcome.test.js app) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
+| Spielabend sichern, Stolpersteine (pflege.test.js) | 0 | ✔ Keine Skriptfehler 31 / 31 bestanden  |
+| Spielabend sichern, Stolpersteine, Server (pflege.test.js app) | 0 | ✔ Keine Skriptfehler 32 / 32 bestanden  |
 | Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
 | Aufgeräumter Bogen: Kopfleiste, Kampfseite, Heldenliste (bogen.test.js) | 0 | ✔ Keine Skriptfehler 38 / 38 bestanden  |
 | Würfelverlauf (verlauf.test.js) | 0 | ✔ Keine Skriptfehler 24 / 24 bestanden  |

@@ -4,9 +4,9 @@
 var APP_MODE = 'app';
 const HB_BROKERS = {
   hivemq: ['HiveMQ (Standard)', 'wss://broker.hivemq.com:8884/mqtt'],
-  emqx: ['EMQX (Ersatz)', 'wss://broker.emqx.io:8084/mqtt'],
-  mosquitto: ['Mosquitto (Test)', 'wss://test.mosquitto.org:8081']
+  emqx: ['EMQX (Ersatz)', 'wss://broker.emqx.io:8084/mqtt']
 };
+/* test.mosquitto.org wurde entfernt (laut mqtt.org nicht für den Betrieb gedacht; der Betreiber sperrt bei Last). Wer ihn gewählt hatte, landet auf HiveMQ. */
 const HB_PREFIX = 'heldenbuch-v2/';
 /* Ende-zu-Ende-Verschlüsselung: Der Raumcode bleibt auf den Geräten. Der Broker sieht nur einen Hash als Themenname
    und AES-GCM-verschlüsselte Daten (Schlüssel per PBKDF2 aus dem Raumcode). Unverschlüsselte Fremdnachrichten werden verworfen. */
@@ -36,6 +36,7 @@ async function hbOpen(key, msg) {
 }
 const hbLs = { get: (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
 function hbUid() { let u = hbLs.get('hb_uid', ''); if (!u) { u = 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); hbLs.set('hb_uid', u); } return u; }
+(function () { const k = hbLs.get('hb_server', ''); if (k && k !== 'custom' && !HB_BROKERS[k]) hbLs.set('hb_server', 'hivemq'); })();
 function hbServer() { const k = hbLs.get('hb_server', 'hivemq'); if (k === 'custom') return hbLs.get('hb_server_url', HB_BROKERS.hivemq[1]); return (HB_BROKERS[k] || HB_BROKERS.hivemq)[1]; }
 
 /* ---------- Kleiner MQTT-3.1.1-Client (QoS 0, retained) ---------- */
