@@ -17,7 +17,7 @@ function newChar(over) {
     bg: 'soldier', bgCustom: { name: 'Eigener Hintergrund', abil: ['str','dex','con'], skills: ['ath','prc'], feat: 'alert' },
     bgMode: '21', bgPlus: { str: 2, con: 1 },
     method: 'standard', base: { str: 15, dex: 13, con: 14, int: 8, wis: 12, cha: 10 },
-    classSkills: [], extraSkills: [], expertise: [], humanFeat: 'skilled',
+    classSkills: [], extraSkills: [], expertise: [], freeSkills: [], freeExp: [], humanFeat: 'skilled',
     asi: {}, styles: [], invocations: [], mi: {},
     cantrips: [], spells: [], book: [], arcanum: {},
     armor: 'none', armorBonus: 0, shield: false, shieldBonus: 0, mageArmor: false,
@@ -181,6 +181,7 @@ function derive(ch, hb) {
   multi.forEach((m) => { if (MC_SKILL[m.cls]) { extraN += 1; extraSrc.push('Multiclassing ' + CLASSES[m.cls].name); } });
   c.extraN = extraN; c.extraSrc = extraSrc;
   (ch.extraSkills || []).slice(0, extraN).forEach((s) => addP(s, 'Zusatz'));
+  (ch.freeSkills || []).forEach((s) => { if (SKILLS[s]) addP(s, 'Übernommen'); });
   if ((ch.extraSkills || []).length < extraN) warn.push('Noch ' + (extraN - ch.extraSkills.length) + ' zusätzliche Fertigkeit(en) wählen (' + extraSrc.join(', ') + ').');
   let expN = 0; for (const e of classList) for (const [el, n] of e.C.expertise || []) if (e.lvl >= el) expN += n;
   const onlyWiz = classList.filter((e) => e.C.expertise && e.lvl >= e.C.expertise[0][0]).every((e) => e.id === 'wiz');
@@ -190,6 +191,7 @@ function derive(ch, hb) {
   c.expFrom = !featExp && onlyWiz ? CLASSES.wiz.expertiseFrom : null;
   const exp = (ch.expertise || []).filter((s) => prof[s] && (!c.expFrom || c.expFrom.includes(s))).slice(0, expN);
   exp.forEach((s) => { prof[s] = 2; });
+  (ch.freeExp || []).forEach((s) => { if (prof[s]) { prof[s] = 2; (src[s] = src[s] || []).push('Expertise übernommen'); } });
   const optsOf = (id) => (lv(id) ? mOf(id).opts || [] : []);
   if (optsOf('bw').includes('zunge') && lv('bw') >= 2) { if (prof.itm) prof.itm = 2; else addP('itm', 'Rote Zunge'); }
   if (exp.length < expN) warn.push('Expertise: noch ' + (expN - exp.length) + ' wählen.');

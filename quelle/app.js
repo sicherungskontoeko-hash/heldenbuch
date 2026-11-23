@@ -463,7 +463,7 @@ function renderHeroes() {
       '<div class="acts2"><button data-act="exportOne" data-arg="' + id + '">Exportieren</button><button data-act="dupChar" data-arg="' + id + '">Duplizieren</button>' +
       (conf ? '<button class="del" data-act="delChar" data-arg="' + id + '">Wirklich löschen?</button><button data-act="noDel">Nein</button>' : '<button class="del" data-act="askDel" data-arg="' + id + '">Löschen</button>') + '</div></article>';
   }
-  h += '</div>' + (isApp() ? transferHtml() : '') + '<div class="herobar"><label class="btn ghost filebtn">Helden aus Datei laden<input type="file" id="importFile" accept=".json,application/json"></label><button class="btn ghost" data-act="importText">Text einfügen</button>' + (ids.length ? '<button class="btn ghost" data-act="exportAll" title="Helden, Hausregeln, eigene Monster, Begegnungen und SL-Notizen in einer Datei">Alles sichern</button>' : '') + '</div>';
+  h += '</div>' + (isApp() ? transferHtml() : '') + '<div class="herobar"><label class="btn ghost filebtn" title="Heldenbuch-Datei (.json) oder Charakterbogen-PDF aus D&amp;D Beyond">Helden aus Datei laden<input type="file" id="importFile" accept=".json,application/json,.pdf,application/pdf"></label><button class="btn ghost" data-act="importText">Text einfügen</button>' + (ids.length ? '<button class="btn ghost" data-act="exportAll" title="Helden, Hausregeln, eigene Monster, Begegnungen und SL-Notizen in einer Datei">Alles sichern</button>' : '') + '</div>';
   return h;
 }
 
@@ -604,6 +604,7 @@ function renderBuild(c) {
     body += '<h2 id="a-skills">Fertigkeiten</h2><p class="hint">' + C.name + ': wähle ' + C.skillN + '. Vom Hintergrund: ' + (c.bg.skills || []).map((s) => SKILLS[s][0]).join(', ') + '.</p><div class="chips">' +
       C.skills.map((s) => { const fromBg = (c.bg.skills || []).includes(s); return chipI(ch.classSkills.includes(s), SKILLS[s][0] + (fromBg ? ' (Hintergrund)' : ''), 'data-act="toggle" data-path="classSkills" data-val="' + s + '" data-max="' + C.skillN + '"', ch.classSkills.length >= C.skillN || fromBg, 'sk', s, SKILLS[s][0]); }).join('') + '</div>';
     if (c.extraN) body += '<h3 id="a-extra">Zusätzliche Fertigkeiten (' + c.extraN + ')</h3><p class="hint">' + c.extraSrc.join(', ') + '</p><div class="chips">' + ALL_SKILLS.map((s) => chipI(ch.extraSkills.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="extraSkills" data-val="' + s + '" data-max="' + c.extraN + '"', ch.extraSkills.length >= c.extraN, 'sk', s, SKILLS[s][0])).join('') + '</div>';
+    if ((ch.freeSkills || []).length || (ch.freeExp || []).length) body += '<h3 id="a-free">Übernommene Übungen</h3><p class="hint">Aus dem Import (z. B. D&amp;D Beyond) ohne Regelquelle im Heldenbuch. Antippen entfernt.</p><div class="chips">' + (ch.freeSkills || []).filter((s) => SKILLS[s]).map((s) => chip(true, SKILLS[s][0], 'data-act="toggle" data-path="freeSkills" data-val="' + s + '"')).join('') + (ch.freeExp || []).filter((s) => SKILLS[s]).map((s) => chip(true, SKILLS[s][0] + ' (Expertise)', 'data-act="toggle" data-path="freeExp" data-val="' + s + '"')).join('') + '</div>';
     if (c.expN) body += '<h3 id="a-exp">Expertise (' + c.expN + ')</h3><div class="chips">' + ALL_SKILLS.filter((s) => c.skills[s].prof && (!c.expFrom || c.expFrom.includes(s))).map((s) => chipI(ch.expertise.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="expertise" data-val="' + s + '" data-max="' + c.expN + '"', ch.expertise.filter((x) => c.skills[x].prof).length >= c.expN, 'sk', s, SKILLS[s][0])).join('') + '</div>';
     body += '<div class="skillgrid">' + ALL_SKILLS.map((s) => '<div class="sk' + (c.skills[s].prof ? ' p' + c.skills[s].prof : '') + '"><span>' + SKILLS[s][0] + ' <small>' + AB_K[SKILLS[s][1]] + '</small></span><b>' + sgn(c.skills[s].val) + '</b></div>').join('') + '</div>';
     const styleN = c.styleN;
@@ -1583,6 +1584,7 @@ document.addEventListener('change', (ev) => {
   if (t.id === 'addW' && t.value) { cur().weapons.push({ w: t.value, bonus: 0, mastery: false, ab: 'auto' }); commit(); return; }
   if (t.id === 'sl') { S.sf.lvl = t.value; render(); return; }
   if (t.id === 'sc') { S.sf.cls = t.value; render(); return; }
+  if (t.id === 'importFile' && t.files[0] && typeof ddbImportFile === 'function' && (/\.pdf$/i.test(t.files[0].name || '') || t.files[0].type === 'application/pdf')) { ddbImportFile(t.files[0]); t.value = ''; return; }
   if (t.id === 'importFile' && t.files[0]) { const r = new FileReader(); r.onload = () => { try { importJson(r.result); } catch (e) { pushLog({ label: 'Datei laden', total: '✗', detail: 'Die Datei ist keine Heldenbuch-Datei.' }); } }; r.readAsText(t.files[0]); t.value = ''; return; }
   if (t.dataset && t.dataset.bind && !(t.tagName === 'TEXTAREA' || t.type === 'text')) onBind(ev);
   else if (t.dataset && t.dataset.bind && t.type === 'text' && !t.dataset.bind.startsWith('hbe.')) { commit(true); }

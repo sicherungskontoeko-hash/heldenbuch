@@ -2,7 +2,7 @@
 # Baut index.html aus den Quelldateien. Läuft aus jedem Verzeichnis (Pfade relativ zum Skript).
 set -euo pipefail
 cd "$(dirname "$0")"
-FILES=(data.js spells.js spells2.js spelldata.js calc.js hbclasses.js subs.js subs2.js flavor.js pics.js assets.js crests.js extra.js items2.js scenes.js theme.js theme-fx.js turn.js effects.js rules.js search.js encounter.js monsters2.js randenc.js mobfx.js mobedit.js loot.js explain.js ux.js help.js hilfe.js verlauf.js spellflav.js info.js dice3d.js levelup.js savedmg.js mechanics.js welcome.js mobsaves.js mobpics.js initcall.js adv-machtader.js adv-krug.js adventure.js slhelfer.js chronik.js kbuch.js claudebr.js stand.js pflege.js app.js)
+FILES=(data.js spells.js spells2.js spelldata.js calc.js hbclasses.js subs.js subs2.js flavor.js pics.js assets.js crests.js extra.js items2.js scenes.js theme.js theme-fx.js turn.js effects.js rules.js search.js encounter.js monsters2.js randenc.js mobfx.js mobedit.js loot.js explain.js ux.js help.js hilfe.js verlauf.js spellflav.js info.js dice3d.js levelup.js savedmg.js mechanics.js welcome.js mobsaves.js mobpics.js initcall.js adv-machtader.js adv-krug.js adventure.js slhelfer.js chronik.js kbuch.js claudebr.js stand.js pflege.js ddbimport.js app.js)
 missing=0
 [ -f shell.html ] || { echo "FEHLT: shell.html" >&2; missing=1; }
 for f in "${FILES[@]}"; do [ -f "$f" ] || { echo "FEHLT: $f" >&2; missing=1; }; done

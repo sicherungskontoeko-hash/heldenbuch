@@ -42,6 +42,8 @@ run "Sicherung: alles sichern und wiederherstellen (backup.test.js)" node tests/
 run "Willkommen: Name beim ersten Start (welcome.test.js)" node tests/welcome.test.js
 run "Willkommen in der App (welcome.test.js app)" node tests/welcome.test.js app/Heldenbuch.html
 run "Spielabend sichern, Stolpersteine (pflege.test.js)" node tests/pflege.test.js
+run "Import aus D&D Beyond (ddbimport.test.js)" node tests/ddbimport.test.js
+run "Import aus D&D Beyond (ddbimport.test.js app)" node tests/ddbimport.test.js app/Heldenbuch.html
 run "Spielabend sichern, Stolpersteine, Server (pflege.test.js app)" node tests/pflege.test.js app/Heldenbuch.html
 run "Kampagnenbuch: Personen, Orte, Aufträge (kbuch.test.js)" node tests/kbuch.test.js
 run "Kampagnenbuch in der App (kbuch.test.js app)" node tests/kbuch.test.js app/Heldenbuch.html

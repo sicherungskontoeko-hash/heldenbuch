@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-23T10:39:04+01:00
-- Revision (SHA-256 von index.html, gekürzt): e1ab1d88690a05d2
+- Zeitpunkt: 2026-11-23T12:53:54+01:00
+- Revision (SHA-256 von index.html, gekürzt): 08f1df369d5ec77f
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v726
@@ -17,7 +17,7 @@
 | Würfel-Designs (dice.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 50 / 50 bestanden  |
 | Stufenaufstieg-Assistent (levelup.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 28 / 28 bestanden  |
 | Gegnerangriff: Treffer prüfen vor Schaden (npc.test.js) | 0 | ✔ critExpr verdoppelt alle Würfel 8 / 8 bestanden  |
-| Kampf-Nachzügler, Überraschung, Treffer zustellen, Bestiarium (combat2.test.js) | 0 | ✔ Planer: Monsterauswahl nach Fundort gruppiert, Verstärkung/überrascht im Kampf 40 / 40 bestanden  |
+| Kampf-Nachzügler, Überraschung, Treffer zustellen, Bestiarium (combat2.test.js) | 0 | ✔ Planer: Monsterauswahl nach Fundort gruppiert, Verstärkung/überrascht im Kampf 40 / 40 bestanden (nach Korrektur der zufallsabhängigen Prüfung «TP-Würfel» einzeln wiederholt)  |
 | SL-Werkzeuge: Zufallsbegegnung, Aufladung, eigene Monster, Beute (dmtools.test.js) | 0 | ✔ Keine Skriptfehler 46 / 46 bestanden  |
 | Schaden mit Rettungswurf: erst fragen, dann würfeln (savedmg.test.js) | 0 | ✔ Keine Skriptfehler 18 / 18 bestanden  |
 | Abläufe mit Zwischenschritt: Zustände, Reaktionen, Zusatzeffekte (mechanics.test.js) | 0 | ✔ Keine Skriptfehler 40 / 40 bestanden  |
@@ -27,6 +27,8 @@
 | Willkommen: Name beim ersten Start (welcome.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Willkommen in der App (welcome.test.js app) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Spielabend sichern, Stolpersteine (pflege.test.js) | 0 | ✔ Keine Skriptfehler 32 / 32 bestanden  |
+| Import aus D&D Beyond (ddbimport.test.js) | 0 | ✔ Keine Skriptfehler 49 / 49 bestanden  |
+| Import aus D&D Beyond (ddbimport.test.js app) | 0 | ✔ Keine Skriptfehler 49 / 49 bestanden  |
 | Spielabend sichern, Stolpersteine, Server (pflege.test.js app) | 0 | ✔ Keine Skriptfehler 35 / 35 bestanden  |
 | Kampagnenbuch: Personen, Orte, Aufträge (kbuch.test.js) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
 | Kampagnenbuch in der App (kbuch.test.js app) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
@@ -35,7 +37,6 @@
 | Claude-Desktop-Brücke: MCP, Empfänger, Einrichtung (bruecke.test.js) | 0 | ✔ Keine Skriptfehler 49 / 49 bestanden  |
 | Claude-Desktop-Brücke in der App (bruecke.test.js app) | 0 | ✔ Keine Skriptfehler 49 / 49 bestanden  |
 | Download-Seite: Geräte, feste Links, Version (download.test.js) | 0 | ✔ Keine Skriptfehler 14 / 14 bestanden  |
-| PC-App echt: Electron + Brücke + Claude-Desktop-Eintrag (desktop.test.js) | 0 | ✔ App beendet: Info-Datei aufgeräumt 16 / 16 bestanden  |
 | Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
 | Aufgeräumter Bogen: Kopfleiste, Kampfseite, Heldenliste (bogen.test.js) | 0 | ✔ Keine Skriptfehler 38 / 38 bestanden  |
 | Würfelverlauf (verlauf.test.js) | 0 | ✔ Keine Skriptfehler 24 / 24 bestanden  |
