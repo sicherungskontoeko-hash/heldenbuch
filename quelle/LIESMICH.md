@@ -26,6 +26,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/info.test.js | Erklärkarten (ⓘ) im Heldenbau: öffnen, Inhalt, Wählen/Abwählen, gesperrte Auswahl, Handy und PC |
 | tests/mobpics.test.js | Kreaturen- und Begleiterbilder: jeder Bestiarium-Eintrag, jede Abenteuer-Kreatur und jeder Begleiter hat ein Bild; Platzhalter für eigene Monster; Bestiarium, Kampf und Bogen |
 | tests/subpics.test.js | Unterklassen-Bilder: jede Unterklasse hat ein Bild, Auswahl und Infokarte, Handy 320 px ohne Querscrollen |
+| tests/m01.test.js | Kampfseite am Handy (Redesign M01): erste Waffe bei 320/360/390/430 px im ersten Bildschirm (Grenzwerte aus HB-UI-REDESIGN v1.2.0), PC unverändert, Zustände/Konzentration/0 TP stehen über den Angriffen, alle Bedienelemente des Kampfreiters wirken (Modus, Rast-Menü, Zugleiste, Bewegung, Neuer Zug, Inspiration, Zustand, Schaden, Rückgängig) |
 | tests/layout.test.js | Layout: ⚠ offene Punkte (Anzahl, Liste, Sprung, ✓), Mehr-Menü, ⋯-Menü, kompakte Übersicht am Handy |
 | tests/dice.test.js | Würfel-Designs: Körper/Zahlen, alle Sets, Auswahl pro Raum, Konflikt, SL-Set, Effekte voll/ruhig/aus, Überspringen, Teilen, Geräusche |
 | tests/levelup.test.js | Stufenaufstieg-Assistent: drei Schritte, neue Merkmale, Veränderungen, TP, Multiclass, offene Entscheidungen mit Sprung |

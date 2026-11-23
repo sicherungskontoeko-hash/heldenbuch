@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-23T19:15:15+01:00
-- Revision (SHA-256 von index.html, gekürzt): ae0172484b3b0859
+- Zeitpunkt: 2026-11-23T21:10:48+01:00
+- Revision (SHA-256 von index.html, gekürzt): a09f7ee62715c49a
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v726
@@ -45,6 +45,7 @@
 | Gegnerzug: Angriffe zählen, Zug beenden (npcturn.test.js) | 0 | ✔ Keine Skriptfehler 11 / 11 bestanden  |
 | Monsterbilder (mobpics.test.js) | 0 | ✔ Keine Skriptfehler 16 / 16 bestanden  |
 | Unterklassen-Bilder (subpics.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
+| Kampfseite am Handy: Angriffe früher, Warnungen oben (m01.test.js) | 0 | ✔ Keine Skriptfehler 103 / 103 bestanden  |
 | Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Tischhilfen: passive Werte, Rast für alle, EP nach dem Kampf (tablehelp.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
 | Gegenstände: SRD-Liste, Flüche, Ausrüstung (items.test.js) | 0 | ✔ Keine Skriptfehler 12 / 12 bestanden  |
