@@ -182,7 +182,7 @@ jobs:
 
             | Gerät | Datei | Hinweis |
             | --- | --- | --- |
-            | Android | [Heldenbuch.apk](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch.apk) | Öffnen, Installation aus dieser Quelle erlauben. Danach aktualisiert sich die App selbst. |
+            | Android | [Heldenbuch.apk](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch.apk) | Öffnen, Installation aus dieser Quelle erlauben. Danach aktualisiert sich die App selbst – bereits installiert? Nicht neu laden (sonst vorher «Alles sichern»). |
             | Windows | [Heldenbuch-Setup.exe](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch-Setup.exe) | Installer (empfohlen, nötig für Claude Desktop). Bei der Windows-Warnung: «Weitere Informationen» › «Trotzdem ausführen». |
             | Windows ohne Installation | [Heldenbuch-Portable.exe](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch-Portable.exe) | Startet direkt, etwas langsamer. |
             | Mac (Intel und Apple) | [Heldenbuch.dmg](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch.dmg) | Wird einige Minuten nach den anderen nachgeliefert. App in «Programme» ziehen; beim ersten Start Systemeinstellungen › Datenschutz und Sicherheit › «Trotzdem öffnen». |
