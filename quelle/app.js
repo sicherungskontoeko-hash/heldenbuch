@@ -773,7 +773,10 @@ function renderSheet(c) {
   if (!P.dead && typeof turnBlock === 'function') h += turnBlock(c);
   if (S.camp && typeof ansBox === 'function') h += ansBox('sheet');
   if (P.hp <= 0) h += '<div class="death" data-grp="kampf werte zauber faehig gear begleiter notiz"><b>Todesrettungswürfe</b><span>Erfolge</span>' + pips('ds0', 3, P.ds[0]) + '<span>Fehlschläge</span>' + pips('ds1', 3, P.ds[1]) + '<button class="btn sm" data-act="deathRoll">Würfeln</button></div>';
-  h += '<div class="strow" data-grp="kampf"><div class="chips">' + chip(P.insp, 'Heldeninspiration', 'data-act="flip" data-path="play.insp"') + (c.lv('bar') ? chip(P.raging, P.raging ? 'Kampfrausch aktiv (+' + c.rageDmg + ' Schaden)' : 'Kampfrausch beginnen', 'data-act="rage"') : '') + fxChips(c) + (P.conc ? '<span class="concchip">Konzentration: <b>' + esc(P.conc.name) + '</b><button class="x" data-act="concEnd" aria-label="Konzentration beenden">×</button></span>' : '') + '</div>' +
+  /* Am Handy rücken ruhige Zeilen (nichts aktiv) hinter die Angriffe – siehe CSS «M01». Aktives bleibt oben. */
+  const fxOn = Object.entries(P.fx || {}).some(([k, v]) => v && !k.endsWith('_L') && !k.endsWith('Tgt'));
+  const quiet = !P.insp && !P.raging && !c.lv('bar') && !P.conc && !fxOn;
+  h += '<div class="strow' + (quiet ? ' quiet' : '') + '" data-grp="kampf"><div class="chips">' + chip(P.insp, 'Heldeninspiration', 'data-act="flip" data-path="play.insp"') + (c.lv('bar') ? chip(P.raging, P.raging ? 'Kampfrausch aktiv (+' + c.rageDmg + ' Schaden)' : 'Kampfrausch beginnen', 'data-act="rage"') : '') + fxChips(c) + (P.conc ? '<span class="concchip">Konzentration: <b>' + esc(P.conc.name) + '</b><button class="x" data-act="concEnd" aria-label="Konzentration beenden">×</button></span>' : '') + '</div>' +
     '</div>';
   h += condBlock(P);
   h += '<div class="cols"><div class="col">';
@@ -827,7 +830,7 @@ function condBlock(P) {
     '<details class="condpick"' + (S.condOpen ? ' open' : '') + '><summary>+ Zustand</summary><div class="chips">' + Object.entries(COND).filter(([k]) => !on.includes(k)).map(([k, c]) => chip(false, c.name, 'data-act="cond" data-arg="' + k + '" title="' + esc(c.text) + '"')).join('') + '</div></details>' +
     (on.length > 1 ? '<button class="link" data-act="condClear">alle entfernen</button>' : '') + exh + '</div>';
   /* ohne Zustände nur eine Zeile */
-  let h = '<section class="blk conds' + (on.length ? '' : ' none') + '" id="conds" data-grp="kampf">' + (on.length ? head + tip + chips : '<div class="cline">' + head + chips + '</div>' + tip);
+  let h = '<section class="blk conds' + (on.length ? '' : ' none') + (on.length || +P.exh ? '' : ' quiet') + '" id="conds" data-grp="kampf">' + (on.length ? head + tip + chips : '<div class="cline">' + head + chips + '</div>' + tip);
   if (on.length) h += '<details class="condlist"><summary>Was bewirken sie?</summary>' + on.map((k) => '<div class="cd"><b>' + COND[k].name + '</b><p>' + esc(COND[k].text) + '</p>' + (COND[k].auto ? '<small>Automatisch: ' + COND[k].auto + '</small>' : '') + '</div>').join('') + '</details>';
   return h + '</section>';
 }
