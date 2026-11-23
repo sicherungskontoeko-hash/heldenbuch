@@ -152,7 +152,7 @@ XA.info = (t, a) => {
   }
   const m = $('#modal'); S.modal = 'info';
   m.innerHTML = '<div class="dlg infodlg" role="dialog" aria-modal="true" aria-label="' + esc(x.t) + '"><div class="ihd"><div><b>' + esc(x.t) + '</b><small>' + x.sub + '</small></div><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
-    '<div class="ibody">' + ((kind === 'cls' || kind === 'sp' || kind === 'bg') && typeof HAS_PIC !== 'undefined' && (HAS_PIC[kind] || []).includes(key) ? '<span class="ipic ipic-' + kind + ' pic-' + kind + '-' + key + '" role="img" aria-label="Bild: ' + esc(x.t) + '"></span>' : '') + (x.flav ? '<p class="iflav">' + esc(x.flav) + '</p>' : '') + (x.dl ? '<dl class="idl">' + x.dl + '</dl>' : '') + (x.more || '') + '</div>' + (foot ? '<div class="ift">' + foot + '</div>' : '') + '</div>';
+    '<div class="ibody">' + (kind === 'sub' && typeof SUB_PIC !== 'undefined' && SUB_PIC.includes(key.replace('/', '-')) ? '<span class="ipic ipic-sub pic-sub-' + key.replace('/', '-') + '" role="img" aria-label="Bild: ' + esc(x.t) + '"></span>' : '') + ((kind === 'cls' || kind === 'sp' || kind === 'bg') && typeof HAS_PIC !== 'undefined' && (HAS_PIC[kind] || []).includes(key) ? '<span class="ipic ipic-' + kind + ' pic-' + kind + '-' + key + '" role="img" aria-label="Bild: ' + esc(x.t) + '"></span>' : '') + (x.flav ? '<p class="iflav">' + esc(x.flav) + '</p>' : '') + (x.dl ? '<dl class="idl">' + x.dl + '</dl>' : '') + (x.more || '') + '</div>' + (foot ? '<div class="ift">' + foot + '</div>' : '') + '</div>';
   m.hidden = false; const b = m.querySelector('.ipick, .x'); if (b) b.focus({ preventScroll: true });
 };
 /* „Wählen“ in der Karte schliesst die Karte, bevor die Auswahl ausgeführt wird */

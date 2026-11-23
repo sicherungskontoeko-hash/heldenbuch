@@ -30,7 +30,9 @@ const shots = process.argv[3];
     T(dev.n + ': Spezies-Karte zeigt das Bild gross und passt ins Fenster', await p.evaluate(() => { const i = $('.infodlg .ipic.pic-sp-dwarf'); if (!i) return false; const r = i.getBoundingClientRect(), d = $('.infodlg').getBoundingClientRect(); return r.width >= Math.min(300, innerWidth - 80) && r.left >= d.left && r.right <= d.right; }));
     await p.mouse.click(5, 5); T(dev.n + ': Tippen neben die Karte schliesst', !(await open()));
     await tap('.card[data-arg="sage"] .ii'); T(dev.n + ': Hintergrund-Karte nennt Talent, Fertigkeiten, Ausrüstung', await p.evaluate(() => /Fertigkeiten/.test($('.infodlg').textContent) && /Ausrüstung/.test($('.infodlg').textContent)));
+    T(dev.n + ': Hintergrund-Karte zeigt das Bild', await p.evaluate(() => { const i = $('.infodlg .ipic.pic-bg-sage'); return !!i && getComputedStyle(i).backgroundImage.startsWith('url'); }));
     await p.keyboard.press('Escape');
+    T(dev.n + ': Hintergrund-Auswahl: vier Karten mit Bild, eigener Hintergrund mit Platzhalterbild', await p.evaluate(() => ['acolyte', 'criminal', 'sage', 'soldier', 'custom'].every((k) => { const e = $('.card[data-arg="' + k + '"] .cpic.pic-bg-' + k); return e && getComputedStyle(e).backgroundImage.startsWith('url'); })));
     /* Fertigkeiten */
     await p.evaluate(() => { S.step = 3; render(); });
     const skI = await p.locator('#view .chipw .ii').count(); T(dev.n + ': ⓘ an Fertigkeiten', skI >= 4, skI);

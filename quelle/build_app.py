@@ -34,12 +34,17 @@ shell = shell.replace('<meta name="claude:viewport-fit-sides" content="cover">\n
 fav = 'data:image/png;base64,' + b64(os.path.join(ROOT, 'app/assets/favicon-32.png'))
 head_extra = ('<link rel="icon" href="%s">\n<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="mobile-web-app-capable" content="yes">\n'
               '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n<meta name="apple-mobile-web-app-title" content="Heldenbuch">\n'
-              '<meta name="description" content="Deutsches D&amp;D-Heldenbuch: Charaktere erschaffen, Bogen, Würfel und gemeinsamer Tisch.">\n') % fav
+              '<meta name="description" content="Deutsches D&amp;D-Heldenbuch: Charaktere erschaffen, Bogen, Würfel und gemeinsamer Tisch.">\n'
+              # Vorschau beim Teilen des Links (WhatsApp, Signal, Teams): Bild liegt in www/teilen.jpg auf GitHub Pages
+              '<meta property="og:type" content="website">\n<meta property="og:site_name" content="Heldenbuch">\n<meta property="og:title" content="Heldenbuch">\n'
+              '<meta property="og:description" content="Charakterbogen, Würfel und Spieltisch für D&amp;D auf Deutsch.">\n'
+              '<meta property="og:image" content="https://sicherungskontoeko-hash.github.io/heldenbuch/teilen.jpg">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n'
+              '<meta name="twitter:card" content="summary_large_image">\n') % fav
 shell = shell.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n' + head_extra, 1)
 
-scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'spelldata.js', 'calc.js', 'hbclasses.js', 'subs.js', 'subs2.js', 'flavor.js', 'pics.js', 'assets.js', 'crests.js', 'extra.js', 'items2.js', 'scenes.js', 'theme.js', 'theme-fx.js', 'turn.js', 'effects.js', 'rules.js', 'search.js', 'encounter.js', 'monsters2.js', 'randenc.js', 'mobfx.js', 'mobedit.js', 'loot.js', 'explain.js', 'ux.js', 'help.js', 'hilfe.js', 'verlauf.js', 'spellflav.js', 'info.js', 'dice3d.js', 'levelup.js', 'savedmg.js', 'mechanics.js', 'welcome.js', 'mobsaves.js', 'mobpics.js', 'initcall.js', 'adv-machtader.js', 'adv-krug.js', 'adventure.js', 'slhelfer.js', 'chronik.js', 'kbuch.js', 'claudebr.js', 'stand.js', 'pflege.js', 'ddbimport.js', 'app.js']
+scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'spelldata.js', 'calc.js', 'hbclasses.js', 'subs.js', 'subs2.js', 'flavor.js', 'pics.js', 'subpics.js', 'assets.js', 'crests.js', 'extra.js', 'items2.js', 'scenes.js', 'theme.js', 'theme-fx.js', 'turn.js', 'effects.js', 'rules.js', 'search.js', 'encounter.js', 'monsters2.js', 'randenc.js', 'mobfx.js', 'mobedit.js', 'loot.js', 'explain.js', 'ux.js', 'help.js', 'hilfe.js', 'verlauf.js', 'spellflav.js', 'info.js', 'dice3d.js', 'levelup.js', 'savedmg.js', 'mechanics.js', 'welcome.js', 'mobsaves.js', 'mobpics.js', 'initcall.js', 'adv-machtader.js', 'adv-krug.js', 'adventure.js', 'slhelfer.js', 'chronik.js', 'kbuch.js', 'claudebr.js', 'stand.js', 'pflege.js', 'ddbimport.js', 'app.js']
 # Reine Bilddateien als eigene <script>-Blöcke zuerst (nur Latin-1-Zeichen: der Browser liest sie platzsparend, der Programmcode wird schneller übersetzt)
-ASSETS = ['scenes.js', 'pics.js', 'assets.js', 'mobpics.js']
+ASSETS = ['scenes.js', 'pics.js', 'subpics.js', 'assets.js', 'mobpics.js']
 asset_js = ''.join('<script>\n' + rd(s) + '\n</script>' for s in ASSETS)
 js = '\n'.join(rd(s) for s in scripts if s not in ASSETS)
 js = js.replace("const APP_URL = 'https://claude.ai/artifact/TKockfJH2cR2kDJKqb1CCK';", "const APP_URL = '';")

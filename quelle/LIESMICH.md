@@ -24,6 +24,8 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/audit2.test.js | Regressionen Kritischer Audit A01–A06 |
 | tests/cases.test.js | Import/Migration/Speicher-Robustheit, Sonderfälle pro Spezies/Klasse |
 | tests/info.test.js | Erklärkarten (ⓘ) im Heldenbau: öffnen, Inhalt, Wählen/Abwählen, gesperrte Auswahl, Handy und PC |
+| tests/mobpics.test.js | Kreaturen- und Begleiterbilder: jeder Bestiarium-Eintrag, jede Abenteuer-Kreatur und jeder Begleiter hat ein Bild; Platzhalter für eigene Monster; Bestiarium, Kampf und Bogen |
+| tests/subpics.test.js | Unterklassen-Bilder: jede Unterklasse hat ein Bild, Auswahl und Infokarte, Handy 320 px ohne Querscrollen |
 | tests/layout.test.js | Layout: ⚠ offene Punkte (Anzahl, Liste, Sprung, ✓), Mehr-Menü, ⋯-Menü, kompakte Übersicht am Handy |
 | tests/dice.test.js | Würfel-Designs: Körper/Zahlen, alle Sets, Auswahl pro Raum, Konflikt, SL-Set, Effekte voll/ruhig/aus, Überspringen, Teilen, Geräusche |
 | tests/levelup.test.js | Stufenaufstieg-Assistent: drei Schritte, neue Merkmale, Veränderungen, TP, Multiclass, offene Entscheidungen mit Sprung |
@@ -70,7 +72,9 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | hbclasses.js | ✦ Klassen Runenmeister, Blutweber, Fluchklinge, Maschinist und ✦ Spezies |
 | subs.js, subs2.js | ✦ Unterklassen |
 | flavor.js | Beschreibungstexte |
-| pics.js | Klassen- und Speziesbilder |
+| pics.js | Bilder für Klassen, Spezies und Hintergründe (CSS-Klassen pic-cls-*, pic-sp-*, pic-bg-*), Abenteuer-Cover (advcov-*), Platzhalter für eigene Unterklasse (pic-sub-eigen) |
+| subpics.js | Bilder der 64 Unterklassen (pic-sub-<klasse>-<id>, Liste SUB_PIC); aus den 2×2- und 4×4-Bildbögen geschnitten, 280 px, WebP |
+| mobpics.js | Bilder der Kreaturen (MOB_PIC, auch Abenteuer-Kreaturen u-mach-*, u-krug-*), Begleiter (COMP_PIC) und Platzhalter für eigene Monster (MOB_PH) |
 | assets.js, crests.js | Bilder (Base64) und Wappen |
 | extra.js | Gegenstände, Begleiter, Bestiarium, Rasten, Navigation |
 | scenes.js | Hintergrundbilder (Base64) |

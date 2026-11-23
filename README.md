@@ -18,7 +18,9 @@ Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUN
 ## Neu in Version 1.9
 - **Helden aus D&D Beyond übernehmen:** Unter **Helden → Helden aus Datei laden** das Charakterbogen-PDF aus D&D Beyond wählen. Die App liest Klasse(n), Unterklasse, Spezies, Hintergrund, Attribute, Fertigkeiten mit Expertise, Rüstung, Waffen mit Meisterschaft, Zauber, Talente, Ausrüstung, Münzen, TP und die Texte zur Figur und gleicht RK, TP, Initiative und Bewegung an das PDF an. Was nicht im SRD steht (z. B. Oath of Vengeance, Heavy Armor Master, Zauber aus Erweiterungen, Homebrew-Schutzherren), legt der Import als **Hausregel nur auf deinem Gerät** an, mit dem Text aus deinem PDF – die öffentliche App bleibt beim freien SRD. Das PDF wird nur auf dem Gerät gelesen.
 - **Neu aus dem SRD 5.1 (CC-BY-4.0):** Spezies **Halbelf** und **Halbork**, Kampfstile **Duellieren** (+2 Schaden, wird eingerechnet) und **Schützen**.
-- **Infokarten mit Bild:** Das ⓘ bei Klassen und Spezies zeigt das Bild gross. Alle 64 Unterklassen haben jetzt einen kurzen Beschrieb.
+- **Bilder überall:** Alle 16 Klassen, 14 Spezies, 4 Hintergründe und 64 Unterklassen haben ein Bild, in der Auswahl und gross in der Infokarte (ⓘ). Alle 184 Kreaturen im Bestiarium, die 31 Kreaturen der beiden Abenteuer und alle Begleiter (Vertraute, Reittiere, Wildgefährten) haben ein Bild, auch am Tisch im Kampf. Beide Abenteuer haben ein Titelbild, die Hauptansichten ein Banner. Eigene Einträge (Monster, Hintergrund, Unterklasse, Begleiter) zeigen ein passendes Platzhalterbild.
+- **Vorschau beim Teilen:** Wer den Download-Link per WhatsApp, Signal oder Teams schickt, sieht ein Vorschaubild mit Titel.
+- Alle 64 Unterklassen haben einen kurzen Beschrieb.
 - **Eigene Unterklasse:** Für Unterklassen ausserhalb des SRD eine «Eigene Unterklasse» mit Name und immer vorbereiteten Zaubern; die Merkmale stehen als Hausregel beim Helden.
 - **Download für alle:** Eine Seite für alle Geräte, mit festen Links, die immer die neueste Version laden: https://sicherungskontoeko-hash.github.io/heldenbuch/download.html. Die Dateien heissen jetzt gleichbleibend (Heldenbuch.apk, Heldenbuch-Setup.exe, Heldenbuch-Portable.exe, Heldenbuch.dmg, Heldenbuch.AppImage), Apps und Release tragen dieselbe Versionsnummer 1.9.<Lauf>. Die PC-App meldet neue Versionen; die Android-App aktualisiert sich weiterhin selbst. Die Web-App-Veröffentlichung versucht es bei einer GitHub-Störung ein zweites Mal.
 - **Spielstand für den nächsten Abend:** Am Ende sagst du Claude «Abend abschliessen». Claude speichert eine knappe Zusammenfassung des Abends und führt die Gesamtzusammenfassung der Kampagne nach, im Abenteuer selbst (Reiter **Spielstand** im Chronik-Fenster, enthalten in «Alles sichern»). Ein neuer Chat holt mit `lage` zuerst «Bisher» und dann nur, was seither neu ist. Ohne Claude: Abend selbst abschliessen, mit Entwurf aus der Chronik. Optional als Handout «Was bisher geschah» an die Spieler, als Datei sicherbar. Behoben: Hohe Fenster liessen sich auf kleinen Bildschirmen nicht scrollen.
@@ -91,7 +93,7 @@ Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUN
 - Kurze Erklärungen zu allen 18 Fertigkeiten und zu den Waffeneigenschaften.
 
 ## Neu in Version 1.1
-- 16 Klassen und 64 Unterklassen (✦ = Eigenkreationen), Beschreibungen, Klassen- und Speziesbilder, Kontexthilfe
+- 16 Klassen und 64 Unterklassen (✦ = Eigenkreationen), Beschreibungen, Bilder für Klassen, Unterklassen, Spezies und Hintergründe, Kontexthilfe
 - Regelkern nach D&D 2024: Aktionsökonomie im Kampf, 1 Zauberplatz pro Zug, einmal-pro-Zug-Schaden, Kampfrausch-Dauer, Waffenmeisterschaften, Tiergestalt, Zauberbuch für Rituale, Zielwahl mit Zuständen
 - Regeloptionen (Hausregeln), Rückgängig, Rechenweg, Begegnungsplaner, Effekt-Tracker, Regelsuche
 - Online-Tisch Ende-zu-Ende verschlüsselt; Spielstände mit Versionsmigration und automatischer Sicherung

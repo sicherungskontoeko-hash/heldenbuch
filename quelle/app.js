@@ -532,8 +532,10 @@ function openModal(kind, data) {
 }
 
 /* ---------- Builder ---------- */
-const picOf = (kind, k) => (typeof HAS_PIC !== 'undefined' && HAS_PIC[kind].includes(k) ? '<span class="cpic pic-' + kind + '-' + k + '" aria-hidden="true"></span>' : '');
-function flavBox(n, t, kind, k) { if (!t) return ''; const pic = kind ? picOf(kind, k).replace('cpic', 'fpic') : ''; return '<div class="flav' + (pic ? ' wpic' : '') + (kind === 'sp' ? ' wide' : '') + '">' + pic + '<p><b>' + esc(n) + '</b> – ' + esc(t.replace(/^✦ /, '')) + '</p></div>'; }
+const picOf = (kind, k) => (typeof HAS_PIC !== 'undefined' && (HAS_PIC[kind] || []).includes(k) ? '<span class="cpic pic-' + kind + '-' + k + '" aria-hidden="true"></span>' : '');
+const subPic = (ck, id) => (typeof SUB_PIC !== 'undefined' && SUB_PIC.includes(ck + '-' + id) ? '<span class="opic pic-sub-' + ck + '-' + id + '" aria-hidden="true"></span>' : '');
+function flavBox(n, t, kind, k) { if (!t) return ''; const pic = kind ? picOf(kind, k).replace('cpic', 'fpic') : ''; return '<div class="flav' + (pic ? ' wpic' : '') + (kind === 'sp' || kind === 'bg' ? ' wide' : '') + '">' + pic + '<p><b>' + esc(n) + '</b> – ' + esc(t.replace(/^✦ /, '')) + '</p></div>'; }
+function slimBanner(k, t, p) { return '<div class="hero-intro banner slim" style="' + bannerStyle(k) + '"><h1>' + t + '</h1><p>' + p + '</p></div>'; }
 function renderBuild(c) {
   const ch = c.char, hb = S.hb;
   let body = '';
@@ -550,7 +552,7 @@ function renderBuild(c) {
     if (c.cls.order) body += '<h3 id="a-order">' + c.cls.order.label + '</h3><div class="opts">' + Object.entries(c.cls.order.opts).map(([k, [n, t]]) => '<button class="opt' + (ch.order === k ? ' on' : '') + '" data-act="pick" data-path="order" data-val="' + k + '"><b>' + n + '</b><span>' + t + '</span></button>').join('') + '</div>';
     if (ch.cls === 'dru' && c.lv('dru') >= 3 && c.subOf('dru') === 'land') body += '<h3>Landschaft (Zirkel des Landes)</h3><div class="chips">' + Object.entries(LAND).map(([k, l]) => chip(ch.land === k, l.name, 'data-act="pick" data-path="land" data-val="' + k + '"')).join('') + '</div>';
     body += '<h3>' + c.cls.name + ' bis Stufe ' + ch.level + '</h3><div class="tbl"><table><tbody>' + c.cls.table(ch.level).map(([a, b]) => '<tr><th>' + a + '</th><td>' + b + '</td></tr>').join('') + (c.hasSub ? '<tr><th>Unterklasse</th><td>' + (c.subName || 'noch wählen (' + (c.cls.subs || []).length + ' zur Wahl)') + '</td></tr>' : '<tr><th>Unterklasse</th><td>ab Stufe 3' + (c.cls.subs ? ' (' + c.cls.subs.length + ' zur Wahl)' : ': ' + c.cls.sub.name) + '</td></tr>') + '</tbody></table></div>';
-    if (c.cls.subs && ch.level >= 3) body += '<h3 id="a-sub">Unterklasse</h3><div class="opts">' + c.cls.subs.map((sb) => '<button class="opt' + (ch.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || (sb.feats[0][1] + ': ' + sb.feats[0][2])) + '</span>' + (sb.desc ? '<small class="ofeat">Ab Stufe 3: ' + esc(sb.feats.filter((f) => f[0] <= 3).map((f) => f[1]).join(', ')) + '</small>' : '') + ii('sub', ch.cls + '/' + sb.id, sb.name) + '</button>').join('') + subEigenBtn(ch, '') + '</div>' + subEigenEdit(ch, '', ch.cls, hb);
+    if (c.cls.subs && ch.level >= 3) body += '<h3 id="a-sub">Unterklasse</h3><div class="opts">' + c.cls.subs.map((sb) => '<button class="opt' + (subPic(ch.cls, sb.id) ? ' haspic' : '') + (ch.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="sub" data-val="' + sb.id + '">' + subPic(ch.cls, sb.id) + '<b>' + sb.name + '</b><span>' + esc(sb.desc || (sb.feats[0][1] + ': ' + sb.feats[0][2])) + '</span>' + (sb.desc ? '<small class="ofeat">Ab Stufe 3: ' + esc(sb.feats.filter((f) => f[0] <= 3).map((f) => f[1]).join(', ')) + '</small>' : '') + ii('sub', ch.cls + '/' + sb.id, sb.name) + '</button>').join('') + subEigenBtn(ch, '') + '</div>' + subEigenEdit(ch, '', ch.cls, hb);
     body += featList(c.features.filter((f) => f.src === c.cls.name || f.src === c.subName));
     body += mcSection(c);
   }
@@ -562,7 +564,7 @@ function renderBuild(c) {
     if (sp.spellAbility) body += '<div class="row">' + field('Zauberattribut für Spezies-Zauber', sel('speciesSpellAbility', ch.speciesSpellAbility, abOpts(['int', 'wis', 'cha']))) + '</div>';
     if (sp.bonusFeat) body += '<div class="row">' + field('Herkunftstalent (Vielseitig)', sel('humanFeat', ch.humanFeat, featOptions('origin', hb))) + '</div>' + (featById(ch.humanFeat, hb) ? '<p class="hint">' + esc(featById(ch.humanFeat, hb).text) + '</p>' : '') + miPicker(c, 'human');
     body += featList(c.features.filter((f) => f.src === sp.name));
-    body += '<h2>Hintergrund</h2><div class="cards">' + Object.entries(BACKGROUNDS).map(([k, b]) => '<button class="card' + (ch.bg === k ? ' on' : '') + '" data-act="setBg" data-arg="' + k + '"><b>' + b.name + '</b><small>' + (b.abil ? b.abil.map((a) => AB_K[a]).join(', ') + ' · ' + FEATS[b.feat].name : 'Selbst zusammenstellen') + '</small>' + ii('bg', k, b.name) + '</button>').join('') + '</div>' + flavBox(bgOf(ch).name, (BACKGROUNDS[ch.bg] || {}).flavor);
+    body += '<h2>Hintergrund</h2><div class="cards pics sp bgs">' + Object.entries(BACKGROUNDS).map(([k, b]) => '<button class="card haspic' + (ch.bg === k ? ' on' : '') + '" data-act="setBg" data-arg="' + k + '">' + (picOf('bg', k) || '<span class="cpic nopic" aria-hidden="true">✎</span>') + '<b>' + b.name + '</b><small>' + (b.abil ? b.abil.map((a) => AB_K[a]).join(', ') + ' · ' + FEATS[b.feat].name : 'Selbst zusammenstellen') + '</small>' + ii('bg', k, b.name) + '</button>').join('') + '</div>' + flavBox(bgOf(ch).name, (BACKGROUNDS[ch.bg] || {}).flavor, 'bg', ch.bg);
     if (ch.bg === 'custom') {
       const bc = ch.bgCustom;
       body += '<div class="box"><div class="row">' + field('Name', txt('bgCustom.name', bc.name, 'z. B. Schmied')) + field('Herkunftstalent', sel('bgCustom.feat', bc.feat, featOptions('origin', hb))) + '</div>' +
@@ -696,7 +698,7 @@ function mcSection(c) {
     if (C.order) h += '<div class="opts">' + Object.entries(C.order.opts).map(([k, [n, t]]) => '<button class="opt' + (m.order === k ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.order" data-val="' + k + '"><b>' + n + '</b><span>' + t + '</span></button>').join('') + '</div>';
     if (m.cls === 'dru' && m.level >= 3 && c.subOf('dru') === 'land') h += '<div class="chips">' + Object.entries(LAND).map(([k, l]) => chip((m.land || 'temperate') === k, l.name, 'data-act="pick" data-path="multi.' + i + '.land" data-val="' + k + '"')).join('') + '</div>';
     const ce = (c.classes || []).find((e) => e.id === m.cls) || {};
-    if (C.subs && m.level >= 3) h += '<div class="opts">' + C.subs.map((sb) => '<button class="opt' + (m.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || sb.feats[0][1]) + '</span>' + ii('sub', m.cls + '/' + sb.id, sb.name) + '</button>').join('') + subEigenBtn(m, 'multi.' + i + '.') + '</div>' + subEigenEdit(m, 'multi.' + i + '.', m.cls, S.hb);
+    if (C.subs && m.level >= 3) h += '<div class="opts">' + C.subs.map((sb) => '<button class="opt' + (subPic(m.cls, sb.id) ? ' haspic' : '') + (m.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.sub" data-val="' + sb.id + '">' + subPic(m.cls, sb.id) + '<b>' + sb.name + '</b><span>' + esc(sb.desc || sb.feats[0][1]) + '</span>' + ii('sub', m.cls + '/' + sb.id, sb.name) + '</button>').join('') + subEigenBtn(m, 'multi.' + i + '.') + '</div>' + subEigenEdit(m, 'multi.' + i + '.', m.cls, S.hb);
     h += featList(c.features.filter((f) => f.src === C.name || f.src === ce.subName));
     h += '</div>';
   });
@@ -1057,7 +1059,7 @@ function renderSpellBook() {
 /* ---------- Eigene Unterklasse (z. B. aus D&D Beyond) ---------- */
 function subEigenBtn(m, pre) {
   const on = m.sub === 'eigen';
-  return '<button class="opt' + (on ? ' on' : '') + '" data-act="pick" data-path="' + pre + 'sub" data-val="eigen"><b>' + (on && m.subName ? esc(m.subName) : 'Eigene Unterklasse') + '</b><span>Für Unterklassen ausserhalb des SRD, z. B. aus D&amp;D Beyond. Merkmale trägst du als Hausregel ein.</span></button>';
+  return '<button class="opt haspic' + (on ? ' on' : '') + '" data-act="pick" data-path="' + pre + 'sub" data-val="eigen"><span class="opic pic-sub-eigen" aria-hidden="true"></span><b>' + (on && m.subName ? esc(m.subName) : 'Eigene Unterklasse') + '</b><span>Für Unterklassen ausserhalb des SRD, z. B. aus D&amp;D Beyond. Merkmale trägst du als Hausregel ein.</span></button>';
 }
 function subEigenEdit(m, pre, clsId, hb) {
   if (m.sub !== 'eigen') return '';
@@ -1434,7 +1436,7 @@ function render0() {
   const v = $('#view'); const y = window.scrollY;
   if (!cur() && (S.view === 'sheet' || S.view === 'build')) { v.innerHTML = noHeroView(); window.scrollTo(0, y); return; }
   const c = cur() ? derive(cur(), S.hb) : null; cvStop(); const keep = y > 0 ? cvKeep(v) : null; const anc = keep ? cvAnchor(v) : null;
-  v.innerHTML = S.view === 'camp' ? renderCamp() : S.view === 'heroes' ? renderHeroes() : S.view === 'build' ? renderBuild(c) : S.view === 'spells' ? renderSpellBook() : S.view === 'hb' ? renderHB() : S.view === 'mobs' ? '<div class="camp">' + bestiaryView() + '</div>' : S.view === 'adv' && typeof renderAdv === 'function' ? renderAdv() : S.view === 'help' ? helpView() : renderSheet(c);
+  v.innerHTML = S.view === 'camp' ? renderCamp() : S.view === 'heroes' ? renderHeroes() : S.view === 'build' ? slimBanner('erschaffen', 'Held erschaffen', 'Schritt für Schritt von der Klasse bis zur Ausrüstung – die App rechnet alles mit.') + renderBuild(c) : S.view === 'spells' ? slimBanner('zauberbuch', 'Zauberbuch', 'Alle Zauber des SRD 5.2.1 – deutsch und englisch durchsuchbar.') + renderSpellBook() : S.view === 'hb' ? slimBanner('hausregeln', 'Hausregeln', 'Eigene Inhalte und Regeloptionen für deinen Tisch.') + renderHB() : S.view === 'mobs' ? '<div class="camp">' + bestiaryView() + '</div>' : S.view === 'adv' && typeof renderAdv === 'function' ? renderAdv() : S.view === 'help' ? helpView() : renderSheet(c);
   if (keep) cvApply(v, keep); window.scrollTo(0, y); if (anc) cvHold(v, anc);
 }
 function commit(rerender = true) { const ch = cur(); if (ch) { ch.updated = Date.now(); persist('c', ch.id); } queueMe(); if (rerender) render(); }

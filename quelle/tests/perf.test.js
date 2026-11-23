@@ -24,7 +24,7 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     const same = (x, y) => x.split('@')[0] === y.split('@')[0] && Math.abs(+x.split('@')[1] - +y.split('@')[1]) <= 1; /* höchstens 1 Pixel Rundung */
     T(lab + ': Neuzeichnen mitten in der Liste lässt den obersten Eintrag an seiner Stelle', r[0] !== '-' && same(r[0], r[1]) && same(r[1], r[2]), r);
   }
-  T('Bestiarium: Bilder als kurze blob:-Adressen', await p.evaluate(() => { S.view = 'mobs'; render(); const i = document.querySelector('details.mob img'); return BLOB_OK && i && i.src.startsWith('blob:'); }));
+  T('Bestiarium: grosse Bilder als kurze blob:-Adressen, kleine eingebettet', await p.evaluate(() => { S.view = 'mobs'; render(); const big = [...document.querySelectorAll('details.mob img')].filter((i) => (MOB_PIC[i.closest('details').dataset.mid || ''] || 'x'.repeat(4000)).length >= 3000); return BLOB_OK && [...document.querySelectorAll('details.mob img')].some((i) => i.src.startsWith('blob:')) && [...document.querySelectorAll('details.mob img')].every((i) => i.src.startsWith('blob:') || i.src.length < 3000); }));
   T('Ohne blob:-Erlaubnis bleiben die eingebetteten Bilder', await p.evaluate(() => { BLOB_OK = false; const u = imgUrl(MOB_PIC.troll); BLOB_OK = true; return u === MOB_PIC.troll; }));
   /* Spieltisch: unveränderte Kästen werden nicht neu aufgebaut */
   await p.evaluate(() => { UID = 'me1'; window.saveCombat = (c) => { S.combat = c; paintCamp(); }; window.saveMeta = (o) => { Object.assign(S.meta, o); paintCamp(); };
