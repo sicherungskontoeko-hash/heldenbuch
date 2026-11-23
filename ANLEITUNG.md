@@ -10,6 +10,8 @@ Das Heldenbuch gibt es in drei Formen. Alle drei können miteinander spielen, so
 
 ---
 
+**Download für alle Geräte (ein Link zum Weitergeben):** https://sicherungskontoeko-hash.github.io/heldenbuch/download.html
+
 ## 1. Sofort loslegen (PC/Mac)
 
 1. `Heldenbuch.html` auf den Computer kopieren.

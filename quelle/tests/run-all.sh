@@ -49,6 +49,7 @@ run "Überdeckungen: 9 Bildschirmgrössen, alle Ansichten (overlap.test.js)" nod
 run "Überdeckungen in der App (overlap.test.js app)" node tests/overlap.test.js app/Heldenbuch.html
 run "Claude-Desktop-Brücke: MCP, Empfänger, Einrichtung (bruecke.test.js)" node tests/bruecke.test.js
 run "Claude-Desktop-Brücke in der App (bruecke.test.js app)" node tests/bruecke.test.js app/Heldenbuch.html
+run "Download-Seite: Geräte, feste Links, Version (download.test.js)" node tests/download.test.js
 if [ -n "$HB_ELECTRON" ] && [ -x "$HB_ELECTRON" ] && command -v xvfb-run >/dev/null; then run "PC-App echt: Electron + Brücke + Claude-Desktop-Eintrag (desktop.test.js)" xvfb-run -a node tests/desktop.test.js; else echo "Hinweis: desktop.test.js übersprungen (HB_ELECTRON nicht gesetzt)"; fi
 run "Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js)" node tests/hilfe.test.js
 run "Aufgeräumter Bogen: Kopfleiste, Kampfseite, Heldenliste (bogen.test.js)" node tests/bogen.test.js

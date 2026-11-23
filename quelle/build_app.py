@@ -5,7 +5,7 @@ import base64, json, os, re, shutil, subprocess, time
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FONTS = os.path.join(ROOT, 'app', 'fonts')
 OUT = os.path.join(ROOT, 'app', 'www')
-VERSION = '1.9'
+VERSION = os.environ.get('HB_VERSION') or '1.9'  # in der Veröffentlichung: 1.9.<Laufnummer>
 BUILD = int(time.time())
 
 def rd(p):

@@ -79,6 +79,21 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     await ctx.close();
   }
 
+  /* 4. PC-App: neue Version melden (nur App-Fassung mit Baunummer) */
+  {
+    const ctx = await b.newContext(); await ctx.addInitScript(() => { window.__hbUpdTest = true; window.hbDesk = { onTool() {}, reply() {}, connect: async () => ({}) }; });
+    let asked = 0; await ctx.route(/sicherungskontoeko-hash\.github\.io\/heldenbuch\/version\.json/, (r) => { asked++; r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ version: '1.9.99', build: 4102444800 }) }); });
+    const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push('Update: ' + e.message));
+    await p.goto('file://' + target); await p.waitForTimeout(900);
+    if (await p.evaluate(() => !!window.HB_BUILD)) {
+      T('PC-App: neue Version wird gemeldet, mit Link zur Download-Seite', asked > 0 && await p.evaluate(() => !!$('#pfUpd') && /Neue Version 1\.9\.99/.test($('#pfUpd').textContent) && /download\.html$/.test($('#pfUpd a').href)));
+      await p.click('#pfUpd [data-pfupd="4102444800"]');
+      T('«Später» merkt sich diese Version', await p.evaluate(() => !$('#pfUpd') && localStorage.getItem('hb_upd_skip') === '4102444800'));
+      await p.reload(); await p.waitForTimeout(900);
+      T('Dieselbe Version wird nicht nochmals gemeldet', await p.evaluate(() => !$('#pfUpd')));
+    } else T('Browser-Fassung: keine Versionsmeldung nötig', await p.evaluate(() => !$('#pfUpd')));
+    await ctx.close();
+  }
   T('Keine Skriptfehler', errs.length === 0, errs.slice(0, 3));
   await b.close();
   let ok = 0; for (const r of out) { console.log((r.ok ? '✔ ' : '✘ ') + r.n + (r.ok ? '' : ' → ' + JSON.stringify(r.got))); if (r.ok) ok++; }

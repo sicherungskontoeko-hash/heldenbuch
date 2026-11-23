@@ -93,3 +93,20 @@ Object.assign(XA, {
   stClear: () => { stSave([]); stOpen(true); }
 });
 document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && !ev.isComposing && ev.target && ev.target.id === 'stX') { ev.preventDefault(); XA.stAdd(); } });
+
+/* PC-App: neue Version melden (die Android-App aktualisiert sich selbst, der Browser lädt ohnehin die neueste) */
+const PF_SITE = 'https://sicherungskontoeko-hash.github.io/heldenbuch/';
+function pfDeskUpdate() {
+  const B = +window.HB_BUILD || 0; if (!window.hbDesk || !B) return;
+  fetch(PF_SITE + 'version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((v) => {
+    if (!v || !(+v.build > B + 600)) return; /* 10 Minuten Spielraum zwischen den Bauten */
+    try { if (+localStorage.getItem('hb_upd_skip') === +v.build) return; } catch (e) {}
+    if ($('#pfUpd')) return;
+    const el = document.createElement('div'); el.id = 'pfUpd'; el.className = 'pfbk'; el.setAttribute('role', 'status');
+    el.innerHTML = '<div><b>Neue Version ' + esc(String(v.version || '')) + '</b><small>Die PC-App aktualisiert sich nicht selbst. Herunterladen und installieren – deine Helden bleiben erhalten.</small></div>' +
+      '<div class="pfbtn"><a class="btn sm" href="' + PF_SITE + 'download.html" target="_blank" rel="noopener" data-pfupd="go">Herunterladen</a><button class="btn sm ghost" data-pfupd="' + (+v.build) + '">Später</button></div>';
+    el.addEventListener('click', (ev) => { const b = ev.target.closest('[data-pfupd]'); if (!b) return; if (b.dataset.pfupd !== 'go') { try { localStorage.setItem('hb_upd_skip', b.dataset.pfupd); } catch (e) {} } el.remove(); });
+    document.body.appendChild(el);
+  }).catch(() => {});
+}
+setTimeout(pfDeskUpdate, window.__hbUpdTest ? 200 : 6000);
