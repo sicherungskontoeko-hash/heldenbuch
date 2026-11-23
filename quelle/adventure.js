@@ -205,11 +205,12 @@ function renderAdv() {
   else h += advOverview(A, st, X);
   return h + '</div>';
 }
+const advCover = (A, cls) => (typeof HAS_PIC !== 'undefined' && (HAS_PIC.adv || []).includes(A.id) ? '<div class="advcov advcov-' + A.id + (cls ? ' ' + cls : '') + '" aria-hidden="true"></div>' : '');
 function advLibrary() {
   const all = advAll(); const d = advDb();
-  return '<div class="camp adv"><div class="hero-intro banner" style="' + bannerStyle('waldlaeufer') + '"><h1>Abenteuer</h1><p>Fertige Abenteuer zum Leiten: Kapitel für Kapitel mit Vorlesetexten, Proben, Kämpfen auf Knopfdruck und Beute.</p></div>' +
+  return '<div class="camp adv"><div class="hero-intro banner" style="' + bannerStyle('abenteuer') + '"><h1>Abenteuer</h1><p>Fertige Abenteuer zum Leiten: Kapitel für Kapitel mit Vorlesetexten, Proben, Kämpfen auf Knopfdruck und Beute.</p></div>' +
     '<section class="blk"><div class="bhead"><h2>Deine Abenteuer</h2>' + (typeof helpBtn === 'function' ? helpBtn('abenteuer') : '') + '</div><div class="advlib">' + all.map((A) => { const st = d.st[A.id]; const where = st && st.tab === 'ch' ? (() => { const C = advCh(A, st.ch); const Sc = advSc(C, st.sc); return C.kicker + ' · ' + Sc.title; })() : '';
-      return '<article class="advcard"><h2>' + esc(A.title) + '</h2>' + (A.sub ? '<p class="advsubt">' + esc(A.sub) + '</p>' : '') + (A.meta ? '<p class="hint">' + esc(A.meta) + '</p>' : '') + (A.quote ? '<p class="advq">' + esc(A.quote) + '</p>' : '') +
+      return '<article class="advcard' + (advCover(A) ? ' wcov' : '') + '">' + advCover(A) + '<h2>' + esc(A.title) + '</h2>' + (A.sub ? '<p class="advsubt">' + esc(A.sub) + '</p>' : '') + (A.meta ? '<p class="hint">' + esc(A.meta) + '</p>' : '') + (A.quote ? '<p class="advq">' + esc(A.quote) + '</p>' : '') +
         (where ? '<p class="advwhere">Weiter bei: <b>' + esc(where) + '</b></p>' : '') +
         (advItemCount(A) ? advOnRow(A, st && st.on) : '') +
         '<div class="chips"><button class="btn" data-act="advOpen" data-arg="' + esc(A.id) + '">' + (where ? 'Weiterlesen' : 'Öffnen') + '</button>' +
@@ -220,7 +221,7 @@ function advOnRow(A, on) {
   return '<label class="advon"><input type="checkbox" data-act="advOn" data-arg="' + esc(A.id) + '"' + (on ? ' checked' : '') + '><span><b>' + advItemCount(A) + ' Gegenstände aktiv</b><small>' + (on ? 'Sie stehen in den Auswahllisten: Bogen, Beute-Formular, Zufallsbeute, Suche.' : 'Aus: Sie stehen in keiner Auswahlliste. Helden, die sie schon haben, behalten sie.') + '</small></span></label>';
 }
 function advOverview(A, st, X) {
-  let h = '<section class="blk advch"><div class="advkick">Übersicht</div><h2>' + esc(A.title) + '</h2>' + (A.quote ? '<p class="advq">' + esc(A.quote) + '</p>' : '');
+  let h = '<section class="blk advch">' + advCover(A, 'big') + '<div class="advkick">Übersicht</div><h2>' + esc(A.title) + '</h2>' + (A.quote ? '<p class="advq">' + esc(A.quote) + '</p>' : '');
   if (A.overview) h += advBlock(A, { t: 'table', tone: 'figur', head: A.overview.head, rows: A.overview.rows }, '', st, X, {});
   h += '<div class="chips advgo"><button class="btn" data-act="advTab" data-arg="ch:' + esc((A.chapters.find((c) => c.id === st.ch) || A.chapters[0]).id) + '">' + (st.ch ? 'Weiterlesen' : 'Beginnen: ' + esc(A.chapters[0].kicker)) + ' ›</button></div>';
   if (advItemCount(A)) h += advOnRow(A, st.on);

@@ -19,7 +19,9 @@ let P0 = null; const shot = async (n) => { if (!shots) return; await P0.evaluate
   /* ---- Bibliothek und Navigation ---- */
   T('Menü „Mehr“ enthält Abenteuer', await p.evaluate(() => !!document.querySelector('#top .mnul [data-act="view"][data-arg="adv"]')));
   T('Bibliothek zeigt „Die Machtader“', await p.evaluate(() => /Die Machtader/.test($('#view').textContent) && !!document.querySelector('[data-act="advOpen"][data-arg="machtader"]')));
+  T('Bibliothek: beide eingebauten Abenteuer mit Cover', await p.evaluate(() => ['machtader', 'krug'].every((k) => { const e = document.querySelector('.advcard .advcov-' + k); return e && getComputedStyle(e).backgroundImage.startsWith('url') && e.getBoundingClientRect().height > 80; })));
   await p.evaluate(() => document.querySelector('[data-act="advOpen"][data-arg="machtader"]').click());
+  T('Übersicht zeigt das Cover gross', await p.evaluate(() => { const e = document.querySelector('.advch .advcov.big.advcov-machtader'); return !!e && e.getBoundingClientRect().height >= 150; }));
   T('Öffnen: Übersicht mit Tabelle und Kapitel-Chips', await p.evaluate(() => S.adv === 'machtader' && document.querySelectorAll('.advnav .chip').length === 10 && !!$('.advtw')));
   await shot('adv-1-uebersicht.png');
   await p.evaluate(() => document.querySelector('[data-act="advTab"][data-arg="ch:k1"]').click());

@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-23T15:22:43+01:00
-- Revision (SHA-256 von index.html, gekürzt): e61c1c4476651d47
+- Zeitpunkt: 2026-11-23T19:15:15+01:00
+- Revision (SHA-256 von index.html, gekürzt): ae0172484b3b0859
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v726
@@ -12,7 +12,7 @@
 | Regressionen HB-01–HB-11 (hb.test.js) | 0 | ✔ HB-11 Bewusstlos ausserhalb des Kampfes: kein Zauber 27 / 27 bestanden · /home/claude/heldenbuch/quelle/index.html  |
 | Robustheit & Sonderfälle (cases.test.js) | 0 | ✔ HB-26 Fluchklinge: zweite Bonusaktion blockiert, keine Ressource verbraucht 23 / 23 bestanden  |
 | Kritischer Audit A01–A06 (audit2.test.js) | 0 | ✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/heldenbuch/quelle/index.html  |
-| Erklärkarten ⓘ (info.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 49 / 49 bestanden  |
+| Erklärkarten ⓘ (info.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 53 / 53 bestanden  |
 | Layout: ⚠ offene Punkte, Menüs (layout.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 29 / 29 bestanden  |
 | Würfel-Designs (dice.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 50 / 50 bestanden  |
 | Stufenaufstieg-Assistent (levelup.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 28 / 28 bestanden  |
@@ -43,14 +43,15 @@
 | Rückgängig, Wiederholen, Zug zurückspulen (undo.test.js) | 0 | ✔ Keine Skriptfehler 30 / 30 bestanden  |
 | Claude als Helfer der Spielleitung (slhelfer.test.js) | 0 | ✔ Keine Skriptfehler 22 / 22 bestanden  |
 | Gegnerzug: Angriffe zählen, Zug beenden (npcturn.test.js) | 0 | ✔ Keine Skriptfehler 11 / 11 bestanden  |
-| Monsterbilder (mobpics.test.js) | 0 | ✔ Keine Skriptfehler 10 / 10 bestanden  |
+| Monsterbilder (mobpics.test.js) | 0 | ✔ Keine Skriptfehler 16 / 16 bestanden  |
+| Unterklassen-Bilder (subpics.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
 | Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Tischhilfen: passive Werte, Rast für alle, EP nach dem Kampf (tablehelp.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
 | Gegenstände: SRD-Liste, Flüche, Ausrüstung (items.test.js) | 0 | ✔ Keine Skriptfehler 12 / 12 bestanden  |
 | Rettungswürfe der Monster (mobsaves.test.js) | 0 | ✔ Keine Skriptfehler 7 / 7 bestanden  |
 | Leistung: Zwischenspeicher, ruhige Listen, Spieltisch, Effekte (perf.test.js) | 0 | ✔ Keine Skriptfehler 18 / 18 bestanden  |
 | Gesinnung: neun Gesinnungen mit Erklärung (align.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
-| Abenteuer: Machtader, Kampf auf Knopfdruck, Entscheidungen, Laden (adventure.test.js) | 0 | ✔ Keine Seitenfehler 36/36 Prüfungen bestanden  |
+| Abenteuer: Machtader, Kampf auf Knopfdruck, Entscheidungen, Laden (adventure.test.js) | 0 | ✔ Keine Seitenfehler 38/38 Prüfungen bestanden  |
 | Abenteuer: Wirtshaus zum letzten Krug (krug.test.js) | 0 | ✔ Keine Seitenfehler 44/44 Prüfungen bestanden  |
 | Klicktest kurz (ui.test.js) | 0 | ✔ Desktop 1280 ✔ Handy 390 (Touch)  |
 | Abnahme-Klicktest (ui-full.test.js) | 0 | ✔ Chromium Desktop 1280: 167/167 Prüfungen ✔ Chromium Handy 390 (Touch): 167/167 Prüfungen  |
