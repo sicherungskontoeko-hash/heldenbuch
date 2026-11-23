@@ -52,10 +52,10 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "Heldenbuch-Setup-${version}.exe"
+      "artifactName": "Heldenbuch-Setup.${ext}"
     },
     "portable": {
-      "artifactName": "Heldenbuch-Portable-${version}.exe"
+      "artifactName": "Heldenbuch-Portable.${ext}"
     },
     "mac": {
       "target": [
@@ -76,7 +76,10 @@
       ],
       "icon": "build/icon.png",
       "category": "Game",
-      "artifactName": "Heldenbuch-${version}.AppImage"
+      "artifactName": "Heldenbuch.${ext}"
+    },
+    "dmg": {
+      "artifactName": "Heldenbuch.${ext}"
     }
   }
 }

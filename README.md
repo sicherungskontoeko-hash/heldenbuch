@@ -1,5 +1,7 @@
 # Heldenbuch
 
+**Herunterladen:** https://sicherungskontoeko-hash.github.io/heldenbuch/download.html (Android, iPhone, Windows, Mac, Linux, Browser)
+
 Deutsches D&D-Charakterbuch (SRD 5.2.1) mit Charaktererstellung, Bogen, Würfeln und gemeinsamem Online-Tisch.
 
 Dieses Repository baut automatisch (siehe *Actions*):
@@ -14,6 +16,7 @@ Dieses Repository baut automatisch (siehe *Actions*):
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
 
 ## Neu in Version 1.9
+- **Download für alle:** Eine Seite für alle Geräte, mit festen Links, die immer die neueste Version laden: https://sicherungskontoeko-hash.github.io/heldenbuch/download.html. Die Dateien heissen jetzt gleichbleibend (Heldenbuch.apk, Heldenbuch-Setup.exe, Heldenbuch-Portable.exe, Heldenbuch.dmg, Heldenbuch.AppImage), Apps und Release tragen dieselbe Versionsnummer 1.9.<Lauf>. Die PC-App meldet neue Versionen; die Android-App aktualisiert sich weiterhin selbst. Die Web-App-Veröffentlichung versucht es bei einer GitHub-Störung ein zweites Mal.
 - **Spielstand für den nächsten Abend:** Am Ende sagst du Claude «Abend abschliessen». Claude speichert eine knappe Zusammenfassung des Abends und führt die Gesamtzusammenfassung der Kampagne nach, im Abenteuer selbst (Reiter **Spielstand** im Chronik-Fenster, enthalten in «Alles sichern»). Ein neuer Chat holt mit `lage` zuerst «Bisher» und dann nur, was seither neu ist. Ohne Claude: Abend selbst abschliessen, mit Entwurf aus der Chronik. Optional als Handout «Was bisher geschah» an die Spieler, als Datei sicherbar. Behoben: Hohe Fenster liessen sich auf kleinen Bildschirmen nicht scrollen.
 - **Claude Desktop als Co-Spielleiter (PC-App):** Ein Knopf trägt das Heldenbuch als Connector (MCP) in Claude Desktop ein. Claude liest dann Lage, Kampf, Chronik, Personen und Aufträge selbst und kann für die Spielleitung Gegner hinzufügen und würfeln, Schaden und Zustände an Gegnern setzen, den nächsten Zug ausrufen, Personen/Orte/Aufträge pflegen, in die Chronik schreiben und Handouts schicken. Läuft über das Claude-Abo, ohne API-Kosten. Auf Tokens getrimmt: kurze Lage, danach nur Änderungen. Anleitung: ANLEITUNG.md, Abschnitt 4.
 - **Personen, Orte und Aufträge** als Reiter im Chronik-Fenster (📜 Chronik): Name, ein Satz, geheime Notiz, Stand (verbündet/feindlich/tot, besucht, offen/erledigt/gescheitert). «Die Spieler wissen davon» zeigt den Eintrag am Tisch unter **Bekannt** (ohne geheime Notiz). Statuswechsel landen in der Chronik, alles fliesst in die Claude-Lage; mehrere Bücher (je Abenteuer oder Tisch) mit Buchwahl. «Alles sichern» enthält jetzt auch Chronik und Kampagnenbuch.

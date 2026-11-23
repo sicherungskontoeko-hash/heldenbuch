@@ -49,6 +49,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/overlap.test.js, tests/overlap-lib.js | Überdeckungen: 9 Bildschirmgrössen × alle Ansichten und Fenster – jedes Bedienelement und jeder Text muss in einer Scrollposition unverdeckt sichtbar sein, keine abgeschnittenen Knöpfe, kein Querscrollen, deckende Leisten; auch im Kampf am Tisch (sitzung.test.js) |
 | tests/bruecke.test.js | Brücke ohne Tisch: MCP-Protokoll, Schlüssel/Herkunft, Werkzeuge gegen die echte App, Antwortlängen, geschlossene App, Eintrag in Claude Desktop (inkl. Store-Fassung, kaputte Datei); Werkzeuge am Tisch prüft sitzung.test.js |
 | tests/desktop.test.js | Echte PC-App mit Electron (HB_ELECTRON, xvfb-run): Empfänger, Brücke mit der App als Node, Werkzeuge ändern das Fenster, Verbinden-Knopf, eingetragener Befehl startet wirklich |
+| tests/download.test.js | Download-Seite www/download.html: eigenes Gerät zuerst (Android, iPhone, Windows, Mac), feste Links passend zu package.json, Version, kein Querscrollen |
 | tests/pflege.test.js | Rückfrage zur Sicherung, Stolpersteine (Handy und PC), Server-Umstellung Mosquitto → HiveMQ (App) |
 | tests/verlauf.test.js | Würfelverlauf: Aufzeichnung, Speicherung, Filter, Wurf in Rückfragen |
 | tests/bogen.test.js | aufgeräumter Bogen: Kopfleiste mit Kernwerten, Kampfseite ohne Reiterwechsel, Heldenliste |

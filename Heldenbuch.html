@@ -7,7 +7,7 @@
    weil die App ihre Adresse (localhost) dabei nicht wechselt.
    Sicherung: Startet eine heruntergeladene Version nicht sauber, wird sie verworfen und die eingebaute genutzt. */
 (function () {
-  var BUILD = 1795425714, VER = '1.9';
+  var BUILD = 1795428140, VER = '1.9';
   var REMOTE = 'https://sicherungskontoeko-hash.github.io/heldenbuch/';
   var C = window.Capacitor; var native = !!(C && (typeof C.isNativePlatform === 'function' ? C.isNativePlatform() : C.isNative));
   if (window.HB_BOOT_TEST) native = true; /* nur für Tests */
@@ -9589,6 +9589,23 @@ Object.assign(XA, {
   stClear: () => { stSave([]); stOpen(true); }
 });
 document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && !ev.isComposing && ev.target && ev.target.id === 'stX') { ev.preventDefault(); XA.stAdd(); } });
+
+/* PC-App: neue Version melden (die Android-App aktualisiert sich selbst, der Browser lädt ohnehin die neueste) */
+const PF_SITE = 'https://sicherungskontoeko-hash.github.io/heldenbuch/';
+function pfDeskUpdate() {
+  const B = +window.HB_BUILD || 0; if (!window.hbDesk || !B) return;
+  fetch(PF_SITE + 'version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((v) => {
+    if (!v || !(+v.build > B + 600)) return; /* 10 Minuten Spielraum zwischen den Bauten */
+    try { if (+localStorage.getItem('hb_upd_skip') === +v.build) return; } catch (e) {}
+    if ($('#pfUpd')) return;
+    const el = document.createElement('div'); el.id = 'pfUpd'; el.className = 'pfbk'; el.setAttribute('role', 'status');
+    el.innerHTML = '<div><b>Neue Version ' + esc(String(v.version || '')) + '</b><small>Die PC-App aktualisiert sich nicht selbst. Herunterladen und installieren – deine Helden bleiben erhalten.</small></div>' +
+      '<div class="pfbtn"><a class="btn sm" href="' + PF_SITE + 'download.html" target="_blank" rel="noopener" data-pfupd="go">Herunterladen</a><button class="btn sm ghost" data-pfupd="' + (+v.build) + '">Später</button></div>';
+    el.addEventListener('click', (ev) => { const b = ev.target.closest('[data-pfupd]'); if (!b) return; if (b.dataset.pfupd !== 'go') { try { localStorage.setItem('hb_upd_skip', b.dataset.pfupd); } catch (e) {} } el.remove(); });
+    document.body.appendChild(el);
+  }).catch(() => {});
+}
+setTimeout(pfDeskUpdate, window.__hbUpdTest ? 200 : 6000);
 
 /* ==== Heldenbuch – Oberfläche ==== */
 const S = { chars: {}, hb: {}, cur: null, view: 'heroes', step: 0, mode: 'normal', log: [], sf: { q: '', lvl: 'all', cls: 'all' }, hbEdit: null, confirm: null, open: {}, store: 'local', saving: '', camp: '', share: true, table: {}, campErr: '', combat: null, myInit: null, logOpen: false, logFilter: 'all', npcRoll: false, meta: { dm: null, mercy: {} }, mercyQ: [] };

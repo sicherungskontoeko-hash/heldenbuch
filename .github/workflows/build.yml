@@ -13,6 +13,8 @@ permissions:
   contents: write
   pages: write
   id-token: write
+env:
+  PAGES_URL: https://sicherungskontoeko-hash.github.io/heldenbuch/
 
 jobs:
   web:
@@ -23,6 +25,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: Versionsnummer (1.9.<Laufnummer>)
+        shell: bash
+        run: echo "HB_VERSION=$(node -p "require('./package.json').version.split('.').slice(0, 2).join('.')").${{ github.run_number }}" >> "$GITHUB_ENV"
       - name: App-Dateien bauen (www/ und Heldenbuch.html)
         run: bash quelle/build_www.sh
       - name: Abgleich mit dem Repo (nur Hinweis)
@@ -60,6 +65,11 @@ jobs:
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
       - name: Abhängigkeiten
         run: npm install --no-audit --no-fund --ignore-scripts
+      - name: Versionsnummer (1.9.<Laufnummer>)
+        shell: bash
+        run: echo "HB_VERSION=$(node -p "require('./package.json').version.split('.').slice(0, 2).join('.')").${{ github.run_number }}" >> "$GITHUB_ENV"
+      - name: Versionsnummer in die Android-App
+        run: sed -i -E "s/versionCode [0-9]+/versionCode $((100 + ${{ github.run_number }}))/; s/versionName \"[^\"]*\"/versionName \"$HB_VERSION\"/" android/app/build.gradle && grep -E "versionCode|versionName" android/app/build.gradle
       - name: Web-Dateien in die Android-App kopieren
         run: npx cap sync android
       - name: APK bauen
@@ -93,8 +103,12 @@ jobs:
           node-version: 22
       - name: Abhängigkeiten
         run: npm install --no-audit --no-fund
+      - name: Versionsnummer (1.9.<Laufnummer>)
+        shell: bash
+        run: echo "HB_VERSION=$(node -p "require('./package.json').version.split('.').slice(0, 2).join('.')").${{ github.run_number }}" >> "$GITHUB_ENV"
       - name: App bauen
-        run: npx electron-builder --publish never
+        shell: bash
+        run: npx electron-builder --publish never -c.extraMetadata.version=$HB_VERSION
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
       - uses: actions/upload-artifact@v4
@@ -111,7 +125,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url || steps.deploy2.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
@@ -122,7 +136,16 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: www
+      - name: Kurz warten (GitHub braucht einen Moment, bis die Dateien abrufbar sind)
+        run: sleep 20
       - id: deploy
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - name: Zweiter Versuch nach einer Störung bei GitHub
+        if: steps.deploy.outcome == 'failure'
+        run: sleep 60
+      - id: deploy2
+        if: steps.deploy.outcome == 'failure'
         uses: actions/deploy-pages@v4
 
   release:
@@ -153,11 +176,20 @@ jobs:
           tag_name: ${{ steps.ver.outputs.tag }}
           name: ${{ steps.ver.outputs.name }}
           body: |
-            **Android:** Heldenbuch.apk herunterladen und öffnen (Installation aus unbekannten Quellen erlauben).
-            **Windows:** Heldenbuch-Setup-….exe (Installer) oder Heldenbuch-Portable-….exe (ohne Installation).
-            **Mac:** Heldenbuch-….dmg (wird nachgeliefert, sobald der Mac-Bau fertig ist) öffnen, App in „Programme“ ziehen, beim ersten Start Rechtsklick → Öffnen.
-            **Linux:** Heldenbuch-….AppImage ausführbar machen und starten.
-            **iPhone/iPad:** Web-App in Safari öffnen und „Zum Home-Bildschirm“ wählen (Link siehe Anleitung).
+            ## Alles auf einer Seite: ${{ env.PAGES_URL }}download.html
+
+            Diese Links laden immer die neueste Version:
+
+            | Gerät | Datei | Hinweis |
+            | --- | --- | --- |
+            | Android | [Heldenbuch.apk](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch.apk) | Öffnen, Installation aus dieser Quelle erlauben. Danach aktualisiert sich die App selbst. |
+            | Windows | [Heldenbuch-Setup.exe](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch-Setup.exe) | Installer (empfohlen, nötig für Claude Desktop). Bei der Windows-Warnung: «Weitere Informationen» › «Trotzdem ausführen». |
+            | Windows ohne Installation | [Heldenbuch-Portable.exe](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch-Portable.exe) | Startet direkt, etwas langsamer. |
+            | Mac (Intel und Apple) | [Heldenbuch.dmg](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch.dmg) | Wird einige Minuten nach den anderen nachgeliefert. App in «Programme» ziehen; beim ersten Start Systemeinstellungen › Datenschutz und Sicherheit › «Trotzdem öffnen». |
+            | Linux | [Heldenbuch.AppImage](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch.AppImage) | Ausführbar machen und starten. |
+            | iPhone, iPad, Browser | [Web-App](${{ env.PAGES_URL }}) | In Safari öffnen › Teilen › «Zum Home-Bildschirm». |
+
+            Version ${{ steps.ver.outputs.tag }}. Die App ist nicht von Apple oder Microsoft signiert; deshalb die Warnungen beim ersten Start.
           files: dl/**/*
 
   mac:
@@ -177,8 +209,11 @@ jobs:
           node-version: 22
       - name: Abhängigkeiten
         run: npm install --no-audit --no-fund
+      - name: Versionsnummer (1.9.<Laufnummer>)
+        shell: bash
+        run: echo "HB_VERSION=$(node -p "require('./package.json').version.split('.').slice(0, 2).join('.')").${{ github.run_number }}" >> "$GITHUB_ENV"
       - name: App bauen
-        run: npx electron-builder --mac --publish never
+        run: npx electron-builder --mac --publish never -c.extraMetadata.version=$HB_VERSION
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
       - name: Zum Release hinzufügen
