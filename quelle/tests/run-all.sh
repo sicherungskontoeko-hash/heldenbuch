@@ -62,6 +62,7 @@ run "Gegnerzug: Angriffe zählen, Zug beenden (npcturn.test.js)" node tests/npct
 run "Monsterbilder (mobpics.test.js)" node tests/mobpics.test.js
 run "Unterklassen-Bilder (subpics.test.js)" node tests/subpics.test.js
 run "Kampfseite am Handy: Angriffe früher, Warnungen oben (m01.test.js)" node tests/m01.test.js
+run "Bestiarium am Handy: Suche vor Einleitung (m03.test.js)" node tests/m03.test.js
 run "Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js)" node tests/initcall.test.js
 run "Tischhilfen: passive Werte, Rast für alle, EP nach dem Kampf (tablehelp.test.js)" node tests/tablehelp.test.js
 run "Gegenstände: SRD-Liste, Flüche, Ausrüstung (items.test.js)" node tests/items.test.js
