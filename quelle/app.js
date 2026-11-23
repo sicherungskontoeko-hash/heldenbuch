@@ -229,6 +229,7 @@ function dmgRoll(ch) {
   const sav = a.idx !== undefined && d.savage && c.feats.some((x) => x.id === 'savage') && !onceUsed(ch, 'savage'); if (sav) once.push('savage');
   if (base) parts.push({ n: base.n, s: base.s, tag: a.name.replace(/ \+\d$/, ''), gwf, savage: sav });
   if (d.ts) { const tsd = spellDice(getSpell('true-strike'), 0, c, d.ts.mod); const m2 = tsd && /^(\d+)W(\d+)/.exec(tsd); if (m2) parts.push({ n: +m2[1], s: +m2[2], tag: 'Wahrer Schlag (gleissend)' }); }
+  if (a.duel && (d.two || d.off)) flat -= a.duel;
   if (d.off && !c.feats.some((x) => x.id === 'fs-twf')) flat = Math.min(0, flat);
   if (P.raging && a.rage) flat += c.rageDmg;
   if (d.sneak && c.lv('rog') && (a.finesse || a.ranged) && !onceUsed(ch, 'sneak') && d.mode !== 'dis') { parts.push({ n: Math.ceil(c.lv('rog') / 2), s: 6, tag: 'Hinterhältig' }); once.push('sneak'); }
@@ -549,7 +550,7 @@ function renderBuild(c) {
     if (c.cls.order) body += '<h3 id="a-order">' + c.cls.order.label + '</h3><div class="opts">' + Object.entries(c.cls.order.opts).map(([k, [n, t]]) => '<button class="opt' + (ch.order === k ? ' on' : '') + '" data-act="pick" data-path="order" data-val="' + k + '"><b>' + n + '</b><span>' + t + '</span></button>').join('') + '</div>';
     if (ch.cls === 'dru' && c.lv('dru') >= 3 && c.subOf('dru') === 'land') body += '<h3>Landschaft (Zirkel des Landes)</h3><div class="chips">' + Object.entries(LAND).map(([k, l]) => chip(ch.land === k, l.name, 'data-act="pick" data-path="land" data-val="' + k + '"')).join('') + '</div>';
     body += '<h3>' + c.cls.name + ' bis Stufe ' + ch.level + '</h3><div class="tbl"><table><tbody>' + c.cls.table(ch.level).map(([a, b]) => '<tr><th>' + a + '</th><td>' + b + '</td></tr>').join('') + (c.hasSub ? '<tr><th>Unterklasse</th><td>' + (c.subName || 'noch wählen (' + (c.cls.subs || []).length + ' zur Wahl)') + '</td></tr>' : '<tr><th>Unterklasse</th><td>ab Stufe 3' + (c.cls.subs ? ' (' + c.cls.subs.length + ' zur Wahl)' : ': ' + c.cls.sub.name) + '</td></tr>') + '</tbody></table></div>';
-    if (c.cls.subs && ch.level >= 3) body += '<h3 id="a-sub">Unterklasse</h3><div class="opts">' + c.cls.subs.map((sb) => '<button class="opt' + (ch.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || (sb.feats[0][1] + ': ' + sb.feats[0][2])) + '</span>' + (sb.desc ? '<small class="ofeat">Ab Stufe 3: ' + esc(sb.feats.filter((f) => f[0] <= 3).map((f) => f[1]).join(', ')) + '</small>' : '') + ii('sub', ch.cls + '/' + sb.id, sb.name) + '</button>').join('') + '</div>';
+    if (c.cls.subs && ch.level >= 3) body += '<h3 id="a-sub">Unterklasse</h3><div class="opts">' + c.cls.subs.map((sb) => '<button class="opt' + (ch.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || (sb.feats[0][1] + ': ' + sb.feats[0][2])) + '</span>' + (sb.desc ? '<small class="ofeat">Ab Stufe 3: ' + esc(sb.feats.filter((f) => f[0] <= 3).map((f) => f[1]).join(', ')) + '</small>' : '') + ii('sub', ch.cls + '/' + sb.id, sb.name) + '</button>').join('') + subEigenBtn(ch, '') + '</div>' + subEigenEdit(ch, '', ch.cls, hb);
     body += featList(c.features.filter((f) => f.src === c.cls.name || f.src === c.subName));
     body += mcSection(c);
   }
@@ -695,7 +696,7 @@ function mcSection(c) {
     if (C.order) h += '<div class="opts">' + Object.entries(C.order.opts).map(([k, [n, t]]) => '<button class="opt' + (m.order === k ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.order" data-val="' + k + '"><b>' + n + '</b><span>' + t + '</span></button>').join('') + '</div>';
     if (m.cls === 'dru' && m.level >= 3 && c.subOf('dru') === 'land') h += '<div class="chips">' + Object.entries(LAND).map(([k, l]) => chip((m.land || 'temperate') === k, l.name, 'data-act="pick" data-path="multi.' + i + '.land" data-val="' + k + '"')).join('') + '</div>';
     const ce = (c.classes || []).find((e) => e.id === m.cls) || {};
-    if (C.subs && m.level >= 3) h += '<div class="opts">' + C.subs.map((sb) => '<button class="opt' + (m.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || sb.feats[0][1]) + '</span>' + ii('sub', m.cls + '/' + sb.id, sb.name) + '</button>').join('') + '</div>';
+    if (C.subs && m.level >= 3) h += '<div class="opts">' + C.subs.map((sb) => '<button class="opt' + (m.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || sb.feats[0][1]) + '</span>' + ii('sub', m.cls + '/' + sb.id, sb.name) + '</button>').join('') + subEigenBtn(m, 'multi.' + i + '.') + '</div>' + subEigenEdit(m, 'multi.' + i + '.', m.cls, S.hb);
     h += featList(c.features.filter((f) => f.src === C.name || f.src === ce.subName));
     h += '</div>';
   });
@@ -1051,6 +1052,20 @@ function renderSpellBook() {
     '<select id="sl">' + [['all', 'Alle Grade'], ['0', 'Zaubertricks']].concat([1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => [String(g), 'Grad ' + g])).map(([v, l]) => '<option value="' + v + '"' + (f.lvl === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>' +
     '<select id="sc"><option value="all">Alle Klassen</option>' + Object.entries(CLASSES).filter(([, C]) => C.caster).map(([k, C]) => '<option value="' + k + '"' + (f.cls === k ? ' selected' : '') + '>' + C.name + '</option>').join('') + '</select></div>' +
     '<p class="hint">' + list.length + ' Zauber · Auswahl aus dem SRD 5.2.1, eigene Zauber über „Hausregeln“.</p><div class="splist cvl">' + list.map((s) => spellCard(s, s.home ? 'Hausregel' : s.classes.map((k) => (CLASSES[k] || {}).name).filter(Boolean).join(', '), false)).join('') + '</div></div>';
+}
+
+/* ---------- Eigene Unterklasse (z. B. aus D&D Beyond) ---------- */
+function subEigenBtn(m, pre) {
+  const on = m.sub === 'eigen';
+  return '<button class="opt' + (on ? ' on' : '') + '" data-act="pick" data-path="' + pre + 'sub" data-val="eigen"><b>' + (on && m.subName ? esc(m.subName) : 'Eigene Unterklasse') + '</b><span>Für Unterklassen ausserhalb des SRD, z. B. aus D&amp;D Beyond. Merkmale trägst du als Hausregel ein.</span></button>';
+}
+function subEigenEdit(m, pre, clsId, hb) {
+  if (m.sub !== 'eigen') return '';
+  const have = m.subSpells || []; const list = spellList(clsId, hb).filter((s) => s.lvl > 0 && !have.includes(s.id)).sort((a, b) => a.lvl - b.lvl || cmpDe(a.name, b.name));
+  return '<div class="box" id="a-subeigen"><div class="row">' + field('Name der Unterklasse', txt(pre + 'subName', m.subName || '', 'z. B. Schwur der Rache')) + '</div>' +
+    '<h4>Immer vorbereitete Zauber</h4>' + (have.length ? '<div class="chips">' + have.map((id) => { const sp = getSpell(id, hb); return sp ? chip(true, sp.name, 'data-act="toggle" data-path="' + pre + 'subSpells" data-val="' + id + '" title="Antippen entfernt"') : ''; }).join('') + '</div>' : '') +
+    '<select id="subSpAdd" data-pre="' + pre + '" aria-label="Zauber hinzufügen"><option value="">+ Zauber hinzufügen …</option>' + list.map((s) => '<option value="' + s.id + '">' + esc(s.name) + ' (Grad ' + s.lvl + ')</option>').join('') + '</select>' +
+    '<p class="hint">Merkmale der Unterklasse unter <b>Hausregeln</b> als «Merkmal / Fähigkeit» eintragen und dem Helden zuweisen.</p></div>';
 }
 
 /* ---------- Hausregeln ---------- */

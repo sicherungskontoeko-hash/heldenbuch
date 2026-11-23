@@ -435,7 +435,13 @@ const SPECIES = {
   choice:{key:'legacy', label:'Unholdes Erbe', opts:{abyssal:'Abyssisch (Gift)',chthonic:'Chthonisch (Nekrotisch)',infernal:'Infernalisch (Feuer)'}},
   traits:(c)=>{ const L=c.char.speciesChoice||'infernal'; const t={abyssal:'Resistenz gegen Giftschaden. Giftspray; ab 3: Strahl der Übelkeit; ab 5: Person festhalten.',chthonic:'Resistenz gegen nekrotischen Schaden. Kältegriff; ab 3: Falsches Leben; ab 5: Schwächestrahl.',infernal:'Resistenz gegen Feuerschaden. Feuerpfeil; ab 3: Höllischer Tadel; ab 5: Dunkelheit.'}[L];
    return [['Dunkelsicht','18 m.'],['Unholdes Erbe',t+' Grad-Zauber je 1× pro langer Rast ohne Platz.'],['Jenseitige Präsenz','Du kennst Thaumaturgie.']]; },
-  spells:(c)=>{ const L=c.char.speciesChoice||'infernal'; const m={abyssal:['poison-spray','ray-of-sickness','hold-person'],chthonic:['chill-touch','false-life','ray-of-enfeeblement'],infernal:['fire-bolt','hellish-rebuke','darkness']}[L]; return ['thaumaturgy',m[0]].concat(c.level>=3&&m[1]?[m[1]]:[]).concat(c.level>=5&&m[2]?[m[2]]:[]); } }
+  spells:(c)=>{ const L=c.char.speciesChoice||'infernal'; const m={abyssal:['poison-spray','ray-of-sickness','hold-person'],chthonic:['chill-touch','false-life','ray-of-enfeeblement'],infernal:['fire-bolt','hellish-rebuke','darkness']}[L]; return ['thaumaturgy',m[0]].concat(c.level>=3&&m[1]?[m[1]]:[]).concat(c.level>=5&&m[2]?[m[2]]:[]); } },
+ /* Aus dem SRD 5.1 (CC-BY-4.0, ältere Regeln). Attributsboni kommen nach den Regeln 2024 vom Hintergrund. */
+ halfelf:{ name:'Halbelf', size:'Mittelgross', speed:9, dv:18, extraSkills:2, legacy:true,
+  traits:(c)=>[['Dunkelsicht','18 m.'],['Feenahnen','Vorteil auf Rettungswürfe gegen bezaubert. Magie kann dich nicht in Schlaf versetzen.'],['Vielseitigkeit','Übung in zwei Fertigkeiten deiner Wahl.'],['Sprachen','Gemeinsprache, Elfisch und eine weitere Sprache.'],['Ältere Spezies (SRD 5.1)','Die Attributsboni der alten Regeln entfallen; sie kommen nach den Regeln 2024 vom Hintergrund.']] },
+ halforc:{ name:'Halbork', size:'Mittelgross', speed:9, dv:18, skills:['itm'], legacy:true,
+  traits:(c)=>[['Dunkelsicht','18 m.'],['Bedrohlich','Übung in Einschüchtern.'],['Unerbittliche Ausdauer','Fällst du auf 0 TP, ohne sofort zu sterben, hast du stattdessen 1 TP. 1× pro langer Rast.'],['Wilde Angriffe','Bei einem kritischen Treffer mit einer Nahkampfwaffe würfelst du einen Schadenswürfel der Waffe zusätzlich.'],['Sprachen','Gemeinsprache und Orkisch.'],['Ältere Spezies (SRD 5.1)','Die Attributsboni der alten Regeln entfallen; sie kommen nach den Regeln 2024 vom Hintergrund.']],
+  res:(c)=>[{k:'rel',n:'Unerbittliche Ausdauer',max:1,reset:'long'}] }
 };
 
 /* ---------- Hintergründe ---------- */
@@ -462,6 +468,8 @@ const FEATS = {
  'fs-defense':{ name:'Kampfstil: Verteidigung', cat:'style', text:'+1 RK, solange du leichte, mittelschwere oder schwere Rüstung trägst.', defense:true },
  'fs-gwf':{ name:'Kampfstil: Kampf mit grossen Waffen', cat:'style', text:'Würfelst du Schaden mit einer zweihändigen oder beidhändig geführten vielseitigen Nahkampfwaffe, zählt jede 1 oder 2 als 3.' },
  'fs-twf':{ name:'Kampfstil: Kampf mit zwei Waffen', cat:'style', text:'Beim zusätzlichen Angriff mit einer leichten Waffe addierst du deinen Attributsmodifikator zum Schaden.' },
+ 'fs-duel':{ name:'Kampfstil: Duellieren', cat:'style', text:'+2 auf den Schaden, wenn du eine Nahkampfwaffe in einer Hand führst und keine andere Waffe (SRD 5.1).', duel:true },
+ 'fs-prot':{ name:'Kampfstil: Schützen', cat:'style', text:'Mit Schild: Greift eine Kreatur, die du siehst, ein anderes Ziel in 1,5 m von dir an, kannst du mit deiner Reaktion Nachteil auf den Angriffswurf verursachen (SRD 5.1).' },
  'boon-combat':{ name:'Gabe der Kampfkraft', cat:'epic', text:'+1 auf ein Attribut (max. 30). Einmal pro Zug darfst du einen verfehlten Angriff in einen Treffer verwandeln.', plus:AB, cap30:true },
  'boon-dim':{ name:'Gabe der Dimensionsreise', cat:'epic', text:'+1 auf ein Attribut (max. 30). Nach Angriff oder Magieaktion darfst du dich 9 m teleportieren.', plus:AB, cap30:true },
  'boon-fate':{ name:'Gabe des Schicksals', cat:'epic', text:'+1 auf ein Attribut (max. 30). 2W4 auf einen W20-Test in 18 m addieren oder abziehen (zurück bei Initiative oder Rast).', plus:AB, cap30:true },

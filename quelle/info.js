@@ -89,7 +89,7 @@ function infoContent(kind, key) {
   if (kind === 'sp') {
     const sp = SPECIES[key]; if (!sp) return null;
     let tr = []; try { const tmp = JSON.parse(JSON.stringify(ch || newChar({}))); tmp.species = key; tmp.speciesChoice = sp.choice ? (key === (ch || {}).species ? ch.speciesChoice : Object.keys(sp.choice.opts)[0]) : ''; const tc = derive(normChar(tmp), S.hb); tr = typeof sp.traits === 'function' ? sp.traits(tc) : (sp.traits || []); } catch (e) { tr = []; }
-    return { t: sp.name, sub: sp.home ? '✦ Heldenbuch-Spezies' : 'Spezies', flav: (sp.flavor || '').replace(/^✦ /, ''),
+    return { t: sp.name, sub: sp.home ? '✦ Heldenbuch-Spezies' : sp.legacy ? 'Spezies aus dem SRD 5.1 (ältere Regeln)' : 'Spezies', flav: (sp.flavor || '').replace(/^✦ /, ''),
       dl: infoRow('Grösse', sp.size) + infoRow('Bewegung', fmtM(sp.speed)) + infoRow('Dunkelsicht', sp.dv ? fmtM(sp.dv) : 'nein') + (sp.choice ? infoRow(sp.choice.label, Object.values(sp.choice.opts).join(', ')) : ''),
       more: tr.length ? '<h4>Merkmale</h4>' + infoFeats(tr.map(([n, t]) => [0, n, t])) : '' };
   }

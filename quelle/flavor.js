@@ -27,6 +27,8 @@ const SPECIES_FLAVOR = {
   human: 'Anpassungsfähig, ehrgeizig und überall zu Hause. Menschen lernen schnell, schöpfen nach einer Rast neue Kraft und finden in jeder Klasse ihren Platz.',
   orc: 'Kräftig, ausdauernd und kaum zu fällen. Orks verfolgen ihre Ziele mit Wucht, sehen im Dunkeln und stehen wieder auf, wenn andere liegen bleiben.',
   tiefling: 'Ein Hauch der Unterwelt liegt in ihrem Blut: Hörner, Schweif und angeborene Magie. Je nach Erbe sind Tieflinge infernalisch, abyssisch oder chthonisch geprägt.',
+  halfelf: 'Zwischen zwei Welten aufgewachsen: elfische Anmut, menschlicher Ehrgeiz. Halbelfen sind vielseitig, sehen im Dämmerlicht und lassen sich kaum bezaubern. (SRD 5.1)',
+  halforc: 'Orkische Kraft und menschliche Entschlossenheit. Halborks schüchtern ein, stehen nach einem tödlichen Treffer wieder auf und schlagen bei Volltreffern besonders hart zu. (SRD 5.1)',
   mykori: '✦ Pilzwesen aus den feuchten Tiefen. Mykori sind durch ein feines Sporennetz miteinander verbunden, fühlen sich im Dunkeln wohl und können eine giftige Sporenwolke ausstossen.',
   vesperkin: '✦ Kinder der Dämmerung, halb aus Schatten gewebt. Vesperkin sehen durch Dunkelheit, verschmelzen mit ihr und springen von einem Schatten in den nächsten.',
   steinblut: '✦ In ihren Adern fliesst Mineral statt nur Blut. Steinblütige sind schwer, geduldig und hart wie Fels – und können ihre Haut für einen Augenblick zu Stein werden lassen.'

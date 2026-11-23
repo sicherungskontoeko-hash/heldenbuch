@@ -20,7 +20,7 @@ Das Heldenbuch gibt es in drei Formen. Alle drei können miteinander spielen, so
 
 > Tipp: Exportiere deine Helden ab und zu (Bogen → **Exportieren**). So hast du eine Sicherung.
 
-> Helden aus **D&D Beyond**: dort beim Charakter «Export PDF» wählen, dann im Heldenbuch unter **Helden → Helden aus Datei laden** das PDF öffnen. Vor dem Anlegen siehst du, was übernommen und was nur in die Notizen geschrieben wird.
+> Helden aus **D&D Beyond**: dort beim Charakter «Export PDF» wählen, dann im Heldenbuch unter **Helden → Helden aus Datei laden** das PDF öffnen. Vor dem Anlegen siehst du, was übernommen wird. Inhalte ausserhalb des freien SRD (z. B. Oath of Vengeance) legt die App als Hausregel nur auf deinem Gerät an.
 
 ---
 

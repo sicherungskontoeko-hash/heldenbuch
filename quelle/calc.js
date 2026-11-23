@@ -17,7 +17,7 @@ function newChar(over) {
     bg: 'soldier', bgCustom: { name: 'Eigener Hintergrund', abil: ['str','dex','con'], skills: ['ath','prc'], feat: 'alert' },
     bgMode: '21', bgPlus: { str: 2, con: 1 },
     method: 'standard', base: { str: 15, dex: 13, con: 14, int: 8, wis: 12, cha: 10 },
-    classSkills: [], extraSkills: [], expertise: [], freeSkills: [], freeExp: [], humanFeat: 'skilled',
+    classSkills: [], extraSkills: [], expertise: [], freeSkills: [], freeExp: [], bonusSpells: [], humanFeat: 'skilled',
     asi: {}, styles: [], invocations: [], mi: {},
     cantrips: [], spells: [], book: [], arcanum: {},
     armor: 'none', armorBonus: 0, shield: false, shieldBonus: 0, mageArmor: false,
@@ -68,7 +68,7 @@ function derive(ch, hb) {
   const mOf = (id) => (id === ch.cls ? ch : multi.find((m) => m.cls === id) || {});
   const ord = (id) => (lv(id) ? mOf(id).order || '' : '');
   const classList = [{ id: ch.cls, C: cls, lvl: levels[ch.cls], primary: true, m: ch, idx: -1 }].concat(multi.filter((m) => levels[m.cls] > 0).map((m, i) => ({ id: m.cls, C: CLASSES[m.cls], lvl: levels[m.cls], primary: false, m, idx: (ch.multi || []).indexOf(m) })));
-  for (const e of classList) { const C = e.C; const chosen = C.subs ? C.subs.find((s) => s.id === e.m.sub) : null; e.subChosen = !C.subs || !!chosen; const sb = chosen || (C.subs ? { name: '', feats: [], id: null } : { name: C.sub.name, feats: C.subFeats, id: C.sub.id }); if (C.subs && e.m.sub && !chosen) warn0.push('Unbekannte Unterklasse „' + e.m.sub + '“ bei ' + C.name + ' – bitte neu wählen.'); e.subName = sb.name; e.subFeats = sb.feats; e.subId = sb.id; e.subGrant = (chosen || !C.subs) ? sb.grant || null : null; e.subSpells = chosen ? chosen.spells : C.subs ? null : C.sub.spells; }
+  for (const e of classList) { const C = e.C; const chosen = C.subs ? (e.m.sub === 'eigen' ? { id: 'eigen', name: e.m.subName || 'Eigene Unterklasse', feats: [], spells: (e.m.subSpells || []).some((id) => getSpell(id, hb)) ? { 1: e.m.subSpells.filter((id) => getSpell(id, hb)) } : null, custom: true } : C.subs.find((s) => s.id === e.m.sub)) : null; e.subChosen = !C.subs || !!chosen; const sb = chosen || (C.subs ? { name: '', feats: [], id: null } : { name: C.sub.name, feats: C.subFeats, id: C.sub.id }); if (C.subs && e.m.sub && !chosen) warn0.push('Unbekannte Unterklasse „' + e.m.sub + '“ bei ' + C.name + ' – bitte neu wählen.'); e.subName = sb.name; e.subFeats = sb.feats; e.subId = sb.id; e.subGrant = (chosen || !C.subs) ? sb.grant || null : null; e.subSpells = chosen ? chosen.spells : C.subs ? null : C.sub.spells; }
   const subOf = (id) => (classList.find((e) => e.id === id) || {}).subId;
   const sp = SPECIES[ch.species] || SPECIES.human;
   const bg = bgOf(ch);
@@ -169,9 +169,11 @@ function derive(ch, hb) {
   const cs = (ch.classSkills || []).filter((s) => cls.skills.includes(s));
   cs.slice(0, cls.skillN).forEach((s) => addP(s, cls.name));
   if (cs.length < cls.skillN) warn.push(cls.name + ': ' + (cls.skillN - cs.length) + ' Fertigkeit(en) wählen.');
+  (sp.skills || []).forEach((s) => addP(s, sp.name));
   if (sp.skillPick) { if (ch.speciesSkill && sp.skillPick.includes(ch.speciesSkill)) addP(ch.speciesSkill, sp.name); else warn.push(sp.name + ': Fertigkeit wählen.'); }
   let extraN = 0; const extraSrc = [];
   c.feats.forEach((x) => { if (x.f.skills) { extraN += x.f.skills; extraSrc.push(x.f.name); } });
+  if (sp.extraSkills) { extraN += sp.extraSkills; extraSrc.push(sp.name); }
   if (lv('brd') >= 3 && subOf('brd') === 'lore') { extraN += 3; extraSrc.push('Schule des Wissens'); }
   if (lv('bar') >= 3) { extraN += 1; extraSrc.push('Urwissen'); }
   if (lv('brd') >= 3 && subOf('brd') === 'stars') { addP('arc', 'Himmelskunde'); addP('nat', 'Himmelskunde'); }
@@ -371,6 +373,7 @@ function derive(ch, hb) {
   const extra = [];
   if (sp.spells) { const ab = ch.speciesSpellAbility || 'wis'; sp.spells(c).forEach((id) => { extra.push({ id, src: sp.name, ab }); const s = getSpell(id, hb); if (s && s.lvl > 0) res.push({ k: 'sp_' + id, n: s.name + ' (' + sp.name + ')', max: 1, reset: 'long', species: true }); }); }
   c.feats.forEach((x) => { if (x.f.mi) { const m = ch.mi[x.slot === 'asi' ? 'asi' + x.lv : x.slot] || {}; const ab = m.ability || 'wis'; (m.cantrips || []).slice(0, x.f.miC || 2).forEach((id) => extra.push({ id, src: x.f.name, ab })); if (m.spell && x.f.miSpell !== false) { extra.push({ id: m.spell, src: x.f.name, ab }); res.push({ k: 'mi_' + (x.slot === 'asi' ? 'asi' + x.lv : x.slot), n: (getSpell(m.spell, hb) || {}).name + ' (gratis)', max: 1, reset: 'long' }); } if ((m.cantrips || []).length < (x.f.miC || 2) || (x.f.miSpell !== false && !m.spell)) warn.push(x.f.name + ': Zauber wählen.'); } });
+  (ch.bonusSpells || []).forEach((b) => { if (b && getSpell(b.id, hb) && !extra.some((x) => x.id === b.id)) extra.push({ id: b.id, src: b.src || 'Übernommen', ab: AB.includes(b.ab) ? b.ab : 'cha' }); });
   c.extraSpells = extra.map((e) => Object.assign(e, { dc: 8 + pb + c.mod[e.ab], atk: pb + c.mod[e.ab] }));
   sc.anything = sc.has || extra.length > 0;
   c.spell = sc;
@@ -410,11 +413,12 @@ function derive(ch, hb) {
     let d = die;
     if (monkW && DIE_MAX(die) < DIE_MAX('1' + maDie) && die.startsWith('1')) d = '1' + maDie;
     if (shill) d = L >= 17 ? '2W6' : '1W' + (L >= 11 ? 12 : L >= 5 ? 10 : 8);
-    const dm = c.mod[ab] + bonus;
+    const duel = !ranged && !props.includes('two') && c.feats.some((x) => x.f.duel) ? 2 : 0;
+    const dm = c.mod[ab] + bonus + duel;
     const ds = (x) => x + (dm ? sgn(dm) : '');
     const atkParts = [AB_K[ab] + ' ' + sgn(c.mod[ab])].concat(ewB ? ['Elementarwaffe +' + ewB] : []).concat(p ? ['Übung ' + sgn(pb)] : ['keine Übung']).concat(bonus ? ['magisch ' + sgn(bonus)] : []).concat(archery && ranged ? ['Bogenschiessen +2'] : []).concat(atkMisc ? ['Sonstiges ' + sgn(atkMisc)] : []).concat(gun ? ['Perfektionierte Technik +1'] : []);
-    const dmgParts = [d].concat(dm ? [AB_K[ab] + (bonus ? ' + magisch' : '') + ' ' + sgn(dm)] : []);
-    const A = { atkParts, dmgParts, name: n + (bonus ? ' +' + bonus : '') + (shill ? ' (Shillelagh)' : ''), idx: i, ab, atk, die: d, vers: vers || null, dmod: dm, gwf: !ranged && (props.includes('two') || props.includes('versatile')), twoOnly: props.includes('two'), light: props.includes('light'), finesse: props.includes('finesse'), ranged, dmg: ds(d), dmg2: vers ? ds(vers) : null, dtype: DT[dt], prof: p,
+    const dmgParts = [d].concat(dm - duel ? [AB_K[ab] + (bonus ? ' + magisch' : '') + ' ' + sgn(dm - duel)] : []).concat(duel ? ['Duellieren +2 (einhändig, ohne zweite Waffe)'] : []);
+    const A = { atkParts, dmgParts, name: n + (bonus ? ' +' + bonus : '') + (shill ? ' (Shillelagh)' : ''), idx: i, ab, atk, die: d, vers: vers || null, dmod: dm, duel, gwf: !ranged && (props.includes('two') || props.includes('versatile')), twoOnly: props.includes('two'), light: props.includes('light'), finesse: props.includes('finesse'), ranged, dmg: ds(d), dmg2: vers ? ds(vers) : null, dtype: DT[dt], prof: p,
       props: props.map((x) => PROP_DE[x]).join(', ') + (range ? ' (' + range + ' m)' : ''), mastery: masteryAny && w.mastery ? mas : null, melee: !ranged, rage: rageDmg && ab === 'str' && !ranged && ar.type !== 'heavy', shill };
     if (shill) { A.dtype = A.dtype + ' oder Energie'; A.vers = null; A.dmg2 = null; }
     att.push(A);
@@ -482,6 +486,7 @@ function derive(ch, hb) {
   if (c.feats.some((x) => x.id === 'fs-gwf') && !(ch.weapons || []).some((w) => WEAPONS[w.w] && (WEAPONS[w.w][5].includes('two') || WEAPONS[w.w][5].includes('versatile')))) hints.push('Kampf mit grossen Waffen nützt nur mit zweihändigen oder vielseitigen Nahkampfwaffen.');
   if (c.feats.some((x) => x.id === 'fs-twf') && (ch.weapons || []).filter((w) => WEAPONS[w.w] && WEAPONS[w.w][5].includes('light')).length < 2) hints.push('Kampf mit zwei Waffen braucht zwei leichte Waffen.');
   if (c.feats.some((x) => x.id === 'fs-defense') && ar.type === 'none') hints.push('Kampfstil Verteidigung wirkt nur mit Rüstung.');
+  if (c.feats.some((x) => x.id === 'fs-prot') && !ch.shield) hints.push('Kampfstil Schützen braucht einen Schild.');
   c.hints = hints;
   return c;
 }

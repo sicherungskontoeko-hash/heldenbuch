@@ -172,7 +172,7 @@ function validateChar(o) {
   const L = +o.level; if (!Number.isInteger(L) || L < 1 || L > 30) e.push('Stufe ungültig (' + o.level + ').');
   if (o.base !== undefined) { if (typeof o.base !== 'object' || !o.base) e.push('Attributswerte fehlen.'); else for (const k of AB) { const v = +o.base[k]; if (o.base[k] !== undefined && (!Number.isFinite(v) || v < 1 || v > 30)) e.push('Attribut ' + AB_K[k] + ' ungültig (' + o.base[k] + ').'); } }
   if (o.species !== undefined && !SPECIES[o.species]) e.push('Unbekannte Spezies „' + o.species + '“.');
-  for (const k of ['multi', 'weapons', 'spells', 'book', 'cantrips', 'classSkills', 'extraSkills', 'expertise', 'freeSkills', 'freeExp', 'invocations', 'styles', 'items', 'homebrew', 'comps']) if (o[k] !== undefined && !Array.isArray(o[k])) e.push('„' + k + '“ muss eine Liste sein.');
+  for (const k of ['multi', 'weapons', 'spells', 'book', 'cantrips', 'classSkills', 'extraSkills', 'expertise', 'freeSkills', 'freeExp', 'bonusSpells', 'invocations', 'styles', 'items', 'homebrew', 'comps']) if (o[k] !== undefined && !Array.isArray(o[k])) e.push('„' + k + '“ muss eine Liste sein.');
   (Array.isArray(o.multi) ? o.multi : []).forEach((m, i) => { if (!m || !CLASSES[m.cls]) e.push('Multiclass ' + (i + 1) + ': unbekannte Klasse.'); else if (!Number.isInteger(+m.level) || +m.level < 1) e.push('Multiclass ' + (i + 1) + ': Stufe ungültig.'); });
   (Array.isArray(o.weapons) ? o.weapons : []).forEach((w, i) => { if (!w || !WEAPONS[w.w]) e.push('Waffe ' + (i + 1) + ': unbekannt (' + (w && w.w) + ').'); });
   if (o.play !== undefined && (typeof o.play !== 'object' || !o.play)) e.push('Spielstand („play“) ist ungültig.');

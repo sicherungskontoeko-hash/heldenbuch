@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-23T12:53:54+01:00
-- Revision (SHA-256 von index.html, gekürzt): 08f1df369d5ec77f
+- Zeitpunkt: 2026-11-23T13:39:32+01:00
+- Revision (SHA-256 von index.html, gekürzt): 5fd609f0fbf3add9 (Gesamtlauf mit der Fassung kurz davor; danach nur ein Hilfetext geändert, hilfe.test.js, tablehelp.test.js und ddbimport.test.js mit dieser Fassung erneut grün)
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v726
@@ -17,7 +17,7 @@
 | Würfel-Designs (dice.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 50 / 50 bestanden  |
 | Stufenaufstieg-Assistent (levelup.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 28 / 28 bestanden  |
 | Gegnerangriff: Treffer prüfen vor Schaden (npc.test.js) | 0 | ✔ critExpr verdoppelt alle Würfel 8 / 8 bestanden  |
-| Kampf-Nachzügler, Überraschung, Treffer zustellen, Bestiarium (combat2.test.js) | 0 | ✔ Planer: Monsterauswahl nach Fundort gruppiert, Verstärkung/überrascht im Kampf 40 / 40 bestanden (nach Korrektur der zufallsabhängigen Prüfung «TP-Würfel» einzeln wiederholt)  |
+| Kampf-Nachzügler, Überraschung, Treffer zustellen, Bestiarium (combat2.test.js) | 0 | ✔ Planer: Monsterauswahl nach Fundort gruppiert, Verstärkung/überrascht im Kampf 40 / 40 bestanden  |
 | SL-Werkzeuge: Zufallsbegegnung, Aufladung, eigene Monster, Beute (dmtools.test.js) | 0 | ✔ Keine Skriptfehler 46 / 46 bestanden  |
 | Schaden mit Rettungswurf: erst fragen, dann würfeln (savedmg.test.js) | 0 | ✔ Keine Skriptfehler 18 / 18 bestanden  |
 | Abläufe mit Zwischenschritt: Zustände, Reaktionen, Zusatzeffekte (mechanics.test.js) | 0 | ✔ Keine Skriptfehler 40 / 40 bestanden  |
@@ -27,8 +27,8 @@
 | Willkommen: Name beim ersten Start (welcome.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Willkommen in der App (welcome.test.js app) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Spielabend sichern, Stolpersteine (pflege.test.js) | 0 | ✔ Keine Skriptfehler 32 / 32 bestanden  |
-| Import aus D&D Beyond (ddbimport.test.js) | 0 | ✔ Keine Skriptfehler 49 / 49 bestanden  |
-| Import aus D&D Beyond (ddbimport.test.js app) | 0 | ✔ Keine Skriptfehler 49 / 49 bestanden  |
+| Import aus D&D Beyond (ddbimport.test.js) | 0 | ✔ Keine Skriptfehler 73 / 73 bestanden  |
+| Import aus D&D Beyond (ddbimport.test.js app) | 0 | ✔ Keine Skriptfehler 73 / 73 bestanden  |
 | Spielabend sichern, Stolpersteine, Server (pflege.test.js app) | 0 | ✔ Keine Skriptfehler 35 / 35 bestanden  |
 | Kampagnenbuch: Personen, Orte, Aufträge (kbuch.test.js) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
 | Kampagnenbuch in der App (kbuch.test.js app) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
@@ -53,7 +53,7 @@
 | Abenteuer: Machtader, Kampf auf Knopfdruck, Entscheidungen, Laden (adventure.test.js) | 0 | ✔ Keine Seitenfehler 36/36 Prüfungen bestanden  |
 | Abenteuer: Wirtshaus zum letzten Krug (krug.test.js) | 0 | ✔ Keine Seitenfehler 44/44 Prüfungen bestanden  |
 | Klicktest kurz (ui.test.js) | 0 | ✔ Desktop 1280 ✔ Handy 390 (Touch)  |
-| Abnahme-Klicktest (ui-full.test.js) | 0 | ✔ Chromium Desktop 1280: 165/165 Prüfungen ✔ Chromium Handy 390 (Touch): 165/165 Prüfungen  |
+| Abnahme-Klicktest (ui-full.test.js) | 0 | ✔ Chromium Desktop 1280: 167/167 Prüfungen ✔ Chromium Handy 390 (Touch): 167/167 Prüfungen  |
 | Kombinationen Klasse×Unterklasse×Stufe (combos.test.js) | 0 | checked 1280 bad 0  |
 | Zugleisten-Fuzz bar | 0 | ran 218 bad 0  |
 | Zugleisten-Fuzz brd | 0 | ran 324 bad 0  |
