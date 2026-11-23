@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-23T13:39:32+01:00
-- Revision (SHA-256 von index.html, gekürzt): 5fd609f0fbf3add9 (Gesamtlauf mit der Fassung kurz davor; danach nur ein Hilfetext geändert, hilfe.test.js, tablehelp.test.js und ddbimport.test.js mit dieser Fassung erneut grün)
+- Zeitpunkt: 2026-11-23T15:22:43+01:00
+- Revision (SHA-256 von index.html, gekürzt): e61c1c4476651d47
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v726
@@ -12,7 +12,7 @@
 | Regressionen HB-01–HB-11 (hb.test.js) | 0 | ✔ HB-11 Bewusstlos ausserhalb des Kampfes: kein Zauber 27 / 27 bestanden · /home/claude/heldenbuch/quelle/index.html  |
 | Robustheit & Sonderfälle (cases.test.js) | 0 | ✔ HB-26 Fluchklinge: zweite Bonusaktion blockiert, keine Ressource verbraucht 23 / 23 bestanden  |
 | Kritischer Audit A01–A06 (audit2.test.js) | 0 | ✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/heldenbuch/quelle/index.html  |
-| Erklärkarten ⓘ (info.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 41 / 41 bestanden  |
+| Erklärkarten ⓘ (info.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 49 / 49 bestanden  |
 | Layout: ⚠ offene Punkte, Menüs (layout.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 29 / 29 bestanden  |
 | Würfel-Designs (dice.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 50 / 50 bestanden  |
 | Stufenaufstieg-Assistent (levelup.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 28 / 28 bestanden  |
