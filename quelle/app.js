@@ -472,7 +472,7 @@ function exportData(list, full) { const d = { heldenbuch: 1, exportiert: new Dat
 /* „Alles sichern“: neben Helden und Hausregeln auch eigene Monster, gespeicherte Begegnungen und SL-Notizen (liegen sonst nur im Browser) */
 function backupExtras() { const notes = {}; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.indexOf('heldenbuch_dm_') === 0 && localStorage.getItem(k)) notes[k.slice(14)] = localStorage.getItem(k); } } catch (e) {}
   const ad = typeof advDb === 'function' ? advDb() : null;
-  return { mobs: typeof ownMobs === 'function' ? ownMobs() : [], enc: typeof encLoad === 'function' ? encLoad() : [], dmNotes: notes, player: typeof myName === 'function' ? myName() : '', adv: ad ? ad.list : [], advSt: ad ? ad.st : {}, chr: typeof chrDb === 'function' ? chrDb() : {}, kb: typeof kbDb === 'function' ? kbDb() : {} }; }
+  return { mobs: typeof ownMobs === 'function' ? ownMobs() : [], enc: typeof encLoad === 'function' ? encLoad() : [], dmNotes: notes, player: typeof myName === 'function' ? myName() : '', adv: ad ? ad.list : [], advSt: ad ? ad.st : {}, chr: typeof chrDb === 'function' ? chrDb() : {}, kb: typeof kbDb === 'function' ? kbDb() : {}, stand: typeof standDb === 'function' ? standDb() : {} }; }
 function restoreExtras(x) {
   if (!x || typeof x !== 'object') return []; const done = [];
   if (typeof x.player === 'string' && x.player.trim() && typeof myName === 'function' && !myName()) { setMyName(x.player.trim().slice(0, 24)); done.push('dein Name'); }
@@ -485,6 +485,11 @@ function restoreExtras(x) {
     Object.entries(x[f]).forEach(([k, L]) => { if (!Array.isArray(L) || !/^(adv:[a-z0-9-]{1,40}|tisch:.{1,60}|frei)$/.test(k)) return; const have = new Set((d[k] || []).map((e) => e && e.id)); const add = L.filter((e) => e && e.id && typeof e.t === 'number' && !have.has(e.id)); if (add.length) { d[k] = (d[k] || []).concat(add).sort((a, b) => a.t - b.t); n += add.length; } });
     if (n) { window[wr](d); done.push(lab + ' (' + n + ')'); }
   }
+  /* Spielstand: Abende nach id zusammenführen, beim Gesamtstand gilt der neuere */
+  if (x.stand && typeof x.stand === 'object' && typeof standDb === 'function') { const d = standDb(); let n = 0;
+    Object.entries(x.stand).forEach(([k, v]) => { if (!v || typeof v !== 'object' || !/^(adv:[a-z0-9-]{1,40}|tisch:.{1,60}|frei)$/.test(k)) return; const cur0 = d[k] || {}; const have = new Set((cur0.abende || []).map((a) => a && a.id)); const add = (Array.isArray(v.abende) ? v.abende : []).filter((a) => a && a.id && typeof a.t === 'number' && typeof a.x === 'string' && !have.has(a.id));
+      const g = v.gesamt && typeof v.gesamt.x === 'string' && (!cur0.gesamt || (+v.gesamt.t || 0) > (+cur0.gesamt.t || 0)) ? v.gesamt : cur0.gesamt; if (add.length || g !== cur0.gesamt) { d[k] = { gesamt: g || null, abende: (cur0.abende || []).concat(add).sort((a, b) => a.t - b.t) }; n += add.length || 1; } });
+    if (n) { standSaveDb(d); done.push('Spielstand (' + n + ')'); } }
   if (Array.isArray(x.adv) && x.adv.length && typeof advImport === 'function') { const n = advImport(x.adv); if (n) done.push(n === 1 ? 'das Abenteuer „' + String((x.adv.find((a) => a && a.title) || {}).title || '').slice(0, 40) + '“' : n + ' Abenteuer'); }
   if (x.advSt && typeof x.advSt === 'object' && typeof advDb === 'function') { const d = advDb(); let n = 0; Object.entries(x.advSt).forEach(([id, st]) => { if (!st || typeof st !== 'object' || !/^[a-z0-9-]{1,40}$/.test(id)) return; if (d.st[id] && (+d.st[id].t || 0) >= (+st.t || 0)) return; d.st[id] = st; n++; }); if (n) { advSave(d); done.push('Abenteuer-Fortschritt'); } }
   return done;

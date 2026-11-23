@@ -80,6 +80,8 @@ Claude Desktop kann den Tisch direkt lesen und für die Spielleitung handeln: La
 
 Die PC-App muss dabei offen sein. In Claude Desktop lässt sich pro Werkzeug einstellen, ob Claude vorher fragen muss.
 
+**Nächster Abend:** Am Ende zu Claude «Abend abschliessen» sagen. Claude speichert die Zusammenfassung im Abenteuer (Reiter «Spielstand» im Chronik-Fenster). Beim nächsten Mal einen neuen Chat beginnen: «Wie ist die Lage?» bringt zuerst den Spielstand und dann nur Neues.
+
 **Nutzung sparen:** Für den Spielabend Sonnet oder Haiku wählen statt Opus und den Denkaufwand niedrig stellen. Pro Abend einen neuen Chat beginnen. Claude ruft zuerst die kurze Lage ab und danach nur noch, was neu ist.
 
 ## Hinweise

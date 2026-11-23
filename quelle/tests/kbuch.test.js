@@ -58,23 +58,33 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     T(d + 'Neues Abenteuer = neues Buch, Buchwahl erscheint', await p.evaluate(() => !!$('#kbBook') && $('#kbBook').options.length >= 2 && /Krug/.test($('#kbBook').selectedOptions[0].textContent)));
     await p.selectOption('#kbBook', 'frei'); await p.click('.kbtabs [data-arg="p"]'); await p.waitForTimeout(80);
     T(d + 'Buchwahl zeigt die Personen des anderen Buchs', await p.evaluate(() => /Brannok Hornhand/.test($('#modal').textContent) && /Ohne Abenteuer/.test(document.querySelector('#modal .dph b').textContent)));
+    /* Reiter Spielstand: Abend selbst abschliessen mit Entwurf aus der Chronik */
+    await p.click('.kbtabs [data-arg="s"]'); await p.waitForTimeout(80);
+    T(d + 'Reiter Spielstand: leer mit Hinweis', await p.evaluate(() => /Noch kein Abend abgeschlossen/.test($('#modal').textContent)));
+    await p.evaluate(() => { document.querySelector('.stnew').open = true; }); await p.click('[data-act="spDraft"]');
+    T(d + 'Entwurf aus der Chronik', await p.evaluate(() => /Brannok Hornhand/.test($('#stNew').value)));
+    await p.fill('#stTit', 'Erster Abend'); await p.click('[data-act="spAdd"]'); await p.waitForTimeout(80);
+    T(d + 'Abend gespeichert und in der Liste', await p.evaluate(() => standOf().abende.length === 1 && /Erster Abend/.test($('#modal').textContent)));
+    const r2 = await scan(p, d + 'Spielstand');
+    T(d + 'Spielstand: nichts verdeckt, kein Querscrollen', !r2.covered.length && !r2.cut.length && !r2.hscroll, r2);
     if (!backup) backup = await p.evaluate(() => exportData(Object.values(S.chars), true));
     await ctx.close();
   }
   /* Sicherung enthält Chronik und Buch; Wiederherstellung auf neuem Gerät */
-  T('«Alles sichern» enthält Chronik und Kampagnenbuch', /"kb":/.test(backup) && /Brannok Hornhand/.test(backup) && /"chr":/.test(backup));
+  T('«Alles sichern» enthält Chronik, Kampagnenbuch und Spielstand', /"kb":/.test(backup) && /Brannok Hornhand/.test(backup) && /"chr":/.test(backup) && /"stand":/.test(backup) && /Erster Abend/.test(backup));
   {
     const ctx = await b.newContext(); const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push('Wiederherstellen: ' + e.message));
     await p.goto('file://' + target); await p.waitForTimeout(400);
     const done = await p.evaluate((txt) => { const x = JSON.parse(txt); return restoreExtras(x.extra); }, backup);
-    T('Wiederherstellen bringt Chronik und Buch zurück', await p.evaluate(() => kbList('frei').some((x) => x.n === 'Brannok Hornhand' && /Golden Scale/.test(x.g)) && chrList('frei').length >= 4), done);
-    const again = await p.evaluate((txt) => { restoreExtras(JSON.parse(txt).extra); return kbList('frei').length + '/' + chrList('frei').length; }, backup);
-    const first = await p.evaluate(() => kbList('frei').length + '/' + chrList('frei').length);
+    T('Wiederherstellen bringt Chronik, Buch und Spielstand zurück', await p.evaluate(() => kbList('frei').some((x) => x.n === 'Brannok Hornhand' && /Golden Scale/.test(x.g)) && chrList('frei').length >= 4 && Object.values(standDb()).some((v) => (v.abende || []).some((a) => a.titel === 'Erster Abend'))), done);
+    const cnt = () => kbList('frei').length + '/' + chrList('frei').length + '/' + Object.values(standDb()).reduce((n, v) => n + (v.abende || []).length, 0);
+    const first = await p.evaluate(`(${cnt})()`);
+    const again = await p.evaluate((txt) => { restoreExtras(JSON.parse(txt).extra); return kbList('frei').length + '/' + chrList('frei').length + '/' + Object.values(standDb()).reduce((n, v) => n + (v.abende || []).length, 0); }, backup);
     T('Zweimal wiederherstellen verdoppelt nichts', again === first, again);
     await ctx.close();
   }
   T('Keine Skriptfehler', errs.length === 0, errs.slice(0, 3));
   await b.close();
-  let ok = 0; for (const r of out) { console.log((r.ok ? '✔ ' : '✘ ') + r.n + (r.ok ? '' : ' → ' + JSON.stringify(r.got).slice(0, 900))); if (r.ok) ok++; }
+  let ok = 0; for (const r of out) { console.log((r.ok ? '✔ ' : '✘ ') + r.n + (r.ok ? '' : ' → ' + String(JSON.stringify(r.got)).slice(0, 900))); if (r.ok) ok++; }
   console.log('\n' + ok + ' / ' + out.length + ' bestanden'); process.exit(ok === out.length ? 0 : 1);
 })();

@@ -43,9 +43,9 @@ const post = (port, headers, body) => new Promise((res) => { const rq = http.req
   const ini2 = await c.call('initialize', { protocolVersion: '2099-01-01', capabilities: {}, clientInfo: { name: 'x', version: '1' } });
   T('Unbekannte Protokollversion: bietet eine unterstützte an', /^20\d\d-\d\d-\d\d$/.test(ini2.result.protocolVersion) && ini2.result.protocolVersion !== '2099-01-01');
   const tl = await c.call('tools/list', {}); const names = tl.result.tools.map((t) => t.name);
-  T('tools/list: 8 Werkzeuge mit Schema', ['lage', 'nachschlagen', 'notieren', 'buch', 'an_spieler', 'gegner', 'naechster_zug', 'wuerfeln'].every((n) => names.includes(n)) && tl.result.tools.every((t) => t.inputSchema && t.inputSchema.type === 'object'), names);
+  T('tools/list: 9 Werkzeuge mit Schema', ['lage', 'nachschlagen', 'notieren', 'buch', 'an_spieler', 'gegner', 'naechster_zug', 'wuerfeln', 'abend_abschliessen'].every((n) => names.includes(n)) && tl.result.tools.every((t) => t.inputSchema && t.inputSchema.type === 'object'), names);
   const defs = JSON.stringify(tl.result.tools).length;
-  T('Werkzeugbeschreibungen kompakt (< 5000 Zeichen, gehen bei jeder Nachricht mit)', defs < 5000, defs);
+  T('Werkzeugbeschreibungen kompakt (< 5500 Zeichen, gehen bei jeder Nachricht mit)', defs < 5500, defs);
   T('Lesende Werkzeuge als «nur lesen» markiert', tl.result.tools.filter((t) => t.annotations && t.annotations.readOnlyHint).map((t) => t.name).sort().join() === 'lage,nachschlagen');
   T('ping', !!(await c.call('ping', {})).result);
   T('Unbekannte Methode: Fehler statt Absturz', !!(await c.call('foo/bar', {})).error);
@@ -86,6 +86,20 @@ const post = (port, headers, body) => new Promise((res) => { const rq = http.req
   T('an_spieler ohne Tisch: klare Meldung', r.err && /Kein Tisch offen/.test(r.text));
   r = await tool(c, 'lage', { voll: true });
   T('lage voll: ausführlich, ohne Rollentext', /## Abenteuer/.test(r.text) && /## Personen, Orte, Aufträge/.test(r.text) && !/Du bist Co-Spielleiter/.test(r.text), r.text.slice(0, 200));
+  /* Spielabend abschliessen, neuer Chat: lage beginnt mit «Bisher» und zeigt nur, was danach geschah */
+  r = await tool(c, 'abend_abschliessen', { zusammenfassung: 'zu kurz' });
+  T('abend_abschliessen: zu kurze Zusammenfassung abgelehnt', r.err && /zu kurz/.test(r.text));
+  r = await tool(c, 'abend_abschliessen', { titel: 'Im Keller', zusammenfassung: 'Die Helden kamen ins Wirtshaus, misstrauten Prunella und fanden im Keller einen Geheimgang. Offen: Wer hat die Glocke gestohlen?', gesamt: 'Kampagne: Die Helden suchen die gestohlene Glocke von Felsbruck. Prunella ist verdächtig.' });
+  T('abend_abschliessen: gespeichert, Chronik vermerkt', !r.err && /1\. Abend/.test(r.text) && (await page.evaluate(() => standOf().abende.length === 1 && !!standOf().gesamt && chrList().some((e) => e.k === 'abend' && /Im Keller/.test(e.x)))), r.text);
+  await page.evaluate(() => { S.brSince = 0; }); /* wie ein neuer Chat nach einem Neustart der App */
+  await page.waitForTimeout(30); await tool(c, 'wuerfeln', { ausdruck: 'W20', wofuer: 'Nach dem Abschluss' });
+  r = await tool(c, 'lage');
+  T('Neuer Chat: lage beginnt mit «Bisher» (Kampagne und letzter Abend)', /^Bisher:\nKampagne bisher/.test(r.text) && /Letzter Abend .*«Im Keller»/.test(r.text), r.text.slice(0, 300));
+  T('Neuer Chat: Neues erst ab dem Abschluss (kein alter Wurf «Falle»)', /Nach dem Abschluss/.test(r.text) && !/Falle/.test(r.text), r.text);
+  T('Neuer Chat: Wiedereinstieg unter 2500 Zeichen', r.text.length < 2500, r.text.length);
+  r = await tool(c, 'lage', { nur_neu: true });
+  T('nur_neu ohne «Bisher»', !/Bisher/.test(r.text), r.text);
+  T('Kopierte Lage (claude.ai) enthält den Spielstand', await page.evaluate(() => /## Bisher \(Spielstand\)/.test(slLage('x'))));
   r = await c.call('tools/call', { name: 'gibtsnicht', arguments: {} });
   T('Unbekanntes Werkzeug: Fehler', !!r.error);
   T('Werkzeug-Aufruf aktualisiert «Claude war da»', await page.evaluate(() => S.brN >= 10 && Date.now() - S.brLast < 60000));

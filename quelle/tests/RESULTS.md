@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-23T09:07:41+01:00
-- Revision (SHA-256 von index.html, gekürzt): 1729c6de254a23ee
+- Zeitpunkt: 2026-11-23T09:57:48+01:00
+- Revision (SHA-256 von index.html, gekürzt): 1f8b98d18d48e3ec
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v726
@@ -28,12 +28,12 @@
 | Willkommen in der App (welcome.test.js app) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Spielabend sichern, Stolpersteine (pflege.test.js) | 0 | ✔ Keine Skriptfehler 31 / 31 bestanden  |
 | Spielabend sichern, Stolpersteine, Server (pflege.test.js app) | 0 | ✔ Keine Skriptfehler 32 / 32 bestanden  |
-| Kampagnenbuch: Personen, Orte, Aufträge (kbuch.test.js) | 0 | ✔ Keine Skriptfehler 40 / 40 bestanden  |
-| Kampagnenbuch in der App (kbuch.test.js app) | 0 | ✔ Keine Skriptfehler 40 / 40 bestanden  |
+| Kampagnenbuch: Personen, Orte, Aufträge (kbuch.test.js) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
+| Kampagnenbuch in der App (kbuch.test.js app) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
 | Überdeckungen: 9 Bildschirmgrössen, alle Ansichten (overlap.test.js) | 0 | ✔ Keine Skriptfehler 20 / 20 bestanden  |
 | Überdeckungen in der App (overlap.test.js app) | 0 | ✔ Keine Skriptfehler 20 / 20 bestanden  |
-| Claude-Desktop-Brücke: MCP, Empfänger, Einrichtung (bruecke.test.js) | 0 | ✔ Keine Skriptfehler 42 / 42 bestanden  |
-| Claude-Desktop-Brücke in der App (bruecke.test.js app) | 0 | ✔ Keine Skriptfehler 42 / 42 bestanden  |
+| Claude-Desktop-Brücke: MCP, Empfänger, Einrichtung (bruecke.test.js) | 0 | ✔ Keine Skriptfehler 49 / 49 bestanden  |
+| Claude-Desktop-Brücke in der App (bruecke.test.js app) | 0 | ✔ Keine Skriptfehler 49 / 49 bestanden  |
 | PC-App echt: Electron + Brücke + Claude-Desktop-Eintrag (desktop.test.js) | 0 | ✔ App beendet: Info-Datei aufgeräumt 16 / 16 bestanden  |
 | Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
 | Aufgeräumter Bogen: Kopfleiste, Kampfseite, Heldenliste (bogen.test.js) | 0 | ✔ Keine Skriptfehler 38 / 38 bestanden  |

@@ -36,7 +36,7 @@ if (!EL || !fs.existsSync(EL)) { console.log('Electron nicht gefunden (HB_ELECTR
   const tool = async (name, args) => { const r = await call('tools/call', { name, arguments: args || {} }); return { text: r.result.content[0].text, err: r.result.isError }; };
   const ini = await call('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'claude-ai', version: '0' } });
   T('Brücke mit der App als Node gestartet: initialize', ini.result && ini.result.serverInfo.name === 'heldenbuch', ini);
-  T('tools/list: 8 Werkzeuge', ((await call('tools/list', {})).result.tools || []).length === 8);
+  T('tools/list: 9 Werkzeuge', ((await call('tools/list', {})).result.tools || []).length === 9);
   let r = await tool('lage');
   T('lage aus dem echten Fenster', !r.err && /Wirtshaus zum letzten Krug/.test(r.text) && /Held: /.test(r.text), r.text);
   r = await tool('buch', { typ: 'person', name: 'Brannok Hornhand', kurz: 'Schmied', stand: 'verbündet', spieler_wissen: true });

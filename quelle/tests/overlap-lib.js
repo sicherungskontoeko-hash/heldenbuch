@@ -100,6 +100,9 @@ const scanInPage = async () => {
   /* Nur das oberste betroffene Element melden (nicht jedes Kind einzeln) */
   const bad = [...open].filter((e) => ![...open].some((o) => o !== e && o.contains(e)));
   const res = bad.filter((e) => (last.get(e) || {}).why === 'verdeckt').map((e) => { const t = last.get(e); const r = e.getBoundingClientRect(); return { el: desc(e), text: label(e), by: t.by ? desc(t.by) + (t.by.closest ? ' in ' + desc(t.by.closest('#top,#bnav,.shbar,.mnav,#diceFab,.udo,#modal,.dlg') || t.by) : '') : '', at: [r.left, r.top, r.width, r.height].map(Math.round).join(',') }; });
+  /* Unerreichbar: Bedienelemente, die sich in keiner Scrollposition ganz zeigen lassen (z. B. Fenster höher als der Bildschirm) */
+  const unreach = bad.filter((e) => /^(BUTTON|INPUT|SELECT|TEXTAREA|SUMMARY|A)$/.test(e.tagName) && /^(ausserhalb|teilweise)$/.test((last.get(e) || {}).why) && e.getBoundingClientRect().height < vh * 0.8).map((e) => ({ el: desc(e), text: label(e), by: 'nicht erreichbar (' + last.get(e).why + ')', at: '' }));
+  res.push(...unreach);
   /* Abgeschnittene Beschriftungen von Knöpfen und Reitern */
   const cut = cand.filter((e) => /^(BUTTON|A|SUMMARY)$/.test(e.tagName) && e.scrollWidth > e.clientWidth + 3 && cs(e).overflowX !== 'visible' && (e.innerText || '').trim().length > 1).map((e) => ({ el: desc(e), text: label(e) }));
   const hscroll = document.documentElement.scrollWidth > vw + 1;

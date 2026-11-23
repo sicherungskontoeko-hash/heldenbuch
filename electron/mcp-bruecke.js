@@ -31,11 +31,14 @@ const TOOLS = [
   { name: 'naechster_zug', title: 'Nächster Zug', annotations: { readOnlyHint: false, destructiveHint: false },
     description: 'Beendet den aktuellen Zug, nennt den nächsten in der Initiative.',
     inputSchema: { type: 'object', properties: {} } },
+  { name: 'abend_abschliessen', title: 'Spielabend abschliessen', annotations: { readOnlyHint: false, destructiveHint: false },
+    description: 'Am Ende des Abends: speichert zusammenfassung (was geschah, wo die Helden stehen, offene Fäden, Haltung wichtiger Figuren, Beute; höchstens 250 Wörter) und gesamt (nachgeführte Zusammenfassung der ganzen Kampagne, höchstens 300 Wörter). Ein neuer Chat liest das mit lage. fuer_spieler: optional ohne Geheimnisse, geht als Handout an alle.',
+    inputSchema: { type: 'object', properties: { zusammenfassung: { type: 'string' }, gesamt: { type: 'string' }, titel: { type: 'string' }, fuer_spieler: { type: 'string' } }, required: ['zusammenfassung'] } },
   { name: 'wuerfeln', title: 'Würfeln', annotations: { readOnlyHint: false, destructiveHint: false },
     description: 'Würfelt für die Spielleitung, z. B. W20 oder 2W6+3. verdeckt=true: Spieler sehen es nicht.',
     inputSchema: { type: 'object', properties: { ausdruck: { type: 'string' }, wofuer: { type: 'string' }, verdeckt: { type: 'boolean' } }, required: ['ausdruck'] } }
 ];
-const INSTRUCTIONS = 'Heldenbuch: D&D-Tisch (Regeln 2024) der Spielleitung. Tokens sparen: zuerst lage, danach lage mit nur_neu=true; voll und nachschlagen nur bei Bedarf. ' +
+const INSTRUCTIONS = 'Heldenbuch: D&D-Tisch (Regeln 2024) der Spielleitung. Tokens sparen: zuerst lage (beginnt mit dem Spielstand), danach lage mit nur_neu=true; voll und nachschlagen nur bei Bedarf. Am Ende des Abends abend_abschliessen. ' +
   'Antworte kurz auf Deutsch (Schweiz, ss statt ß). Die Spieler sehen nur Handouts (an_spieler) und geteilte Würfe. Ändere nur, worum die Spielleitung bittet.';
 
 function readInfo() { try { return JSON.parse(fs.readFileSync(INFO, 'utf8')); } catch (e) { return null; } }
