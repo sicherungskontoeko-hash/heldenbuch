@@ -18,6 +18,7 @@ const shots = process.argv[3];
     await tap('.card[data-arg="wiz"] .ii'); T(dev.n + ': Klassen-ⓘ öffnet Karte, ohne zu wählen', (await open()) && (await p.evaluate(() => cur().cls)) !== 'wiz');
     T(dev.n + ': Klassenkarte zeigt Beschreibung und Werte', await p.evaluate(() => /Magier/.test($('.infodlg .ihd').textContent) && !!$('.infodlg .iflav') && /Trefferwürfel/.test($('.infodlg .idl').textContent)));
     if (shots) await p.screenshot({ path: path.join(shots, dev.n + '-klasse.png') });
+    T(dev.n + ': Klassenkarte zeigt das Bild gross', await p.evaluate(() => { const i = $('.infodlg .ipic.pic-cls-wiz'); if (!i) return false; const r = i.getBoundingClientRect(); return r.width >= Math.min(300, innerWidth - 80) && r.height > 150 && getComputedStyle(i).backgroundImage.startsWith('url'); }));
     await tap('.infodlg .ipick'); T(dev.n + ': „Wählen“ wählt die Klasse und schliesst', (await p.evaluate(() => cur().cls)) === 'wiz' && !(await open()));
     await tap('.card[data-arg="wiz"]'); T(dev.n + ': Karte selbst antippen wählt direkt (kein Pop-up)', !(await open()));
     await tap('.card[data-arg="wiz"] .ii'); T(dev.n + ': gewählte Klasse: „✓ Gewählt“ statt Knopf', await p.evaluate(() => !!$('.infodlg .ihint.ok') && !$('.infodlg .ipick')));
@@ -26,6 +27,7 @@ const shots = process.argv[3];
     await p.evaluate(() => { S.step = 1; render(); });
     await tap('.card[data-arg="dwarf"] .ii'); T(dev.n + ': Spezies-Karte mit Merkmalen', await p.evaluate(() => /Zwerg/.test($('.infodlg').textContent) && document.querySelectorAll('.infodlg .ifeats details').length >= 3));
     if (shots) await p.screenshot({ path: path.join(shots, dev.n + '-spezies.png') });
+    T(dev.n + ': Spezies-Karte zeigt das Bild gross und passt ins Fenster', await p.evaluate(() => { const i = $('.infodlg .ipic.pic-sp-dwarf'); if (!i) return false; const r = i.getBoundingClientRect(), d = $('.infodlg').getBoundingClientRect(); return r.width >= Math.min(300, innerWidth - 80) && r.left >= d.left && r.right <= d.right; }));
     await p.mouse.click(5, 5); T(dev.n + ': Tippen neben die Karte schliesst', !(await open()));
     await tap('.card[data-arg="sage"] .ii'); T(dev.n + ': Hintergrund-Karte nennt Talent, Fertigkeiten, Ausrüstung', await p.evaluate(() => /Fertigkeiten/.test($('.infodlg').textContent) && /Ausrüstung/.test($('.infodlg').textContent)));
     await p.keyboard.press('Escape');
@@ -54,6 +56,8 @@ const shots = process.argv[3];
     /* Unterklasse */
     await p.evaluate(() => { cur().cls = 'fig'; cur().level = 3; S.step = 0; render(); });
     await tap('#a-sub + .opts .opt .ii'); T(dev.n + ': Unterklassen-Karte listet Merkmale', await p.evaluate(() => document.querySelectorAll('.infodlg .ifeats details').length >= 3));
+    T(dev.n + ': Unterklassen-Karte beginnt mit einem Beschrieb', await p.evaluate(() => ($('.infodlg .iflav') || {}).textContent.length > 60));
+    T(dev.n + ': Jede Unterklasse hat einen Beschrieb', await p.evaluate(() => Object.entries(CLASSES).every(([k, C]) => (C.subs || []).every((sb) => sb.desc && sb.desc.length > 40))), await p.evaluate(() => Object.entries(CLASSES).flatMap(([k, C]) => (C.subs || []).filter((sb) => !sb.desc).map((sb) => k + '/' + sb.id))));
     await p.keyboard.press('Escape');
     /* kein Überlauf auf dem Handy */
     if (dev.mobile) { const ow = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1); T('handy: keine waagrechte Scrollleiste', !ow); }

@@ -215,3 +215,43 @@ const MORE_HB_SUBS = {
 };
 for (const [id, list] of Object.entries(MORE_SUBS)) { const C = CLASSES[id]; if (!C || !C.subs) continue; for (const sb of list) if (!C.subs.some((x) => x.id === sb.id)) C.subs.push(sb); }
 for (const [id, sb] of Object.entries(MORE_HB_SUBS)) { const C = CLASSES[id]; if (C && C.subs && !C.subs.some((x) => x.id === sb.id)) C.subs.push(sb); }
+
+/* Kurzbeschriebe für Unterklassen ohne eigenen Text (in eigenen Worten) */
+const SUB_DESC = {
+ 'bar/berserker': 'Dein Zorn kennt kein Mass. Im Kampfrausch schlägst du rücksichtslos zu, schüttelst Furcht und Bezauberung ab und lässt jeden, der dich trifft, sofort dafür bezahlen.',
+ 'bar/glut': 'In dir glimmt ein Feuer, das der Kampfrausch entfacht. Deine Schläge brennen, du springst durch die Reihen der Feinde, und selbst am Boden lodert die Glut noch einmal auf.',
+ 'brd/lore': 'Du sammelst Geschichten, Geheimnisse und Zauber aus allen Ecken der Welt. Mit spitzen Worten bringst du Feinde aus dem Takt und lernst Magie, die anderen Barden verschlossen bleibt.',
+ 'brd/stars': 'Deine Lieder folgen den Sternbildern. Deine Inspiration schützt Verbündete wie ein Leitstern, und wenn du singst, fällt Sternenlicht auf das Schlachtfeld.',
+ 'cle/life': 'Du dienst den Göttern der Heilung. Deine Heilzauber wirken stärker als die anderer Kleriker, und mit göttlicher Macht holst du ganze Gruppen vom Rand des Todes zurück.',
+ 'cle/tide': 'Dein Gott herrscht über Meer und Strömung. Du schwimmst wie ein Fisch, spülst Feinde mit einer Welle fort und trägst Verbündete mit jeder Heilung an sicherere Orte.',
+ 'dru/land': 'Du bist mit einer Landschaft verbunden – Wüste, Eis, Wald oder Dschungel. Ihre Zauber sind dir immer zur Hand, und ihre Kraft schützt dich und deine Gefährten.',
+ 'dru/storm': 'Du hörst den Wind in den Baumkronen. Statt eine Tiergestalt anzunehmen, hüllst du dich in einen Sturm, schwebst über dem Boden, wirfst Feinde um und leitest Blitze ab.',
+ 'fig/champion': 'Du setzt auf reine körperliche Überlegenheit. Deine Treffer werden öfter kritisch, du bist athletischer als andere und hältst durch, wenn alle anderen fallen.',
+ 'fig/warden': 'Du stehst zwischen deinen Freunden und der Gefahr. Wer an dir vorbei will, wird bestraft, Verbündete neben dir sind schwerer zu treffen, und du durchschaust Gegner mit einem Blick.',
+ 'mon/openhand': 'Du meisterst den waffenlosen Kampf bis zur Vollendung. Deine Schläge werfen Gegner um, stossen sie fort oder rauben ihnen die Reaktion – und dein Körper heilt sich selbst.',
+ 'mon/water': 'Du kämpfst wie ein Fluss: weich und unaufhaltsam. Deine Schläge reichen wie Wasserpeitschen weit, Treffer gleiten an dir ab, und auf dem Höhepunkt reisst ein Strudel alle um dich mit.',
+ 'pal/devotion': 'Du hast geschworen, Güte, Ehrlichkeit und Ehre zu verteidigen – das Bild des strahlenden Ritters. Deine Waffe leuchtet heilig, und deine Aura schützt Verbündete vor Bezauberung.',
+ 'pal/dawn': 'Du trägst das erste Licht des Tages in die Dunkelheit. Deine Waffe strahlt gegen Untote, deine Freunde schöpfen Kraft für den Kampf, und in deiner Aura fällt niemand so schnell.',
+ 'ran/hunter': 'Du hast gelernt, die gefährlichsten Bestien und Feinde zu jagen. Du erkennst die Schwächen deiner Beute, triffst verletzte Gegner härter und weisst dich gegen eine Übermacht zu schützen.',
+ 'ran/stormh': 'Du jagst bei Blitz und Donner. Deine Treffer knistern vor Elektrizität, du liest das Wetter wie eine Fährte, und später springt dein Blitz von Feind zu Feind.',
+ 'rog/thief': 'Einbrecher, Taschendieb, Schatzjäger. Du bist flinker mit den Fingern als andere, kletterst Fassaden hoch und kannst später fast jeden magischen Gegenstand benutzen.',
+ 'rog/poison': 'Du kennst jedes Kraut und jede Drüse, die tötet oder lähmt. Nach jeder Rast mischst du Gifte für deine Klingen, und dir selbst kann Gift kaum etwas anhaben.',
+ 'sor/draconic': 'In deinen Adern fliesst das Blut eines Drachen. Deine Haut wird zäh wie Schuppen, deine Zauber tragen die Kraft deines Ahnen, und später wachsen dir Drachenflügel.',
+ 'sor/moon': 'Deine Magie folgt dem Mond. Nach jeder Rast wählst du eine Mondphase, die deine Zauber verändert, und im Silberschleier springst du davon und lässt ein Trugbild zurück.',
+ 'wlk/fiend': 'Du hast einen Pakt mit einem Wesen der Unterwelt geschlossen. Fallende Feinde stärken dich, Feuer gehört zu deinem Repertoire, und später schleuderst du Gegner kurz durch die Hölle.',
+ 'wiz/evoker': 'Du formst rohe Energie zu Feuer, Blitz und Kälte. Deine Schadenszauber treffen härter, und du kannst Verbündete aus ihrem Wirkungsbereich aussparen.',
+ 'wiz/chrono': 'Du hast gelernt, an den Fäden der Zeit zu ziehen. Du lässt Würfe neu würfeln, beschleunigst und verlangsamst mühelos und springst im Notfall in den Moment vor deinem Fall zurück.',
+ 'rk/guard': 'Deine Runen sind Schild und Mauer. Du schützt Verbündete in deiner Nähe, teilst deine Schutzrune mit ihnen und wirst am Ende zur lebendigen Festung.',
+ 'rk/war': 'Du ritzt Glut und Sturm in deine Klingen. Deine runenbeschrifteten Waffen schlagen mit Elementarkraft zu und entladen sich bei kritischen Treffern rund um das Ziel.',
+ 'rk/shift': 'Deine Runen biegen den Raum. Du springst kurze Strecken durch die Luft, versetzt getroffene Gegner und weichst Angriffen aus, indem du einfach woanders bist.',
+ 'bw/battle': 'Du kämpfst an vorderster Front und nährst deine Magie mit dem eigenen Blut. Du trägst Rüstung, führst Kriegswaffen mit deiner Konstitution und wirst mit jedem Opfer zäher.',
+ 'bw/vein': 'Du knüpfst unsichtbare Fäden in die Adern deiner Feinde. Wer markiert ist, wird schwächer, trägt einen Teil deines Schmerzes und tanzt am Ende wie eine Marionette.',
+ 'bw/life': 'Du verwebst dein Blut mit dem deiner Gefährten. Du heilst über Distanz, fängst Fallende auf, bevor sie sterben, und hältst die Gruppe mit deinem eigenen Herzschlag am Leben.',
+ 'fk/blade': 'Du bindest eine Waffe an deine Seele. Sie trifft mit deinem Charisma, giert nach deinem markierten Ziel und schenkt dir das Leben derer, die du fällst.',
+ 'fk/judge': 'Du sprichst Urteile über die Feinde der Ordnung. Deine Flüche schwächen und lassen verstummen, dein Ziel kann nicht fliehen, und seine Zauber prallen an deinem Spruch ab.',
+ 'fk/shadow': 'Du jagst aus der Dunkelheit. Du springst von Schatten zu Schatten, bremst fliehende Beute und schlägst unsichtbar zu, wenn dein Ziel schon wankt.',
+ 'ma/combat': 'Du baust dir deine eigene Kriegsrüstung. Schwere Panzerung, Waffen mit Blitz- oder Feuerschaden und am Ende ein Schlachtanzug machen dich zur wandelnden Maschine.',
+ 'ma/field': 'Du kämpfst mit Fallen, Fernzündern und Barrikaden. Bevor der Feind angreift, hast du das Gelände längst vorbereitet.',
+ 'ma/alch': 'Du mischst Säuren und Brandsätze in Phiolen. Deine Wurfgeschosse brennen und ätzen, kleben Gegner am Boden fest und gipfeln im Grossen Werk – einer gewaltigen Explosion.'
+};
+for (const [k, C] of Object.entries(CLASSES)) for (const sb of C.subs || []) if (!sb.desc && SUB_DESC[k + '/' + sb.id]) sb.desc = SUB_DESC[k + '/' + sb.id];
