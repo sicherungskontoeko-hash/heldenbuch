@@ -584,9 +584,9 @@ function renderBuild(c) {
     if (ch.method === 'standard') body += '<p class="hint">Verteile 15, 14, 13, 12, 10 und 8. Für ' + c.cls.name + ' zuerst ' + c.cls.prim.map((a) => AB_DE[a]).join(' und ') + '.</p>';
     body += '<div class="abgrid" id="a-abil">' + AB.map((a) => {
       let inp;
-      if (ch.method === 'standard') inp = sel('base.' + a, ch.base[a], [15, 14, 13, 12, 10, 8].map((v) => [v, v]), 'data-type="num"');
+      if (ch.method === 'standard') inp = sel('base.' + a, ch.base[a], [15, 14, 13, 12, 10, 8].map((v) => [v, v]), 'data-type="num" aria-label="' + AB_DE[a] + '"');
       else if (ch.method === 'pointbuy') inp = '<div class="stepper"><button data-act="pb" data-path="' + a + '" data-arg="-1" aria-label="weniger">−</button><b>' + ch.base[a] + '</b><button data-act="pb" data-path="' + a + '" data-arg="1" aria-label="mehr">+</button></div>';
-      else inp = num('base.' + a, ch.base[a], 'min="1" max="20"');
+      else inp = num('base.' + a, ch.base[a], 'min="1" max="20" aria-label="' + AB_DE[a] + '"');
       return '<div class="abbox' + (c.cls.prim.includes(a) ? ' prim' : '') + '"><span class="abn">' + AB_DE[a] + '</span>' + inp + '<div class="abres"><b>' + c.abil[a] + '</b><span>' + sgn(c.mod[a]) + '</span></div><small>' + c.breakdown[a].slice(1).join(' · ') + '</small></div>';
     }).join('') + '</div>';
     const lvls = c.asiSlots;
@@ -660,7 +660,7 @@ function renderBuild(c) {
   if (st === 6) {
     body += '<h2>Abschluss</h2><p class="hint">Gib deinem Helden einen Namen und eine Geschichte. Danach kannst du ihn sichern und losspielen.</p><div class="row">' + field('Name', txt('name', ch.name === 'Neuer Held' ? '' : ch.name, 'z. B. Brakk Eisenfaust', 'autocomplete="off"')) + field('Spieler', txt('player', ch.player)) + '</div><h3>Porträt</h3>' + portraitPicker(ch) + (typeof diceRow === 'function' ? '<h3>Würfel-Set</h3>' + diceRow(ch) : '') + alignPicker(ch) + '<div class="row">' + field('Sprachen', txt('languages', ch.languages)) + '</div>' +
       field('Aussehen & Persönlichkeit', area('appearance', ch.appearance, 'Aussehen, Ideale, Bindungen, Makel …')) + field('Notizen', area('notes', ch.notes, 'Hintergrundgeschichte, Kampagnennotizen …', 6));
-    body += '<div class="finish"><h3>' + (c.warn.length ? 'Fast geschafft' : 'Dein Held ist bereit') + '</h3><p class="hint" style="margin:0">' + (c.warn.length ? 'Es sind noch ' + c.warn.length + ' Auswahl(en) offen (rechts antippen). Du kannst trotzdem schon sichern.' : 'Sichere ihn als Datei, damit du ihn jederzeit wieder laden oder weitergeben kannst.') + '</p><div class="chips"><button class="btn big" data-act="exportOne" data-arg="' + ch.id + '">Helden exportieren</button><button class="btn big ghost" data-act="view" data-arg="sheet">Zum Charakterbogen</button></div></div>';
+    body += '<div class="finish"><h3>' + (c.warn.length ? 'Fast geschafft' : 'Dein Held ist bereit') + '</h3><p class="hint" style="margin:0">' + (c.warn.length ? 'Es sind noch ' + c.warn.length + ' Auswahl(en) offen (⚠ antippen). Du kannst trotzdem schon sichern.' : 'Sichere ihn als Datei, damit du ihn jederzeit wieder laden oder weitergeben kannst.') + '</p><div class="chips"><button class="btn big" data-act="exportOne" data-arg="' + ch.id + '">Helden exportieren</button><button class="btn big ghost" data-act="view" data-arg="sheet">Zum Charakterbogen</button></div></div>';
   }
   const nav = '<div class="stepnav">' + (st > 0 ? '<button class="btn ghost" data-act="step" data-arg="' + (st - 1) + '">← ' + STEPS[st - 1] + '</button>' : '<span></span>') + (st < STEPS.length - 1 ? '<button class="btn" data-act="step" data-arg="' + (st + 1) + '">' + STEPS[st + 1] + ' →</button>' : '<button class="btn" data-act="view" data-arg="sheet">Losspielen →</button>') + '</div>';
   return '<div class="build"><ol class="steps" aria-label="Schritte">' + STEPS.map((s, i) => '<li><button class="' + (i === st ? 'on' : '') + '" data-act="step" data-arg="' + i + '"' + (i === st ? ' aria-current="step"' : '') + ' title="' + esc(s) + '"><span>' + (i + 1) + '</span><em>' + s + '</em></button></li>').join('') + '</ol><section class="panel">' + body + nav + '</section>' + summary(c) + '</div>';
@@ -1054,8 +1054,8 @@ function renderSpellBook() {
   const f = S.sf; const q = f.q.trim().toLowerCase();
   const list = allSpells(S.hb).filter((s) => (f.lvl === 'all' || s.lvl === +f.lvl) && (f.cls === 'all' || s.classes.includes(f.cls)) && (!q || (s.name + ' ' + s.en + ' ' + s.text).toLowerCase().includes(q)));
   return '<div class="book"><div class="filters"><input type="search" id="sq" value="' + esc(f.q) + '" placeholder="Zauber suchen (deutsch oder englisch) …" aria-label="Suche">' +
-    '<select id="sl">' + [['all', 'Alle Grade'], ['0', 'Zaubertricks']].concat([1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => [String(g), 'Grad ' + g])).map(([v, l]) => '<option value="' + v + '"' + (f.lvl === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>' +
-    '<select id="sc"><option value="all">Alle Klassen</option>' + Object.entries(CLASSES).filter(([, C]) => C.caster).map(([k, C]) => '<option value="' + k + '"' + (f.cls === k ? ' selected' : '') + '>' + C.name + '</option>').join('') + '</select></div>' +
+    '<select id="sl" aria-label="Grad">' + [['all', 'Alle Grade'], ['0', 'Zaubertricks']].concat([1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => [String(g), 'Grad ' + g])).map(([v, l]) => '<option value="' + v + '"' + (f.lvl === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>' +
+    '<select id="sc" aria-label="Klasse"><option value="all">Alle Klassen</option>' + Object.entries(CLASSES).filter(([, C]) => C.caster).map(([k, C]) => '<option value="' + k + '"' + (f.cls === k ? ' selected' : '') + '>' + C.name + '</option>').join('') + '</select></div>' +
     '<p class="hint">' + list.length + ' Zauber · Auswahl aus dem SRD 5.2.1, eigene Zauber über „Hausregeln“.</p><div class="splist cvl">' + list.map((s) => spellCard(s, s.home ? 'Hausregel' : s.classes.map((k) => (CLASSES[k] || {}).name).filter(Boolean).join(', '), false)).join('') + '</div></div>';
 }
 
@@ -1104,7 +1104,7 @@ function saveCampPref() { try { localStorage.setItem('heldenbuch_camp', JSON.str
 function myRolls() { return S.log.filter((e) => (e.sides || e.share) && !e.preview).slice(0, 30).map((e) => ({ label: e.label, total: e.total, detail: e.detail, crit: !!e.crit, fumble: !!e.fumble, t: e.t, secret: !!e.secret, sides: e.sides || 0, nat: e.nat || 0, dset: e.dset || '' })); }
 function meDoc() {
   const ch = cur(); let c = null; try { c = derive(ch, S.hb); } catch (e) {}
-  return { char: ch.name.replace(/^Beispiel:\s*/, ''), pl: typeof myName === 'function' ? myName() : '', cls: ch.cls, pas: c ? [c.passive, 10 + c.skills.ins.val, 10 + c.skills.inv.val] : null, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: ch.play.hp ?? (c ? c.hpMax : 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0, dodge: !!(ch.play.fx || {}).dodge,
+  return { char: ch.name.replace(/^Beispiel:\s*/, ''), pl: typeof myName === 'function' ? myName() : '', cls: ch.cls, pas: c ? [c.passive, 10 + c.skills.ins.val, 10 + c.skills.inv.val] : null, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: c ? Math.min(ch.play.hp ?? c.hpMax, c.hpMax) : (ch.play.hp ?? 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0, dodge: !!(ch.play.fx || {}).dodge,
     cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], ans: typeof ansMine === 'function' ? ansMine() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, dice: ch.dice || '', diceAt: ch.diceAt || 0, t: Date.now() };
 }
 function queueMe() { if (!S.camp || !DB || !cur()) return; clearTimeout(meTimer); meTimer = setTimeout(writeMe, 250); }
@@ -1442,7 +1442,10 @@ function render0() {
   v.innerHTML = S.view === 'camp' ? renderCamp() : S.view === 'heroes' ? renderHeroes() : S.view === 'build' ? slimBanner('erschaffen', 'Held erschaffen<small class="bstep">Schritt ' + ((+S.step || 0) + 1) + ' von ' + STEPS.length + ' · ' + esc(STEPS[+S.step || 0]) + '</small>', 'Schritt für Schritt von der Klasse bis zur Ausrüstung – die App rechnet alles mit.') + renderBuild(c) : S.view === 'spells' ? slimBanner('zauberbuch', 'Zauberbuch', 'Alle Zauber des SRD 5.2.1 – deutsch und englisch durchsuchbar.') + renderSpellBook() : S.view === 'hb' ? slimBanner('hausregeln', 'Hausregeln', 'Eigene Inhalte und Regeloptionen für deinen Tisch.') + renderHB() : S.view === 'mobs' ? '<div class="camp">' + bestiaryView() + '</div>' : S.view === 'adv' && typeof renderAdv === 'function' ? renderAdv() : S.view === 'help' ? helpView() : renderSheet(c);
   if (keep) cvApply(v, keep); window.scrollTo(0, y); if (anc) cvHold(v, anc);
 }
-function commit(rerender = true) { const ch = cur(); if (ch) { ch.updated = Date.now(); persist('c', ch.id); } queueMe(); if (rerender) render(); }
+/* TP nie über dem Maximum speichern: Stufe senken oder Klasse/Spezies wechseln im Erschaffen kann das Maximum verkleinern.
+   Sonst sähen andere am Tisch z. B. «44/38», bis der Bogen einmal geöffnet wird. */
+function hpClamp(ch) { try { const P = ch.play; if (!P || P.hp == null) return; const m = derive(ch, S.hb).hpMax; if (P.hp > m) P.hp = m; } catch (e) {} }
+function commit(rerender = true) { const ch = cur(); if (ch) { ch.updated = Date.now(); hpClamp(ch); persist('c', ch.id); } queueMe(); if (rerender) render(); }
 function noHeroView() { return '<div class="camp"><div class="hero-intro banner" style="' + bannerStyle('paladin') + '"><h1>Noch kein Held</h1><p>Du hast im Moment keinen Helden. Erschaffe einen neuen oder lade einen gesicherten Helden.</p><div class="chips"><button class="btn big" data-act="newChar">Neuen Helden erschaffen</button><button class="btn ghost" data-act="loadSample">Beispielheld ansehen</button><button class="btn ghost" data-act="view" data-arg="heroes">Zu den Helden</button></div></div></div>'; }
 
 /* TP ändern (Schaden mit Temp-TP, 0 TP, Todesrettung, Massiver Schaden, Konzentration; Heilung; Temp-TP) */
