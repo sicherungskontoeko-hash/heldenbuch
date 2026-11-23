@@ -20,6 +20,8 @@ Das Heldenbuch gibt es in drei Formen. Alle drei können miteinander spielen, so
 
 > Tipp: Exportiere deine Helden ab und zu (Bogen → **Exportieren**). So hast du eine Sicherung.
 
+> Helden aus **D&D Beyond**: dort beim Charakter «Export PDF» wählen, dann im Heldenbuch unter **Helden → Helden aus Datei laden** das PDF öffnen. Vor dem Anlegen siehst du, was übernommen und was nur in die Notizen geschrieben wird.
+
 ---
 
 ## 2. Echte Apps bauen lassen (kostenlos, ca. 10 Minuten, nur einmal)

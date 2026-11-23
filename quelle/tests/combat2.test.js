@@ -91,7 +91,7 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
   T('Mehr Kreaturen (≥ 180)', await p.evaluate(() => Object.keys(BESTIARY).length >= 180), await p.evaluate(() => Object.keys(BESTIARY).length));
   T('Jede Kreatur hat einen Fundort und eine Empfehlung', await p.evaluate(() => Object.keys(BESTIARY).every((k) => MOB_HAB[k] && HABITATS[mobHab(k)[0]] && mobRec(BESTIARY[k][1]).txt !== '–')), await p.evaluate(() => Object.keys(BESTIARY).filter((k) => !MOB_HAB[k] || !CR_XP[BESTIARY[k][1]])));
   T('Alle Werte vollständig (RK, TP, Würfel, Angriffe)', await p.evaluate(() => Object.values(BESTIARY).every((m) => m.length >= 8 && m[2] > 0 && m[3] > 0 && /W/.test(m[4]) && m[7].length && m[7].every((a) => typeof a[1] === 'number'))));
-  T('TP-Würfel sind würfelbar', await p.evaluate(() => Object.values(BESTIARY).every((m) => rollExpr(m[4].replace(/−/g, '-')).total > 0)));
+  T('TP-Würfel sind würfelbar (Ergebnis wie beim Einsetzen mindestens 1)', await p.evaluate(() => Object.values(BESTIARY).every((m) => { const r = rollExpr(m[4].replace(/−/g, '-')); return Number.isFinite(r.total) && Math.max(1, r.total) > 0 && /W\d/.test(m[4]); })));
   T('Empfehlung plausibel: Goblin als Schar Stufe 1, Troll ~Stufe 4–7, Balor sehr hoch', await p.evaluate(() => mobRec('1/4').swarm && mobRec('5').lo >= 3 && mobRec('5').hi <= 8 && mobRec('19').lo >= 14), await p.evaluate(() => [mobRec('1/4'), mobRec('5'), mobRec('19')]));
   await p.evaluate(() => { S.view = 'mobs'; S.mhab = ''; render(); });
   T('Bestiarium nach Fundort gruppiert', await p.evaluate(() => document.querySelectorAll('.mhab').length >= 8));

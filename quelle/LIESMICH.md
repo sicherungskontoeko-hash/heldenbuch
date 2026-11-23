@@ -51,6 +51,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/desktop.test.js | Echte PC-App mit Electron (HB_ELECTRON, xvfb-run): Empfänger, Brücke mit der App als Node, Werkzeuge ändern das Fenster, Verbinden-Knopf, eingetragener Befehl startet wirklich |
 | tests/download.test.js | Download-Seite www/download.html: eigenes Gerät zuerst (Android, iPhone, Windows, Mac), feste Links passend zu package.json, Version, kein Querscrollen |
 | tests/pflege.test.js | Rückfrage zur Sicherung, Stolpersteine (Handy und PC), Server-Umstellung Mosquitto → HiveMQ (App) |
+| tests/ddbimport.test.js | D&D-Beyond-Import mit selbst erzeugtem Test-PDF (normal und komprimiert): Felder, Escapes, UTF-16, Nachbau, Abgleich, Vorschau, Anlegen, Abbrechen. Mit DDB_DIR=… zusätzlich echte Exporte (nur lokal, nie ins Repo) |
 | tests/verlauf.test.js | Würfelverlauf: Aufzeichnung, Speicherung, Filter, Wurf in Rückfragen |
 | tests/bogen.test.js | aufgeräumter Bogen: Kopfleiste mit Kernwerten, Kampfseite ohne Reiterwechsel, Heldenliste |
 | tests/hilfe.test.js | Hilfe-Stufen: was sichtbar ist, Regelprüfung ohne Zugleiste, Dialog, Willkommen |
@@ -93,6 +94,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | claudebr.js | Claude-Brücke: Werkzeuge für Claude Desktop (lage, nachschlagen, notieren, buch, an_spieler, gegner, naechster_zug, wuerfeln) mit kurzen Antworten; in der PC-App Empfang über window.hbDesk und Knopf «Mit Claude Desktop verbinden» im Claude-Fenster. Gegenstück: electron/main.js, preload.js, claude-desk.js (Empfänger auf 127.0.0.1 mit Schlüssel, Eintrag in claude_desktop_config.json), mcp-bruecke.js (MCP über stdin/stdout, von Claude Desktop mit der App als Node gestartet) |
 | stand.js | Spielstand: Zusammenfassungen der Abende und Gesamtstand je Buch (hb_stand), Reiter «Spielstand» im Chronik-Fenster, Entwurf aus der Chronik, Handout, Datei; Claude-Werkzeug abend_abschliessen; lage beginnt mit «Bisher» und zeigt Neues ab dem Abschluss; Abschnitt in der kopierten Lage |
 | pflege.js | Speicher absichern (navigator.storage.persist), Rückfrage «Spielabend sichern?» beim Start (≥ 10 eigene Würfe seit der letzten Sicherung, älter als 20 h, höchstens 1× pro Tag), Stolpersteine mit Ort und Zeit (hb_stolper, 100) |
+| ddbimport.js | Import des Charakterbogen-PDFs von D&D Beyond: liest die Formular-Widgets (/T, /V) direkt aus den Bytes, auch aus komprimierten Objektströmen; baut den Helden mit den Heldenbuch-Regeln nach, gleicht RK/TP/Initiative/Bewegung/Zauber-SG über «Sonstiges» an, schreibt Nicht-Abbildbares in die Notizen; Vorschau vor dem Anlegen. Fertigkeiten ohne Quelle im Heldenbuch landen in freeSkills/freeExp |
 | verlauf.js | Würfelverlauf: alle Würfe (Held, Kreaturen, Mitspieler) mit Details, auf dem Gerät gespeichert (200) |
 | hilfe.js | Hilfe-Stufe (Einsteiger · Standard · Erfahren): Erklärknöpfe, Einsteiger-Tipps, Zug-Leitfaden, Wurferklärung, Zugleiste an/aus, Nachbessern, Rechenweg |
 | spellflav.js | Zauberbilder: wie man sich jeden Zauber vorstellt |
