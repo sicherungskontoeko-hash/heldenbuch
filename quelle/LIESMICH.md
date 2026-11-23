@@ -47,6 +47,8 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/sitzung.test.js | Spielabend mit Abenteuer über den Online-Tisch: Handout, Kampf, Monsterangriff, Beute, geheime Tabellen |
 | tests/kbuch.test.js | Kampagnenbuch: anlegen, bearbeiten, Stand, Freigabe, Chronik, Buchwahl, Sicherung/Wiederherstellung, Claude-Lage (Handy und PC); Teilen am Tisch prüft sitzung.test.js |
 | tests/overlap.test.js, tests/overlap-lib.js | Überdeckungen: 9 Bildschirmgrössen × alle Ansichten und Fenster – jedes Bedienelement und jeder Text muss in einer Scrollposition unverdeckt sichtbar sein, keine abgeschnittenen Knöpfe, kein Querscrollen, deckende Leisten; auch im Kampf am Tisch (sitzung.test.js) |
+| tests/bruecke.test.js | Brücke ohne Tisch: MCP-Protokoll, Schlüssel/Herkunft, Werkzeuge gegen die echte App, Antwortlängen, geschlossene App, Eintrag in Claude Desktop (inkl. Store-Fassung, kaputte Datei); Werkzeuge am Tisch prüft sitzung.test.js |
+| tests/desktop.test.js | Echte PC-App mit Electron (HB_ELECTRON, xvfb-run): Empfänger, Brücke mit der App als Node, Werkzeuge ändern das Fenster, Verbinden-Knopf, eingetragener Befehl startet wirklich |
 | tests/pflege.test.js | Rückfrage zur Sicherung, Stolpersteine (Handy und PC), Server-Umstellung Mosquitto → HiveMQ (App) |
 | tests/verlauf.test.js | Würfelverlauf: Aufzeichnung, Speicherung, Filter, Wurf in Rückfragen |
 | tests/bogen.test.js | aufgeräumter Bogen: Kopfleiste mit Kernwerten, Kampfseite ohne Reiterwechsel, Heldenliste |
@@ -87,6 +89,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | chronik.js | Abenteuerverfolgung: Chronik der Spielleitung (automatisch + Notizen, je Abenteuer/Tisch), Ansagen der Spieler (Feld „Was tust du?“, Tisch-Dokument ans, Meta ansSeen), Mikrofon in claude.ai (dictation) |
 | slhelfer.js | Claude als Helfer der Spielleitung: Lagebericht (Szene, Gruppe, Kampf, Würfe) zum Kopieren/Teilen; in claude.ai direkte Antworten (Fähigkeit „sample“) |
 | kbuch.js | Kampagnenbuch: Personen, Orte, Aufträge als Reiter im Chronik-Fenster (hb_kbuch je Buch wie die Chronik), Freigabe an den Tisch (Meta kb, ohne geheime Notiz), Chronik-Einträge bei Stand/Freigabe, Spieleransicht «Bekannt», Abschnitt in der Claude-Lage |
+| claudebr.js | Claude-Brücke: Werkzeuge für Claude Desktop (lage, nachschlagen, notieren, buch, an_spieler, gegner, naechster_zug, wuerfeln) mit kurzen Antworten; in der PC-App Empfang über window.hbDesk und Knopf «Mit Claude Desktop verbinden» im Claude-Fenster. Gegenstück: electron/main.js, preload.js, claude-desk.js (Empfänger auf 127.0.0.1 mit Schlüssel, Eintrag in claude_desktop_config.json), mcp-bruecke.js (MCP über stdin/stdout, von Claude Desktop mit der App als Node gestartet) |
 | pflege.js | Speicher absichern (navigator.storage.persist), Rückfrage «Spielabend sichern?» beim Start (≥ 10 eigene Würfe seit der letzten Sicherung, älter als 20 h, höchstens 1× pro Tag), Stolpersteine mit Ort und Zeit (hb_stolper, 100) |
 | verlauf.js | Würfelverlauf: alle Würfe (Held, Kreaturen, Mitspieler) mit Details, auf dem Gerät gespeichert (200) |
 | hilfe.js | Hilfe-Stufe (Einsteiger · Standard · Erfahren): Erklärknöpfe, Einsteiger-Tipps, Zug-Leitfaden, Wurferklärung, Zugleiste an/aus, Nachbessern, Rechenweg |

@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-22T22:10:29+01:00
-- Revision (SHA-256 von index.html, gekürzt): 33a2d6af4eb27cdd
+- Zeitpunkt: 2026-11-23T09:07:41+01:00
+- Revision (SHA-256 von index.html, gekürzt): 1729c6de254a23ee
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v726
@@ -32,6 +32,9 @@
 | Kampagnenbuch in der App (kbuch.test.js app) | 0 | ✔ Keine Skriptfehler 40 / 40 bestanden  |
 | Überdeckungen: 9 Bildschirmgrössen, alle Ansichten (overlap.test.js) | 0 | ✔ Keine Skriptfehler 20 / 20 bestanden  |
 | Überdeckungen in der App (overlap.test.js app) | 0 | ✔ Keine Skriptfehler 20 / 20 bestanden  |
+| Claude-Desktop-Brücke: MCP, Empfänger, Einrichtung (bruecke.test.js) | 0 | ✔ Keine Skriptfehler 42 / 42 bestanden  |
+| Claude-Desktop-Brücke in der App (bruecke.test.js app) | 0 | ✔ Keine Skriptfehler 42 / 42 bestanden  |
+| PC-App echt: Electron + Brücke + Claude-Desktop-Eintrag (desktop.test.js) | 0 | ✔ App beendet: Info-Datei aufgeräumt 16 / 16 bestanden  |
 | Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
 | Aufgeräumter Bogen: Kopfleiste, Kampfseite, Heldenliste (bogen.test.js) | 0 | ✔ Keine Skriptfehler 38 / 38 bestanden  |
 | Würfelverlauf (verlauf.test.js) | 0 | ✔ Keine Skriptfehler 24 / 24 bestanden  |
@@ -69,6 +72,6 @@
 | Online-Tisch (net.test.js) | 0 | ✔ Nach Verbindungsabbruch: Spieler verbindet neu, Würfe kommen an 7 / 7 bestanden  |
 | Selbst-Update Android-App (boot.test.js) | 0 | ✔ Im normalen Browser: keine Update-Logik 16 / 16 bestanden  |
 | Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js) | 0 | ✔ Handy: kein Querscrollen bei den Spielern 18 / 18 bestanden  |
-| Spielabend mit Abenteuer: SL + 2 Spieler (sitzung.test.js) | 0 | ✔ Laptop der SL: kein Querscrollen (Tisch, Abenteuer) 45 / 45 bestanden  |
+| Spielabend mit Abenteuer: SL + 2 Spieler (sitzung.test.js) | 0 | ✔ Laptop der SL: kein Querscrollen (Tisch, Abenteuer) 54 / 54 bestanden  |
 
 Gesamtergebnis: alle Suiten bestanden
