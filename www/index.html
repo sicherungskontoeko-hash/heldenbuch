@@ -7,7 +7,7 @@
    weil die App ihre Adresse (localhost) dabei nicht wechselt.
    Sicherung: Startet eine heruntergeladene Version nicht sauber, wird sie verworfen und die eingebaute genutzt. */
 (function () {
-  var BUILD = 1795436242, VER = '1.9';
+  var BUILD = 1795438971, VER = '1.9';
   var REMOTE = 'https://sicherungskontoeko-hash.github.io/heldenbuch/';
   var C = window.Capacitor; var native = !!(C && (typeof C.isNativePlatform === 'function' ? C.isNativePlatform() : C.isNative));
   if (window.HB_BOOT_TEST) native = true; /* nur für Tests */
@@ -2034,7 +2034,13 @@ const SPECIES = {
   choice:{key:'legacy', label:'Unholdes Erbe', opts:{abyssal:'Abyssisch (Gift)',chthonic:'Chthonisch (Nekrotisch)',infernal:'Infernalisch (Feuer)'}},
   traits:(c)=>{ const L=c.char.speciesChoice||'infernal'; const t={abyssal:'Resistenz gegen Giftschaden. Giftspray; ab 3: Strahl der Übelkeit; ab 5: Person festhalten.',chthonic:'Resistenz gegen nekrotischen Schaden. Kältegriff; ab 3: Falsches Leben; ab 5: Schwächestrahl.',infernal:'Resistenz gegen Feuerschaden. Feuerpfeil; ab 3: Höllischer Tadel; ab 5: Dunkelheit.'}[L];
    return [['Dunkelsicht','18 m.'],['Unholdes Erbe',t+' Grad-Zauber je 1× pro langer Rast ohne Platz.'],['Jenseitige Präsenz','Du kennst Thaumaturgie.']]; },
-  spells:(c)=>{ const L=c.char.speciesChoice||'infernal'; const m={abyssal:['poison-spray','ray-of-sickness','hold-person'],chthonic:['chill-touch','false-life','ray-of-enfeeblement'],infernal:['fire-bolt','hellish-rebuke','darkness']}[L]; return ['thaumaturgy',m[0]].concat(c.level>=3&&m[1]?[m[1]]:[]).concat(c.level>=5&&m[2]?[m[2]]:[]); } }
+  spells:(c)=>{ const L=c.char.speciesChoice||'infernal'; const m={abyssal:['poison-spray','ray-of-sickness','hold-person'],chthonic:['chill-touch','false-life','ray-of-enfeeblement'],infernal:['fire-bolt','hellish-rebuke','darkness']}[L]; return ['thaumaturgy',m[0]].concat(c.level>=3&&m[1]?[m[1]]:[]).concat(c.level>=5&&m[2]?[m[2]]:[]); } },
+ /* Aus dem SRD 5.1 (CC-BY-4.0, ältere Regeln). Attributsboni kommen nach den Regeln 2024 vom Hintergrund. */
+ halfelf:{ name:'Halbelf', size:'Mittelgross', speed:9, dv:18, extraSkills:2, legacy:true,
+  traits:(c)=>[['Dunkelsicht','18 m.'],['Feenahnen','Vorteil auf Rettungswürfe gegen bezaubert. Magie kann dich nicht in Schlaf versetzen.'],['Vielseitigkeit','Übung in zwei Fertigkeiten deiner Wahl.'],['Sprachen','Gemeinsprache, Elfisch und eine weitere Sprache.'],['Ältere Spezies (SRD 5.1)','Die Attributsboni der alten Regeln entfallen; sie kommen nach den Regeln 2024 vom Hintergrund.']] },
+ halforc:{ name:'Halbork', size:'Mittelgross', speed:9, dv:18, skills:['itm'], legacy:true,
+  traits:(c)=>[['Dunkelsicht','18 m.'],['Bedrohlich','Übung in Einschüchtern.'],['Unerbittliche Ausdauer','Fällst du auf 0 TP, ohne sofort zu sterben, hast du stattdessen 1 TP. 1× pro langer Rast.'],['Wilde Angriffe','Bei einem kritischen Treffer mit einer Nahkampfwaffe würfelst du einen Schadenswürfel der Waffe zusätzlich.'],['Sprachen','Gemeinsprache und Orkisch.'],['Ältere Spezies (SRD 5.1)','Die Attributsboni der alten Regeln entfallen; sie kommen nach den Regeln 2024 vom Hintergrund.']],
+  res:(c)=>[{k:'rel',n:'Unerbittliche Ausdauer',max:1,reset:'long'}] }
 };
 
 /* ---------- Hintergründe ---------- */
@@ -2061,6 +2067,8 @@ const FEATS = {
  'fs-defense':{ name:'Kampfstil: Verteidigung', cat:'style', text:'+1 RK, solange du leichte, mittelschwere oder schwere Rüstung trägst.', defense:true },
  'fs-gwf':{ name:'Kampfstil: Kampf mit grossen Waffen', cat:'style', text:'Würfelst du Schaden mit einer zweihändigen oder beidhändig geführten vielseitigen Nahkampfwaffe, zählt jede 1 oder 2 als 3.' },
  'fs-twf':{ name:'Kampfstil: Kampf mit zwei Waffen', cat:'style', text:'Beim zusätzlichen Angriff mit einer leichten Waffe addierst du deinen Attributsmodifikator zum Schaden.' },
+ 'fs-duel':{ name:'Kampfstil: Duellieren', cat:'style', text:'+2 auf den Schaden, wenn du eine Nahkampfwaffe in einer Hand führst und keine andere Waffe (SRD 5.1).', duel:true },
+ 'fs-prot':{ name:'Kampfstil: Schützen', cat:'style', text:'Mit Schild: Greift eine Kreatur, die du siehst, ein anderes Ziel in 1,5 m von dir an, kannst du mit deiner Reaktion Nachteil auf den Angriffswurf verursachen (SRD 5.1).' },
  'boon-combat':{ name:'Gabe der Kampfkraft', cat:'epic', text:'+1 auf ein Attribut (max. 30). Einmal pro Zug darfst du einen verfehlten Angriff in einen Treffer verwandeln.', plus:AB, cap30:true },
  'boon-dim':{ name:'Gabe der Dimensionsreise', cat:'epic', text:'+1 auf ein Attribut (max. 30). Nach Angriff oder Magieaktion darfst du dich 9 m teleportieren.', plus:AB, cap30:true },
  'boon-fate':{ name:'Gabe des Schicksals', cat:'epic', text:'+1 auf ein Attribut (max. 30). 2W4 auf einen W20-Test in 18 m addieren oder abziehen (zurück bei Initiative oder Rast).', plus:AB, cap30:true },
@@ -2801,7 +2809,7 @@ function newChar(over) {
     bg: 'soldier', bgCustom: { name: 'Eigener Hintergrund', abil: ['str','dex','con'], skills: ['ath','prc'], feat: 'alert' },
     bgMode: '21', bgPlus: { str: 2, con: 1 },
     method: 'standard', base: { str: 15, dex: 13, con: 14, int: 8, wis: 12, cha: 10 },
-    classSkills: [], extraSkills: [], expertise: [], freeSkills: [], freeExp: [], humanFeat: 'skilled',
+    classSkills: [], extraSkills: [], expertise: [], freeSkills: [], freeExp: [], bonusSpells: [], humanFeat: 'skilled',
     asi: {}, styles: [], invocations: [], mi: {},
     cantrips: [], spells: [], book: [], arcanum: {},
     armor: 'none', armorBonus: 0, shield: false, shieldBonus: 0, mageArmor: false,
@@ -2852,7 +2860,7 @@ function derive(ch, hb) {
   const mOf = (id) => (id === ch.cls ? ch : multi.find((m) => m.cls === id) || {});
   const ord = (id) => (lv(id) ? mOf(id).order || '' : '');
   const classList = [{ id: ch.cls, C: cls, lvl: levels[ch.cls], primary: true, m: ch, idx: -1 }].concat(multi.filter((m) => levels[m.cls] > 0).map((m, i) => ({ id: m.cls, C: CLASSES[m.cls], lvl: levels[m.cls], primary: false, m, idx: (ch.multi || []).indexOf(m) })));
-  for (const e of classList) { const C = e.C; const chosen = C.subs ? C.subs.find((s) => s.id === e.m.sub) : null; e.subChosen = !C.subs || !!chosen; const sb = chosen || (C.subs ? { name: '', feats: [], id: null } : { name: C.sub.name, feats: C.subFeats, id: C.sub.id }); if (C.subs && e.m.sub && !chosen) warn0.push('Unbekannte Unterklasse „' + e.m.sub + '“ bei ' + C.name + ' – bitte neu wählen.'); e.subName = sb.name; e.subFeats = sb.feats; e.subId = sb.id; e.subGrant = (chosen || !C.subs) ? sb.grant || null : null; e.subSpells = chosen ? chosen.spells : C.subs ? null : C.sub.spells; }
+  for (const e of classList) { const C = e.C; const chosen = C.subs ? (e.m.sub === 'eigen' ? { id: 'eigen', name: e.m.subName || 'Eigene Unterklasse', feats: [], spells: (e.m.subSpells || []).some((id) => getSpell(id, hb)) ? { 1: e.m.subSpells.filter((id) => getSpell(id, hb)) } : null, custom: true } : C.subs.find((s) => s.id === e.m.sub)) : null; e.subChosen = !C.subs || !!chosen; const sb = chosen || (C.subs ? { name: '', feats: [], id: null } : { name: C.sub.name, feats: C.subFeats, id: C.sub.id }); if (C.subs && e.m.sub && !chosen) warn0.push('Unbekannte Unterklasse „' + e.m.sub + '“ bei ' + C.name + ' – bitte neu wählen.'); e.subName = sb.name; e.subFeats = sb.feats; e.subId = sb.id; e.subGrant = (chosen || !C.subs) ? sb.grant || null : null; e.subSpells = chosen ? chosen.spells : C.subs ? null : C.sub.spells; }
   const subOf = (id) => (classList.find((e) => e.id === id) || {}).subId;
   const sp = SPECIES[ch.species] || SPECIES.human;
   const bg = bgOf(ch);
@@ -2953,9 +2961,11 @@ function derive(ch, hb) {
   const cs = (ch.classSkills || []).filter((s) => cls.skills.includes(s));
   cs.slice(0, cls.skillN).forEach((s) => addP(s, cls.name));
   if (cs.length < cls.skillN) warn.push(cls.name + ': ' + (cls.skillN - cs.length) + ' Fertigkeit(en) wählen.');
+  (sp.skills || []).forEach((s) => addP(s, sp.name));
   if (sp.skillPick) { if (ch.speciesSkill && sp.skillPick.includes(ch.speciesSkill)) addP(ch.speciesSkill, sp.name); else warn.push(sp.name + ': Fertigkeit wählen.'); }
   let extraN = 0; const extraSrc = [];
   c.feats.forEach((x) => { if (x.f.skills) { extraN += x.f.skills; extraSrc.push(x.f.name); } });
+  if (sp.extraSkills) { extraN += sp.extraSkills; extraSrc.push(sp.name); }
   if (lv('brd') >= 3 && subOf('brd') === 'lore') { extraN += 3; extraSrc.push('Schule des Wissens'); }
   if (lv('bar') >= 3) { extraN += 1; extraSrc.push('Urwissen'); }
   if (lv('brd') >= 3 && subOf('brd') === 'stars') { addP('arc', 'Himmelskunde'); addP('nat', 'Himmelskunde'); }
@@ -3155,6 +3165,7 @@ function derive(ch, hb) {
   const extra = [];
   if (sp.spells) { const ab = ch.speciesSpellAbility || 'wis'; sp.spells(c).forEach((id) => { extra.push({ id, src: sp.name, ab }); const s = getSpell(id, hb); if (s && s.lvl > 0) res.push({ k: 'sp_' + id, n: s.name + ' (' + sp.name + ')', max: 1, reset: 'long', species: true }); }); }
   c.feats.forEach((x) => { if (x.f.mi) { const m = ch.mi[x.slot === 'asi' ? 'asi' + x.lv : x.slot] || {}; const ab = m.ability || 'wis'; (m.cantrips || []).slice(0, x.f.miC || 2).forEach((id) => extra.push({ id, src: x.f.name, ab })); if (m.spell && x.f.miSpell !== false) { extra.push({ id: m.spell, src: x.f.name, ab }); res.push({ k: 'mi_' + (x.slot === 'asi' ? 'asi' + x.lv : x.slot), n: (getSpell(m.spell, hb) || {}).name + ' (gratis)', max: 1, reset: 'long' }); } if ((m.cantrips || []).length < (x.f.miC || 2) || (x.f.miSpell !== false && !m.spell)) warn.push(x.f.name + ': Zauber wählen.'); } });
+  (ch.bonusSpells || []).forEach((b) => { if (b && getSpell(b.id, hb) && !extra.some((x) => x.id === b.id)) extra.push({ id: b.id, src: b.src || 'Übernommen', ab: AB.includes(b.ab) ? b.ab : 'cha' }); });
   c.extraSpells = extra.map((e) => Object.assign(e, { dc: 8 + pb + c.mod[e.ab], atk: pb + c.mod[e.ab] }));
   sc.anything = sc.has || extra.length > 0;
   c.spell = sc;
@@ -3194,11 +3205,12 @@ function derive(ch, hb) {
     let d = die;
     if (monkW && DIE_MAX(die) < DIE_MAX('1' + maDie) && die.startsWith('1')) d = '1' + maDie;
     if (shill) d = L >= 17 ? '2W6' : '1W' + (L >= 11 ? 12 : L >= 5 ? 10 : 8);
-    const dm = c.mod[ab] + bonus;
+    const duel = !ranged && !props.includes('two') && c.feats.some((x) => x.f.duel) ? 2 : 0;
+    const dm = c.mod[ab] + bonus + duel;
     const ds = (x) => x + (dm ? sgn(dm) : '');
     const atkParts = [AB_K[ab] + ' ' + sgn(c.mod[ab])].concat(ewB ? ['Elementarwaffe +' + ewB] : []).concat(p ? ['Übung ' + sgn(pb)] : ['keine Übung']).concat(bonus ? ['magisch ' + sgn(bonus)] : []).concat(archery && ranged ? ['Bogenschiessen +2'] : []).concat(atkMisc ? ['Sonstiges ' + sgn(atkMisc)] : []).concat(gun ? ['Perfektionierte Technik +1'] : []);
-    const dmgParts = [d].concat(dm ? [AB_K[ab] + (bonus ? ' + magisch' : '') + ' ' + sgn(dm)] : []);
-    const A = { atkParts, dmgParts, name: n + (bonus ? ' +' + bonus : '') + (shill ? ' (Shillelagh)' : ''), idx: i, ab, atk, die: d, vers: vers || null, dmod: dm, gwf: !ranged && (props.includes('two') || props.includes('versatile')), twoOnly: props.includes('two'), light: props.includes('light'), finesse: props.includes('finesse'), ranged, dmg: ds(d), dmg2: vers ? ds(vers) : null, dtype: DT[dt], prof: p,
+    const dmgParts = [d].concat(dm - duel ? [AB_K[ab] + (bonus ? ' + magisch' : '') + ' ' + sgn(dm - duel)] : []).concat(duel ? ['Duellieren +2 (einhändig, ohne zweite Waffe)'] : []);
+    const A = { atkParts, dmgParts, name: n + (bonus ? ' +' + bonus : '') + (shill ? ' (Shillelagh)' : ''), idx: i, ab, atk, die: d, vers: vers || null, dmod: dm, duel, gwf: !ranged && (props.includes('two') || props.includes('versatile')), twoOnly: props.includes('two'), light: props.includes('light'), finesse: props.includes('finesse'), ranged, dmg: ds(d), dmg2: vers ? ds(vers) : null, dtype: DT[dt], prof: p,
       props: props.map((x) => PROP_DE[x]).join(', ') + (range ? ' (' + range + ' m)' : ''), mastery: masteryAny && w.mastery ? mas : null, melee: !ranged, rage: rageDmg && ab === 'str' && !ranged && ar.type !== 'heavy', shill };
     if (shill) { A.dtype = A.dtype + ' oder Energie'; A.vers = null; A.dmg2 = null; }
     att.push(A);
@@ -3266,6 +3278,7 @@ function derive(ch, hb) {
   if (c.feats.some((x) => x.id === 'fs-gwf') && !(ch.weapons || []).some((w) => WEAPONS[w.w] && (WEAPONS[w.w][5].includes('two') || WEAPONS[w.w][5].includes('versatile')))) hints.push('Kampf mit grossen Waffen nützt nur mit zweihändigen oder vielseitigen Nahkampfwaffen.');
   if (c.feats.some((x) => x.id === 'fs-twf') && (ch.weapons || []).filter((w) => WEAPONS[w.w] && WEAPONS[w.w][5].includes('light')).length < 2) hints.push('Kampf mit zwei Waffen braucht zwei leichte Waffen.');
   if (c.feats.some((x) => x.id === 'fs-defense') && ar.type === 'none') hints.push('Kampfstil Verteidigung wirkt nur mit Rüstung.');
+  if (c.feats.some((x) => x.id === 'fs-prot') && !ch.shield) hints.push('Kampfstil Schützen braucht einen Schild.');
   c.hints = hints;
   return c;
 }
@@ -3905,6 +3918,8 @@ const SPECIES_FLAVOR = {
   human: 'Anpassungsfähig, ehrgeizig und überall zu Hause. Menschen lernen schnell, schöpfen nach einer Rast neue Kraft und finden in jeder Klasse ihren Platz.',
   orc: 'Kräftig, ausdauernd und kaum zu fällen. Orks verfolgen ihre Ziele mit Wucht, sehen im Dunkeln und stehen wieder auf, wenn andere liegen bleiben.',
   tiefling: 'Ein Hauch der Unterwelt liegt in ihrem Blut: Hörner, Schweif und angeborene Magie. Je nach Erbe sind Tieflinge infernalisch, abyssisch oder chthonisch geprägt.',
+  halfelf: 'Zwischen zwei Welten aufgewachsen: elfische Anmut, menschlicher Ehrgeiz. Halbelfen sind vielseitig, sehen im Dämmerlicht und lassen sich kaum bezaubern. (SRD 5.1)',
+  halforc: 'Orkische Kraft und menschliche Entschlossenheit. Halborks schüchtern ein, stehen nach einem tödlichen Treffer wieder auf und schlagen bei Volltreffern besonders hart zu. (SRD 5.1)',
   mykori: '✦ Pilzwesen aus den feuchten Tiefen. Mykori sind durch ein feines Sporennetz miteinander verbunden, fühlen sich im Dunkeln wohl und können eine giftige Sporenwolke ausstossen.',
   vesperkin: '✦ Kinder der Dämmerung, halb aus Schatten gewebt. Vesperkin sehen durch Dunkelheit, verschmelzen mit ihr und springen von einem Schatten in den nächsten.',
   steinblut: '✦ In ihren Adern fliesst Mineral statt nur Blut. Steinblütige sind schwer, geduldig und hart wie Fels – und können ihre Haut für einen Augenblick zu Stein werden lassen.'
@@ -4386,6 +4401,7 @@ const XA = {
 };
 function xChange(t) {
   const ch = cur();
+  if (t.id === 'subSpAdd' && t.value) { const path = (t.dataset.pre || '') + 'subSpells'; let a = getP(ch, path); if (!Array.isArray(a)) { a = []; setP(ch, path, a); } if (!a.includes(t.value)) a.push(t.value); commit(); return true; }
   if (t.id === 'addItem' && t.value) { ch.items = ch.items || []; const d = MAGIC_ITEMS[t.value]; const lab = ($('#itemLabel') || {}).value || ''; const ex = d.cons && ch.items.find((x) => x.id === t.value && (x.label || '') === lab.trim()); if (ex) ex.qty = (+ex.qty || 1) + 1; else ch.items.push({ uid: uidX(), id: t.value, att: false, eq: true, qty: 1, w: d.wpn && ch.weapons.length === 1 ? 0 : '', label: lab.trim() }); commit(); return true; }
   if (t.id === 'addGear' && t.value !== '') { const g = GEAR[+t.value]; ch.inv = ch.inv || []; const ex = ch.inv.find((x) => x.n === g[0]); if (ex) ex.qty = (+ex.qty || 0) + 1; else ch.inv.push({ n: g[0], qty: 1, kg: g[1] }); commit(); return true; }
   if (t.id === 'addComp' && t.value) { ch.comps = ch.comps || []; const x = { t: t.value, name: '', hp: null }; if (t.value === 'steed') { x.kind = 'celestial'; x.lvl = 2; } if (t.value === 'custom') { x.name = 'Eigener Begleiter'; x.ac = 12; x.hpMax = 20; } ch.comps.push(x); commit(); return true; }
@@ -4427,7 +4443,7 @@ function helpView() {
   const app = typeof APP_MODE !== 'undefined' && APP_MODE === 'app';
   return '<div class="camp helpv"><div class="hero-intro banner" style="' + bannerStyle('magier') + '"><h1>So funktioniert das Heldenbuch</h1><p>Alles Wichtige auf einen Blick. Tippe auf hervorgehobene Werte, um zu würfeln.</p></div>' +
     '<section class="blk hlsec"><h2>Wie viel Hilfe?</h2><p class="hint">Einsteiger bekommen alles erklärt, Erfahrene sehen nur ihren Bogen. Gilt auf diesem Gerät.</p>' + hlPanel('help') + '</section>' +
-    sec('Helden erschaffen', ['Unter <b>Erschaffen</b> gehst du Schritt für Schritt durch Klasse, Herkunft, Attribute, Fertigkeiten, Zauber und Ausrüstung.', 'Rote Hinweise rechts (auf dem Handy oben) zeigen, was noch fehlt – antippen bringt dich direkt zum richtigen Feld.', 'Alle Werte (RK, TP, Angriffe, Zauber-SG, Plätze) rechnet die App automatisch.', 'Helden aus <b>D&amp;D Beyond</b>: dort den Charakter als PDF exportieren, dann unter <b>Helden → Helden aus Datei laden</b> das PDF wählen. Die App zeigt vorher, was übernommen, angeglichen und nur in die Notizen geschrieben wird.']) +
+    sec('Helden erschaffen', ['Unter <b>Erschaffen</b> gehst du Schritt für Schritt durch Klasse, Herkunft, Attribute, Fertigkeiten, Zauber und Ausrüstung.', 'Rote Hinweise rechts (auf dem Handy oben) zeigen, was noch fehlt – antippen bringt dich direkt zum richtigen Feld.', 'Alle Werte (RK, TP, Angriffe, Zauber-SG, Plätze) rechnet die App automatisch.', 'Helden aus <b>D&amp;D Beyond</b>: dort den Charakter als PDF exportieren, dann unter <b>Helden → Helden aus Datei laden</b> das PDF wählen. Die App zeigt vorher, was übernommen und angeglichen wird. Inhalte ausserhalb des SRD legt sie als Hausregel nur auf deinem Gerät an.']) +
     sec('Spielen', ['Auf dem <b>Bogen</b> tippst du Attribute, Fertigkeiten, Rettungswürfe oder Angriffe an – die App würfelt mit Animation und beachtet Vor-/Nachteil und Zustände.', 'Oben im Bogen wechselst du zwischen <b>Kampf, Werte, Zauber, Fähigkeiten, Ausrüstung, Begleiter</b> und <b>Notizen</b>. Darunter stehen immer TP, RK, Initiative und Bewegung – TP antippen trägt Schaden oder Heilung ein.', 'Vertan? <b>↶</b> rechts in der Reiterleiste nimmt den letzten Schritt zurück, <b>↷</b> holt ihn wieder. <b>⟲ Zug</b> (Zugleiste oder ⋯) spult alles seit Beginn deines Zuges zurück.', 'Jeder Wurf landet im <b>Würfelverlauf</b> (Würfelfenster antippen oder Mehr → Würfelverlauf), auch die der Kreaturen und Mitspieler.', 'Zauber wirken zieht den Platz automatisch ab. Konzentration, Segnen, Mal des Jägers usw. werden verfolgt.', 'Bei 0 TP würfelst du Todesrettungswürfe. Nach drei Fehlschlägen entscheidet die Spielleitung über Gnade.', 'Der Würfelbecher unten links würfelt beliebige Würfel (bis 30 Stück).']) +
     sec('Gemeinsam spielen', [app ? 'Unter <b>Tisch</b> erstellt die Spielleitung einen Raum. Den <b>Raumcode</b> schickst du per WhatsApp – Mitspieler tippen ihn ein und sind verbunden (Handy und PC gemischt).' : 'Unter <b>Tisch</b> treten alle derselben Kampagne bei. Mitspieler musst du einmal per E-Mail als Bearbeiter einladen.', 'Die Spielleitung startet den Kampf, alle würfeln Initiative, und wer am Zug ist, sieht seinen Bildschirm leuchten.', 'Gegner fügt die Spielleitung im Kampf über <b>+ Gegner</b> hinzu (Bestiarium, Zufallsbegegnung oder ohne Werte). Ist ein Gegner am Zug, zeigt ein Kasten seine Angriffe und zählt mit. Spieler sehen bei Gegnern nur den Zustand (z. B. „schwer verletzt“), nicht die genauen TP.', 'Rast, Beute, EP und Handouts verteilt die Spielleitung für alle mit einem Tipp.', 'Abenteuer leitet die Spielleitung unter <b>Abenteuer</b>: Vorlesetext als Handout teilen, Kampf mit einem Tipp beginnen, Beute ins Formular übernehmen. Würfeltabellen der Spielleitung bleiben geheim.', '<b>Was tust du?</b> Spieler sagen am Tisch oder auf dem Bogen an, was ihr Held tut – tippen oder mit dem Mikrofon der Handytastatur sprechen. Die Spielleitung sieht die Ansagen oben, hakt sie ab (✓) oder gibt sie mit «An Claude» weiter.', 'Die <b>Chronik</b> der Spielleitung schreibt von selbst mit: Szenen, Handouts, Kämpfe, Beute, Entscheidungen, Rasten, Stufenaufstiege und erledigte Ansagen. «Was bisher geschah» macht daraus mit Claude einen Rückblick zum Vorlesen.', '<b>✦ Claude fragen</b> (Tisch, Abenteuer oder Mehr) fasst Szene, Gruppe, Kampf und letzte Würfe zusammen. In claude.ai antwortet Claude direkt, in der App kopierst du die Lage in die Claude-App.', 'Unter <b>📜 Chronik</b> schreibt die App mit, was am Spielabend passiert. Daneben liegen die Reiter <b>Personen</b>, <b>Orte</b> und <b>Aufträge</b>: Name, ein Satz, eine geheime Notiz und der Stand (z. B. verbündet, erledigt). Setzt die Spielleitung «Die Spieler wissen davon», sehen die Spieler den Eintrag am Tisch unter <b>Bekannt</b> – die geheime Notiz nie.', 'In der <b>PC-App</b> kann Claude Desktop den Tisch direkt lesen und für die Spielleitung handeln: unter <b>✦ Claude fragen › Claude Desktop</b> einmal «Mit Claude Desktop verbinden», Claude Desktop neu starten, dann im Chat zum Beispiel «Wie ist die Lage?» oder «Der Goblin-Krieger 1 greift Ilva an». Claude würfelt für Gegner, trägt Personen und Aufträge ein, schreibt in die Chronik und schickt Handouts. Am Ende des Abends «Abend abschliessen» sagen: Die Zusammenfassung landet im Reiter <b>Spielstand</b>, und ein neuer Chat setzt dort an. Das läuft über dein Claude-Abo; für den Spielabend Sonnet statt Opus wählen und pro Abend einen neuen Chat beginnen spart Nutzung.']) +
     sec('Sichern', [app ? 'Deine Helden werden auf diesem Gerät gespeichert. Unter <b>Helden</b> sicherst du mit <b>Alles sichern</b> Helden, Hausregeln, eigene Monster und Notizen in einer Datei.' : 'Deine Helden werden in deinem Claude-Konto gespeichert. Unter <b>Helden</b> erhältst du mit <b>Alles sichern</b> zusätzlich eine Datei mit allem.', 'Beim ersten Start fragt die App nach deinem Namen. So sehen die anderen am Tisch, wer welchen Helden spielt.', 'Hast du seit der letzten Sicherung viel gespielt, fragt die App beim nächsten Start einmal, ob sie eine Sicherungsdatei anlegen soll.', 'Stört dich am Spielabend etwas, tippe im Menü <b>⋯</b> auf <b>Stolperstein melden</b>. Ein Satz genügt; die App merkt sich, wo du warst. Danach kopierst du alle Einträge und schickst sie Claude.']) +
@@ -5707,7 +5723,7 @@ function validateChar(o) {
   const L = +o.level; if (!Number.isInteger(L) || L < 1 || L > 30) e.push('Stufe ungültig (' + o.level + ').');
   if (o.base !== undefined) { if (typeof o.base !== 'object' || !o.base) e.push('Attributswerte fehlen.'); else for (const k of AB) { const v = +o.base[k]; if (o.base[k] !== undefined && (!Number.isFinite(v) || v < 1 || v > 30)) e.push('Attribut ' + AB_K[k] + ' ungültig (' + o.base[k] + ').'); } }
   if (o.species !== undefined && !SPECIES[o.species]) e.push('Unbekannte Spezies „' + o.species + '“.');
-  for (const k of ['multi', 'weapons', 'spells', 'book', 'cantrips', 'classSkills', 'extraSkills', 'expertise', 'freeSkills', 'freeExp', 'invocations', 'styles', 'items', 'homebrew', 'comps']) if (o[k] !== undefined && !Array.isArray(o[k])) e.push('„' + k + '“ muss eine Liste sein.');
+  for (const k of ['multi', 'weapons', 'spells', 'book', 'cantrips', 'classSkills', 'extraSkills', 'expertise', 'freeSkills', 'freeExp', 'bonusSpells', 'invocations', 'styles', 'items', 'homebrew', 'comps']) if (o[k] !== undefined && !Array.isArray(o[k])) e.push('„' + k + '“ muss eine Liste sein.');
   (Array.isArray(o.multi) ? o.multi : []).forEach((m, i) => { if (!m || !CLASSES[m.cls]) e.push('Multiclass ' + (i + 1) + ': unbekannte Klasse.'); else if (!Number.isInteger(+m.level) || +m.level < 1) e.push('Multiclass ' + (i + 1) + ': Stufe ungültig.'); });
   (Array.isArray(o.weapons) ? o.weapons : []).forEach((w, i) => { if (!w || !WEAPONS[w.w]) e.push('Waffe ' + (i + 1) + ': unbekannt (' + (w && w.w) + ').'); });
   if (o.play !== undefined && (typeof o.play !== 'object' || !o.play)) e.push('Spielstand („play“) ist ungültig.');
@@ -7650,7 +7666,7 @@ function infoContent(kind, key) {
   if (kind === 'sp') {
     const sp = SPECIES[key]; if (!sp) return null;
     let tr = []; try { const tmp = JSON.parse(JSON.stringify(ch || newChar({}))); tmp.species = key; tmp.speciesChoice = sp.choice ? (key === (ch || {}).species ? ch.speciesChoice : Object.keys(sp.choice.opts)[0]) : ''; const tc = derive(normChar(tmp), S.hb); tr = typeof sp.traits === 'function' ? sp.traits(tc) : (sp.traits || []); } catch (e) { tr = []; }
-    return { t: sp.name, sub: sp.home ? '✦ Heldenbuch-Spezies' : 'Spezies', flav: (sp.flavor || '').replace(/^✦ /, ''),
+    return { t: sp.name, sub: sp.home ? '✦ Heldenbuch-Spezies' : sp.legacy ? 'Spezies aus dem SRD 5.1 (ältere Regeln)' : 'Spezies', flav: (sp.flavor || '').replace(/^✦ /, ''),
       dl: infoRow('Grösse', sp.size) + infoRow('Bewegung', fmtM(sp.speed)) + infoRow('Dunkelsicht', sp.dv ? fmtM(sp.dv) : 'nein') + (sp.choice ? infoRow(sp.choice.label, Object.values(sp.choice.opts).join(', ')) : ''),
       more: tr.length ? '<h4>Merkmale</h4>' + infoFeats(tr.map(([n, t]) => [0, n, t])) : '' };
   }
@@ -9656,7 +9672,7 @@ function ddbDict(s, i) {
     const c = s[i];
     if (c === '<' && s[i + 1] === '<') { put({ t: 'dict' }); depth++; i += 2; continue; }
     if (c === '>' && s[i + 1] === '>') { depth--; i += 2; if (depth <= 0) return { d, end: i }; continue; }
-    if (c === '[') { put({ t: 'arr' }); depth++; i++; continue; }
+    if (c === '[') { const j = s.indexOf(']', i); const raw = j > 0 ? s.slice(i + 1, j) : ''; if (depth === 1 && key !== null && j > 0 && !/[[(<]/.test(raw)) { put({ t: 'arr', v: raw }); i = j + 1; continue; } put({ t: 'arr' }); depth++; i++; continue; }
     if (c === ']') { depth--; i++; continue; }
     if (c === '(') { const r = ddbLit(s, i); put({ t: 'str', v: r.v }); i = r.end; continue; }
     if (c === '<') { const j = s.indexOf('>', i); if (j < 0) break; put({ t: 'str', v: ddbHex(s.slice(i + 1, j)) }); i = j + 1; continue; }
@@ -9669,17 +9685,28 @@ function ddbDict(s, i) {
   return { d, end: i };
 }
 function ddbTake(s, out) {
-  const re = /\d+\s+\d+\s+obj\s*<</g; let m;
+  const re = /(\d+)\s+\d+\s+obj\s*<</g; let m;
   while ((m = re.exec(s))) {
     const at = m.index + m[0].length - 2; const r = ddbDict(s, at); re.lastIndex = Math.max(re.lastIndex, r.end);
-    ddbField(r.d, out);
+    ddbField(r.d, out, +m[1]);
     if (r.d.Type && r.d.Type.v === 'ObjStm') out.stm.push({ d: r.d, at: r.end });
   }
 }
-function ddbField(d, out) {
+function ddbField(d, out, num) {
+  if (d.Type && d.Type.v === 'Pages' && d.Kids && d.Kids.v) out.pages[num] = (d.Kids.v.match(/\d+(?=\s+\d+\s+R)/g) || []).map(Number);
   if (!d.T || d.T.t !== 'str' || !d.V) return;
   const name = ddbText(d.T.v).replace(/\s+/g, ' ').trim(); if (!name) return;
   out.f[name] = d.V.t === 'str' ? ddbText(d.V.v) : d.V.t === 'name' ? d.V.v : '';
+  if (/^spell(Name|Header)\d+$/.test(name) && d.Rect && d.Rect.v && d.P) { const r = d.Rect.v.trim().split(/\s+/).map(Number); if (r.length === 4) out.pos[name] = [+d.P.v, Math.max(r[1], r[3])]; }
+}
+/* Reihenfolge der Seiten aus dem Seitenbaum; Positionen → [Seitennummer, Oberkante] */
+function ddbPagePos(out) {
+  const kids = new Set(Object.values(out.pages).flat()); const order = [];
+  const walk = (n, depth) => { if (depth > 20) return; if (out.pages[n]) out.pages[n].forEach((k) => walk(k, depth + 1)); else order.push(n); };
+  Object.keys(out.pages).map(Number).filter((n) => !kids.has(n)).forEach((n) => walk(n, 0));
+  const idx = {}; order.forEach((n, i) => { idx[n] = i; });
+  const pos = {}; for (const [k, [pg, y]] of Object.entries(out.pos)) pos[k] = [idx[pg] !== undefined ? idx[pg] : 999, y];
+  return pos;
 }
 async function ddbInflate(u8) {
   if (typeof DecompressionStream !== 'function') return null;
@@ -9688,7 +9715,7 @@ async function ddbInflate(u8) {
 /* Liefert alle Formularfelder als { Name: Text }. Komprimierte Objektströme werden mitgelesen. */
 async function ddbFields(bytes) {
   const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-  const s = ddbLatin(u8); const out = { f: {}, stm: [] };
+  const s = ddbLatin(u8); const out = { f: {}, stm: [], pages: {}, pos: {} };
   if (!/^%PDF-/.test(s.slice(0, 1024).replace(/^[^%]*/, ''))) throw new Error('Das ist keine PDF-Datei.');
   if (/\/Encrypt\b/.test(s)) throw new Error('Das PDF ist verschlüsselt. Bitte in D&D Beyond neu exportieren.');
   ddbTake(s, out);
@@ -9698,8 +9725,9 @@ async function ddbFields(bytes) {
     let e = s.indexOf('endstream', k); if (e < 0) continue; if (s[e - 1] === '\n') e--; if (s[e - 1] === '\r') e--;
     const raw = await ddbInflate(u8.subarray(k, e)); if (!raw) continue;
     const t = ddbLatin(raw); const first = +((o.d.First || {}).v || 0); const nums = t.slice(0, first).trim().split(/\s+/).map(Number);
-    for (let i = 1; i < nums.length; i += 2) { const p = first + nums[i]; const q = t.indexOf('<<', p); if (q >= 0 && q - p < 8) ddbField(ddbDict(t, q).d, out); }
+    for (let i = 1; i < nums.length; i += 2) { const p = first + nums[i]; const q = t.indexOf('<<', p); if (q >= 0 && q - p < 8) ddbField(ddbDict(t, q).d, out, nums[i - 1]); }
   }
+  if (Object.keys(out.pos).length) out.f['#pos'] = ddbPagePos(out);
   return out.f;
 }
 function ddbIsSheet(F) { return !!(F && F.CharacterName !== undefined && F['CLASS LEVEL'] !== undefined && F.STR !== undefined); }
@@ -9708,10 +9736,10 @@ function ddbIsSheet(F) { return !!(F && F.CharacterName !== undefined && F['CLAS
 const DDB_CLS = { barbarian: 'bar', bard: 'brd', cleric: 'cle', druid: 'dru', fighter: 'fig', monk: 'mon', paladin: 'pal', ranger: 'ran', rogue: 'rog', sorcerer: 'sor', warlock: 'wlk', wizard: 'wiz' };
 const DDB_SUB = { bar: [/berserker/i, 'berserker'], brd: [/lore/i, 'lore'], cle: [/life/i, 'life'], dru: [/\bland\b/i, 'land'], fig: [/champion/i, 'champion'], mon: [/open hand/i, 'openhand'], pal: [/devotion/i, 'devotion'], ran: [/hunter/i, 'hunter'], rog: [/thief/i, 'thief'], sor: [/draconic/i, 'draconic'], wlk: [/fiend/i, 'fiend'], wiz: [/evo[ck]/i, 'evoker'] };
 const DDB_SUBF = /Subclass$|^Sacred Oath$|^Primal Path$|^Bard College$|^Divine Domain$|^Druid Circle$|^Martial Archetype$|^Monastic Tradition$|^Ranger (Archetype|Conclave)$|^Roguish Archetype$|^Sorcerous Origin$|^Otherworldly Patron$|^Arcane Tradition$/;
-const DDB_SPEC = [[/half-?elf/i, null], [/half-?orc/i, 'orc'], [/dragonborn/i, 'dragonborn'], [/dwarf/i, 'dwarf'], [/\belf\b|drow|eladrin/i, 'elf'], [/gnome/i, 'gnome'], [/goliath/i, 'goliath'], [/halfling/i, 'halfling'], [/human/i, 'human'], [/\borc\b/i, 'orc'], [/tiefling/i, 'tiefling']];
+const DDB_SPEC = [[/half-?elf/i, 'halfelf'], [/half-?orc/i, 'halforc'], [/dragonborn/i, 'dragonborn'], [/dwarf/i, 'dwarf'], [/\belf\b|drow|eladrin/i, 'elf'], [/gnome/i, 'gnome'], [/goliath/i, 'goliath'], [/halfling/i, 'halfling'], [/human/i, 'human'], [/\borc\b/i, 'orc'], [/tiefling/i, 'tiefling']];
 const DDB_BG = { acolyte: 'acolyte', criminal: 'criminal', sage: 'sage', soldier: 'soldier' };
 const DDB_SK = { Acrobatics: 'acr', AnimalHandling: 'ani', Arcana: 'arc', Athletics: 'ath', Deception: 'dec', History: 'his', Insight: 'ins', Intimidation: 'itm', Investigation: 'inv', Medicine: 'med', Nature: 'nat', Perception: 'prc', Performance: 'prf', Persuasion: 'per', Religion: 'rel', SleightOfHand: 'slt', Stealth: 'ste', Survival: 'sur' };
-const DDB_FEAT = { 'alert': 'alert', 'magic initiate (cleric)': 'mi-cle', 'magic initiate (druid)': 'mi-dru', 'magic initiate (wizard)': 'mi-wiz', 'savage attacker': 'savage', 'skilled': 'skilled', 'tough': 'tough', 'grappler': 'grappler', 'archery': 'fs-archery', 'defense': 'fs-defense', 'great weapon fighting': 'fs-gwf', 'two-weapon fighting': 'fs-twf' };
+const DDB_FEAT = { 'alert': 'alert', 'magic initiate (cleric)': 'mi-cle', 'magic initiate (druid)': 'mi-dru', 'magic initiate (wizard)': 'mi-wiz', 'savage attacker': 'savage', 'skilled': 'skilled', 'tough': 'tough', 'grappler': 'grappler', 'archery': 'fs-archery', 'defense': 'fs-defense', 'great weapon fighting': 'fs-gwf', 'two-weapon fighting': 'fs-twf', 'dueling': 'fs-duel', 'protection': 'fs-prot' };
 const DDB_INV = { 'agonizing blast': 'agonizing', 'armor of shadows': 'shadows', "devil's sight": 'devilsight', 'eldritch mind': 'mind', 'eldritch spear': 'spear', 'fiendish vigor': 'vigor', 'mask of many faces': 'faces', 'misty visions': 'misty', 'pact of the blade': 'blade', 'pact of the chain': 'chain', 'pact of the tome': 'tome', 'repelling blast': 'repelling', 'thirsting blade': 'thirsting', 'lifedrinker': 'lifedrinker', 'devouring blade': 'devouring', 'one with shadows': 'shadowsone', 'ascendant step': 'ascendant', 'otherworldly leap': 'leap', 'gift of the depths': 'depths', 'master of myriad forms': 'myriad', 'whispers of the grave': 'grave', 'witch sight': 'witchsight', 'gift of the protectors': 'protectors', 'investment of the chain master': 'chainmaster', 'visions of distant realms': 'visions', 'eldritch smite': 'smite', 'gaze of two minds': 'gaze', 'lessons of the first ones': 'lessons' };
 const DDB_WPN = { club: 'club', dagger: 'dagger', greatclub: 'greatclub', handaxe: 'handaxe', javelin: 'javelin', 'light hammer': 'lighthammer', mace: 'mace', quarterstaff: 'quarterstaff', staff: 'quarterstaff', sickle: 'sickle', spear: 'spear', dart: 'dart', 'light crossbow': 'lcrossbow', 'crossbow, light': 'lcrossbow', shortbow: 'shortbow', sling: 'sling', battleaxe: 'battleaxe', flail: 'flail', glaive: 'glaive', greataxe: 'greataxe', greatsword: 'greatsword', halberd: 'halberd', lance: 'lance', longsword: 'longsword', maul: 'maul', morningstar: 'morningstar', pike: 'pike', rapier: 'rapier', scimitar: 'scimitar', shortsword: 'shortsword', trident: 'trident', warhammer: 'warhammer', 'war pick': 'warpick', whip: 'whip', blowgun: 'blowgun', 'hand crossbow': 'hcrossbow', 'crossbow, hand': 'hcrossbow', 'heavy crossbow': 'hvcrossbow', 'crossbow, heavy': 'hvcrossbow', longbow: 'longbow', musket: 'musket', pistol: 'pistol' };
 const DDB_ARM = [[/studded/i, 'studded'], [/padded/i, 'padded'], [/\bleather\b/i, 'leather'], [/\bhide\b/i, 'hide'], [/chain shirt/i, 'chainshirt'], [/scale/i, 'scale'], [/breastplate/i, 'breastplate'], [/half plate/i, 'halfplate'], [/ring mail/i, 'ringmail'], [/chain mail/i, 'chainmail'], [/splint/i, 'splint'], [/\bplate\b/i, 'plate']];
@@ -9753,16 +9781,49 @@ function ddbFeatures(txt) {
 /* Auswahl-Zeile übernehmen, Nutzungsangaben («2 / Long Rest», «1 Reaction», «Special») weglassen */
 function ddbOpt(b, t) {
   const o = String(t).replace(/\s*•.*$/, '').trim();
+  const u = o.match(/(\d+)\s*\/\s*(long|short) rest/i); if (u && !b.uses) b.uses = { n: +u[1], reset: /short/i.test(u[2]) ? 'short' : 'long' };
   if (!o || /(^|:\s*)(\d+\s*\/\s*(long|short) rest|special|\d+\s+(action|bonus action|reaction|minute|hour)s?)$/i.test(o) || /^increase (two|three) scores/i.test(o)) return;
   b.opts.push(o);
 }
 
 /* ---------- 3. Held nachbauen ---------- */
+/* Zeitaufwand, Reichweite, Komponenten und Dauer aus der Zauberzeile ins Deutsche */
+function ddbRowDe(F, i) {
+  const g = (k) => String(F[k + i] == null ? '' : F[k + i]).trim();
+  const m = (x) => String(x).replace(/(\d+(?:\.\d+)?)[- ]?(?:ft\.?|feet|foot)/gi, (z, n) => String(Math.round(+n * 3) / 10).replace('.', ',') + ' m')
+    .replace(/\bmiles?\b/gi, 'Meilen').replace(/\bcone\b/gi, 'Kegel').replace(/\bline\b/gi, 'Linie').replace(/\bradius\b/gi, 'Radius').replace(/\bsphere\b/gi, 'Kugel').replace(/\bcube\b/gi, 'Würfel').replace(/\bemanation\b/gi, 'Ausstrahlung').replace(/\bcylinder\b/gi, 'Zylinder');
+  const unit = (x) => x.replace(/(\d+)\s*minutes?/gi, (z, n) => n + (n === '1' ? ' Minute' : ' Minuten')).replace(/(\d+)\s*hours?/gi, (z, n) => n + (n === '1' ? ' Stunde' : ' Stunden')).replace(/(\d+)\s*rounds?/gi, (z, n) => n + (n === '1' ? ' Runde' : ' Runden')).replace(/(\d+)\s*days?/gi, (z, n) => n + (n === '1' ? ' Tag' : ' Tage'));
+  const t = g('spellCastingTime').replace(/^1\s*A\s*\+\s*10\s*m$/i, 'Aktion (als Ritual 10 Minuten länger)'); const tm = t.match(/^(\d+)\s*(A|BA|R|m|min|h)$/i);
+  const time = !tm ? t : /^a$/i.test(tm[2]) ? 'Aktion' : /^ba$/i.test(tm[2]) ? 'Bonusaktion' : /^r$/i.test(tm[2]) ? 'Reaktion' : /^h$/i.test(tm[2]) ? unit(tm[1] + ' hours') : unit(tm[1] + ' minutes');
+  const r = g('spellRange'); const range = m(r.replace(/^self/i, 'Selbst').replace(/^touch$/i, 'Berührung').replace(/^sight$/i, 'Sicht').replace(/^unlimited$/i, 'Unbegrenzt'));
+  const d = g('spellDuration'); const conc = /concentration/i.test(d);
+  const dur = unit(d.replace(/^concentration,\s*up to\s*/i, 'bis zu ').replace(/^instantaneous$/i, 'Sofort').replace(/^until dispelled$/i, 'Bis aufgehoben').replace(/^special$/i, 'Speziell'));
+  return { time: time || 'Aktion', range: range || '—', comp: g('spellComponents').replace(/\s*,\s*/g, ', ').replace(/\bS\b/g, 'G') || '—', dur: dur || 'Sofort', conc, hit: g('spellSaveHit'), page: g('spellPage') };
+}
+/* Grad jeder Zauberzeile aus der Lage der Überschriften («=== 1st LEVEL ===») */
+function ddbLevels(F) {
+  const pos = F['#pos'] || {}; const it = [];
+  for (const [k, v] of Object.entries(pos)) {
+    let m = k.match(/^spellHeader(\d+)$/);
+    if (m) { const t = String(F[k] || ''); const lv = /cantrip/i.test(t) ? 0 : +((t.match(/(\d+)\s*(st|nd|rd|th)\b/i) || [])[1]); if (!isNaN(lv)) it.push({ p: v[0], y: v[1], lv, h: 1 }); continue; }
+    m = k.match(/^spellName(\d+)$/); if (m) it.push({ p: v[0], y: v[1], i: +m[1], h: 0 });
+  }
+  it.sort((a, b) => a.p - b.p || b.y - a.y || b.h - a.h);
+  const out = {}; let cur = null; for (const x of it) { if (x.h) cur = x.lv; else if (cur !== null) out[x.i] = cur; }
+  return out;
+}
+
 function ddbBuild(F, hb) {
-  hb = hb || {};
+  hb = Object.assign({}, hb || {}); const newHb = {};
+  const hbMake = (kind, name, more) => {
+    const ex = Object.values(hb).find((h) => h && h.kind === kind && ddbLow(h.name) === ddbLow(name)); if (ex) return ex.id;
+    const id = 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const h = Object.assign({ id, kind, name, text: '', src: 'D&D Beyond' }, kind === 'feature' ? { ac: 0, save: 0, atk: 0, dc: 0, init: 0, hpPerLevel: 0, speed: 0, uses: 0, reset: 'long' } : {}, more || {});
+    hb[id] = h; newHb[id] = h; return id;
+  };
   const g = (k) => String(F[k] == null ? '' : F[k]).trim();
   const num = (k) => { const m = g(k).replace(/−/g, '-').match(/[-+]?\d+/); return m ? +m[0] : null; };
-  const rep = { ok: [], adj: [], miss: [], hint: [] }; const extraNotes = [];
+  const rep = { ok: [], adj: [], miss: [], hint: [], hb: [] }; const extraNotes = []; const feats = [];
   /* Klassen */
   const cl = [];
   for (const m of g('CLASS LEVEL').matchAll(/([A-Za-z][A-Za-z' -]*?)\s+(\d+)/g)) { const id = DDB_CLS[ddbLow(m[1])]; if (id && !cl.some((x) => x.id === id)) cl.push({ id, lvl: +m[2], en: m[1].trim() }); else if (!id) rep.miss.push('Klasse ' + m[1].trim() + ' ' + m[2] + ' (gibt es im Heldenbuch nicht)'); }
@@ -9772,26 +9833,47 @@ function ddbBuild(F, hb) {
   const opt1 = (re) => { const b = blk(re); return (b && b.opts[0]) || ''; };
   const allOpts = (re) => ft.filter((b) => re.test(b.name)).flatMap((b) => b.opts);
   const featNames = ft.filter((b) => /FEATS/i.test(b.sec)).map((b) => b.name);
-  const spells = []; for (let i = 0; i < 400; i++) { const n = g('spellName' + i); if (n) spells.push({ n, id: ddbSpell(n, hb), src: g('spellSource' + i) }); }
+  const spells = []; for (let i = 0; i < 400; i++) { const n = g('spellName' + i); if (n) spells.push({ n, i, id: ddbSpell(n, hb), src: g('spellSource' + i) }); }
+  const lvOf = ddbLevels(F); const hbSpells = [];
+  spells.forEach((s, k) => {
+    if (s.id) return;
+    const name = s.n.replace(/\s*\[[A-Z]+\]\s*$/, '').trim(); const known = spells.find((o) => o.id && o.id.startsWith('hb:') && ddbLow(o.n.replace(/\s*\[[A-Z]+\]\s*$/, '')) === ddbLow(name));
+    if (known) { s.id = known.id; return; }
+    let lv = lvOf[s.i]; if (lv === undefined) { for (let j = k - 1; j >= 0 && lv === undefined; j--) if (spells[j].id) lv = (getSpell(spells[j].id, hb) || {}).lvl; }
+    const r = ddbRowDe(F, s.i); const cls = DDB_CLS[ddbLow((s.src.match(/^[A-Za-z]+/) || [''])[0])];
+    s.id = 'hb:' + hbMake('spell', name, { lvl: lv || 0, school: '', classes: cls ? [cls] : [], time: r.time, range: r.range, comp: r.comp, dur: r.dur, conc: r.conc, ritual: /\[R\]/.test(s.n),
+      text: 'Aus D&D Beyond übernommen' + (r.page ? ' (' + r.page + ')' : '') + '. Die Beschreibung steht nicht im PDF – bitte in eigenen Worten ergänzen' + (r.hit && r.hit !== '--' ? '. Rettungswurf/Angriff laut D&D Beyond: ' + r.hit : '') + '.' });
+    hbSpells.push(name);
+  });
+  if (hbSpells.length) rep.hb.push('Zauber: ' + [...new Set(hbSpells)].join(', '));
 
-  const ch = newChar({ name: g('CharacterName') || 'Importierter Held', player: g('PLAYER NAME'), cls: cl[0].id, level: cl[0].lvl, method: 'manual', species: 'human', speciesChoice: '', classSkills: [], extraSkills: [], expertise: [], freeSkills: [], freeExp: [] });
+  const ch = newChar({ name: g('CharacterName') || 'Importierter Held', player: g('PLAYER NAME'), cls: cl[0].id, level: cl[0].lvl, method: 'manual', species: 'human', speciesChoice: '', classSkills: [], extraSkills: [], expertise: [], freeSkills: [], freeExp: [], bonusSpells: [], homebrew: [] });
   ch.multi = cl.slice(1).map((x) => ({ cls: x.id, level: x.lvl, sub: '', cantrips: [], spells: [] }));
   ch.importedFrom = 'D&D Beyond';
   rep.ok.push('Klasse: ' + cl.map((x) => CLASSES[x.id].name + ' ' + x.lvl).join(' / '));
   /* Unterklassen */
-  const subOpt = ft.filter((b) => DDB_SUBF.test(b.name)).map((b) => b.opts[0]).filter(Boolean);
+  const subBl = ft.filter((b) => DDB_SUBF.test(b.name) && b.opts[0]);
+  const customSub = [];
   cl.forEach((x, i) => {
     const tgt = i ? ch.multi[i - 1] : ch; const C = CLASSES[x.id]; if (!C.subs || x.lvl < 3) return;
-    const r = DDB_SUB[x.id]; const hit = subOpt.find((o) => r && r[0].test(o));
-    const own = !hit && subOpt.map((o) => C.subs.find((s) => ddbLow(s.name) === ddbLow(o))).find(Boolean);
-    if (hit && C.subs.some((s) => s.id === r[1])) { tgt.sub = r[1]; rep.ok.push('Unterklasse: ' + C.subs.find((s) => s.id === r[1]).name); }
-    else if (own) { tgt.sub = own.id; rep.ok.push('Unterklasse: ' + own.name); }
-    else { const nm = subOpt.find((o) => !Object.values(DDB_SUB).some((rr) => rr[0].test(o) && rr !== r)) || subOpt[i] || '?'; rep.miss.push('Unterklasse «' + nm + '» (' + C.name + ') – bitte im Heldenbuch eine wählen'); }
+    const sb = subBl.find((b) => new RegExp('\\b' + x.en + '\\b', 'i').test(b.sec)) || subBl[i]; const o = sb ? sb.opts[0] : '';
+    const r = DDB_SUB[x.id]; const hit = o && r && r[0].test(o) && C.subs.find((s) => s.id === r[1]);
+    const own = !hit && o && C.subs.find((s) => ddbLow(s.name) === ddbLow(o));
+    if (hit || own) { tgt.sub = (hit || own).id; rep.ok.push('Unterklasse: ' + (hit || own).name); return; }
+    if (!o) { rep.hint.push(C.name + ': Unterklasse bitte wählen'); return; }
+    tgt.sub = 'eigen'; tgt.subName = o; tgt.subSpells = []; customSub.push({ x, tgt });
+    const k0 = ft.indexOf(sb); const parts = ft.filter((b, k) => k > k0 && b.sec === sb.sec && b.text && !/^(hit points|proficiencies|spellcasting|ability score improvement)$/i.test(b.name)).map((b) => b.name + ': ' + b.text);
+    ch.homebrew.push(hbMake('feature', o, { text: (parts.join('\n\n') || 'Unterklasse aus D&D Beyond.') + '\n\n(Aus D&D Beyond übernommen.)' }));
+    rep.ok.push('Unterklasse: ' + o + ' (eigene)'); rep.hb.push('Unterklasse ' + o + ' (' + C.name + ')');
   });
   /* Spezies */
   const race = g('RACE'); const spHit = DDB_SPEC.find(([re]) => re.test(race));
   if (spHit && spHit[1]) { ch.species = spHit[1]; rep.ok.push('Spezies: ' + SPECIES[ch.species].name + (/half-?orc/i.test(race) ? ' (aus «' + race + '»)' : '')); }
-  else { rep.miss.push('Spezies «' + (race || '?') + '» gibt es im Heldenbuch nicht – vorläufig Mensch, Merkmale stehen in den Notizen'); ch.humanFeat = ''; ch.speciesFallback = true; ft.filter((b) => /SPECIES|RACIAL/i.test(b.sec)).forEach((b) => extraNotes.push('Spezies-Merkmal ' + b.name + (b.text ? ': ' + b.text.slice(0, 300) : ''))); }
+  else {
+    ch.humanFeat = ''; ch.speciesFallback = true; const tr = ft.filter((b) => /SPECIES|RACIAL/i.test(b.sec) && b.text).map((b) => b.name + ': ' + b.text);
+    ch.homebrew.push(hbMake('feature', 'Volk: ' + (race || 'unbekannt'), { text: (tr.join('\n\n') || 'Spezies aus D&D Beyond.') + '\n\n(Aus D&D Beyond übernommen.)' }));
+    rep.miss.push('Spezies «' + (race || '?') + '» gibt es im Heldenbuch nicht – vorläufig Mensch, die Merkmale stehen als Hausregel beim Helden'); rep.hb.push('Volk: ' + race);
+  }
   const SPd = SPECIES[ch.species];
   if (SPd.choice) {
     const opts = Object.keys(SPd.choice.opts); const src = [race, opt1(/Draconic Ancestry|Elven Lineage$|Gnomish Lineage|Giant Ancestry|Fiendish Legacy$/)].join(' ');
@@ -9899,6 +9981,14 @@ function ddbBuild(F, hb) {
   }
   if (ch.inv.length || ch.items.length) rep.ok.push('Ausrüstung: ' + (ch.inv.length + ch.items.length) + ' Einträge' + (ch.items.length ? ' (davon ' + ch.items.length + ' magisch)' : ''));
   ch.coins = { pm: num('PP') || 0, gm: num('GP') || 0, em: num('EP') || 0, sm: num('SP') || 0, km: num('CP') || 0 }; ch.gold = ch.coins.gm;
+  /* Immer vorbereitete Zauber der eigenen Unterklasse (z. B. «Paladin (Always Prepared)», «Succubus Spells (Always Prepared)») */
+  const baseAlways = (id) => new Set(Object.values(CLASSES[id].always || {}).flat());
+  const classEn = cl.map((x) => x.en.toLowerCase());
+  customSub.forEach(({ x, tgt }) => {
+    const ids = spells.filter((sp) => sp.id && /always prepared/i.test(sp.src) && !baseAlways(x.id).has(sp.id)).filter((sp) => { const pre = ddbLow(sp.src.replace(/\s*\(always prepared\)/i, '')); const own = classEn.includes(pre); return own ? pre === x.en.toLowerCase() : customSub.length === 1 || /spells$/i.test(pre); }).map((sp) => sp.id);
+    tgt.subSpells = [...new Set(ids)];
+    if (tgt.subSpells.length) rep.ok.push(tgt.subName + ': ' + tgt.subSpells.length + ' immer vorbereitete Zauber');
+  });
   /* Zauber je Klasse */
   const other = []; const clsRe = [];
   c = derive(ch, hb);
@@ -9918,12 +10008,27 @@ function ddbBuild(F, hb) {
   c = derive(ch, hb); (c.spell.classes || []).forEach((s) => s.always.forEach((id) => taken.add(id)));
   Object.values(ch.mi).forEach((m) => { (m.cantrips || []).forEach((id) => taken.add(id)); if (m.spell) taken.add(m.spell); });
   if (typeof SPd.spells === 'function') { try { SPd.spells(c).forEach((id) => taken.add(id)); } catch (e) { /* ältere Spezies ohne Zauberliste */ } }
-  const unknownSp = [...new Set(spells.filter((s) => !s.id).map((s) => s.n.replace(/\s*\[R\]$/, '')))];
+  customSub.forEach(({ tgt }) => (tgt.subSpells || []).forEach((id) => taken.add(id)));
   spells.forEach((s) => { if (s.id && !taken.has(s.id) && !clsRe.some((re) => re && re.test(s.src)) && !other.some((o) => o.id === s.id)) other.push(s); });
-  if (unknownSp.length) rep.miss.push('Zauber nicht im Heldenbuch: ' + unknownSp.join(', '));
-  if (other.length) extraNotes.push('Weitere Zauber laut D&D Beyond: ' + other.map((s) => getSpell(s.id, hb).name + ' (' + s.src + ')').join(', '));
-  featMiss.forEach((n) => { const b = /^Kampfstil /.test(n) ? blk(/^Fighting Style$/) : blk(new RegExp('^' + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$')); extraNotes.push('Talent/Merkmal ' + n + (b && b.text ? ': ' + b.text.slice(0, 300) : '')); });
-  if (featMiss.length) rep.miss.push('Talente und Merkmale: ' + featMiss.join(', '));
+  /* Übrige Zauber (Talente, Anrufungen, Pakte) als Zusatzzauber; Zauber aus Gegenständen bleiben beim Gegenstand */
+  const casterAb = ((c.spell.classes || [])[0] || {}).ability || 'cha'; const fromItem = [];
+  other.forEach((sp) => {
+    const src = sp.src.replace(/\s*\(always prepared\)/i, '').trim();
+    if (eq.some((x) => ddbLow(x.n) === ddbLow(src))) { fromItem.push(getSpell(sp.id, hb).name + ' (' + src + ')'); return; }
+    const bb = ft.find((b) => ddbLow(b.name) === ddbLow(src)); const ab = (bb && ddbAbil(bb.opts.join(' '))) || (/invocation|pact/i.test(src) ? 'cha' : casterAb);
+    ch.bonusSpells.push({ id: sp.id, src, ab });
+  });
+  if (ch.bonusSpells.length) rep.ok.push('Weitere Zauber: ' + ch.bonusSpells.map((b) => getSpell(b.id, hb).name + ' (' + b.src + ')').join(', '));
+  if (fromItem.length) extraNotes.push('Zauber aus Gegenständen: ' + fromItem.join(', '));
+  /* Talente und Merkmale ohne Gegenstück im Heldenbuch als Hausregel beim Helden */
+  featMiss.forEach((n) => {
+    if (/kein freier Platz/.test(n)) { extraNotes.push('Talent ' + n.replace(' (kein freier Platz)', '') + ': in D&D Beyond zusätzlich gewählt, Wirkung über Fertigkeiten/TP angeglichen'); return; }
+    const isStyle = /^Kampfstil /.test(n); const b = isStyle ? blk(/^Fighting Style$/) : blk(new RegExp('^' + n.replace(/^Anrufung /, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'));
+    const name = isStyle ? 'Kampfstil: ' + n.slice(9) : n.replace(/^Anrufung /, '');
+    ch.homebrew.push(hbMake('feature', name, { text: ((b && b.text) || 'Aus D&D Beyond.') + '\n\n(Aus D&D Beyond übernommen.)', uses: b && b.uses ? b.uses.n : 0, reset: b && b.uses ? b.uses.reset : 'long' }));
+    rep.hb.push(name);
+  });
+  ch.homebrew = [...new Set(ch.homebrew)];
   /* Abgleich mit den PDF-Zahlen über «Sonstiges» */
   c = derive(ch, hb);
   const adj = (k, have, want, label, unit) => { if (want == null || isNaN(want) || want === have) return; const d = Math.round((want - have) * 10) / 10; ch.misc[k] = Math.round(((+ch.misc[k] || 0) + d) * 10) / 10; rep.adj.push(label + ' ' + (d > 0 ? '+' : '') + String(d).replace('.', ',') + (unit || '') + ' (D&D Beyond ' + String(want).replace('.', ',') + (unit || '') + ', Heldenbuch ' + String(have).replace('.', ',') + (unit || '') + ')'); };
@@ -9954,11 +10059,11 @@ function ddbBuild(F, hb) {
     g('Backstory') ? 'Hintergrundgeschichte:\n' + g('Backstory') : '',
     Object.keys(F).filter((k) => /^(AdditionalNotes|Notes)\d*$/.test(k)).map((k) => g(k)).filter((x) => x && x !== '-').join('\n')].filter(Boolean);
   const tools = sec('TOOLS'); const dfn = g('Defenses').replace(/\s*\n\s*/g, ' · '); const sns = g('AdditionalSenses');
-  const ddb = [tools && 'Werkzeuge: ' + tools, dfn && 'Abwehr: ' + dfn, sns && 'Sinne: ' + sns, g('SaveModifiers') && 'Rettungswurf-Hinweise: ' + g('SaveModifiers').replace(/\s*\n\s*/g, ' · ')].concat(rep.miss.filter((m) => /^Unterklasse/.test(m))).concat(extraNotes).filter(Boolean);
-  if (ddb.length) notes.push('— Aus D&D Beyond (im Heldenbuch nicht abgebildet) —\n• ' + ddb.join('\n• '));
+  const ddb = [tools && 'Werkzeuge: ' + tools, dfn && 'Abwehr: ' + dfn, sns && 'Sinne: ' + sns, g('SaveModifiers') && 'Rettungswurf-Hinweise: ' + g('SaveModifiers').replace(/\s*\n\s*/g, ' · '), rep.hb.length && 'Als Hausregel angelegt (Hausregeln, nur auf diesem Gerät): ' + rep.hb.join('; ')].concat(extraNotes).filter(Boolean);
+  if (ddb.length) notes.push('— Aus D&D Beyond —\n• ' + ddb.join('\n• '));
   ch.notes = notes.join('\n\n');
   c = derive(ch, hb);
-  return { ch, rep, c };
+  return { ch, rep, c, newHb };
 }
 
 /* ---------- 4. Bedienung ---------- */
@@ -9978,13 +10083,14 @@ function ddbPreview(F) {
   m.innerHTML = '<div class="dlg ddbdlg" role="dialog" aria-modal="true" aria-label="Held aus D&amp;D Beyond übernehmen"><div class="dph"><b>Aus D&amp;D Beyond übernehmen</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
     '<p class="ddbhead"><b>' + esc(ch.name) + '</b> · ' + esc(c.classLabel) + ' · ' + esc(c.sp.name) + '</p>' +
     '<p class="ddbnum">RK <b>' + c.ac + '</b> · TP <b>' + c.hpMax + '</b> · Initiative <b>' + (c.init >= 0 ? '+' : '') + c.init + '</b> · Bewegung <b>' + String(c.speed).replace('.', ',') + ' m</b></p>' +
-    ul('Bitte prüfen', rep.hint.concat(open.length ? [open.length + ' offene Auswahl(en) im Bogen, z. B. ' + open.slice(0, 2).join(' ')] : []), 'hint') + ul('Nicht im Heldenbuch – steht in den Notizen', rep.miss, 'miss') + ul('Angeglichen über «Sonstiges»', rep.adj, 'adj') + ul('Übernommen', rep.ok) +
+    ul('Bitte prüfen', rep.hint.concat(open.length ? [open.length + ' offene Auswahl(en) im Bogen, z. B. ' + open.slice(0, 2).join(' ')] : []), 'hint') + ul('Nicht übernommen', rep.miss, 'miss') + ul('Neu als Hausregel (nur auf diesem Gerät)', rep.hb, 'hbl') + ul('Angeglichen über «Sonstiges»', rep.adj, 'adj') + ul('Übernommen', rep.ok) +
     '<p class="hint">Das PDF bleibt unverändert. Den Helden kannst du danach unter «Bearbeiten» wie jeden anderen anpassen.</p>' +
     '<div class="chips end ddbgo"><button class="btn ghost" data-act="closeModal">Abbrechen</button><button class="btn" data-act="ddbTake">Held anlegen</button></div></div>';
   m.hidden = false;
 }
 XA.ddbTake = () => {
   const r = S.ddb; if (!r) return; const ch = r.ch;
+  Object.values(r.newHb || {}).forEach((h) => { if (!S.hb[h.id]) { S.hb[h.id] = h; persist('h', h.id); } });
   if (S.chars[ch.id]) ch.id = typeof freshId === 'function' ? freshId() : ch.id + 'x';
   ch.updated = Date.now(); S.chars[ch.id] = ch; persist('c', ch.id); S.cur = ch.id; S.ddb = null; S.modal = null; $('#modal').hidden = true; S.view = 'heroes'; render();
   pushLog({ label: 'Übernommen', total: '✓', detail: '„' + ch.name + '“ aus D&D Beyond ist jetzt in deinen Helden' });
@@ -10221,6 +10327,7 @@ function dmgRoll(ch) {
   const sav = a.idx !== undefined && d.savage && c.feats.some((x) => x.id === 'savage') && !onceUsed(ch, 'savage'); if (sav) once.push('savage');
   if (base) parts.push({ n: base.n, s: base.s, tag: a.name.replace(/ \+\d$/, ''), gwf, savage: sav });
   if (d.ts) { const tsd = spellDice(getSpell('true-strike'), 0, c, d.ts.mod); const m2 = tsd && /^(\d+)W(\d+)/.exec(tsd); if (m2) parts.push({ n: +m2[1], s: +m2[2], tag: 'Wahrer Schlag (gleissend)' }); }
+  if (a.duel && (d.two || d.off)) flat -= a.duel;
   if (d.off && !c.feats.some((x) => x.id === 'fs-twf')) flat = Math.min(0, flat);
   if (P.raging && a.rage) flat += c.rageDmg;
   if (d.sneak && c.lv('rog') && (a.finesse || a.ranged) && !onceUsed(ch, 'sneak') && d.mode !== 'dis') { parts.push({ n: Math.ceil(c.lv('rog') / 2), s: 6, tag: 'Hinterhältig' }); once.push('sneak'); }
@@ -10541,7 +10648,7 @@ function renderBuild(c) {
     if (c.cls.order) body += '<h3 id="a-order">' + c.cls.order.label + '</h3><div class="opts">' + Object.entries(c.cls.order.opts).map(([k, [n, t]]) => '<button class="opt' + (ch.order === k ? ' on' : '') + '" data-act="pick" data-path="order" data-val="' + k + '"><b>' + n + '</b><span>' + t + '</span></button>').join('') + '</div>';
     if (ch.cls === 'dru' && c.lv('dru') >= 3 && c.subOf('dru') === 'land') body += '<h3>Landschaft (Zirkel des Landes)</h3><div class="chips">' + Object.entries(LAND).map(([k, l]) => chip(ch.land === k, l.name, 'data-act="pick" data-path="land" data-val="' + k + '"')).join('') + '</div>';
     body += '<h3>' + c.cls.name + ' bis Stufe ' + ch.level + '</h3><div class="tbl"><table><tbody>' + c.cls.table(ch.level).map(([a, b]) => '<tr><th>' + a + '</th><td>' + b + '</td></tr>').join('') + (c.hasSub ? '<tr><th>Unterklasse</th><td>' + (c.subName || 'noch wählen (' + (c.cls.subs || []).length + ' zur Wahl)') + '</td></tr>' : '<tr><th>Unterklasse</th><td>ab Stufe 3' + (c.cls.subs ? ' (' + c.cls.subs.length + ' zur Wahl)' : ': ' + c.cls.sub.name) + '</td></tr>') + '</tbody></table></div>';
-    if (c.cls.subs && ch.level >= 3) body += '<h3 id="a-sub">Unterklasse</h3><div class="opts">' + c.cls.subs.map((sb) => '<button class="opt' + (ch.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || (sb.feats[0][1] + ': ' + sb.feats[0][2])) + '</span>' + (sb.desc ? '<small class="ofeat">Ab Stufe 3: ' + esc(sb.feats.filter((f) => f[0] <= 3).map((f) => f[1]).join(', ')) + '</small>' : '') + ii('sub', ch.cls + '/' + sb.id, sb.name) + '</button>').join('') + '</div>';
+    if (c.cls.subs && ch.level >= 3) body += '<h3 id="a-sub">Unterklasse</h3><div class="opts">' + c.cls.subs.map((sb) => '<button class="opt' + (ch.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || (sb.feats[0][1] + ': ' + sb.feats[0][2])) + '</span>' + (sb.desc ? '<small class="ofeat">Ab Stufe 3: ' + esc(sb.feats.filter((f) => f[0] <= 3).map((f) => f[1]).join(', ')) + '</small>' : '') + ii('sub', ch.cls + '/' + sb.id, sb.name) + '</button>').join('') + subEigenBtn(ch, '') + '</div>' + subEigenEdit(ch, '', ch.cls, hb);
     body += featList(c.features.filter((f) => f.src === c.cls.name || f.src === c.subName));
     body += mcSection(c);
   }
@@ -10687,7 +10794,7 @@ function mcSection(c) {
     if (C.order) h += '<div class="opts">' + Object.entries(C.order.opts).map(([k, [n, t]]) => '<button class="opt' + (m.order === k ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.order" data-val="' + k + '"><b>' + n + '</b><span>' + t + '</span></button>').join('') + '</div>';
     if (m.cls === 'dru' && m.level >= 3 && c.subOf('dru') === 'land') h += '<div class="chips">' + Object.entries(LAND).map(([k, l]) => chip((m.land || 'temperate') === k, l.name, 'data-act="pick" data-path="multi.' + i + '.land" data-val="' + k + '"')).join('') + '</div>';
     const ce = (c.classes || []).find((e) => e.id === m.cls) || {};
-    if (C.subs && m.level >= 3) h += '<div class="opts">' + C.subs.map((sb) => '<button class="opt' + (m.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || sb.feats[0][1]) + '</span>' + ii('sub', m.cls + '/' + sb.id, sb.name) + '</button>').join('') + '</div>';
+    if (C.subs && m.level >= 3) h += '<div class="opts">' + C.subs.map((sb) => '<button class="opt' + (m.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.sub" data-val="' + sb.id + '"><b>' + sb.name + '</b><span>' + esc(sb.desc || sb.feats[0][1]) + '</span>' + ii('sub', m.cls + '/' + sb.id, sb.name) + '</button>').join('') + subEigenBtn(m, 'multi.' + i + '.') + '</div>' + subEigenEdit(m, 'multi.' + i + '.', m.cls, S.hb);
     h += featList(c.features.filter((f) => f.src === C.name || f.src === ce.subName));
     h += '</div>';
   });
@@ -11043,6 +11150,20 @@ function renderSpellBook() {
     '<select id="sl">' + [['all', 'Alle Grade'], ['0', 'Zaubertricks']].concat([1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => [String(g), 'Grad ' + g])).map(([v, l]) => '<option value="' + v + '"' + (f.lvl === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>' +
     '<select id="sc"><option value="all">Alle Klassen</option>' + Object.entries(CLASSES).filter(([, C]) => C.caster).map(([k, C]) => '<option value="' + k + '"' + (f.cls === k ? ' selected' : '') + '>' + C.name + '</option>').join('') + '</select></div>' +
     '<p class="hint">' + list.length + ' Zauber · Auswahl aus dem SRD 5.2.1, eigene Zauber über „Hausregeln“.</p><div class="splist cvl">' + list.map((s) => spellCard(s, s.home ? 'Hausregel' : s.classes.map((k) => (CLASSES[k] || {}).name).filter(Boolean).join(', '), false)).join('') + '</div></div>';
+}
+
+/* ---------- Eigene Unterklasse (z. B. aus D&D Beyond) ---------- */
+function subEigenBtn(m, pre) {
+  const on = m.sub === 'eigen';
+  return '<button class="opt' + (on ? ' on' : '') + '" data-act="pick" data-path="' + pre + 'sub" data-val="eigen"><b>' + (on && m.subName ? esc(m.subName) : 'Eigene Unterklasse') + '</b><span>Für Unterklassen ausserhalb des SRD, z. B. aus D&amp;D Beyond. Merkmale trägst du als Hausregel ein.</span></button>';
+}
+function subEigenEdit(m, pre, clsId, hb) {
+  if (m.sub !== 'eigen') return '';
+  const have = m.subSpells || []; const list = spellList(clsId, hb).filter((s) => s.lvl > 0 && !have.includes(s.id)).sort((a, b) => a.lvl - b.lvl || cmpDe(a.name, b.name));
+  return '<div class="box" id="a-subeigen"><div class="row">' + field('Name der Unterklasse', txt(pre + 'subName', m.subName || '', 'z. B. Schwur der Rache')) + '</div>' +
+    '<h4>Immer vorbereitete Zauber</h4>' + (have.length ? '<div class="chips">' + have.map((id) => { const sp = getSpell(id, hb); return sp ? chip(true, sp.name, 'data-act="toggle" data-path="' + pre + 'subSpells" data-val="' + id + '" title="Antippen entfernt"') : ''; }).join('') + '</div>' : '') +
+    '<select id="subSpAdd" data-pre="' + pre + '" aria-label="Zauber hinzufügen"><option value="">+ Zauber hinzufügen …</option>' + list.map((s) => '<option value="' + s.id + '">' + esc(s.name) + ' (Grad ' + s.lvl + ')</option>').join('') + '</select>' +
+    '<p class="hint">Merkmale der Unterklasse unter <b>Hausregeln</b> als «Merkmal / Fähigkeit» eintragen und dem Helden zuweisen.</p></div>';
 }
 
 /* ---------- Hausregeln ---------- */

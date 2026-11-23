@@ -39,7 +39,7 @@ function ddbDict(s, i) {
     const c = s[i];
     if (c === '<' && s[i + 1] === '<') { put({ t: 'dict' }); depth++; i += 2; continue; }
     if (c === '>' && s[i + 1] === '>') { depth--; i += 2; if (depth <= 0) return { d, end: i }; continue; }
-    if (c === '[') { put({ t: 'arr' }); depth++; i++; continue; }
+    if (c === '[') { const j = s.indexOf(']', i); const raw = j > 0 ? s.slice(i + 1, j) : ''; if (depth === 1 && key !== null && j > 0 && !/[[(<]/.test(raw)) { put({ t: 'arr', v: raw }); i = j + 1; continue; } put({ t: 'arr' }); depth++; i++; continue; }
     if (c === ']') { depth--; i++; continue; }
     if (c === '(') { const r = ddbLit(s, i); put({ t: 'str', v: r.v }); i = r.end; continue; }
     if (c === '<') { const j = s.indexOf('>', i); if (j < 0) break; put({ t: 'str', v: ddbHex(s.slice(i + 1, j)) }); i = j + 1; continue; }
@@ -52,17 +52,28 @@ function ddbDict(s, i) {
   return { d, end: i };
 }
 function ddbTake(s, out) {
-  const re = /\d+\s+\d+\s+obj\s*<</g; let m;
+  const re = /(\d+)\s+\d+\s+obj\s*<</g; let m;
   while ((m = re.exec(s))) {
     const at = m.index + m[0].length - 2; const r = ddbDict(s, at); re.lastIndex = Math.max(re.lastIndex, r.end);
-    ddbField(r.d, out);
+    ddbField(r.d, out, +m[1]);
     if (r.d.Type && r.d.Type.v === 'ObjStm') out.stm.push({ d: r.d, at: r.end });
   }
 }
-function ddbField(d, out) {
+function ddbField(d, out, num) {
+  if (d.Type && d.Type.v === 'Pages' && d.Kids && d.Kids.v) out.pages[num] = (d.Kids.v.match(/\d+(?=\s+\d+\s+R)/g) || []).map(Number);
   if (!d.T || d.T.t !== 'str' || !d.V) return;
   const name = ddbText(d.T.v).replace(/\s+/g, ' ').trim(); if (!name) return;
   out.f[name] = d.V.t === 'str' ? ddbText(d.V.v) : d.V.t === 'name' ? d.V.v : '';
+  if (/^spell(Name|Header)\d+$/.test(name) && d.Rect && d.Rect.v && d.P) { const r = d.Rect.v.trim().split(/\s+/).map(Number); if (r.length === 4) out.pos[name] = [+d.P.v, Math.max(r[1], r[3])]; }
+}
+/* Reihenfolge der Seiten aus dem Seitenbaum; Positionen → [Seitennummer, Oberkante] */
+function ddbPagePos(out) {
+  const kids = new Set(Object.values(out.pages).flat()); const order = [];
+  const walk = (n, depth) => { if (depth > 20) return; if (out.pages[n]) out.pages[n].forEach((k) => walk(k, depth + 1)); else order.push(n); };
+  Object.keys(out.pages).map(Number).filter((n) => !kids.has(n)).forEach((n) => walk(n, 0));
+  const idx = {}; order.forEach((n, i) => { idx[n] = i; });
+  const pos = {}; for (const [k, [pg, y]] of Object.entries(out.pos)) pos[k] = [idx[pg] !== undefined ? idx[pg] : 999, y];
+  return pos;
 }
 async function ddbInflate(u8) {
   if (typeof DecompressionStream !== 'function') return null;
@@ -71,7 +82,7 @@ async function ddbInflate(u8) {
 /* Liefert alle Formularfelder als { Name: Text }. Komprimierte Objektströme werden mitgelesen. */
 async function ddbFields(bytes) {
   const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-  const s = ddbLatin(u8); const out = { f: {}, stm: [] };
+  const s = ddbLatin(u8); const out = { f: {}, stm: [], pages: {}, pos: {} };
   if (!/^%PDF-/.test(s.slice(0, 1024).replace(/^[^%]*/, ''))) throw new Error('Das ist keine PDF-Datei.');
   if (/\/Encrypt\b/.test(s)) throw new Error('Das PDF ist verschlüsselt. Bitte in D&D Beyond neu exportieren.');
   ddbTake(s, out);
@@ -81,8 +92,9 @@ async function ddbFields(bytes) {
     let e = s.indexOf('endstream', k); if (e < 0) continue; if (s[e - 1] === '\n') e--; if (s[e - 1] === '\r') e--;
     const raw = await ddbInflate(u8.subarray(k, e)); if (!raw) continue;
     const t = ddbLatin(raw); const first = +((o.d.First || {}).v || 0); const nums = t.slice(0, first).trim().split(/\s+/).map(Number);
-    for (let i = 1; i < nums.length; i += 2) { const p = first + nums[i]; const q = t.indexOf('<<', p); if (q >= 0 && q - p < 8) ddbField(ddbDict(t, q).d, out); }
+    for (let i = 1; i < nums.length; i += 2) { const p = first + nums[i]; const q = t.indexOf('<<', p); if (q >= 0 && q - p < 8) ddbField(ddbDict(t, q).d, out, nums[i - 1]); }
   }
+  if (Object.keys(out.pos).length) out.f['#pos'] = ddbPagePos(out);
   return out.f;
 }
 function ddbIsSheet(F) { return !!(F && F.CharacterName !== undefined && F['CLASS LEVEL'] !== undefined && F.STR !== undefined); }
@@ -91,10 +103,10 @@ function ddbIsSheet(F) { return !!(F && F.CharacterName !== undefined && F['CLAS
 const DDB_CLS = { barbarian: 'bar', bard: 'brd', cleric: 'cle', druid: 'dru', fighter: 'fig', monk: 'mon', paladin: 'pal', ranger: 'ran', rogue: 'rog', sorcerer: 'sor', warlock: 'wlk', wizard: 'wiz' };
 const DDB_SUB = { bar: [/berserker/i, 'berserker'], brd: [/lore/i, 'lore'], cle: [/life/i, 'life'], dru: [/\bland\b/i, 'land'], fig: [/champion/i, 'champion'], mon: [/open hand/i, 'openhand'], pal: [/devotion/i, 'devotion'], ran: [/hunter/i, 'hunter'], rog: [/thief/i, 'thief'], sor: [/draconic/i, 'draconic'], wlk: [/fiend/i, 'fiend'], wiz: [/evo[ck]/i, 'evoker'] };
 const DDB_SUBF = /Subclass$|^Sacred Oath$|^Primal Path$|^Bard College$|^Divine Domain$|^Druid Circle$|^Martial Archetype$|^Monastic Tradition$|^Ranger (Archetype|Conclave)$|^Roguish Archetype$|^Sorcerous Origin$|^Otherworldly Patron$|^Arcane Tradition$/;
-const DDB_SPEC = [[/half-?elf/i, null], [/half-?orc/i, 'orc'], [/dragonborn/i, 'dragonborn'], [/dwarf/i, 'dwarf'], [/\belf\b|drow|eladrin/i, 'elf'], [/gnome/i, 'gnome'], [/goliath/i, 'goliath'], [/halfling/i, 'halfling'], [/human/i, 'human'], [/\borc\b/i, 'orc'], [/tiefling/i, 'tiefling']];
+const DDB_SPEC = [[/half-?elf/i, 'halfelf'], [/half-?orc/i, 'halforc'], [/dragonborn/i, 'dragonborn'], [/dwarf/i, 'dwarf'], [/\belf\b|drow|eladrin/i, 'elf'], [/gnome/i, 'gnome'], [/goliath/i, 'goliath'], [/halfling/i, 'halfling'], [/human/i, 'human'], [/\borc\b/i, 'orc'], [/tiefling/i, 'tiefling']];
 const DDB_BG = { acolyte: 'acolyte', criminal: 'criminal', sage: 'sage', soldier: 'soldier' };
 const DDB_SK = { Acrobatics: 'acr', AnimalHandling: 'ani', Arcana: 'arc', Athletics: 'ath', Deception: 'dec', History: 'his', Insight: 'ins', Intimidation: 'itm', Investigation: 'inv', Medicine: 'med', Nature: 'nat', Perception: 'prc', Performance: 'prf', Persuasion: 'per', Religion: 'rel', SleightOfHand: 'slt', Stealth: 'ste', Survival: 'sur' };
-const DDB_FEAT = { 'alert': 'alert', 'magic initiate (cleric)': 'mi-cle', 'magic initiate (druid)': 'mi-dru', 'magic initiate (wizard)': 'mi-wiz', 'savage attacker': 'savage', 'skilled': 'skilled', 'tough': 'tough', 'grappler': 'grappler', 'archery': 'fs-archery', 'defense': 'fs-defense', 'great weapon fighting': 'fs-gwf', 'two-weapon fighting': 'fs-twf' };
+const DDB_FEAT = { 'alert': 'alert', 'magic initiate (cleric)': 'mi-cle', 'magic initiate (druid)': 'mi-dru', 'magic initiate (wizard)': 'mi-wiz', 'savage attacker': 'savage', 'skilled': 'skilled', 'tough': 'tough', 'grappler': 'grappler', 'archery': 'fs-archery', 'defense': 'fs-defense', 'great weapon fighting': 'fs-gwf', 'two-weapon fighting': 'fs-twf', 'dueling': 'fs-duel', 'protection': 'fs-prot' };
 const DDB_INV = { 'agonizing blast': 'agonizing', 'armor of shadows': 'shadows', "devil's sight": 'devilsight', 'eldritch mind': 'mind', 'eldritch spear': 'spear', 'fiendish vigor': 'vigor', 'mask of many faces': 'faces', 'misty visions': 'misty', 'pact of the blade': 'blade', 'pact of the chain': 'chain', 'pact of the tome': 'tome', 'repelling blast': 'repelling', 'thirsting blade': 'thirsting', 'lifedrinker': 'lifedrinker', 'devouring blade': 'devouring', 'one with shadows': 'shadowsone', 'ascendant step': 'ascendant', 'otherworldly leap': 'leap', 'gift of the depths': 'depths', 'master of myriad forms': 'myriad', 'whispers of the grave': 'grave', 'witch sight': 'witchsight', 'gift of the protectors': 'protectors', 'investment of the chain master': 'chainmaster', 'visions of distant realms': 'visions', 'eldritch smite': 'smite', 'gaze of two minds': 'gaze', 'lessons of the first ones': 'lessons' };
 const DDB_WPN = { club: 'club', dagger: 'dagger', greatclub: 'greatclub', handaxe: 'handaxe', javelin: 'javelin', 'light hammer': 'lighthammer', mace: 'mace', quarterstaff: 'quarterstaff', staff: 'quarterstaff', sickle: 'sickle', spear: 'spear', dart: 'dart', 'light crossbow': 'lcrossbow', 'crossbow, light': 'lcrossbow', shortbow: 'shortbow', sling: 'sling', battleaxe: 'battleaxe', flail: 'flail', glaive: 'glaive', greataxe: 'greataxe', greatsword: 'greatsword', halberd: 'halberd', lance: 'lance', longsword: 'longsword', maul: 'maul', morningstar: 'morningstar', pike: 'pike', rapier: 'rapier', scimitar: 'scimitar', shortsword: 'shortsword', trident: 'trident', warhammer: 'warhammer', 'war pick': 'warpick', whip: 'whip', blowgun: 'blowgun', 'hand crossbow': 'hcrossbow', 'crossbow, hand': 'hcrossbow', 'heavy crossbow': 'hvcrossbow', 'crossbow, heavy': 'hvcrossbow', longbow: 'longbow', musket: 'musket', pistol: 'pistol' };
 const DDB_ARM = [[/studded/i, 'studded'], [/padded/i, 'padded'], [/\bleather\b/i, 'leather'], [/\bhide\b/i, 'hide'], [/chain shirt/i, 'chainshirt'], [/scale/i, 'scale'], [/breastplate/i, 'breastplate'], [/half plate/i, 'halfplate'], [/ring mail/i, 'ringmail'], [/chain mail/i, 'chainmail'], [/splint/i, 'splint'], [/\bplate\b/i, 'plate']];
@@ -136,16 +148,49 @@ function ddbFeatures(txt) {
 /* Auswahl-Zeile übernehmen, Nutzungsangaben («2 / Long Rest», «1 Reaction», «Special») weglassen */
 function ddbOpt(b, t) {
   const o = String(t).replace(/\s*•.*$/, '').trim();
+  const u = o.match(/(\d+)\s*\/\s*(long|short) rest/i); if (u && !b.uses) b.uses = { n: +u[1], reset: /short/i.test(u[2]) ? 'short' : 'long' };
   if (!o || /(^|:\s*)(\d+\s*\/\s*(long|short) rest|special|\d+\s+(action|bonus action|reaction|minute|hour)s?)$/i.test(o) || /^increase (two|three) scores/i.test(o)) return;
   b.opts.push(o);
 }
 
 /* ---------- 3. Held nachbauen ---------- */
+/* Zeitaufwand, Reichweite, Komponenten und Dauer aus der Zauberzeile ins Deutsche */
+function ddbRowDe(F, i) {
+  const g = (k) => String(F[k + i] == null ? '' : F[k + i]).trim();
+  const m = (x) => String(x).replace(/(\d+(?:\.\d+)?)[- ]?(?:ft\.?|feet|foot)/gi, (z, n) => String(Math.round(+n * 3) / 10).replace('.', ',') + ' m')
+    .replace(/\bmiles?\b/gi, 'Meilen').replace(/\bcone\b/gi, 'Kegel').replace(/\bline\b/gi, 'Linie').replace(/\bradius\b/gi, 'Radius').replace(/\bsphere\b/gi, 'Kugel').replace(/\bcube\b/gi, 'Würfel').replace(/\bemanation\b/gi, 'Ausstrahlung').replace(/\bcylinder\b/gi, 'Zylinder');
+  const unit = (x) => x.replace(/(\d+)\s*minutes?/gi, (z, n) => n + (n === '1' ? ' Minute' : ' Minuten')).replace(/(\d+)\s*hours?/gi, (z, n) => n + (n === '1' ? ' Stunde' : ' Stunden')).replace(/(\d+)\s*rounds?/gi, (z, n) => n + (n === '1' ? ' Runde' : ' Runden')).replace(/(\d+)\s*days?/gi, (z, n) => n + (n === '1' ? ' Tag' : ' Tage'));
+  const t = g('spellCastingTime').replace(/^1\s*A\s*\+\s*10\s*m$/i, 'Aktion (als Ritual 10 Minuten länger)'); const tm = t.match(/^(\d+)\s*(A|BA|R|m|min|h)$/i);
+  const time = !tm ? t : /^a$/i.test(tm[2]) ? 'Aktion' : /^ba$/i.test(tm[2]) ? 'Bonusaktion' : /^r$/i.test(tm[2]) ? 'Reaktion' : /^h$/i.test(tm[2]) ? unit(tm[1] + ' hours') : unit(tm[1] + ' minutes');
+  const r = g('spellRange'); const range = m(r.replace(/^self/i, 'Selbst').replace(/^touch$/i, 'Berührung').replace(/^sight$/i, 'Sicht').replace(/^unlimited$/i, 'Unbegrenzt'));
+  const d = g('spellDuration'); const conc = /concentration/i.test(d);
+  const dur = unit(d.replace(/^concentration,\s*up to\s*/i, 'bis zu ').replace(/^instantaneous$/i, 'Sofort').replace(/^until dispelled$/i, 'Bis aufgehoben').replace(/^special$/i, 'Speziell'));
+  return { time: time || 'Aktion', range: range || '—', comp: g('spellComponents').replace(/\s*,\s*/g, ', ').replace(/\bS\b/g, 'G') || '—', dur: dur || 'Sofort', conc, hit: g('spellSaveHit'), page: g('spellPage') };
+}
+/* Grad jeder Zauberzeile aus der Lage der Überschriften («=== 1st LEVEL ===») */
+function ddbLevels(F) {
+  const pos = F['#pos'] || {}; const it = [];
+  for (const [k, v] of Object.entries(pos)) {
+    let m = k.match(/^spellHeader(\d+)$/);
+    if (m) { const t = String(F[k] || ''); const lv = /cantrip/i.test(t) ? 0 : +((t.match(/(\d+)\s*(st|nd|rd|th)\b/i) || [])[1]); if (!isNaN(lv)) it.push({ p: v[0], y: v[1], lv, h: 1 }); continue; }
+    m = k.match(/^spellName(\d+)$/); if (m) it.push({ p: v[0], y: v[1], i: +m[1], h: 0 });
+  }
+  it.sort((a, b) => a.p - b.p || b.y - a.y || b.h - a.h);
+  const out = {}; let cur = null; for (const x of it) { if (x.h) cur = x.lv; else if (cur !== null) out[x.i] = cur; }
+  return out;
+}
+
 function ddbBuild(F, hb) {
-  hb = hb || {};
+  hb = Object.assign({}, hb || {}); const newHb = {};
+  const hbMake = (kind, name, more) => {
+    const ex = Object.values(hb).find((h) => h && h.kind === kind && ddbLow(h.name) === ddbLow(name)); if (ex) return ex.id;
+    const id = 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const h = Object.assign({ id, kind, name, text: '', src: 'D&D Beyond' }, kind === 'feature' ? { ac: 0, save: 0, atk: 0, dc: 0, init: 0, hpPerLevel: 0, speed: 0, uses: 0, reset: 'long' } : {}, more || {});
+    hb[id] = h; newHb[id] = h; return id;
+  };
   const g = (k) => String(F[k] == null ? '' : F[k]).trim();
   const num = (k) => { const m = g(k).replace(/−/g, '-').match(/[-+]?\d+/); return m ? +m[0] : null; };
-  const rep = { ok: [], adj: [], miss: [], hint: [] }; const extraNotes = [];
+  const rep = { ok: [], adj: [], miss: [], hint: [], hb: [] }; const extraNotes = []; const feats = [];
   /* Klassen */
   const cl = [];
   for (const m of g('CLASS LEVEL').matchAll(/([A-Za-z][A-Za-z' -]*?)\s+(\d+)/g)) { const id = DDB_CLS[ddbLow(m[1])]; if (id && !cl.some((x) => x.id === id)) cl.push({ id, lvl: +m[2], en: m[1].trim() }); else if (!id) rep.miss.push('Klasse ' + m[1].trim() + ' ' + m[2] + ' (gibt es im Heldenbuch nicht)'); }
@@ -155,26 +200,47 @@ function ddbBuild(F, hb) {
   const opt1 = (re) => { const b = blk(re); return (b && b.opts[0]) || ''; };
   const allOpts = (re) => ft.filter((b) => re.test(b.name)).flatMap((b) => b.opts);
   const featNames = ft.filter((b) => /FEATS/i.test(b.sec)).map((b) => b.name);
-  const spells = []; for (let i = 0; i < 400; i++) { const n = g('spellName' + i); if (n) spells.push({ n, id: ddbSpell(n, hb), src: g('spellSource' + i) }); }
+  const spells = []; for (let i = 0; i < 400; i++) { const n = g('spellName' + i); if (n) spells.push({ n, i, id: ddbSpell(n, hb), src: g('spellSource' + i) }); }
+  const lvOf = ddbLevels(F); const hbSpells = [];
+  spells.forEach((s, k) => {
+    if (s.id) return;
+    const name = s.n.replace(/\s*\[[A-Z]+\]\s*$/, '').trim(); const known = spells.find((o) => o.id && o.id.startsWith('hb:') && ddbLow(o.n.replace(/\s*\[[A-Z]+\]\s*$/, '')) === ddbLow(name));
+    if (known) { s.id = known.id; return; }
+    let lv = lvOf[s.i]; if (lv === undefined) { for (let j = k - 1; j >= 0 && lv === undefined; j--) if (spells[j].id) lv = (getSpell(spells[j].id, hb) || {}).lvl; }
+    const r = ddbRowDe(F, s.i); const cls = DDB_CLS[ddbLow((s.src.match(/^[A-Za-z]+/) || [''])[0])];
+    s.id = 'hb:' + hbMake('spell', name, { lvl: lv || 0, school: '', classes: cls ? [cls] : [], time: r.time, range: r.range, comp: r.comp, dur: r.dur, conc: r.conc, ritual: /\[R\]/.test(s.n),
+      text: 'Aus D&D Beyond übernommen' + (r.page ? ' (' + r.page + ')' : '') + '. Die Beschreibung steht nicht im PDF – bitte in eigenen Worten ergänzen' + (r.hit && r.hit !== '--' ? '. Rettungswurf/Angriff laut D&D Beyond: ' + r.hit : '') + '.' });
+    hbSpells.push(name);
+  });
+  if (hbSpells.length) rep.hb.push('Zauber: ' + [...new Set(hbSpells)].join(', '));
 
-  const ch = newChar({ name: g('CharacterName') || 'Importierter Held', player: g('PLAYER NAME'), cls: cl[0].id, level: cl[0].lvl, method: 'manual', species: 'human', speciesChoice: '', classSkills: [], extraSkills: [], expertise: [], freeSkills: [], freeExp: [] });
+  const ch = newChar({ name: g('CharacterName') || 'Importierter Held', player: g('PLAYER NAME'), cls: cl[0].id, level: cl[0].lvl, method: 'manual', species: 'human', speciesChoice: '', classSkills: [], extraSkills: [], expertise: [], freeSkills: [], freeExp: [], bonusSpells: [], homebrew: [] });
   ch.multi = cl.slice(1).map((x) => ({ cls: x.id, level: x.lvl, sub: '', cantrips: [], spells: [] }));
   ch.importedFrom = 'D&D Beyond';
   rep.ok.push('Klasse: ' + cl.map((x) => CLASSES[x.id].name + ' ' + x.lvl).join(' / '));
   /* Unterklassen */
-  const subOpt = ft.filter((b) => DDB_SUBF.test(b.name)).map((b) => b.opts[0]).filter(Boolean);
+  const subBl = ft.filter((b) => DDB_SUBF.test(b.name) && b.opts[0]);
+  const customSub = [];
   cl.forEach((x, i) => {
     const tgt = i ? ch.multi[i - 1] : ch; const C = CLASSES[x.id]; if (!C.subs || x.lvl < 3) return;
-    const r = DDB_SUB[x.id]; const hit = subOpt.find((o) => r && r[0].test(o));
-    const own = !hit && subOpt.map((o) => C.subs.find((s) => ddbLow(s.name) === ddbLow(o))).find(Boolean);
-    if (hit && C.subs.some((s) => s.id === r[1])) { tgt.sub = r[1]; rep.ok.push('Unterklasse: ' + C.subs.find((s) => s.id === r[1]).name); }
-    else if (own) { tgt.sub = own.id; rep.ok.push('Unterklasse: ' + own.name); }
-    else { const nm = subOpt.find((o) => !Object.values(DDB_SUB).some((rr) => rr[0].test(o) && rr !== r)) || subOpt[i] || '?'; rep.miss.push('Unterklasse «' + nm + '» (' + C.name + ') – bitte im Heldenbuch eine wählen'); }
+    const sb = subBl.find((b) => new RegExp('\\b' + x.en + '\\b', 'i').test(b.sec)) || subBl[i]; const o = sb ? sb.opts[0] : '';
+    const r = DDB_SUB[x.id]; const hit = o && r && r[0].test(o) && C.subs.find((s) => s.id === r[1]);
+    const own = !hit && o && C.subs.find((s) => ddbLow(s.name) === ddbLow(o));
+    if (hit || own) { tgt.sub = (hit || own).id; rep.ok.push('Unterklasse: ' + (hit || own).name); return; }
+    if (!o) { rep.hint.push(C.name + ': Unterklasse bitte wählen'); return; }
+    tgt.sub = 'eigen'; tgt.subName = o; tgt.subSpells = []; customSub.push({ x, tgt });
+    const k0 = ft.indexOf(sb); const parts = ft.filter((b, k) => k > k0 && b.sec === sb.sec && b.text && !/^(hit points|proficiencies|spellcasting|ability score improvement)$/i.test(b.name)).map((b) => b.name + ': ' + b.text);
+    ch.homebrew.push(hbMake('feature', o, { text: (parts.join('\n\n') || 'Unterklasse aus D&D Beyond.') + '\n\n(Aus D&D Beyond übernommen.)' }));
+    rep.ok.push('Unterklasse: ' + o + ' (eigene)'); rep.hb.push('Unterklasse ' + o + ' (' + C.name + ')');
   });
   /* Spezies */
   const race = g('RACE'); const spHit = DDB_SPEC.find(([re]) => re.test(race));
   if (spHit && spHit[1]) { ch.species = spHit[1]; rep.ok.push('Spezies: ' + SPECIES[ch.species].name + (/half-?orc/i.test(race) ? ' (aus «' + race + '»)' : '')); }
-  else { rep.miss.push('Spezies «' + (race || '?') + '» gibt es im Heldenbuch nicht – vorläufig Mensch, Merkmale stehen in den Notizen'); ch.humanFeat = ''; ch.speciesFallback = true; ft.filter((b) => /SPECIES|RACIAL/i.test(b.sec)).forEach((b) => extraNotes.push('Spezies-Merkmal ' + b.name + (b.text ? ': ' + b.text.slice(0, 300) : ''))); }
+  else {
+    ch.humanFeat = ''; ch.speciesFallback = true; const tr = ft.filter((b) => /SPECIES|RACIAL/i.test(b.sec) && b.text).map((b) => b.name + ': ' + b.text);
+    ch.homebrew.push(hbMake('feature', 'Volk: ' + (race || 'unbekannt'), { text: (tr.join('\n\n') || 'Spezies aus D&D Beyond.') + '\n\n(Aus D&D Beyond übernommen.)' }));
+    rep.miss.push('Spezies «' + (race || '?') + '» gibt es im Heldenbuch nicht – vorläufig Mensch, die Merkmale stehen als Hausregel beim Helden'); rep.hb.push('Volk: ' + race);
+  }
   const SPd = SPECIES[ch.species];
   if (SPd.choice) {
     const opts = Object.keys(SPd.choice.opts); const src = [race, opt1(/Draconic Ancestry|Elven Lineage$|Gnomish Lineage|Giant Ancestry|Fiendish Legacy$/)].join(' ');
@@ -282,6 +348,14 @@ function ddbBuild(F, hb) {
   }
   if (ch.inv.length || ch.items.length) rep.ok.push('Ausrüstung: ' + (ch.inv.length + ch.items.length) + ' Einträge' + (ch.items.length ? ' (davon ' + ch.items.length + ' magisch)' : ''));
   ch.coins = { pm: num('PP') || 0, gm: num('GP') || 0, em: num('EP') || 0, sm: num('SP') || 0, km: num('CP') || 0 }; ch.gold = ch.coins.gm;
+  /* Immer vorbereitete Zauber der eigenen Unterklasse (z. B. «Paladin (Always Prepared)», «Succubus Spells (Always Prepared)») */
+  const baseAlways = (id) => new Set(Object.values(CLASSES[id].always || {}).flat());
+  const classEn = cl.map((x) => x.en.toLowerCase());
+  customSub.forEach(({ x, tgt }) => {
+    const ids = spells.filter((sp) => sp.id && /always prepared/i.test(sp.src) && !baseAlways(x.id).has(sp.id)).filter((sp) => { const pre = ddbLow(sp.src.replace(/\s*\(always prepared\)/i, '')); const own = classEn.includes(pre); return own ? pre === x.en.toLowerCase() : customSub.length === 1 || /spells$/i.test(pre); }).map((sp) => sp.id);
+    tgt.subSpells = [...new Set(ids)];
+    if (tgt.subSpells.length) rep.ok.push(tgt.subName + ': ' + tgt.subSpells.length + ' immer vorbereitete Zauber');
+  });
   /* Zauber je Klasse */
   const other = []; const clsRe = [];
   c = derive(ch, hb);
@@ -301,12 +375,27 @@ function ddbBuild(F, hb) {
   c = derive(ch, hb); (c.spell.classes || []).forEach((s) => s.always.forEach((id) => taken.add(id)));
   Object.values(ch.mi).forEach((m) => { (m.cantrips || []).forEach((id) => taken.add(id)); if (m.spell) taken.add(m.spell); });
   if (typeof SPd.spells === 'function') { try { SPd.spells(c).forEach((id) => taken.add(id)); } catch (e) { /* ältere Spezies ohne Zauberliste */ } }
-  const unknownSp = [...new Set(spells.filter((s) => !s.id).map((s) => s.n.replace(/\s*\[R\]$/, '')))];
+  customSub.forEach(({ tgt }) => (tgt.subSpells || []).forEach((id) => taken.add(id)));
   spells.forEach((s) => { if (s.id && !taken.has(s.id) && !clsRe.some((re) => re && re.test(s.src)) && !other.some((o) => o.id === s.id)) other.push(s); });
-  if (unknownSp.length) rep.miss.push('Zauber nicht im Heldenbuch: ' + unknownSp.join(', '));
-  if (other.length) extraNotes.push('Weitere Zauber laut D&D Beyond: ' + other.map((s) => getSpell(s.id, hb).name + ' (' + s.src + ')').join(', '));
-  featMiss.forEach((n) => { const b = /^Kampfstil /.test(n) ? blk(/^Fighting Style$/) : blk(new RegExp('^' + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$')); extraNotes.push('Talent/Merkmal ' + n + (b && b.text ? ': ' + b.text.slice(0, 300) : '')); });
-  if (featMiss.length) rep.miss.push('Talente und Merkmale: ' + featMiss.join(', '));
+  /* Übrige Zauber (Talente, Anrufungen, Pakte) als Zusatzzauber; Zauber aus Gegenständen bleiben beim Gegenstand */
+  const casterAb = ((c.spell.classes || [])[0] || {}).ability || 'cha'; const fromItem = [];
+  other.forEach((sp) => {
+    const src = sp.src.replace(/\s*\(always prepared\)/i, '').trim();
+    if (eq.some((x) => ddbLow(x.n) === ddbLow(src))) { fromItem.push(getSpell(sp.id, hb).name + ' (' + src + ')'); return; }
+    const bb = ft.find((b) => ddbLow(b.name) === ddbLow(src)); const ab = (bb && ddbAbil(bb.opts.join(' '))) || (/invocation|pact/i.test(src) ? 'cha' : casterAb);
+    ch.bonusSpells.push({ id: sp.id, src, ab });
+  });
+  if (ch.bonusSpells.length) rep.ok.push('Weitere Zauber: ' + ch.bonusSpells.map((b) => getSpell(b.id, hb).name + ' (' + b.src + ')').join(', '));
+  if (fromItem.length) extraNotes.push('Zauber aus Gegenständen: ' + fromItem.join(', '));
+  /* Talente und Merkmale ohne Gegenstück im Heldenbuch als Hausregel beim Helden */
+  featMiss.forEach((n) => {
+    if (/kein freier Platz/.test(n)) { extraNotes.push('Talent ' + n.replace(' (kein freier Platz)', '') + ': in D&D Beyond zusätzlich gewählt, Wirkung über Fertigkeiten/TP angeglichen'); return; }
+    const isStyle = /^Kampfstil /.test(n); const b = isStyle ? blk(/^Fighting Style$/) : blk(new RegExp('^' + n.replace(/^Anrufung /, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'));
+    const name = isStyle ? 'Kampfstil: ' + n.slice(9) : n.replace(/^Anrufung /, '');
+    ch.homebrew.push(hbMake('feature', name, { text: ((b && b.text) || 'Aus D&D Beyond.') + '\n\n(Aus D&D Beyond übernommen.)', uses: b && b.uses ? b.uses.n : 0, reset: b && b.uses ? b.uses.reset : 'long' }));
+    rep.hb.push(name);
+  });
+  ch.homebrew = [...new Set(ch.homebrew)];
   /* Abgleich mit den PDF-Zahlen über «Sonstiges» */
   c = derive(ch, hb);
   const adj = (k, have, want, label, unit) => { if (want == null || isNaN(want) || want === have) return; const d = Math.round((want - have) * 10) / 10; ch.misc[k] = Math.round(((+ch.misc[k] || 0) + d) * 10) / 10; rep.adj.push(label + ' ' + (d > 0 ? '+' : '') + String(d).replace('.', ',') + (unit || '') + ' (D&D Beyond ' + String(want).replace('.', ',') + (unit || '') + ', Heldenbuch ' + String(have).replace('.', ',') + (unit || '') + ')'); };
@@ -337,11 +426,11 @@ function ddbBuild(F, hb) {
     g('Backstory') ? 'Hintergrundgeschichte:\n' + g('Backstory') : '',
     Object.keys(F).filter((k) => /^(AdditionalNotes|Notes)\d*$/.test(k)).map((k) => g(k)).filter((x) => x && x !== '-').join('\n')].filter(Boolean);
   const tools = sec('TOOLS'); const dfn = g('Defenses').replace(/\s*\n\s*/g, ' · '); const sns = g('AdditionalSenses');
-  const ddb = [tools && 'Werkzeuge: ' + tools, dfn && 'Abwehr: ' + dfn, sns && 'Sinne: ' + sns, g('SaveModifiers') && 'Rettungswurf-Hinweise: ' + g('SaveModifiers').replace(/\s*\n\s*/g, ' · ')].concat(rep.miss.filter((m) => /^Unterklasse/.test(m))).concat(extraNotes).filter(Boolean);
-  if (ddb.length) notes.push('— Aus D&D Beyond (im Heldenbuch nicht abgebildet) —\n• ' + ddb.join('\n• '));
+  const ddb = [tools && 'Werkzeuge: ' + tools, dfn && 'Abwehr: ' + dfn, sns && 'Sinne: ' + sns, g('SaveModifiers') && 'Rettungswurf-Hinweise: ' + g('SaveModifiers').replace(/\s*\n\s*/g, ' · '), rep.hb.length && 'Als Hausregel angelegt (Hausregeln, nur auf diesem Gerät): ' + rep.hb.join('; ')].concat(extraNotes).filter(Boolean);
+  if (ddb.length) notes.push('— Aus D&D Beyond —\n• ' + ddb.join('\n• '));
   ch.notes = notes.join('\n\n');
   c = derive(ch, hb);
-  return { ch, rep, c };
+  return { ch, rep, c, newHb };
 }
 
 /* ---------- 4. Bedienung ---------- */
@@ -361,13 +450,14 @@ function ddbPreview(F) {
   m.innerHTML = '<div class="dlg ddbdlg" role="dialog" aria-modal="true" aria-label="Held aus D&amp;D Beyond übernehmen"><div class="dph"><b>Aus D&amp;D Beyond übernehmen</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
     '<p class="ddbhead"><b>' + esc(ch.name) + '</b> · ' + esc(c.classLabel) + ' · ' + esc(c.sp.name) + '</p>' +
     '<p class="ddbnum">RK <b>' + c.ac + '</b> · TP <b>' + c.hpMax + '</b> · Initiative <b>' + (c.init >= 0 ? '+' : '') + c.init + '</b> · Bewegung <b>' + String(c.speed).replace('.', ',') + ' m</b></p>' +
-    ul('Bitte prüfen', rep.hint.concat(open.length ? [open.length + ' offene Auswahl(en) im Bogen, z. B. ' + open.slice(0, 2).join(' ')] : []), 'hint') + ul('Nicht im Heldenbuch – steht in den Notizen', rep.miss, 'miss') + ul('Angeglichen über «Sonstiges»', rep.adj, 'adj') + ul('Übernommen', rep.ok) +
+    ul('Bitte prüfen', rep.hint.concat(open.length ? [open.length + ' offene Auswahl(en) im Bogen, z. B. ' + open.slice(0, 2).join(' ')] : []), 'hint') + ul('Nicht übernommen', rep.miss, 'miss') + ul('Neu als Hausregel (nur auf diesem Gerät)', rep.hb, 'hbl') + ul('Angeglichen über «Sonstiges»', rep.adj, 'adj') + ul('Übernommen', rep.ok) +
     '<p class="hint">Das PDF bleibt unverändert. Den Helden kannst du danach unter «Bearbeiten» wie jeden anderen anpassen.</p>' +
     '<div class="chips end ddbgo"><button class="btn ghost" data-act="closeModal">Abbrechen</button><button class="btn" data-act="ddbTake">Held anlegen</button></div></div>';
   m.hidden = false;
 }
 XA.ddbTake = () => {
   const r = S.ddb; if (!r) return; const ch = r.ch;
+  Object.values(r.newHb || {}).forEach((h) => { if (!S.hb[h.id]) { S.hb[h.id] = h; persist('h', h.id); } });
   if (S.chars[ch.id]) ch.id = typeof freshId === 'function' ? freshId() : ch.id + 'x';
   ch.updated = Date.now(); S.chars[ch.id] = ch; persist('c', ch.id); S.cur = ch.id; S.ddb = null; S.modal = null; $('#modal').hidden = true; S.view = 'heroes'; render();
   pushLog({ label: 'Übernommen', total: '✓', detail: '„' + ch.name + '“ aus D&D Beyond ist jetzt in deinen Helden' });
