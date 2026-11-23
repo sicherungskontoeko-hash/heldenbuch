@@ -69,6 +69,19 @@ Gut zu wissen:
 
 ---
 
+## 4. Claude Desktop als Co-Spielleiter (PC-App)
+
+Claude Desktop kann den Tisch direkt lesen und für die Spielleitung handeln: Lage abfragen, für Gegner würfeln, Personen und Aufträge eintragen, in die Chronik schreiben, Handouts schicken. Das läuft über dein Claude-Abo (auch Pro), ohne Zusatzkosten.
+
+1. Claude Desktop installieren (claude.ai/download) und einmal starten.
+2. In der Heldenbuch-PC-App: **✦ Claude fragen › Claude Desktop › Mit Claude Desktop verbinden**. Die App trägt sich selbst in die Einstellungen von Claude Desktop ein (mit Sicherungskopie der alten Datei).
+3. Claude Desktop ganz beenden (auch im Infobereich) und neu starten.
+4. Im Chat zum Beispiel: «Wie ist die Lage am Tisch?», «Der Goblin-Krieger 1 greift Ilva an», «Trag Prunella als Verbündete ein, die Spieler wissen davon».
+
+Die PC-App muss dabei offen sein. In Claude Desktop lässt sich pro Werkzeug einstellen, ob Claude vorher fragen muss.
+
+**Nutzung sparen:** Für den Spielabend Sonnet oder Haiku wählen statt Opus und den Denkaufwand niedrig stellen. Pro Abend einen neuen Chat beginnen. Claude ruft zuerst die kurze Lage ab und danach nur noch, was neu ist.
+
 ## Hinweise
 
 - Die Claude-Version (Artifact) und die App sind getrennte Welten: Ein Tisch in Claude und ein Raum in der App sind nicht verbunden. Helden kannst du per **Exportieren/Laden** hin- und herschieben.
