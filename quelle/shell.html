@@ -1299,6 +1299,13 @@ body{margin:0}
   .sheet[data-mg] .cols .blk[data-grp~="kampf"]>h2{font-size:1.15rem;line-height:1.25}
   .sheet[data-mg] .cols .blk[data-grp~="kampf"]>h2 small{font-size:.72rem}
   .sheet[data-mg]>.turnblk{margin-bottom:10px}
+  /* Konzentration und Zustand in der Werteleiste: eigene Zeile, Name lesbar statt «S.» und «Ver» */
+  .vrow .vbar{flex-wrap:wrap}
+  .vbar:has(>.vconc,>.vcond)::after{content:'';flex-basis:100%;order:1;height:0}
+  .vbar>.vconc,.vbar>.vcond{order:2;min-width:0;min-height:0;max-width:100%;display:flex;align-items:baseline;gap:6px;padding:4px 10px}
+  .vbar>.vconc{flex:0 1 auto}
+  .vbar>.vcond{flex:1 1 auto}
+  .vbar>.vconc b,.vbar>.vcond b{font-size:.95rem;min-width:0;overflow:hidden;text-overflow:ellipsis}
 }
 /* unter 390 px reicht die Breite nicht für «Bonusaktion»: Buchstabe und Stand genügen (Name bleibt als aria-label) */
 @media (max-width:389px){

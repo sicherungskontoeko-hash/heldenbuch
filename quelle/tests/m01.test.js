@@ -40,6 +40,8 @@ const lage = () => { const nav = document.querySelector('#bnav'); const navH = n
     const g = await p.evaluate(lage); mess[k].mit_warnung = g;
     if (fotos && [320, 390].includes(w)) await p.screenshot({ path: path.join(fotos, 'm01-' + w + '-warnung.png') });
     T(k + ': aktive Zustände und Konzentration stehen über den Angriffen', g.conds !== null && g.conds < g.top && g.strow !== null && g.strow < g.top, g);
+    if (mob) { const vb = await p.evaluate(() => ['.vb.vconc b', '.vb.vcond b'].map((s) => { const e = document.querySelector(s); return e ? { text: e.textContent, ganz: e.scrollWidth <= e.clientWidth + 1, breite: Math.round(e.clientWidth) } : null; }));
+      T(k + ': Werteleiste zeigt «Segnen» und «Vergiftet, Erschöpfung 1» lesbar (nicht abgeschnitten)', vb[0] && vb[0].ganz && vb[0].text === 'Segnen' && vb[1] && /Vergiftet/.test(vb[1].text) && vb[1].ganz, vb); }
     // 0 TP: Todesrettung über den Angriffen
     await p.evaluate(() => { const P = cur().play; P.conc = null; P.cond = []; P.exh = 0; P.hp = 0; P.ds = [0, 0]; render(); window.scrollTo(0, 0); }); await p.waitForTimeout(100);
     const d = await p.evaluate(lage); mess[k].null_tp = d;
