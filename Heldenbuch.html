@@ -7,7 +7,7 @@
    weil die App ihre Adresse (localhost) dabei nicht wechselt.
    Sicherung: Startet eine heruntergeladene Version nicht sauber, wird sie verworfen und die eingebaute genutzt. */
 (function () {
-  var BUILD = 1795422694, VER = '1.9';
+  var BUILD = 1795425714, VER = '1.9';
   var REMOTE = 'https://sicherungskontoeko-hash.github.io/heldenbuch/';
   var C = window.Capacitor; var native = !!(C && (typeof C.isNativePlatform === 'function' ? C.isNativePlatform() : C.isNative));
   if (window.HB_BOOT_TEST) native = true; /* nur für Tests */
@@ -1283,6 +1283,9 @@ body.hl-erkl0 .sheet .ii,body.hl-erkl0 .hlp,body.hl-erkl0 .slb{display:none!impo
 .kbp summary{cursor:pointer}.kbp summary small{color:var(--muted);margin-left:6px}.kbpb h4{margin:10px 0 4px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .kbpl{list-style:none;margin:0;padding:0;display:grid;gap:6px}.kbpl li{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:center}.kbpl li small{grid-column:1/-1;color:var(--muted);font-size:.82rem}.kbpl li .kbst{justify-self:start}.kbpl li.dim b{opacity:.6}
 .brdesk summary{cursor:pointer}.brdesk summary small{color:var(--muted);margin-left:6px}.brdesk .okc{color:#9fd49a}.brdesk .badc{color:#f0a08a}.brsn{white-space:pre-wrap;font-size:.76rem;max-height:180px;overflow:auto;background:rgba(0,0,0,.25);padding:8px;border-radius:8px}
+.stg{display:grid;gap:4px;font-size:.8rem;color:var(--muted);margin:0 0 6px}.stg small{color:var(--faint)}.stg textarea,.stab textarea,.stnew textarea,.stnew input{font:inherit;width:100%}.stnew{margin:8px 0}.stnew summary{cursor:pointer;color:var(--gold)}.stnew>*:not(summary){margin-top:6px}
+/* Hohe Fenster auf kleinen Bildschirmen: scrollen statt oben und unten abgeschnitten */
+#modal{overflow-y:auto;overscroll-behavior:contain;place-items:safe center}
 /* ---- Lesbarkeit (1.9.29): Leisten deckend, nichts scheint durch, kleine Handys ohne Überlappung ---- */
 body{margin:0}
 #top,.shbar,#bnav{background:rgb(var(--bg-rgb));-webkit-backdrop-filter:none;backdrop-filter:none}
@@ -4418,7 +4421,7 @@ function helpView() {
     '<section class="blk hlsec"><h2>Wie viel Hilfe?</h2><p class="hint">Einsteiger bekommen alles erklärt, Erfahrene sehen nur ihren Bogen. Gilt auf diesem Gerät.</p>' + hlPanel('help') + '</section>' +
     sec('Helden erschaffen', ['Unter <b>Erschaffen</b> gehst du Schritt für Schritt durch Klasse, Herkunft, Attribute, Fertigkeiten, Zauber und Ausrüstung.', 'Rote Hinweise rechts (auf dem Handy oben) zeigen, was noch fehlt – antippen bringt dich direkt zum richtigen Feld.', 'Alle Werte (RK, TP, Angriffe, Zauber-SG, Plätze) rechnet die App automatisch.']) +
     sec('Spielen', ['Auf dem <b>Bogen</b> tippst du Attribute, Fertigkeiten, Rettungswürfe oder Angriffe an – die App würfelt mit Animation und beachtet Vor-/Nachteil und Zustände.', 'Oben im Bogen wechselst du zwischen <b>Kampf, Werte, Zauber, Fähigkeiten, Ausrüstung, Begleiter</b> und <b>Notizen</b>. Darunter stehen immer TP, RK, Initiative und Bewegung – TP antippen trägt Schaden oder Heilung ein.', 'Vertan? <b>↶</b> rechts in der Reiterleiste nimmt den letzten Schritt zurück, <b>↷</b> holt ihn wieder. <b>⟲ Zug</b> (Zugleiste oder ⋯) spult alles seit Beginn deines Zuges zurück.', 'Jeder Wurf landet im <b>Würfelverlauf</b> (Würfelfenster antippen oder Mehr → Würfelverlauf), auch die der Kreaturen und Mitspieler.', 'Zauber wirken zieht den Platz automatisch ab. Konzentration, Segnen, Mal des Jägers usw. werden verfolgt.', 'Bei 0 TP würfelst du Todesrettungswürfe. Nach drei Fehlschlägen entscheidet die Spielleitung über Gnade.', 'Der Würfelbecher unten links würfelt beliebige Würfel (bis 30 Stück).']) +
-    sec('Gemeinsam spielen', [app ? 'Unter <b>Tisch</b> erstellt die Spielleitung einen Raum. Den <b>Raumcode</b> schickst du per WhatsApp – Mitspieler tippen ihn ein und sind verbunden (Handy und PC gemischt).' : 'Unter <b>Tisch</b> treten alle derselben Kampagne bei. Mitspieler musst du einmal per E-Mail als Bearbeiter einladen.', 'Die Spielleitung startet den Kampf, alle würfeln Initiative, und wer am Zug ist, sieht seinen Bildschirm leuchten.', 'Gegner fügt die Spielleitung im Kampf über <b>+ Gegner</b> hinzu (Bestiarium, Zufallsbegegnung oder ohne Werte). Ist ein Gegner am Zug, zeigt ein Kasten seine Angriffe und zählt mit. Spieler sehen bei Gegnern nur den Zustand (z. B. „schwer verletzt“), nicht die genauen TP.', 'Rast, Beute, EP und Handouts verteilt die Spielleitung für alle mit einem Tipp.', 'Abenteuer leitet die Spielleitung unter <b>Abenteuer</b>: Vorlesetext als Handout teilen, Kampf mit einem Tipp beginnen, Beute ins Formular übernehmen. Würfeltabellen der Spielleitung bleiben geheim.', '<b>Was tust du?</b> Spieler sagen am Tisch oder auf dem Bogen an, was ihr Held tut – tippen oder mit dem Mikrofon der Handytastatur sprechen. Die Spielleitung sieht die Ansagen oben, hakt sie ab (✓) oder gibt sie mit «An Claude» weiter.', 'Die <b>Chronik</b> der Spielleitung schreibt von selbst mit: Szenen, Handouts, Kämpfe, Beute, Entscheidungen, Rasten, Stufenaufstiege und erledigte Ansagen. «Was bisher geschah» macht daraus mit Claude einen Rückblick zum Vorlesen.', '<b>✦ Claude fragen</b> (Tisch, Abenteuer oder Mehr) fasst Szene, Gruppe, Kampf und letzte Würfe zusammen. In claude.ai antwortet Claude direkt, in der App kopierst du die Lage in die Claude-App.', 'Unter <b>📜 Chronik</b> schreibt die App mit, was am Spielabend passiert. Daneben liegen die Reiter <b>Personen</b>, <b>Orte</b> und <b>Aufträge</b>: Name, ein Satz, eine geheime Notiz und der Stand (z. B. verbündet, erledigt). Setzt die Spielleitung «Die Spieler wissen davon», sehen die Spieler den Eintrag am Tisch unter <b>Bekannt</b> – die geheime Notiz nie.', 'In der <b>PC-App</b> kann Claude Desktop den Tisch direkt lesen und für die Spielleitung handeln: unter <b>✦ Claude fragen › Claude Desktop</b> einmal «Mit Claude Desktop verbinden», Claude Desktop neu starten, dann im Chat zum Beispiel «Wie ist die Lage?» oder «Der Goblin-Krieger 1 greift Ilva an». Claude würfelt für Gegner, trägt Personen und Aufträge ein, schreibt in die Chronik und schickt Handouts. Das läuft über dein Claude-Abo; für den Spielabend Sonnet statt Opus wählen und pro Abend einen neuen Chat beginnen spart Nutzung.']) +
+    sec('Gemeinsam spielen', [app ? 'Unter <b>Tisch</b> erstellt die Spielleitung einen Raum. Den <b>Raumcode</b> schickst du per WhatsApp – Mitspieler tippen ihn ein und sind verbunden (Handy und PC gemischt).' : 'Unter <b>Tisch</b> treten alle derselben Kampagne bei. Mitspieler musst du einmal per E-Mail als Bearbeiter einladen.', 'Die Spielleitung startet den Kampf, alle würfeln Initiative, und wer am Zug ist, sieht seinen Bildschirm leuchten.', 'Gegner fügt die Spielleitung im Kampf über <b>+ Gegner</b> hinzu (Bestiarium, Zufallsbegegnung oder ohne Werte). Ist ein Gegner am Zug, zeigt ein Kasten seine Angriffe und zählt mit. Spieler sehen bei Gegnern nur den Zustand (z. B. „schwer verletzt“), nicht die genauen TP.', 'Rast, Beute, EP und Handouts verteilt die Spielleitung für alle mit einem Tipp.', 'Abenteuer leitet die Spielleitung unter <b>Abenteuer</b>: Vorlesetext als Handout teilen, Kampf mit einem Tipp beginnen, Beute ins Formular übernehmen. Würfeltabellen der Spielleitung bleiben geheim.', '<b>Was tust du?</b> Spieler sagen am Tisch oder auf dem Bogen an, was ihr Held tut – tippen oder mit dem Mikrofon der Handytastatur sprechen. Die Spielleitung sieht die Ansagen oben, hakt sie ab (✓) oder gibt sie mit «An Claude» weiter.', 'Die <b>Chronik</b> der Spielleitung schreibt von selbst mit: Szenen, Handouts, Kämpfe, Beute, Entscheidungen, Rasten, Stufenaufstiege und erledigte Ansagen. «Was bisher geschah» macht daraus mit Claude einen Rückblick zum Vorlesen.', '<b>✦ Claude fragen</b> (Tisch, Abenteuer oder Mehr) fasst Szene, Gruppe, Kampf und letzte Würfe zusammen. In claude.ai antwortet Claude direkt, in der App kopierst du die Lage in die Claude-App.', 'Unter <b>📜 Chronik</b> schreibt die App mit, was am Spielabend passiert. Daneben liegen die Reiter <b>Personen</b>, <b>Orte</b> und <b>Aufträge</b>: Name, ein Satz, eine geheime Notiz und der Stand (z. B. verbündet, erledigt). Setzt die Spielleitung «Die Spieler wissen davon», sehen die Spieler den Eintrag am Tisch unter <b>Bekannt</b> – die geheime Notiz nie.', 'In der <b>PC-App</b> kann Claude Desktop den Tisch direkt lesen und für die Spielleitung handeln: unter <b>✦ Claude fragen › Claude Desktop</b> einmal «Mit Claude Desktop verbinden», Claude Desktop neu starten, dann im Chat zum Beispiel «Wie ist die Lage?» oder «Der Goblin-Krieger 1 greift Ilva an». Claude würfelt für Gegner, trägt Personen und Aufträge ein, schreibt in die Chronik und schickt Handouts. Am Ende des Abends «Abend abschliessen» sagen: Die Zusammenfassung landet im Reiter <b>Spielstand</b>, und ein neuer Chat setzt dort an. Das läuft über dein Claude-Abo; für den Spielabend Sonnet statt Opus wählen und pro Abend einen neuen Chat beginnen spart Nutzung.']) +
     sec('Sichern', [app ? 'Deine Helden werden auf diesem Gerät gespeichert. Unter <b>Helden</b> sicherst du mit <b>Alles sichern</b> Helden, Hausregeln, eigene Monster und Notizen in einer Datei.' : 'Deine Helden werden in deinem Claude-Konto gespeichert. Unter <b>Helden</b> erhältst du mit <b>Alles sichern</b> zusätzlich eine Datei mit allem.', 'Beim ersten Start fragt die App nach deinem Namen. So sehen die anderen am Tisch, wer welchen Helden spielt.', 'Hast du seit der letzten Sicherung viel gespielt, fragt die App beim nächsten Start einmal, ob sie eine Sicherungsdatei anlegen soll.', 'Stört dich am Spielabend etwas, tippe im Menü <b>⋯</b> auf <b>Stolperstein melden</b>. Ein Satz genügt; die App merkt sich, wo du warst. Danach kopierst du alle Einträge und schickst sie Claude.']) +
     '<p class="hint">Regeln nach dem SRD 5.2.1 (CC-BY-4.0), eigene deutsche Zusammenfassung. Mit ✦ markierte Inhalte sind eigene Erfindungen.</p>' + (typeof window.HB_VER === 'string' ? '<p class="hint">Version ' + esc(window.HB_VER) + '</p>' : '') + '</div>';
 }
@@ -9117,7 +9120,7 @@ function kbTabs() {
   const bk = kbBooks();
   return '<div class="kbbar">' + (bk.length > 1 ? '<label class="kbbook">Buch <select id="kbBook" aria-label="Buch wählen">' + bk.map(([k, nm]) => '<option value="' + esc(k) + '"' + (k === key ? ' selected' : '') + '>' + esc(nm) + '</option>').join('') + '</select></label>' : '') +
     '<div class="chips kbtabs" role="tablist">' + chip(t === 'chr', 'Chronik', 'role="tab" data-act="kbTab" data-arg="chr"') +
-    ['p', 'o', 'a'].map((k) => chip(t === k, KB_TYP[k][0] + (n(k) ? ' <small>' + n(k) + '</small>' : ''), 'role="tab" data-act="kbTab" data-arg="' + k + '"')).join('') + '</div></div>';
+    ['p', 'o', 'a'].map((k) => chip(t === k, KB_TYP[k][0] + (n(k) ? ' <small>' + n(k) + '</small>' : ''), 'role="tab" data-act="kbTab" data-arg="' + k + '"')).join('') + (typeof standRender === 'function' ? chip(t === 's', 'Spielstand', 'role="tab" data-act="kbTab" data-arg="s"') : '') + '</div></div>';
 }
 function kbSort(L, typ) {
   const rank = (x) => (typ === 'a' ? { offen: 0, erledigt: 1, gescheitert: 2 }[x.st] || 0 : x.st === 'tot' ? 1 : 0);
@@ -9144,7 +9147,7 @@ function kbRender(keep) {
   m.hidden = false; const l = m.querySelector('.kbl'); if (l && sy) l.scrollTop = sy;
 }
 /* Chronik-Fenster: Reiter Personen, Orte, Aufträge */
-if (typeof chrOpen === 'function') { const _kbChr0 = chrOpen; chrOpen = function (keep) { if (S.kbTab && S.kbTab !== 'chr') return kbRender(keep); return _kbChr0.apply(this, arguments); }; }
+if (typeof chrOpen === 'function') { const _kbChr0 = chrOpen; chrOpen = function (keep) { if (S.kbTab === 's' && typeof standRender === 'function') return standRender(keep); if (S.kbTab && S.kbTab !== 'chr') return kbRender(keep); return _kbChr0.apply(this, arguments); }; }
 
 /* «📜 Chronik» öffnet immer die Chronik; die gewählte Buchseite (Personen …) bleibt über die Reiter erreichbar */
 if (XA.chrOpen) { const _kbXa0 = XA.chrOpen; XA.chrOpen = function () { S.kbTab = 'chr'; return _kbXa0.apply(this, arguments); }; }
@@ -9407,6 +9410,89 @@ Object.assign(XA, {
   },
   brCopy: async (t) => { const s = (S.brRes && S.brRes.snippet) || ''; const ok = typeof slCopy === 'function' ? await slCopy(s) : false; if (t) t.textContent = ok ? 'Kopiert ✓' : 'Kopieren ging nicht'; }
 });
+
+/* ==== Spielstand: Zusammenfassungen der Spielabende, damit ein neuer Chat mit wenig Tokens weitermachen kann ====
+   Je Buch (wie Chronik und Kampagnenbuch) in localStorage «hb_stand»: { gesamt: {x, t}, abende: [{id, t, titel, x}] }.
+   Claude schreibt am Ende des Abends mit «abend_abschliessen» eine knappe Zusammenfassung und führt die Gesamtzusammenfassung nach.
+   «lage» bringt danach zuerst «Bisher» und nur, was seit dem Abschluss neu ist. Ohne Claude: Entwurf aus der Chronik. */
+const ST_DB = 'hb_stand', ST_ABENDE = 30;
+function standDb() { try { const d = JSON.parse(localStorage.getItem(ST_DB) || '{}'); return d && typeof d === 'object' ? d : {}; } catch (e) { return {}; } }
+function standSaveDb(d) { try { localStorage.setItem(ST_DB, JSON.stringify(d)); } catch (e) { if (typeof bannerToast === 'function') bannerToast('Speichern fehlgeschlagen', 'Der Speicher ist voll. Sichere jetzt über «Alles sichern».'); } }
+function standOf(key) { const d = standDb()[key || kbKey()] || {}; return { gesamt: d.gesamt && d.gesamt.x ? d.gesamt : null, abende: Array.isArray(d.abende) ? d.abende : [] }; }
+function standPut(key, st) { const d = standDb(); d[key] = { gesamt: st.gesamt || null, abende: (st.abende || []).slice(-ST_ABENDE) }; standSaveDb(d); }
+function standLastT(key) { const s = standOf(key); const a = s.abende[s.abende.length - 1]; return a ? a.t : 0; }
+const stDate = (t) => new Date(t).toLocaleDateString('de-CH', { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' });
+/* Text «Bisher» für Claude: Gesamtstand und letzter Abend, gekürzt */
+function standText(key, max) {
+  const s = standOf(key); const a = s.abende[s.abende.length - 1]; if (!s.gesamt && !a) return '';
+  const m = max || 1600; const cut = (x) => (String(x).length > m ? String(x).slice(0, m).replace(/\s\S*$/, '') + ' …' : String(x));
+  return (s.gesamt ? 'Kampagne bisher (Stand ' + stDate(s.gesamt.t) + '): ' + cut(s.gesamt.x) : '') + (a ? (s.gesamt ? '\n' : '') + 'Letzter Abend ' + stDate(a.t) + (a.titel ? ' «' + a.titel + '»' : '') + ': ' + cut(a.x) : '');
+}
+function standSave(key, { x, gesamt, titel }) {
+  const st = standOf(key); const now = Date.now(); const ab = { id: uidX(), t: now, titel: String(titel || '').slice(0, 80), x: String(x || '').slice(0, 3000) };
+  st.abende.push(ab); if (gesamt != null && String(gesamt).trim()) st.gesamt = { x: String(gesamt).slice(0, 4000), t: now };
+  standPut(key, st); try { chrAdd('abend', 'Abend abgeschlossen' + (ab.titel ? ': ' + ab.titel : '') + ' (Zusammenfassung gespeichert)', true); } catch (e) {}
+  return ab;
+}
+/* Entwurf ohne Claude: Chronik seit dem letzten Abschluss als Stichworte */
+function standDraft(key) { const since = standLastT(key); const L = (typeof chrList === 'function' ? chrList(key) : []).filter((e) => e.t > since && !/^(kampf)$/.test(e.k)); return L.length ? L.map((e) => '- ' + String(e.x).replace(/\s+/g, ' ')).join('\n') : ''; }
+
+/* Reiter «Spielstand» im Chronik-Fenster */
+function standRender(keep) {
+  const key = kbKey(); const s = standOf(key); const m = $('#modal'); S.modal = 'chronik'; S.more = false;
+  const dm = !S.camp || (typeof isDM === 'function' && isDM());
+  m.innerHTML = '<div class="dlg chrdlg kbdlg stdlg2" role="dialog" aria-modal="true" aria-label="Spielstand"><div class="dph"><b>Spielstand · ' + esc(kbKeyName(key)) + '</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' + kbTabs() +
+    '<p class="hint">Zusammenfassungen der Spielabende. Ein neuer Chat mit Claude liest zuerst diesen Stand und nur, was seither neu ist – das spart viel Nutzung. Am Ende des Abends in Claude: «Abend abschliessen».</p>' +
+    '<label class="stg">Kampagne bisher <small>(fortlaufend, von Claude nachgeführt)</small><textarea id="stGes" rows="4" maxlength="4000" placeholder="Noch keine Gesamtzusammenfassung">' + esc(s.gesamt ? s.gesamt.x : '') + '</textarea></label>' +
+    (dm ? '<div class="chips"><button class="btn ghost sm" data-act="spGesSave">Gesamt speichern</button></div>' : '') +
+    (s.abende.length ? '<ul class="kbl stab">' + s.abende.slice().reverse().map((a, i) => '<li class="kbi"><details' + (i === 0 && !keep ? ' open' : '') + '><summary><span class="kbn"><b>' + esc(stDate(a.t)) + (a.titel ? ' · ' + esc(a.titel) : '') + '</b><small>' + esc(String(a.x).slice(0, 90)) + '</small></span></summary><div class="kbed"><textarea rows="6" maxlength="3000" data-stid="' + a.id + '">' + esc(a.x) + '</textarea>' +
+      (dm ? '<div class="chips end">' + (S.camp ? '<button class="btn ghost sm" data-act="spHo" data-arg="' + a.id + '" title="Geht als Handout an alle – vorher prüfen, ob nichts Geheimes drinsteht">An Spieler</button>' : '') + '<button class="btn ghost sm" data-act="spDel" data-arg="' + a.id + '" data-confirm="Diese Zusammenfassung löschen?">Löschen</button></div>' : '') + '</div></details></li>').join('') + '</ul>' : '<p class="hint">Noch kein Abend abgeschlossen.</p>') +
+    (dm ? '<details class="stnew"' + (S.stNewOpen ? ' open' : '') + '><summary>Abend selbst abschliessen (ohne Claude)</summary><input id="stTit" type="text" maxlength="80" placeholder="Titel, z. B. «Im Keller der Wirtin»"><textarea id="stNew" rows="6" maxlength="3000" placeholder="Was ist passiert, wo stehen die Helden, was ist offen?"></textarea><div class="chips"><button class="btn ghost sm" data-act="spDraft">Entwurf aus der Chronik</button><button class="btn sm" data-act="spAdd">Speichern</button></div></details>' : '') +
+    '<div class="chips end"><button class="btn ghost" data-act="spFile">Als Datei sichern</button></div></div>';
+  m.hidden = false;
+}
+function standFileText(key) {
+  const s = standOf(key); const L = ['# Spielstand: ' + kbKeyName(key), ''];
+  if (s.gesamt) L.push('## Kampagne bisher (' + stDate(s.gesamt.t) + ')', s.gesamt.x, '');
+  for (const a of s.abende) L.push('## ' + stDate(a.t) + (a.titel ? ' – ' + a.titel : ''), a.x, '');
+  try { const k = typeof kbText === 'function' ? kbText(key) : ''; if (k) L.push('## Personen, Orte, Aufträge', k, ''); } catch (e) {}
+  return L.join('\n');
+}
+Object.assign(XA, {
+  spGesSave: () => { const key = kbKey(); const st = standOf(key); const v = ($('#stGes') || {}).value || ''; st.gesamt = v.trim() ? { x: v.slice(0, 4000), t: Date.now() } : null; standPut(key, st); bannerToast('Gespeichert', 'Gesamtzusammenfassung aktualisiert.'); },
+  spDraft: () => { const d = standDraft(kbKey()); const el = $('#stNew'); if (el) el.value = d || '(Keine neuen Chronik-Einträge seit dem letzten Abschluss.)'; S.stNewOpen = true; },
+  spAdd: () => { const el = $('#stNew'); const v = el && el.value.trim(); if (!v) { if (el) el.focus(); return; } standSave(kbKey(), { x: v, titel: ($('#stTit') || {}).value || '' }); S.stNewOpen = false; standRender(); },
+  spDel: (t, a) => { const key = kbKey(); const st = standOf(key); st.abende = st.abende.filter((x) => x.id !== a); standPut(key, st); standRender(true); },
+  spHo: (t, a) => { const ab = standOf(kbKey()).abende.find((x) => x.id === a); if (!ab || !S.camp || !isDM()) return; saveMeta({ handouts: ((S.meta && S.meta.handouts) || []).concat([{ id: uidX(), title: 'Was bisher geschah' + (ab.titel ? ': ' + ab.titel : ''), text: ab.x, t: Date.now() }]).slice(-20) }); bannerToast('Handout geteilt', 'Die Zusammenfassung ist jetzt bei allen am Tisch.'); },
+  spFile: async (t) => {
+    const key = kbKey(); const txt = standFileText(key); const fn = ('Spielstand_' + kbKeyName(key)).replace(/[^\wäöüÄÖÜ -]/g, '').trim().replace(/\s+/g, '_') + '.md';
+    try { const d = await (window.claude && window.claude.use ? window.claude.use('downloads') : null); if (!d) throw new Error('none'); await d.save({ filename: fn, data: txt }); bannerToast('Gesichert', fn); }
+    catch (e) { const ok = typeof slCopy === 'function' ? await slCopy(txt) : false; if (t) t.textContent = ok ? 'Kopiert (kein Speichern möglich)' : 'Ging nicht'; }
+  }
+});
+/* Abend-Texte direkt beim Tippen speichern */
+document.addEventListener('input', (ev) => { const el = ev.target; if (!el || !el.dataset || !el.dataset.stid) return; const key = kbKey(); const st = standOf(key); const a = st.abende.find((x) => x.id === el.dataset.stid); if (a) { a.x = String(el.value).slice(0, 3000); standPut(key, st); } });
+document.addEventListener('toggle', (ev) => { const d = ev.target; if (d && d.classList && d.classList.contains('stnew')) S.stNewOpen = d.open; }, true);
+
+/* Claude: Werkzeug «abend_abschliessen», «lage» beginnt mit «Bisher», Neues ab dem Abschluss */
+if (typeof BR_TOOLS === 'object') {
+  BR_TOOLS.abend_abschliessen = (a) => {
+    if (S.camp && !isDM()) throw new Error('Den Spielstand führt die Spielleitung.');
+    const x = String(a.zusammenfassung || '').trim(); if (x.length < 40) throw new Error('zusammenfassung fehlt oder ist zu kurz.');
+    const key = kbKey(); const ab = standSave(key, { x, gesamt: a.gesamt, titel: a.titel });
+    let ho = ''; if (a.fuer_spieler && S.camp && isDM()) { saveMeta({ handouts: ((S.meta && S.meta.handouts) || []).concat([{ id: uidX(), title: 'Was bisher geschah' + (ab.titel ? ': ' + ab.titel : ''), text: String(a.fuer_spieler).slice(0, 2500), t: Date.now() }]).slice(-20) }); ho = ' Die Spielerfassung ging als Handout an alle.'; }
+    if (S.modal === 'chronik') chrOpen(true);
+    return 'Gespeichert im Buch «' + kbKeyName(key) + '» (' + standOf(key).abende.length + '. Abend' + (a.gesamt ? ', Gesamtstand nachgeführt' : '') + ').' + ho + ' Ein neuer Chat holt das mit lage.';
+  };
+  const _stLage0 = BR_TOOLS.lage;
+  BR_TOOLS.lage = (a) => {
+    const key = kbKey(); if (!S.brSince) { const t0 = standLastT(key); if (t0) S.brSince = t0; } /* neuer Abend: nur was seit dem Abschluss passiert ist */
+    const out = _stLage0(a); if (a && (a.nur_neu === true || a.nur_neu === 'true' || a.voll === true || a.voll === 'true')) return out; /* voll: steht schon in der ausführlichen Lage */
+    const b = standText(key, 1400); return b ? 'Bisher:\n' + b + '\n\n' + out : out;
+  };
+}
+/* Auch die kopierte Lage (claude.ai) beginnt mit dem Spielstand */
+if (typeof slLage === 'function') { const _stSl0 = slLage; slLage = function (q) { const s = _stSl0.apply(this, arguments); let k = 'frei'; try { k = kbKey(); } catch (e) {} const b = standText(k, 1400); if (!b) return s; const i = s.indexOf('\n## '); const add = '\n## Bisher (Spielstand)\n' + b + '\n'; return i >= 0 ? s.slice(0, i) + add + s.slice(i) : s + add; }; }
 
 /* ==== Pflege: Speicher absichern, Sicherung nach dem Spielabend anbieten, Stolpersteine sammeln ==== */
 /* Sprache der Seite: für Silbentrennung langer Wörter (z. B. «Drachenblütiger» auf kleinen Karten) und Vorlesefunktionen */
@@ -9978,7 +10064,7 @@ function exportData(list, full) { const d = { heldenbuch: 1, exportiert: new Dat
 /* „Alles sichern“: neben Helden und Hausregeln auch eigene Monster, gespeicherte Begegnungen und SL-Notizen (liegen sonst nur im Browser) */
 function backupExtras() { const notes = {}; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.indexOf('heldenbuch_dm_') === 0 && localStorage.getItem(k)) notes[k.slice(14)] = localStorage.getItem(k); } } catch (e) {}
   const ad = typeof advDb === 'function' ? advDb() : null;
-  return { mobs: typeof ownMobs === 'function' ? ownMobs() : [], enc: typeof encLoad === 'function' ? encLoad() : [], dmNotes: notes, player: typeof myName === 'function' ? myName() : '', adv: ad ? ad.list : [], advSt: ad ? ad.st : {}, chr: typeof chrDb === 'function' ? chrDb() : {}, kb: typeof kbDb === 'function' ? kbDb() : {} }; }
+  return { mobs: typeof ownMobs === 'function' ? ownMobs() : [], enc: typeof encLoad === 'function' ? encLoad() : [], dmNotes: notes, player: typeof myName === 'function' ? myName() : '', adv: ad ? ad.list : [], advSt: ad ? ad.st : {}, chr: typeof chrDb === 'function' ? chrDb() : {}, kb: typeof kbDb === 'function' ? kbDb() : {}, stand: typeof standDb === 'function' ? standDb() : {} }; }
 function restoreExtras(x) {
   if (!x || typeof x !== 'object') return []; const done = [];
   if (typeof x.player === 'string' && x.player.trim() && typeof myName === 'function' && !myName()) { setMyName(x.player.trim().slice(0, 24)); done.push('dein Name'); }
@@ -9991,6 +10077,11 @@ function restoreExtras(x) {
     Object.entries(x[f]).forEach(([k, L]) => { if (!Array.isArray(L) || !/^(adv:[a-z0-9-]{1,40}|tisch:.{1,60}|frei)$/.test(k)) return; const have = new Set((d[k] || []).map((e) => e && e.id)); const add = L.filter((e) => e && e.id && typeof e.t === 'number' && !have.has(e.id)); if (add.length) { d[k] = (d[k] || []).concat(add).sort((a, b) => a.t - b.t); n += add.length; } });
     if (n) { window[wr](d); done.push(lab + ' (' + n + ')'); }
   }
+  /* Spielstand: Abende nach id zusammenführen, beim Gesamtstand gilt der neuere */
+  if (x.stand && typeof x.stand === 'object' && typeof standDb === 'function') { const d = standDb(); let n = 0;
+    Object.entries(x.stand).forEach(([k, v]) => { if (!v || typeof v !== 'object' || !/^(adv:[a-z0-9-]{1,40}|tisch:.{1,60}|frei)$/.test(k)) return; const cur0 = d[k] || {}; const have = new Set((cur0.abende || []).map((a) => a && a.id)); const add = (Array.isArray(v.abende) ? v.abende : []).filter((a) => a && a.id && typeof a.t === 'number' && typeof a.x === 'string' && !have.has(a.id));
+      const g = v.gesamt && typeof v.gesamt.x === 'string' && (!cur0.gesamt || (+v.gesamt.t || 0) > (+cur0.gesamt.t || 0)) ? v.gesamt : cur0.gesamt; if (add.length || g !== cur0.gesamt) { d[k] = { gesamt: g || null, abende: (cur0.abende || []).concat(add).sort((a, b) => a.t - b.t) }; n += add.length || 1; } });
+    if (n) { standSaveDb(d); done.push('Spielstand (' + n + ')'); } }
   if (Array.isArray(x.adv) && x.adv.length && typeof advImport === 'function') { const n = advImport(x.adv); if (n) done.push(n === 1 ? 'das Abenteuer „' + String((x.adv.find((a) => a && a.title) || {}).title || '').slice(0, 40) + '“' : n + ' Abenteuer'); }
   if (x.advSt && typeof x.advSt === 'object' && typeof advDb === 'function') { const d = advDb(); let n = 0; Object.entries(x.advSt).forEach(([id, st]) => { if (!st || typeof st !== 'object' || !/^[a-z0-9-]{1,40}$/.test(id)) return; if (d.st[id] && (+d.st[id].t || 0) >= (+st.t || 0)) return; d.st[id] = st; n++; }); if (n) { advSave(d); done.push('Abenteuer-Fortschritt'); } }
   return done;

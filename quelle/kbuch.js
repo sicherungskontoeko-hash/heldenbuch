@@ -35,7 +35,7 @@ function kbTabs() {
   const bk = kbBooks();
   return '<div class="kbbar">' + (bk.length > 1 ? '<label class="kbbook">Buch <select id="kbBook" aria-label="Buch wählen">' + bk.map(([k, nm]) => '<option value="' + esc(k) + '"' + (k === key ? ' selected' : '') + '>' + esc(nm) + '</option>').join('') + '</select></label>' : '') +
     '<div class="chips kbtabs" role="tablist">' + chip(t === 'chr', 'Chronik', 'role="tab" data-act="kbTab" data-arg="chr"') +
-    ['p', 'o', 'a'].map((k) => chip(t === k, KB_TYP[k][0] + (n(k) ? ' <small>' + n(k) + '</small>' : ''), 'role="tab" data-act="kbTab" data-arg="' + k + '"')).join('') + '</div></div>';
+    ['p', 'o', 'a'].map((k) => chip(t === k, KB_TYP[k][0] + (n(k) ? ' <small>' + n(k) + '</small>' : ''), 'role="tab" data-act="kbTab" data-arg="' + k + '"')).join('') + (typeof standRender === 'function' ? chip(t === 's', 'Spielstand', 'role="tab" data-act="kbTab" data-arg="s"') : '') + '</div></div>';
 }
 function kbSort(L, typ) {
   const rank = (x) => (typ === 'a' ? { offen: 0, erledigt: 1, gescheitert: 2 }[x.st] || 0 : x.st === 'tot' ? 1 : 0);
@@ -62,7 +62,7 @@ function kbRender(keep) {
   m.hidden = false; const l = m.querySelector('.kbl'); if (l && sy) l.scrollTop = sy;
 }
 /* Chronik-Fenster: Reiter Personen, Orte, Aufträge */
-if (typeof chrOpen === 'function') { const _kbChr0 = chrOpen; chrOpen = function (keep) { if (S.kbTab && S.kbTab !== 'chr') return kbRender(keep); return _kbChr0.apply(this, arguments); }; }
+if (typeof chrOpen === 'function') { const _kbChr0 = chrOpen; chrOpen = function (keep) { if (S.kbTab === 's' && typeof standRender === 'function') return standRender(keep); if (S.kbTab && S.kbTab !== 'chr') return kbRender(keep); return _kbChr0.apply(this, arguments); }; }
 
 /* «📜 Chronik» öffnet immer die Chronik; die gewählte Buchseite (Personen …) bleibt über die Reiter erreichbar */
 if (XA.chrOpen) { const _kbXa0 = XA.chrOpen; XA.chrOpen = function () { S.kbTab = 'chr'; return _kbXa0.apply(this, arguments); }; }
