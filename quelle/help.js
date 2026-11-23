@@ -55,7 +55,7 @@ const HELP = {
     'So siehst du sofort, warum deine RK 17 ist oder woher ein +1 auf Rettungswürfe kommt.']],
   undo: ['Rückgängig', [
     'Fast jede Änderung am Bogen lässt sich zurücknehmen: TP, Ressourcen, Zauberplätze, Inventar, Münzen, Stufe.',
-    'Nach einer Änderung erscheint unten kurz „↶ Rückgängig“. Am Computer geht es auch mit Strg+Z. Bis zu 25 Schritte pro Held werden gemerkt.',
+    'Auf dem Bogen steht nach einer Änderung „↶“ mit der Zahl der Schritte rechts in der Reiterleiste, in anderen Ansichten erscheint unten kurz „↶ Rückgängig“. Am Computer geht es auch mit Strg+Z. Bis zu 25 Schritte pro Held werden gemerkt.',
     'Folgenschwere Knöpfe wie „Lange Rast“ oder „Kampf beenden“ fragen vorher nach.']],
   tisch: ['Am Tisch', [
     'Am Tisch spielt ihr gemeinsam: Würfe, Initiative, Effekte und Handouts sind für alle sichtbar, die im selben Raum sind.',
