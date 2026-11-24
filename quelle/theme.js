@@ -77,8 +77,9 @@ function ensureScene() { let el = document.getElementById('scene'); if (el) retu
 function applyTheme() {
   const t = themeNow(); const html = document.documentElement;
   sceneVars([t]); const scene = ensureScene(); if (!scene.querySelector('.hb-ambient-light')) { const light = document.createElement('i'); light.className = 'hb-ambient-light'; light.setAttribute('aria-hidden', 'true'); scene.appendChild(light); }
-  if (html.getAttribute('data-theme') === t) return;
-  html.setAttribute('data-theme', t);
+  const old = html.getAttribute('data-theme'); if (old === t) return;
+  if (typeof vfxThemeFade === 'function') vfxThemeFade(old, t);
+  html.setAttribute('data-theme', t); if (typeof tonAmbSync === 'function') setTimeout(tonAmbSync, 0);
   const mc = document.querySelector('meta[name=\"theme-color\"]'); if (mc) mc.setAttribute('content', THEMES[t].c.bg);
   startFx();
 }
@@ -103,26 +104,26 @@ function startFx() {
   const cfg = THEMES[themeNow()].fx; const run = { stop: false }; FX = run;
   const lvl = typeof fxLevel === 'function' ? fxLevel() : 'stark';
   if (lvl === 'aus') { cv.width = cv.height = 0; run.size = () => {}; return; }
-  let W, H, dpr; const P = []; const soft = ['rise', 'spark', 'fog'].includes(cfg.mode); const mobile = matchMedia('(max-width: 820px)').matches; const minDt = mobile ? 48 : 31;
+  let W, H, dpr; const P = []; const soft = ['rise', 'spark', 'fog'].includes(cfg.mode); const mobile = matchMedia('(max-width: 820px)').matches; const minDt = typeof vfxBgDt === 'function' ? vfxBgDt(mobile) : mobile ? 48 : 31;
   const size = () => { dpr = soft || mobile ? 1 : Math.min(1.5, window.devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
   size(); if (!startFx.bound) { window.addEventListener('resize', () => { if (FX && FX.size) FX.size(); }); startFx.bound = true; } run.size = size;
   const strong = lvl === 'stark'; const BIG = strong ? (cfg.big || 1) : 1;
   const N = Math.round(Math.min(cfg.n, (W * H) / 32000 * (cfg.n / 46)) * (strong ? 1 : 0.4));
   const extra = []; let wind = 0, windT = 0;
   const rgb = {}; const solid = (c) => rgb[c] || (rgb[c] = 'rgb(' + c + ')');
-  run.burst = (colors, n, shape) => { for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, sp = 2 + Math.random() * 7; extra.push({ x: W / 2 + (Math.random() - 0.5) * 60, y: H * 0.45 + (Math.random() - 0.5) * 40, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 2, r: 2 + Math.random() * 4, c: colors[Math.floor(Math.random() * colors.length)], life: 1, shape, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.3 }); } };
-  const col = () => cfg.colors[Math.floor(Math.random() * cfg.colors.length)];
+  run.burst = (colors, n, shape) => { for (let i = 0; i < n; i++) { const a = vrand() * 6.283, sp = 2 + vrand() * 7; extra.push({ x: W / 2 + (vrand() - 0.5) * 60, y: H * 0.45 + (vrand() - 0.5) * 40, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 2, r: 2 + vrand() * 4, c: colors[Math.floor(vrand() * colors.length)], life: 1, shape, rot: vrand() * 6.28, vr: (vrand() - 0.5) * 0.3 }); } };
+  const col = () => cfg.colors[Math.floor(vrand() * cfg.colors.length)];
   const spawn = (p, init) => {
-    p.c = col(); p.t = Math.random() * 6.28; p.x = Math.random() * W;
+    p.c = col(); p.t = vrand() * 6.28; p.x = vrand() * W;
     const m = cfg.mode;
-    if (m === 'rise' || m === 'spark') { p.y = init ? Math.random() * H : H + 10; p.r = 0.6 + Math.random() * (m === 'spark' ? 2.2 : 1.8); p.vy = (m === 'spark' ? 0.4 : 0.15) + Math.random() * (m === 'spark' ? 0.9 : 0.45); p.vx = (Math.random() - 0.5) * 0.25; p.a = 0.15 + Math.random() * 0.55; }
-    else if (m === 'snow') { p.y = init ? Math.random() * H : -10; p.r = 0.8 + Math.random() * 2.2; p.vy = 0.3 + Math.random() * 0.8; p.vx = (Math.random() - 0.5) * 0.3; p.a = 0.35 + Math.random() * 0.5; }
-    else if (m === 'petal') { p.y = init ? Math.random() * H : -20; p.r = 4 + Math.random() * 4; p.vy = 0.35 + Math.random() * 0.6; p.vx = 0.2 + Math.random() * 0.4; p.a = 0.22 + Math.random() * 0.35; p.rot = Math.random() * 6.28; p.vr = (Math.random() - 0.5) * 0.04; }
-    else if (m === 'confetti') { p.y = init ? Math.random() * H : -20; p.r = 3 + Math.random() * 4; p.vy = 0.6 + Math.random() * 1.1; p.vx = (Math.random() - 0.5) * 0.6; p.a = 0.20 + Math.random() * 0.35; p.rot = Math.random() * 6.28; p.vr = (Math.random() - 0.5) * 0.15; }
-    else if (m === 'fog') { p.y = H * (0.55 + Math.random() * 0.45); p.x = init ? Math.random() * W : -360; p.r = 150 + Math.random() * 200; p.vx = 0.08 + Math.random() * 0.25; p.vy = (Math.random() - 0.5) * 0.05; p.a = (0.035 + Math.random() * 0.05) * (BIG > 1 ? 1.9 : 1); }
-    else if (m === 'stars') { p.y = Math.random() * H; p.r = 0.5 + Math.random() * 1.6; p.vx = (Math.random() - 0.5) * 0.04; p.vy = (Math.random() - 0.5) * 0.04; p.a = 0.2 + Math.random() * 0.6; p.sp = 0.01 + Math.random() * 0.04; }
-    else if (m === 'sand') { p.y = Math.random() * H; p.x = init ? Math.random() * W : -10; p.r = 0.5 + Math.random() * 1.2; p.vx = 0.7 + Math.random() * 1.5; p.vy = 0.1 + Math.random() * 0.25; p.a = 0.12 + Math.random() * 0.3; }
-    if (m !== 'fog') p.r *= BIG; p.heart = cfg.hearts && Math.random() < cfg.hearts; p.rgb = solid(p.c);
+    if (m === 'rise' || m === 'spark') { p.y = init ? vrand() * H : H + 10; p.r = 0.6 + vrand() * (m === 'spark' ? 2.2 : 1.8); p.vy = (m === 'spark' ? 0.4 : 0.15) + vrand() * (m === 'spark' ? 0.9 : 0.45); p.vx = (vrand() - 0.5) * 0.25; p.a = 0.15 + vrand() * 0.55; }
+    else if (m === 'snow') { p.y = init ? vrand() * H : -10; p.r = 0.8 + vrand() * 2.2; p.vy = 0.3 + vrand() * 0.8; p.vx = (vrand() - 0.5) * 0.3; p.a = 0.35 + vrand() * 0.5; }
+    else if (m === 'petal') { p.y = init ? vrand() * H : -20; p.r = 4 + vrand() * 4; p.vy = 0.35 + vrand() * 0.6; p.vx = 0.2 + vrand() * 0.4; p.a = 0.22 + vrand() * 0.35; p.rot = vrand() * 6.28; p.vr = (vrand() - 0.5) * 0.04; }
+    else if (m === 'confetti') { p.y = init ? vrand() * H : -20; p.r = 3 + vrand() * 4; p.vy = 0.6 + vrand() * 1.1; p.vx = (vrand() - 0.5) * 0.6; p.a = 0.20 + vrand() * 0.35; p.rot = vrand() * 6.28; p.vr = (vrand() - 0.5) * 0.15; }
+    else if (m === 'fog') { p.y = H * (0.55 + vrand() * 0.45); p.x = init ? vrand() * W : -360; p.r = 150 + vrand() * 200; p.vx = 0.08 + vrand() * 0.25; p.vy = (vrand() - 0.5) * 0.05; p.a = (0.035 + vrand() * 0.05) * (BIG > 1 ? 1.9 : 1); }
+    else if (m === 'stars') { p.y = vrand() * H; p.r = 0.5 + vrand() * 1.6; p.vx = (vrand() - 0.5) * 0.04; p.vy = (vrand() - 0.5) * 0.04; p.a = 0.2 + vrand() * 0.6; p.sp = 0.01 + vrand() * 0.04; }
+    else if (m === 'sand') { p.y = vrand() * H; p.x = init ? vrand() * W : -10; p.r = 0.5 + vrand() * 1.2; p.vx = 0.7 + vrand() * 1.5; p.vy = 0.1 + vrand() * 0.25; p.a = 0.12 + vrand() * 0.3; }
+    if (m !== 'fog') p.r *= BIG; p.heart = cfg.hearts && vrand() < cfg.hearts; p.rgb = solid(p.c);
     return p;
   };
   for (let i = 0; i < N; i++) P.push(spawn({}, true));
@@ -134,10 +135,11 @@ function startFx() {
     if (run.stop) return;
     requestAnimationFrame(tick);
     if (document.hidden) { last = 0; return; }
+    if (typeof VFX_RT !== 'undefined' && VFX_RT.busy && !extra.length) { last = 0; return; } /* Würfel im Vordergrund: Hintergrund wartet */
     const el = last ? now - last : 16.7; if (last && el < (extra.length ? 13 : minDt)) return; last = now;
     const k = Math.min(4, el / 16.7); const m = cfg.mode;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = 1; ctx.clearRect(0, 0, W, H);
-    if (cfg.gust && strong) { windT -= k; if (windT <= 0) { wind = Math.random() < 0.3 ? 3 + Math.random() * 4 : 0; windT = 200 + Math.random() * 400; } }
+    if (cfg.gust && strong) { windT -= k; if (windT <= 0) { wind = vrand() < 0.3 ? 3 + vrand() * 4 : 0; windT = 200 + vrand() * 400; } }
     for (const p of P) {
       p.t += 0.02 * k;
       if (m === 'rise' || m === 'spark') { p.y -= p.vy * k; p.x += (p.vx + Math.sin(p.t) * 0.15) * k; if (p.y < -10) spawn(p);
@@ -168,7 +170,7 @@ function themeSwatches() {
 function themeBlock() {
   const dm = S.camp && S.meta && S.meta.theme && THEMES[S.meta.theme];
   return '<section class="panel themep"><div class="tph"><h2>Stimmung</h2><span class="hint" style="margin:0">Ändert nur das Aussehen – alle Funktionen bleiben gleich.</span></div>' + themeSwatches() +
-    '<div class="fxlv"><span>Effekte:</span>' + [['stark', 'Stark'], ['dezent', 'Dezent'], ['aus', 'Aus']].map(([k, l]) => chip(fxLevel() === k, l, 'data-act="fxLevel" data-arg="' + esc(k) + '"')).join('') + '</div>' +
+    (typeof vfxBlock === 'function' ? vfxBlock() : '') +
     (typeof isDM === 'function' && isDM() ? '<label class="chk tfollow"><input type="checkbox" id="themeAll"' + (S.dmThemeAll !== false ? ' checked' : '') + '> Für die ganze Runde (du leitest)</label>' : dm ? '<label class="chk tfollow"><input type="checkbox" id="themeFollow"' + (themeFollow() ? ' checked' : '') + '> Stimmung der Spielleitung folgen (' + THEMES[S.meta.theme].name + ')</label>' : '') + '</section>';
 }
 function openThemeModal() {

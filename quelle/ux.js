@@ -38,7 +38,7 @@ function undoDo() {
   let i = -1; for (let k = S.undo.length - 1; k >= 0; k--) if (S.undo[k].id === S.cur) { i = k; break; }
   if (i < 0) return; const u = S.undo.splice(i, 1)[0]; const ch = S.chars[u.id]; if (!ch) return;
   S.redo = S.redo || []; S.redo.push({ id: u.id, snap: undoSnap(ch), label: u.label, t: u.t }); if (S.redo.length > UNDO_MAX) S.redo.shift();
-  undoApply(ch, u.snap); commit(); bannerToast('Rückgängig gemacht', u.label);
+  undoApply(ch, u.snap); if (typeof vfxQuiet === 'function') vfxQuiet(); commit(); bannerToast('Rückgängig gemacht', u.label);
   const el = document.getElementById('undoBar'); if (el) el.hidden = true;
 }
 /* Wiederholen: den zuletzt zurückgenommenen Schritt wieder anwenden */
@@ -46,7 +46,7 @@ function redoDo() {
   S.redo = S.redo || []; let i = -1; for (let k = S.redo.length - 1; k >= 0; k--) if (S.redo[k].id === S.cur) { i = k; break; }
   if (i < 0) return; const r = S.redo.splice(i, 1)[0]; const ch = S.chars[r.id]; if (!ch) return;
   S.undo = S.undo || []; S.undo.push({ id: r.id, snap: undoSnap(ch), label: r.label, t: r.t });
-  undoApply(ch, r.snap); commit(); bannerToast('Wiederholt', r.label);
+  undoApply(ch, r.snap); if (typeof vfxQuiet === 'function') vfxQuiet(); commit(); bannerToast('Wiederholt', r.label);
 }
 /* Zug zurückspulen: Stand zu Beginn des eigenen Zuges (gemerkt bei „Neuer Zug“ bzw. Zugbeginn am Tisch) */
 function turnMark(ch) { S.turnSnap = S.turnSnap || {}; S.turnSnap[ch.id] = { snap: undoSnap(ch), t: Date.now() }; }
@@ -65,7 +65,7 @@ function turnBackGo() {
   const ch = S.chars[S.cur]; const m = ch && S.turnSnap && S.turnSnap[ch.id]; if (!m) return; const n = turnSince(ch).length;
   S.undo = (S.undo || []).filter((u) => !(u.id === ch.id && u.t >= m.t));
   S.redo = (S.redo || []).filter((r) => r.id !== ch.id); S.redo.push({ id: ch.id, snap: undoSnap(ch), label: 'Zug zurückgespult', t: Date.now() });
-  undoApply(ch, m.snap); S.modal = null; $('#modal').hidden = true; commit(); bannerToast('Zug zurückgespult', n + (n === 1 ? ' Schritt' : ' Schritte') + ' zurückgenommen');
+  undoApply(ch, m.snap); S.modal = null; $('#modal').hidden = true; if (typeof vfxQuiet === 'function') vfxQuiet(); commit(); bannerToast('Zug zurückgespult', n + (n === 1 ? ' Schritt' : ' Schritte') + ' zurückgenommen');
 }
 XA.undo = () => undoDo();
 XA.redo = () => redoDo();

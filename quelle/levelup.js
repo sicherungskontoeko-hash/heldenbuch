@@ -66,15 +66,20 @@ function lvlUpGo() {
   else { const mm = ch.multi.find((x) => x.cls === id); if (!mm) return; mm.level = nl; if (ch.hpMode === 'roll') { mm.hpRolls = mm.hpRolls || {}; mm.hpRolls[nl] = S.lu.roll; } }
   const after = derive(ch, S.hb); const P = ch.play; P.hp = Math.min(after.hpMax, (P.hp ?? before.hpMax) + (after.hpMax - before.hpMax));
   pushLog({ label: 'Stufenaufstieg', total: after.level, detail: CLASSES[id].name + ' ' + nl + ' · TP-Maximum ' + before.hpMax + ' → ' + after.hpMax, share: true });
+  if (typeof vfxQuiet === 'function') vfxQuiet(); /* TP-Zuwachs ist kein Heilen: eigene Feier statt TP-Effekt */
   commit(); S.lu.step = 3; lvlUpOpen(); luCelebrate(after.level);
 }
+/* Stufenaufstieg: goldene Runen und wenige Teilchen, 1,3 s, blockiert nichts (Einstellung «Zug, Rast, Stufe, Zustände») */
 function luCelebrate(lv) {
-  if (typeof d3fx === 'function' && d3fx() === 'aus') return; const full = typeof d3fx !== 'function' || d3fx() === 'voll';
+  if (typeof vfxVibrate === 'function') vfxVibrate('levelup'); if (typeof tonEvent === 'function') tonEvent('levelup');
+  const lvl = typeof vfxLevel === 'function' ? vfxLevel('status') : 'dezent'; if (lvl === 'aus') return; const full = lvl === 'intensiv';
   const st = document.createElement('div'); st.className = 'd3stage lucel'; st.setAttribute('aria-hidden', 'true');
   st.style.cssText = '--x:' + window.innerWidth / 2 + 'px;--y:' + window.innerHeight * 0.42 + 'px;--c:#ffd36b;--c2:#fff6d6';
-  let h = '<div class="sg-vig"></div><div class="sg-aura"></div><div class="sg-ring"></div><div class="sg-ring r2"></div><div class="lunum">' + lv + '</div>';
-  if (full) for (let i = 0; i < 28; i++) { const a = (i / 28) * Math.PI * 2; const d = 120 + Math.random() * 200; h += '<span class="d3p sg burst" style="--dx:' + (Math.cos(a) * d).toFixed(0) + 'px;--dy:' + (Math.sin(a) * d).toFixed(0) + 'px;--c:' + ['#ffd36b', '#fff6d6', '#ffb347'][i % 3] + ';--d:' + (Math.random() * 200).toFixed(0) + 'ms;--r:0deg;--sz:' + (1 + Math.random()).toFixed(2) + '"><i class="ps"></i></span>'; }
-  st.innerHTML = h; document.body.appendChild(st); if (typeof d3snd === 'function') d3snd('n20'); setTimeout(() => st.remove(), 2300);
+  let h = '<div class="sg-aura"></div><div class="sg-ring"></div><div class="lunum">' + lv + '</div>';
+  if (full) { h += '<div class="sg-ring r2"></div><div class="sg-rc lurc">'; for (let k = 0; k < 10; k++) h += '<span style="transform:rotate(' + k * 36 + 'deg) translateY(-112px)">' + D3_RUNES[(k * 7 + lv) % D3_RUNES.length] + '</span>'; h += '</div>';
+    for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; const d = 90 + vrand() * 90; h += '<span class="d3p sg burst" style="--dx:' + (Math.cos(a) * d).toFixed(0) + 'px;--dy:' + (Math.sin(a) * d).toFixed(0) + 'px;--c:' + ['#ffd36b', '#fff6d6', '#ffb347'][i % 3] + ';--d:' + (vrand() * 200).toFixed(0) + 'ms;--r:0deg;--sz:' + (1 + vrand()).toFixed(2) + '"><i class="ps"></i></span>'; } }
+  st.innerHTML = h; document.body.appendChild(st);
+  setTimeout(() => st.classList.add('out'), 1100); setTimeout(() => st.remove(), 1350);
 }
 Object.assign(XA, {
   luNext: () => { S.lu.step = 2; lvlUpOpen(); },

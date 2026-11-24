@@ -43,10 +43,12 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
   T('Stimmungsdialog der SL: „Für die ganze Runde“', await p.evaluate(() => !!$('#themeAll') && $('#themeAll').checked));
   await p.evaluate(() => document.querySelector('#modal [data-act="theme"][data-arg="gruselig"]').click());
   T('… wählt die Stimmung für alle', await p.evaluate(() => S.meta.theme === 'gruselig'));
+  const roll0 = await p.evaluate(() => vfxLoad().roll);
   await p.evaluate(() => { XA.fxLevel(null, 'dezent'); });
-  T('Eine Effekte-Einstellung: „Dezent“ gilt auch für die Würfel', await p.evaluate(() => localStorage.getItem('hb_dice_fx') === 'ruhig'));
+  /* Effects 2.0: Würfel und Hintergrund getrennt einstellbar (früher eine gemeinsame Einstellung) */
+  T('Hintergrund „Dezent“ ändert die Würfel nicht', await p.evaluate((r0) => vfxLoad().background === 'dezent' && vfxLoad().roll === r0 && localStorage.getItem('hb_fx') === 'dezent', roll0));
   await p.evaluate(() => { XA.diceFx(null, 'aus'); });
-  T('… und umgekehrt: Würfel „Aus“ schaltet auch die Szenen-Effekte aus', await p.evaluate(() => localStorage.getItem('hb_fx') === 'aus'));
+  T('… und Würfel „Aus“ lässt den Hintergrund, wie er ist', await p.evaluate(() => vfxLoad().roll === 'aus' && vfxLoad().background === 'dezent' && localStorage.getItem('hb_fx') === 'dezent'));
   await p.evaluate(() => { localStorage.setItem('hb_fx', 'stark'); $('#modal').hidden = true; S.modal = null; });
   /* Schaden anwenden: drei Knöpfe */
   await p.evaluate(() => { applyPrompt('n:' + S.combat.npcs[0].id, 9, 'Feuerpfeil'); });
