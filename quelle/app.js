@@ -353,6 +353,7 @@ function showMulti(e, flat) {
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
   const has3 = typeof d3ok === 'function'; const set = has3 ? (e.dset || d3setOf(cur())) : ''; const rollMs = typeof vfxRollMs === 'function' ? vfxRollMs() : 850; if (!rollMs) reduce = true;
   const live3 = has3 && n <= ({ eco: 2, balanced: 4, max: 6 }[typeof vfxTier === 'function' ? vfxTier() : 'balanced'] || 4); /* so viele Würfel drehen sich echt, sonst einfache Darstellung */
+  const art = has3 && n <= 12 && typeof W3D !== 'undefined' && typeof vfxLoad === 'function' && vfxLoad().dice3d === 'artifact'; /* Artefaktwürfel (WebGL) bis 12 Würfel, sonst bisherige Darstellung */
   const d3h = (d, v, cls) => '<span class="die d3 ' + cls + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(d.sides, v, set, { gold: / crit/.test(cls) && d.sides === 20, dead: / fum/.test(cls) && d.sides === 20, cracks: / fum/.test(cls) && d.sides === 20, thin: n > 6 }) + '</span>';
   const W = window.innerWidth, H = window.innerHeight;
   const areaW = W * 0.86, areaH = H * 0.52, top0 = H * 0.2;
@@ -370,7 +371,7 @@ function showMulti(e, flat) {
     const fx = side === 0 ? -W * 0.6 : side === 1 ? W * 0.6 : (vrand() - 0.5) * W;
     const fy = side === 2 ? -H * 0.6 : side === 3 ? H * 0.6 : (vrand() - 0.5) * H;
     el.style.cssText = 'left:' + (x0 + col * cell + (cell - size) / 2 + jx) + 'px;top:' + (y0 + r * cell + (cell - size) / 2 + jy) + 'px;width:' + size + 'px;height:' + size + 'px;--fx:' + fx + 'px;--fy:' + fy + 'px;--rot:' + ((vrand() < 0.5 ? -1 : 1) * (360 + vrand() * 540)) + 'deg;--fr:' + ((vrand() - 0.5) * 30) + 'deg;animation-delay:' + (i * 28) + 'ms;animation-duration:' + Math.max(0.25, rollMs / 1000).toFixed(2) + 's';
-    if (has3 && d3ok(d.sides)) { el.dataset.d3 = '1'; if (live3 && !reduce) { el.innerHTML = '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>'; el._h = d3roll(el.firstChild, d.sides, d.v, set, { dur: Math.round(rollMs * 0.82) + i * 60 }); } else el.innerHTML = d3h(d, reduce ? d.v : 1 + Math.floor(vrand() * d.sides), 'rolling-x'); }
+    if (has3 && d3ok(d.sides)) { el.dataset.d3 = '1'; if (live3 && !reduce) { el.innerHTML = '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>'; const o = { dur: Math.round(rollMs * 0.82) + i * 60 }; el._h = (art && W3D.supports(d.sides, set) && W3D.roll(el.firstChild, d.sides, d.v, set, o)) || d3roll(el.firstChild, d.sides, d.v, set, o); } else el.innerHTML = d3h(d, reduce ? d.v : 1 + Math.floor(vrand() * d.sides), 'rolling-x'); }
     else el.innerHTML = dieSvg(d.sides, reduce ? d.v : 1 + Math.floor(vrand() * d.sides), 'rolling-x');
     tray.appendChild(el); return el;
   });
@@ -381,7 +382,7 @@ function showMulti(e, flat) {
     clearInterval(showMulti.iv); t.onclick = () => { t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
     /* Höchst- und Tiefstwert nur leise markieren: kein Krit, keine natürliche 20/1 */
     els.forEach((el, i) => { const d = list[i]; const pair = (e.pairVals || []).includes(d.v); const cls = pair ? ' pair' : d.v === d.sides ? ' max' : d.v === 1 ? ' min' : '';
-      if (el.dataset.d3) { if (el._h) el._h.skip(); el.innerHTML = d3h(d, d.v, 'land' + cls + (d.neg ? ' neg' : '')); return; }
+      if (el.dataset.d3) { if (el._h) el._h.skip(); el.innerHTML = d3h(d, d.v, 'land' + cls + (d.neg ? ' neg' : '')); if (art && W3D.supports(d.sides, set)) { const dv = el.firstChild, svg = dv.innerHTML; if (!W3D.still(dv, d.sides, d.v, set, {})) dv.innerHTML = svg; } return; }
       const tx = el.querySelector('text'); if (tx) tx.textContent = d.v; el.firstChild.className = 'die land' + cls + (d.neg ? ' neg' : ''); });
     if (has3) d3snd('land', n, set); if (typeof vfxVibrate === 'function') vfxVibrate('land');
     if ((e.pairVals || []).length) { const pb = document.createElement('div'); pb.className = 'tpair'; pb.textContent = 'Pasch!'; tray.appendChild(pb); }
@@ -436,12 +437,13 @@ function showToast(e) {
   const nat = sides === 20 ? +vals[keep] : 0; /* natürliche 20/1 aus dem behaltenen W20, unabhängig vom Regel-Krit */
   /* Artefaktwürfel v5 (Vorschau, Schalter im Würfel-Fenster): nur wo vorhanden, sonst bisherige Darstellung */
   const art = use3 && typeof W3D !== 'undefined' && typeof vfxLoad === 'function' && vfxLoad().dice3d === 'artifact' && W3D.supports(sides, set);
-  const dieH = (v, cls) => use3 ? '<span class="die d3 ' + cls + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(sides, v, set, { gold: / crit/.test(cls) && sides === 20, dead: / fum/.test(cls) && sides === 20, cracks: / fum/.test(cls) && sides === 20 }) + '</span>' : dieSvg(sides, v, cls);
+  const wide = art && sides === 100 ? ' w100' : ''; /* W100 als Artefakt: Zehner- und Einerwürfel nebeneinander */
+  const dieH = (v, cls) => use3 ? '<span class="die d3 ' + cls + wide + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(sides, v, set, { gold: / crit/.test(cls) && sides === 20, dead: / fum/.test(cls) && sides === 20, cracks: / fum/.test(cls) && sides === 20 }) + '</span>' : dieSvg(sides, v, cls);
   const final = () => {
     clearInterval(showToast.iv); t.onclick = (ev) => { if (ev.target.closest('[data-act]')) return; t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
     const dice = vals.map((v, i) => dieH(v, 'land' + (i === keep ? hl : ' drop'))).join('');
     const tip = typeof rollTip === 'function' ? rollTip(e) : '';
-    t.innerHTML = '<div class="trow"><div class="dice">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer' + (nat && nat < 20 ? ' (erweiterter Bereich)' : '') + '!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
+    t.innerHTML = '<div class="trow"><div class="dice' + wide + '">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer' + (nat && nat < 20 ? ' (erweiterter Bereich)' : '') + '!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
     if (art) t.querySelectorAll('.die.d3').forEach((el, i) => { const svg = el.innerHTML; if (!W3D.still(el, sides, vals[i], set, { gold: i === keep && nat === 20, dim: i !== keep || nat === 1 })) el.innerHTML = svg; });
     if (use3) { d3snd('land', 1, set); if (nat !== 20 && nat !== 1 && typeof vfxVibrate === 'function') vfxVibrate('land'); if (nat === 20 || nat === 1) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, nat === 20 ? 'n20' : 'n1', crl); d3snd(nat === 20 ? 'n20' : 'n1'); if (typeof vfxVibrate === 'function') vfxVibrate(nat === 20 ? 'n20' : 'n1'); } }
     showToast.tm = setTimeout(() => { t.hidden = true; }, tip ? 9000 : 6500);
@@ -450,7 +452,7 @@ function showToast(e) {
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
   if (use3) {
     if (!rollMs) return final();
-    t.innerHTML = '<div class="trow"><div class="dice">' + vals.map(() => '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>').join('') + '</div><div class="tt">' + head + '<div class="tv dim">…</div></div></div>';
+    t.innerHTML = '<div class="trow"><div class="dice' + wide + '">' + vals.map(() => '<span class="die d3 rolling3' + wide + '" style="--dg:' + D3_SETS[set].glow + '"></span>').join('') + '</div><div class="tt">' + head + '<div class="tv dim">…</div></div></div>';
     d3snd('roll', vals.length, set); let left = vals.length; const hs = [];
     t.querySelectorAll('.die').forEach((el, i) => { const o = { dur: Math.round(rollMs * 0.9) + i * (rollMs > 400 ? 140 : 50), onDone: () => { if (--left === 0) final(); } }; hs.push((art && W3D.roll(el, sides, vals[i], set, o)) || d3roll(el, sides, vals[i], set, o)); });
     t.onclick = () => { hs.forEach((h) => h.skip()); };
