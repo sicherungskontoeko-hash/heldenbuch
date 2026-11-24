@@ -344,15 +344,15 @@ function saHit() {
   saNext();
 }
 function rollDmg(expr, label) { const r = rollExpr(expr); const m = /W(\d+)/.exec(String(expr)); const g = /\[([\d,]+)\]/.exec(r.detail); pushLog({ label, groups: r.groups, total: r.total, detail: r.detail, sides: m ? +m[1] : 0, nat: g ? g[1].split(',').reduce((a, b) => a + +b, 0) : r.total }); }
-function pushLog(e) { e.t = Date.now(); if (S.secret) e.secret = true; if (e.sides && !e.dset && typeof d3setOf === 'function') e.dset = d3setOf(cur()); const d3on = typeof d3fx === 'function' && d3ok(e.sides) && d3fx() !== 'aus'; if (!d3on && e.sides === 20 && (e.nat === 20 || e.crit || e.nat === 1) && typeof themeBurst === 'function') { const k = e.nat === 1 || e.fumble ? 'fumble' : 'crit'; setTimeout(() => themeBurst(k), 820); } S.log.unshift(e); S.log = S.log.slice(0, 30); if (typeof histAdd === 'function') histAdd(e); showToast(e); const l = $('#log'); if (l) l.innerHTML = logHtml(); if ((e.sides || e.share) && !e.preview) shareRoll(e); }
+function pushLog(e) { e.t = Date.now(); if (S.secret) e.secret = true; if (e.sides && !e.dset && typeof d3setOf === 'function') e.dset = d3setOf(cur()); const d3on = typeof d3ok === 'function' && d3ok(e.sides); if (!d3on && e.sides === 20 && (e.nat === 20 || e.nat === 1) && typeof themeBurst === 'function') { const k = e.nat === 1 ? 'fumble' : 'crit'; setTimeout(() => themeBurst(k), 820); } /* nur ohne 3D-Würfel; themeBurst prüft selbst die Einstellung */ S.log.unshift(e); S.log = S.log.slice(0, 30); if (typeof histAdd === 'function') histAdd(e); showToast(e); const l = $('#log'); if (l) l.innerHTML = logHtml(); if ((e.sides || e.share) && !e.preview) shareRoll(e); }
 /* ---------- Würfelschale: viele Würfel über den Bildschirm ---------- */
 function showMulti(e, flat) {
   const t = $('#toast'); const tray = $('#tray');
   clearTimeout(showMulti.fade); clearInterval(showMulti.iv); clearTimeout(showMulti.st);
   const extra = Math.max(0, flat.length - 30); const list = flat.slice(0, 30); const n = list.length;
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
-  const has3 = typeof d3ok === 'function'; const set = has3 ? (e.dset || d3setOf(cur())) : ''; const fxl = has3 ? d3fx() : 'voll'; if (has3 && fxl === 'aus') reduce = true;
-  const live3 = has3 && fxl === 'voll' && n <= 6;
+  const has3 = typeof d3ok === 'function'; const set = has3 ? (e.dset || d3setOf(cur())) : ''; const rollMs = typeof vfxRollMs === 'function' ? vfxRollMs() : 850; if (!rollMs) reduce = true;
+  const live3 = has3 && n <= ({ eco: 2, balanced: 4, max: 6 }[typeof vfxTier === 'function' ? vfxTier() : 'balanced'] || 4); /* so viele Würfel drehen sich echt, sonst einfache Darstellung */
   const d3h = (d, v, cls) => '<span class="die d3 ' + cls + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(d.sides, v, set, { gold: / crit/.test(cls) && d.sides === 20, dead: / fum/.test(cls) && d.sides === 20, cracks: / fum/.test(cls) && d.sides === 20, thin: n > 6 }) + '</span>';
   const W = window.innerWidth, H = window.innerHeight;
   const areaW = W * 0.86, areaH = H * 0.52, top0 = H * 0.2;
@@ -364,14 +364,14 @@ function showMulti(e, flat) {
   tray.innerHTML = ''; tray.classList.remove('fade'); tray.hidden = false;
   const els = list.map((d, i) => {
     const r = Math.floor(i / cols), col = i % cols;
-    const jx = (Math.random() - 0.5) * cell * 0.18, jy = (Math.random() - 0.5) * cell * 0.18;
+    const jx = (vrand() - 0.5) * cell * 0.18, jy = (vrand() - 0.5) * cell * 0.18;
     const el = document.createElement('div'); el.className = 'tdie' + (reduce ? '' : ' fly');
-    const side = Math.floor(rnd() * 4);
-    const fx = side === 0 ? -W * 0.6 : side === 1 ? W * 0.6 : (Math.random() - 0.5) * W;
-    const fy = side === 2 ? -H * 0.6 : side === 3 ? H * 0.6 : (Math.random() - 0.5) * H;
-    el.style.cssText = 'left:' + (x0 + col * cell + (cell - size) / 2 + jx) + 'px;top:' + (y0 + r * cell + (cell - size) / 2 + jy) + 'px;width:' + size + 'px;height:' + size + 'px;--fx:' + fx + 'px;--fy:' + fy + 'px;--rot:' + ((Math.random() < 0.5 ? -1 : 1) * (360 + Math.random() * 540)) + 'deg;--fr:' + ((Math.random() - 0.5) * 30) + 'deg;animation-delay:' + (i * 28) + 'ms';
-    if (has3 && d3ok(d.sides)) { el.dataset.d3 = '1'; if (live3 && !reduce) { el.innerHTML = '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>'; el._h = d3roll(el.firstChild, d.sides, d.v, set, { dur: 700 + i * 60 }); } else el.innerHTML = d3h(d, reduce ? d.v : 1 + Math.floor(rnd() * d.sides), 'rolling-x'); }
-    else el.innerHTML = dieSvg(d.sides, reduce ? d.v : 1 + Math.floor(rnd() * d.sides), 'rolling-x');
+    const side = Math.floor(vrand() * 4);
+    const fx = side === 0 ? -W * 0.6 : side === 1 ? W * 0.6 : (vrand() - 0.5) * W;
+    const fy = side === 2 ? -H * 0.6 : side === 3 ? H * 0.6 : (vrand() - 0.5) * H;
+    el.style.cssText = 'left:' + (x0 + col * cell + (cell - size) / 2 + jx) + 'px;top:' + (y0 + r * cell + (cell - size) / 2 + jy) + 'px;width:' + size + 'px;height:' + size + 'px;--fx:' + fx + 'px;--fy:' + fy + 'px;--rot:' + ((vrand() < 0.5 ? -1 : 1) * (360 + vrand() * 540)) + 'deg;--fr:' + ((vrand() - 0.5) * 30) + 'deg;animation-delay:' + (i * 28) + 'ms;animation-duration:' + Math.max(0.25, rollMs / 1000).toFixed(2) + 's';
+    if (has3 && d3ok(d.sides)) { el.dataset.d3 = '1'; if (live3 && !reduce) { el.innerHTML = '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>'; el._h = d3roll(el.firstChild, d.sides, d.v, set, { dur: Math.round(rollMs * 0.82) + i * 60 }); } else el.innerHTML = d3h(d, reduce ? d.v : 1 + Math.floor(vrand() * d.sides), 'rolling-x'); }
+    else el.innerHTML = dieSvg(d.sides, reduce ? d.v : 1 + Math.floor(vrand() * d.sides), 'rolling-x');
     tray.appendChild(el); return el;
   });
   const head = '<div class="tl">' + esc(e.label) + ' · ' + flat.length + ' Würfel</div>';
@@ -379,10 +379,11 @@ function showMulti(e, flat) {
   t.innerHTML = '<div class="tt">' + head + '<div class="tv dim">…</div></div>';
   const land = () => {
     clearInterval(showMulti.iv); t.onclick = () => { t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
-    els.forEach((el, i) => { const d = list[i]; const pair = (e.pairVals || []).includes(d.v); const cls = pair ? ' pair' : d.v === d.sides ? ' crit' : d.v === 1 ? ' fum' : '';
+    /* Höchst- und Tiefstwert nur leise markieren: kein Krit, keine natürliche 20/1 */
+    els.forEach((el, i) => { const d = list[i]; const pair = (e.pairVals || []).includes(d.v); const cls = pair ? ' pair' : d.v === d.sides ? ' max' : d.v === 1 ? ' min' : '';
       if (el.dataset.d3) { if (el._h) el._h.skip(); el.innerHTML = d3h(d, d.v, 'land' + cls + (d.neg ? ' neg' : '')); return; }
       const tx = el.querySelector('text'); if (tx) tx.textContent = d.v; el.firstChild.className = 'die land' + cls + (d.neg ? ' neg' : ''); });
-    if (has3 && fxl !== 'aus') d3snd('land');
+    if (has3) d3snd('land');
     if ((e.pairVals || []).length) { const pb = document.createElement('div'); pb.className = 'tpair'; pb.textContent = 'Pasch!'; tray.appendChild(pb); }
     const sum = list.reduce((a, d) => a + (d.neg ? -d.v : d.v), 0);
     t.innerHTML = '<div class="tt">' + head + '<div class="tv">' + esc(e.total) + '</div><div class="td">' + esc(e.detail) + (extra ? ' · ' + extra + ' weitere Würfel nicht gezeigt' : '') + '</div></div>';
@@ -393,8 +394,8 @@ function showMulti(e, flat) {
   };
   if (reduce) return land();
   if (has3) { d3snd('roll', n); t.onclick = () => { clearTimeout(showMulti.st); t.onclick = null; land(); }; }
-  showMulti.iv = setInterval(() => els.forEach((el, i) => { if (el.dataset.d3) return; const tx = el.querySelector('text'); if (tx) tx.textContent = 1 + Math.floor(rnd() * list[i].sides); }), 80);
-  showMulti.st = setTimeout(land, 850 + n * 28);
+  showMulti.iv = setInterval(() => els.forEach((el, i) => { if (el.dataset.d3) return; const tx = el.querySelector('text'); if (tx) tx.textContent = 1 + Math.floor(vrand() * list[i].sides); }), 80);
+  showMulti.st = setTimeout(land, rollMs + n * 28);
 }
 
 /* ---------- Freier Würfelbecher ---------- */
@@ -419,6 +420,7 @@ function dieSvg(sides, n, cls) {
 }
 function showToast(e) {
   const t = $('#toast'); clearTimeout(showToast.tm); clearInterval(showToast.iv); clearTimeout(showToast.st);
+  document.querySelectorAll('.d3stage').forEach((x) => x.remove()); document.body.classList.remove('d3quake'); /* neuer Wurf: alte grosse Effekte weg */
   const flat = (e.groups || []).flatMap((g) => g.rolls.map((v) => ({ v, sides: g.sides, neg: g.sign < 0 })));
   if (flat.length > 1) return showMulti(e, flat);
   const sides = e.sides || 0;
@@ -430,31 +432,32 @@ function showToast(e) {
   const vals = e.pair || (flat.length === 1 ? [flat[0].v] : sides ? [e.nat ?? e.total] : []);
   const keep = e.pair ? e.keep : 0;
   const hl = (e.crit ? ' crit' : e.fumble ? ' fum' : '');
-  const use3 = typeof d3ok === 'function' && d3ok(sides); const set = use3 ? (e.dset || d3setOf(cur())) : ''; const fxl = use3 ? d3fx() : 'aus';
+  const use3 = typeof d3ok === 'function' && d3ok(sides); const set = use3 ? (e.dset || d3setOf(cur())) : ''; const rollMs = typeof vfxRollMs === 'function' ? vfxRollMs() : 850; const crl = use3 && typeof d3critLv === 'function' ? d3critLv() : 'aus';
+  const nat = sides === 20 ? +vals[keep] : 0; /* natürliche 20/1 aus dem behaltenen W20, unabhängig vom Regel-Krit */
   const dieH = (v, cls) => use3 ? '<span class="die d3 ' + cls + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(sides, v, set, { gold: / crit/.test(cls) && sides === 20, dead: / fum/.test(cls) && sides === 20, cracks: / fum/.test(cls) && sides === 20 }) + '</span>' : dieSvg(sides, v, cls);
   const final = () => {
     clearInterval(showToast.iv); t.onclick = (ev) => { if (ev.target.closest('[data-act]')) return; t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
     const dice = vals.map((v, i) => dieH(v, 'land' + (i === keep ? hl : ' drop'))).join('');
     const tip = typeof rollTip === 'function' ? rollTip(e) : '';
-    t.innerHTML = '<div class="trow"><div class="dice">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
-    if (use3) { if (fxl !== 'aus') d3snd('land'); if (sides === 20 && (e.crit || e.fumble)) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, e.crit ? 'n20' : 'n1', fxl); d3snd(e.crit ? 'n20' : 'n1'); } }
+    t.innerHTML = '<div class="trow"><div class="dice">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer' + (nat && nat < 20 ? ' (erweiterter Bereich)' : '') + '!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
+    if (use3) { d3snd('land'); if (nat === 20 || nat === 1) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, nat === 20 ? 'n20' : 'n1', crl); d3snd(nat === 20 ? 'n20' : 'n1'); if (typeof vfxVibrate === 'function') vfxVibrate(nat === 20 ? 'n20' : 'n1'); } }
     showToast.tm = setTimeout(() => { t.hidden = true; }, tip ? 9000 : 6500);
   };
   t.hidden = false; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
   if (use3) {
-    if (fxl !== 'voll') return final();
+    if (!rollMs) return final();
     t.innerHTML = '<div class="trow"><div class="dice">' + vals.map(() => '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>').join('') + '</div><div class="tt">' + head + '<div class="tv dim">…</div></div></div>';
     d3snd('roll', vals.length); let left = vals.length; const hs = [];
-    t.querySelectorAll('.die').forEach((el, i) => hs.push(d3roll(el, sides, vals[i], set, { dur: 760 + i * 140, onDone: () => { if (--left === 0) final(); } })));
+    t.querySelectorAll('.die').forEach((el, i) => hs.push(d3roll(el, sides, vals[i], set, { dur: Math.round(rollMs * 0.9) + i * (rollMs > 400 ? 140 : 50), onDone: () => { if (--left === 0) final(); } })));
     t.onclick = () => { hs.forEach((h) => h.skip()); };
     return;
   }
-  if (!sides || reduce) return final();
-  const flick = () => 1 + Math.floor(Math.random() * sides);
+  if (!sides || reduce || !rollMs) return final();
+  const flick = () => 1 + Math.floor(vrand() * sides);
   t.innerHTML = '<div class="trow"><div class="dice">' + vals.map((_, i) => dieSvg(sides, flick(), 'rolling' + (i ? ' r2' : ''))).join('') + '</div><div class="tt">' + head + '<div class="tv dim">…</div></div></div>';
   showToast.iv = setInterval(() => { t.querySelectorAll('.die text').forEach((x) => { x.textContent = flick(); }); }, 70);
-  showToast.st = setTimeout(final, e.pair ? 950 : 750);
+  showToast.st = setTimeout(final, Math.min(e.pair ? 950 : 750, rollMs));
 }
 const logHtml = () => S.log.length ? S.log.map((e) => '<li><span>' + esc(e.label) + '</span><b' + (e.crit ? ' class="crit"' : '') + '>' + e.total + '</b><small>' + esc(e.detail) + '</small></li>').join('') : '<li class="empty">Noch nichts gewürfelt. Tippe auf einen Wert.</li>';
 
@@ -1467,7 +1470,7 @@ function paintTurn() {
     '<span class="tbsp"></span>' + (meAway ? '<span class="tbaway">Du bist noch nicht im Kampf</span><button class="btn sm" data-act="initRoll">Eingreifen</button>' : meWaiting ? '<button class="btn sm" data-act="initRoll">Initiative würfeln</button><button class="btn sm ghost" data-act="initAway">Noch nicht dabei</button>' : '') + (mine ? '<button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>' : cur && (!S.meta.dm || isDM()) ? '<button class="btn sm ghost" data-act="turnEnd" title="Gegner oder abwesende Spieler: weiter zum Nächsten">Weiter ▸</button>' : '') + (S.view !== 'camp' ? '<button class="link" data-act="view" data-arg="camp">Reihenfolge</button>' : '') + '</div>';
   document.body.classList.toggle('myturn', !!mine);
   if (mine && !wasMyTurn && S.chars[S.cur] && typeof turnReset === 'function') { const me = S.chars[S.cur]; setTimeout(() => { turnReset(me); if (S.chars[S.cur] === me) commit(); }, 0); }
-  if (mine && !wasMyTurn) { try { navigator.vibrate && navigator.vibrate([120, 60, 120]); } catch (e) {} }
+  if (mine && !wasMyTurn && typeof vfxVibrate === 'function') vfxVibrate('turn'); /* nur mit Einwilligung (Einstellungen › Vibration) */
   wasMyTurn = !!mine;
 }
 function bannerToast(title, text) { const m = $('#mini'); if (!m) return; const el = document.createElement('div'); el.className = 'mt big'; el.innerHTML = '<div><b>' + esc(title) + '</b><small>' + esc(text) + '</small></div>'; m.prepend(el); setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 5000); }

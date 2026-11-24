@@ -9,7 +9,7 @@ function initCall() {
     '<p>' + esc(ch.name) + ', würfle Initiative.' + (sur ? ' <b>Du bist überrascht</b> (Nachteil).' : '') + '</p>' +
     '<button class="btn big glowbtn" data-act="initRoll">Initiative würfeln</button>' +
     '<div class="chips"><button class="link" data-act="initAway">Noch nicht dabei</button><button class="link" data-act="closeModal">Später</button></div></div>';
-  m.hidden = false; try { navigator.vibrate && navigator.vibrate([90, 50, 90]); } catch (e) {}
+  m.hidden = false; if (typeof vfxVibrate === 'function') vfxVibrate('call');
   return true;
 }
 function fightPickHtml() {

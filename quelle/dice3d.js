@@ -43,13 +43,11 @@ const D3_OLD = { drachenglut: 'drachenfeuer', gebein: 'totenbein', feenhain: 'we
 /* ---- Einstellungen ---- */
 function d3get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }
 function d3set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
-function d3fx() {
-  const v = d3get('hb_dice_fx', '');
-  if (v) return v;
-  let weak = false; try { weak = matchMedia('(prefers-reduced-motion: reduce)').matches || ((navigator.hardwareConcurrency || 8) <= 4 && (navigator.deviceMemory || 8) <= 3); } catch (e) {}
-  return weak ? 'ruhig' : 'voll';
-}
-const d3sound = () => d3get('hb_dice_snd', '0') === '1';
+/* Kurzform für ältere Stellen (Wartezeiten, Mini-Würfel am Tisch): voll = rollende Würfel, ruhig = nur Ergebnis (mit Effekt), aus = nichts. Einstellungen in vfx.js */
+function d3fx() { if (typeof vfxRollMs !== 'function') return 'voll'; const ms = vfxRollMs(); return ms >= 600 ? 'voll' : ms > 0 || vfxLevel('critical') !== 'aus' ? 'ruhig' : 'aus'; }
+/* Stufe der natürlichen 20/1 in der Schreibweise von d3effect */
+function d3critLv() { return typeof vfxLevel === 'function' ? { aus: 'aus', dezent: 'ruhig', intensiv: 'voll' }[vfxLevel('critical')] : 'voll'; }
+const d3sound = () => (typeof vfxLoad === 'function' ? vfxLoad().diceSound : d3get('hb_dice_snd', '0') === '1');
 const d3vol = () => Math.max(0, Math.min(1, +d3get('hb_dice_vol', '0.6')));
 
 /* ---- Vektor- und Quaternion-Rechnung ---- */
@@ -264,17 +262,20 @@ function d3roll(holder, sides, value, setId, opt) {
   const v = sides === 100 ? 1 : Math.max(1, Math.min(geo.F.length, value | 0)); const T = d3target(geo, v, 0.34);
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('class', 'd3s'); svg.setAttribute('aria-hidden', 'true');
   holder.innerHTML = ''; holder.appendChild(svg);
-  const ax = V.norm([Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5]); const A = (2.2 + Math.random() * 1.6) * Math.PI * 2;
-  const D = opt.dur || 820; const t0 = performance.now(); let raf = 0, done = false;
-  if (set.roll) { const box = document.createElement('div'); box.className = 'd3fx d3rollfx'; let h = ''; for (let k = 0; k < 9; k++) { const a = Math.random() * Math.PI * 2, dist = 26 + Math.random() * 26; const sh = D3_SHAPE[set.roll.shape] || D3_SHAPE.spark; h += '<span class="d3p" style="--dx:' + (Math.cos(a) * dist).toFixed(0) + 'px;--dy:' + (Math.sin(a) * dist).toFixed(0) + 'px;--c:' + set.roll.col[k % set.roll.col.length] + ';--d:' + (k * D / 10).toFixed(0) + 'ms;--r:' + ((Math.random() - 0.5) * 360).toFixed(0) + 'deg">' + sh + '</span>'; } box.innerHTML = h; holder.appendChild(box); setTimeout(() => box.remove(), D + 1300); }
+  const ax = V.norm([vrand() - 0.5, vrand() - 0.5, vrand() - 0.5]); const A = (2.2 + vrand() * 1.6) * Math.PI * 2;
+  const D = opt.dur || 820; const t0 = performance.now(); let raf = 0, done = false, prev = 0; const dts = [];
+  if (typeof vfxBusy === 'function') vfxBusy(1);
+  if (set.roll) { const box = document.createElement('div'); box.className = 'd3fx d3rollfx'; let h = ''; for (let k = 0; k < 9; k++) { const a = vrand() * Math.PI * 2, dist = 26 + vrand() * 26; const sh = D3_SHAPE[set.roll.shape] || D3_SHAPE.spark; h += '<span class="d3p" style="--dx:' + (Math.cos(a) * dist).toFixed(0) + 'px;--dy:' + (Math.sin(a) * dist).toFixed(0) + 'px;--c:' + set.roll.col[k % set.roll.col.length] + ';--d:' + (k * D / 10).toFixed(0) + 'ms;--r:' + ((vrand() - 0.5) * 360).toFixed(0) + 'deg">' + sh + '</span>'; } box.innerHTML = h; holder.appendChild(box); setTimeout(() => box.remove(), D + 1300); }
   const lab = sides === 100 ? String(value === 100 ? '00' : value) : null;
   const frame = (now) => {
+    if (prev) dts.push(now - prev); prev = now;
     const t = Math.min(1, (now - t0) / D); const e = 1 - Math.pow(1 - t, 3);
     const q = Q.mul(Q.axis(ax, A * (1 - e)), T.q); const hop = Math.abs(Math.sin(Math.PI * t * 2.2)) * (1 - t) * 10;
     svg.innerHTML = d3draw(geo, set, q, { dy: -hop, scale: 0.7 + 0.3 * Math.min(1, t * 4), label: t > 0.85 ? lab : null, labelFor: 1, main: T.f, shift: e, emph: false });
     if (t < 1) raf = requestAnimationFrame(frame); else finish();
   };
-  const finish = () => { if (done) return; done = true; cancelAnimationFrame(raf); svg.innerHTML = d3draw(geo, set, T.q, { label: lab, labelFor: 1, main: T.f }); if (opt.onDone) opt.onDone(); };
+  const finish = () => { if (done) return; done = true; cancelAnimationFrame(raf); if (typeof vfxBusy === 'function') vfxBusy(-1);
+    if (dts.length >= 8 && typeof vfxSample === 'function') { const q = dts.slice().sort((a, b) => a - b); vfxSample(q[Math.floor(q.length * 0.9)]); } svg.innerHTML = d3draw(geo, set, T.q, { label: lab, labelFor: 1, main: T.f }); if (opt.onDone) opt.onDone(); };
   raf = requestAnimationFrame(frame);
   return { skip: finish };
 }
@@ -289,10 +290,10 @@ function d3effect(dieEl, setId, kind, level) {
     d3stage20(dieEl, set, setId, level);
     const f = set.fx20; let h = '<div class="d3ray" style="--rc:' + f.ray + '"></div>';
     if (f.flash) h += '<div class="d3flash"></div>';
-    if (level === 'voll') { for (let i = 0; i < f.n; i++) { const a = (i / f.n) * Math.PI * 2 + Math.random() * 0.4; const dist = 38 + Math.random() * 34; let dx = Math.cos(a) * dist, dy = Math.sin(a) * dist;
-      if (f.move === 'rise') { dx = (Math.random() - 0.5) * 50; dy = -(30 + Math.random() * 50); } if (f.move === 'fall') { dx = (Math.random() - 0.5) * 70; dy = 25 + Math.random() * 40; }
-      const col = f.col[i % f.col.length]; let sh = D3_SHAPE[f.shape] || D3_SHAPE.spark; if (f.shape === 'rune') sh = '<i class="pru">' + D3_RUNES[Math.floor(Math.random() * D3_RUNES.length)] + '</i>';
-      h += '<span class="d3p ' + f.move + '" style="--dx:' + dx.toFixed(0) + 'px;--dy:' + dy.toFixed(0) + 'px;--c:' + col + ';--d:' + (Math.random() * 160).toFixed(0) + 'ms;--r:' + ((Math.random() - 0.5) * 540).toFixed(0) + 'deg">' + sh + '</span>'; } }
+    if (level === 'voll') { for (let i = 0; i < f.n; i++) { const a = (i / f.n) * Math.PI * 2 + vrand() * 0.4; const dist = 38 + vrand() * 34; let dx = Math.cos(a) * dist, dy = Math.sin(a) * dist;
+      if (f.move === 'rise') { dx = (vrand() - 0.5) * 50; dy = -(30 + vrand() * 50); } if (f.move === 'fall') { dx = (vrand() - 0.5) * 70; dy = 25 + vrand() * 40; }
+      const col = f.col[i % f.col.length]; let sh = D3_SHAPE[f.shape] || D3_SHAPE.spark; if (f.shape === 'rune') sh = '<i class="pru">' + D3_RUNES[Math.floor(vrand() * D3_RUNES.length)] + '</i>';
+      h += '<span class="d3p ' + f.move + '" style="--dx:' + dx.toFixed(0) + 'px;--dy:' + dy.toFixed(0) + 'px;--c:' + col + ';--d:' + (vrand() * 160).toFixed(0) + 'ms;--r:' + ((vrand() - 0.5) * 540).toFixed(0) + 'deg">' + sh + '</span>'; } }
     box.innerHTML = h;
   } else {
     d3stage1(dieEl, level); box.innerHTML = '<div class="d3dim" style="--tc:#3a0508"></div>'; dieEl.classList.add('n1-hit');
@@ -309,23 +310,23 @@ function d3stage20(dieEl, set, id, level) {
     h += '<div class="sg-ring r2"></div>';
     const B = f.big;
     if (B === 'pillar' || B === 'nova') h += '<div class="sg-pillar" style="height:' + y + 'px"></div>';
-    if (B === 'bolt') { let pts = [[x + (Math.random() - 0.5) * 80, 0]]; const n = 7; for (let i = 1; i < n; i++) pts.push([x + (Math.random() - 0.5) * 70 * (1 - i / n), (y * i) / n]); pts.push([x, y]); const d = 'M' + pts.map((p) => p[0].toFixed(0) + ' ' + p[1].toFixed(0)).join(' L');
+    if (B === 'bolt') { let pts = [[x + (vrand() - 0.5) * 80, 0]]; const n = 7; for (let i = 1; i < n; i++) pts.push([x + (vrand() - 0.5) * 70 * (1 - i / n), (y * i) / n]); pts.push([x, y]); const d = 'M' + pts.map((p) => p[0].toFixed(0) + ' ' + p[1].toFixed(0)).join(' L');
       h += '<svg class="sg-bolt" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '"><path d="' + d + '" stroke="#fff" stroke-width="3.5" fill="none" stroke-linejoin="bevel"/><path d="' + d + '" stroke="' + c + '" stroke-width="12" fill="none" opacity=".45" stroke-linejoin="bevel"/></svg><div class="d3flash"></div>'; }
     if (B === 'moon') h += '<div class="sg-moon"></div>';
     if (B === 'vortex') h += '<div class="sg-vortex"></div>';
     if (B === 'flake') h += '<div class="sg-big">❄</div><div class="sg-frost"></div>';
     if (B === 'gears') h += '<div class="sg-big gear a">⚙</div><div class="sg-big gear b">⚙</div>';
-    if (B === 'flames' || B === 'ghost') for (let i = 0; i < 7; i++) h += '<span class="sg-flame" style="--fx:' + ((i - 3) * 16) + 'px;--d:' + (i * 50) + 'ms;--s:' + (0.7 + Math.random() * 0.6).toFixed(2) + '"></span>';
+    if (B === 'flames' || B === 'ghost') for (let i = 0; i < 7; i++) h += '<span class="sg-flame" style="--fx:' + ((i - 3) * 16) + 'px;--d:' + (i * 50) + 'ms;--s:' + (0.7 + vrand() * 0.6).toFixed(2) + '"></span>';
     if (B === 'nova') h += '<div class="d3flash nova"></div>';
     if (B === 'crown') h += '<div class="sg-big crownup">♛</div>';
     if (B === 'runecircle') { let rc = '<div class="sg-rc">'; for (let k = 0; k < 10; k++) rc += '<span style="transform:rotate(' + k * 36 + 'deg) translateY(-118px)">' + D3_RUNES[(k * 3) % D3_RUNES.length] + '</span>'; h += rc + '</div>'; }
     if (B === 'prism') h += '<div class="sg-prism"></div><div class="sg-prism p2"></div><div class="d3flash nova"></div>';
     if (f.rings) for (let k = 3; k <= f.rings + 1; k++) h += '<div class="sg-ring r' + k + '"></div>';
     const N = f.big === 'petals' ? 30 : 26;
-    for (let i = 0; i < N; i++) { const a = (i / N) * Math.PI * 2 + Math.random() * 0.3; const dist = 90 + Math.random() * 160; let dx = Math.cos(a) * dist, dy = Math.sin(a) * dist;
-      if (f.move === 'rise') { dx = (Math.random() - 0.5) * 160; dy = -(120 + Math.random() * 220); } if (f.move === 'fall') { dx = (Math.random() - 0.5) * 260; dy = -(y * 0.9) * Math.random(); }
-      let sh = D3_SHAPE[f.shape] || D3_SHAPE.spark; if (f.shape === 'rune') sh = '<i class="pru">' + D3_RUNES[Math.floor(Math.random() * D3_RUNES.length)] + '</i>';
-      h += '<span class="d3p sg ' + (f.move === 'fall' ? 'fallin' : f.move) + '" style="--dx:' + dx.toFixed(0) + 'px;--dy:' + dy.toFixed(0) + 'px;--c:' + f.col[i % f.col.length] + ';--d:' + (Math.random() * 220).toFixed(0) + 'ms;--r:' + ((Math.random() - 0.5) * 720).toFixed(0) + 'deg;--sz:' + (1 + Math.random() * 1.2).toFixed(2) + '">' + sh + '</span>'; }
+    for (let i = 0; i < N; i++) { const a = (i / N) * Math.PI * 2 + vrand() * 0.3; const dist = 90 + vrand() * 160; let dx = Math.cos(a) * dist, dy = Math.sin(a) * dist;
+      if (f.move === 'rise') { dx = (vrand() - 0.5) * 160; dy = -(120 + vrand() * 220); } if (f.move === 'fall') { dx = (vrand() - 0.5) * 260; dy = -(y * 0.9) * vrand(); }
+      let sh = D3_SHAPE[f.shape] || D3_SHAPE.spark; if (f.shape === 'rune') sh = '<i class="pru">' + D3_RUNES[Math.floor(vrand() * D3_RUNES.length)] + '</i>';
+      h += '<span class="d3p sg ' + (f.move === 'fall' ? 'fallin' : f.move) + '" style="--dx:' + dx.toFixed(0) + 'px;--dy:' + dy.toFixed(0) + 'px;--c:' + f.col[i % f.col.length] + ';--d:' + (vrand() * 220).toFixed(0) + 'ms;--r:' + ((vrand() - 0.5) * 720).toFixed(0) + 'deg;--sz:' + (1 + vrand() * 1.2).toFixed(2) + '">' + sh + '</span>'; }
   }
   st.innerHTML = h; document.body.appendChild(st); dieEl.classList.add('n20pop');
   setTimeout(() => st.remove(), level === 'voll' ? 2400 : 1500);
@@ -335,9 +336,9 @@ function d3stage20(dieEl, set, id, level) {
 function d3stage1(dieEl, level) {
   const r = dieEl.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; const W = window.innerWidth, H = window.innerHeight;
   const paths = []; const n = 7;
-  for (let k = 0; k < n; k++) { let a = (k / n) * Math.PI * 2 + (Math.random() - 0.5) * 0.6; let px = x, py = y; let d = 'M' + px.toFixed(0) + ' ' + py.toFixed(0); const len = Math.hypot(W, H) * (0.35 + Math.random() * 0.35); let walked = 0;
-    while (walked < len) { const st = 25 + Math.random() * 45; a += (Math.random() - 0.5) * 0.7; px += Math.cos(a) * st; py += Math.sin(a) * st; walked += st; d += ' L' + px.toFixed(0) + ' ' + py.toFixed(0);
-      if (Math.random() < 0.28) { let bx = px, by = py, ba = a + (Math.random() < 0.5 ? 1 : -1) * (0.5 + Math.random() * 0.6); let bd = 'M' + bx.toFixed(0) + ' ' + by.toFixed(0); for (let m = 0; m < 3; m++) { const bs = 15 + Math.random() * 25; ba += (Math.random() - 0.5) * 0.6; bx += Math.cos(ba) * bs; by += Math.sin(ba) * bs; bd += ' L' + bx.toFixed(0) + ' ' + by.toFixed(0); } paths.push([bd, 1]); } }
+  for (let k = 0; k < n; k++) { let a = (k / n) * Math.PI * 2 + (vrand() - 0.5) * 0.6; let px = x, py = y; let d = 'M' + px.toFixed(0) + ' ' + py.toFixed(0); const len = Math.hypot(W, H) * (0.35 + vrand() * 0.35); let walked = 0;
+    while (walked < len) { const st = 25 + vrand() * 45; a += (vrand() - 0.5) * 0.7; px += Math.cos(a) * st; py += Math.sin(a) * st; walked += st; d += ' L' + px.toFixed(0) + ' ' + py.toFixed(0);
+      if (vrand() < 0.28) { let bx = px, by = py, ba = a + (vrand() < 0.5 ? 1 : -1) * (0.5 + vrand() * 0.6); let bd = 'M' + bx.toFixed(0) + ' ' + by.toFixed(0); for (let m = 0; m < 3; m++) { const bs = 15 + vrand() * 25; ba += (vrand() - 0.5) * 0.6; bx += Math.cos(ba) * bs; by += Math.sin(ba) * bs; bd += ' L' + bx.toFixed(0) + ' ' + by.toFixed(0); } paths.push([bd, 1]); } }
     paths.push([d, 2]); }
   const st = document.createElement('div'); st.className = 'd3stage n1stage'; st.setAttribute('aria-hidden', 'true'); st.style.cssText = '--x:' + x + 'px;--y:' + y + 'px';
   st.innerHTML = '<div class="n1-vig"></div><svg class="n1-cracks" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
@@ -351,11 +352,12 @@ function d3stage1(dieEl, level) {
 /* ---- Geräusche (WebAudio, ohne Dateien) ---- */
 let D3_AC = null;
 function d3ac() { if (!d3sound()) return null; try { if (!D3_AC) D3_AC = new (window.AudioContext || window.webkitAudioContext)(); if (D3_AC.state === 'suspended') D3_AC.resume(); return D3_AC; } catch (e) { return null; } }
-function d3noise(ac, t, dur, f, g) { const n = Math.floor(ac.sampleRate * dur); const b = ac.createBuffer(1, n, ac.sampleRate); const d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n); const s = ac.createBufferSource(); s.buffer = b; const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 1.2; const gn = ac.createGain(); gn.gain.value = g; s.connect(bp); bp.connect(gn); gn.connect(ac.destination); s.start(t); }
+function d3noise(ac, t, dur, f, g) { const n = Math.floor(ac.sampleRate * dur); const b = ac.createBuffer(1, n, ac.sampleRate); const d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (vrand() * 2 - 1) * (1 - i / n); const s = ac.createBufferSource(); s.buffer = b; const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 1.2; const gn = ac.createGain(); gn.gain.value = g; s.connect(bp); bp.connect(gn); gn.connect(ac.destination); s.start(t); }
 function d3tone(ac, t, f1, f2, dur, g, type) { const o = ac.createOscillator(); o.type = type || 'sine'; o.frequency.setValueAtTime(f1, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur); const gn = ac.createGain(); gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(g, t + 0.01); gn.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(gn); gn.connect(ac.destination); o.start(t); o.stop(t + dur + 0.05); }
 function d3snd(kind, n) {
+  if (d3vol() <= 0) return; /* Lautstärke 0: gar nichts abspielen (eine Rampe auf 0 ist bei WebAudio nicht erlaubt) */
   const ac = d3ac(); if (!ac) return; const t = ac.currentTime + 0.01; const v = d3vol() * 0.5;
-  if (kind === 'roll') { const k = Math.min(3, n || 1); for (let j = 0; j < k; j++) [0, 0.09, 0.17, 0.24, 0.3, 0.35, 0.39].forEach((dt, i) => d3noise(ac, t + dt + j * 0.03, 0.03, 1800 + Math.random() * 1600, v * (1 - i * 0.12))); }
+  if (kind === 'roll') { const k = Math.min(3, n || 1); for (let j = 0; j < k; j++) [0, 0.09, 0.17, 0.24, 0.3, 0.35, 0.39].forEach((dt, i) => d3noise(ac, t + dt + j * 0.03, 0.03, 1800 + vrand() * 1600, v * (1 - i * 0.12))); }
   if (kind === 'land') d3tone(ac, t, 150, 60, 0.14, v * 0.8);
   if (kind === 'n20') [880, 1175, 1568, 2093].forEach((f, i) => d3tone(ac, t + i * 0.07, f, 0, 0.7, v * 0.35, 'triangle'));
   if (kind === 'n1') { d3tone(ac, t, 110, 70, 0.6, v * 0.5, 'sawtooth'); d3tone(ac, t, 117, 74, 0.6, v * 0.4, 'sawtooth'); d3noise(ac, t + 0.02, 0.12, 600, v); }
@@ -372,7 +374,7 @@ function d3conflict() { /* gleichzeitig gewählt: früher gewählt gewinnt */
   if (t.at < (ch.diceAt || 0) || (t.at === (ch.diceAt || 0) && t.uid < UID)) { const nm = D3_SETS[ch.dice].name; ch.dice = ''; ch.diceAt = 0; persist('c', ch.id); if (typeof queueMe === 'function') queueMe(); bannerToast('Würfel-Set vergeben', '„' + nm + '“ hat ' + t.name + ' schon gewählt. Du würfelst wieder mit dem Heldenbuch-Set – wähle ein anderes.'); }
 }
 function diceModal() {
-  const ch = cur(); if (!ch) return; const taken = d3taken(); const fx = d3fx(); const mine = ch.dice || 'klassik';
+  const ch = cur(); if (!ch) return; const taken = d3taken(); const vs = vfxLoad(); const mine = ch.dice || 'klassik';
   const card = (id) => { const s = D3_SETS[id]; const tk = taken[id]; const on = mine === id;
     return '<button class="d3card' + (on ? ' on' : '') + (tk ? ' taken' : '') + '"' + (tk ? ' disabled' : '') + ' data-act="diceSet" data-arg="' + esc(id) + '"><span class="d3pv" style="--dg:' + s.glow + '">' + d3svg(20, 20, id, { tilt: 0.42 }) + '</span><b>' + esc(s.name) + '</b><small>' + (tk ? 'Vergeben an ' + esc(tk.name) : esc(s.desc)) + '</small></button>'; };
   const m = $('#modal'); S.modal = 'dice';
@@ -380,16 +382,19 @@ function diceModal() {
     '<p class="hint">' + (S.camp ? 'Im Raum <b>' + esc(S.camp) + '</b> gehört jedes Set nur einem Helden. Am Tisch würfeln deine Würfel bei allen in deinem Design.' : 'Allein frei wählbar. Am Online-Tisch gehört jedes Set nur einem Helden.') + '</p>' +
     '<div class="d3grid">' + ['klassik'].concat(D3_PLAYER).map(card).join('') + '</div>' +
     (typeof isDM === 'function' && isDM() ? '<p class="hint">Als Spielleitung würfelst du am Tisch für Monster automatisch mit <b>Schatten der Spielleitung</b>.</p>' : '') +
-    '<div class="d3opts"><div class="fld"><span>Effekte</span><div class="seg">' + [['voll', 'Voll'], ['ruhig', 'Ruhig'], ['aus', 'Aus']].map(([k, l]) => '<button class="' + (fx === k ? 'on' : '') + '" data-act="diceFx" data-arg="' + esc(k) + '">' + l + '</button>').join('') + '</div></div>' +
+    '<div class="d3opts"><div class="fld"><span>Würfel rollen</span><div class="seg">' + [['normal', 'Normal'], ['kurz', 'Kurz'], ['aus', 'Aus']].map(([k, l]) => '<button class="' + (vs.roll === k ? 'on' : '') + '" data-act="vfx" data-arg="' + esc('roll:' + k) + '">' + l + '</button>').join('') + '</div></div>' +
+    '<div class="fld"><span>Natürliche 20 und 1</span><div class="seg">' + [['aus', 'Aus'], ['dezent', 'Dezent'], ['intensiv', 'Intensiv']].map(([k, l]) => '<button class="' + (vs.critical === k ? 'on' : '') + '" data-act="vfx" data-arg="' + esc('critical:' + k) + '">' + l + '</button>').join('') + '</div></div>' +
     '<div class="fld"><span>Geräusche</span><div class="seg"><button class="' + (d3sound() ? '' : 'on') + '" data-act="diceSnd" data-arg="0">Aus</button><button class="' + (d3sound() ? 'on' : '') + '" data-act="diceSnd" data-arg="1">An</button></div>' + (d3sound() ? '<input type="range" min="0" max="1" step="0.05" value="' + d3vol() + '" id="d3vol" aria-label="Lautstärke">' : '') + '</div>' +
-    '<div class="d3try"><button class="btn ghost" data-act="diceTry" data-arg="20">Probewurf W20</button><button class="btn ghost" data-act="diceTry" data-arg="n20">Natürliche 20 zeigen</button><button class="btn ghost" data-act="diceTry" data-arg="n1">Natürliche 1 zeigen</button></div></div></div>';
+    '<div class="d3try"><button class="btn ghost" data-act="diceTry" data-arg="20">Probewurf W20</button><button class="btn ghost" data-act="diceTry" data-arg="n20">Natürliche 20 zeigen</button><button class="btn ghost" data-act="diceTry" data-arg="n1">Natürliche 1 zeigen</button></div>' +
+    (vfxReduce() ? '<p class="hint">Dein Gerät wünscht weniger Bewegung: die Würfel rollen nicht.</p>' : '') + '<p class="hint"><button class="link" data-act="themeOpen">Weitere Effekte, Leistung und Vibration …</button></p></div></div>';
   m.hidden = false;
 }
 XA.diceOpen = () => diceModal();
 XA.diceSet = (t, a) => { const ch = cur(); if (!ch || !D3_SETS[a] || D3_SETS[a].dm) return; if (d3taken()[a]) return; ch.dice = a === 'klassik' ? '' : a; ch.diceAt = Date.now(); persist('c', ch.id); if (typeof queueMe === 'function') queueMe(); diceModal(); };
-XA.diceFx = (t, a) => { d3set('hb_dice_fx', a); d3set('hb_fx', { voll: 'stark', ruhig: 'dezent', aus: 'aus' }[a] || 'stark'); if (typeof applyFxLevel === 'function') { applyFxLevel(); if (typeof startFx === 'function') startFx(); } diceModal(); };
-XA.diceSnd = (t, a) => { d3set('hb_dice_snd', a); if (a === '1') { d3ac(); d3snd('land'); } diceModal(); };
-XA.diceTry = (t, a) => { const m = $('#modal'); m.hidden = true; S.modal = null; const n = a === 'n20' ? 20 : a === 'n1' ? 1 : 1 + Math.floor(Math.random() * 20); pushLog({ label: 'Probewurf', total: n, detail: 'W20 [' + n + '] · nur zum Anschauen', sides: 20, nat: n, crit: n === 20, fumble: n === 1, preview: true }); };
+/* alte Aktion (Voll/Ruhig/Aus): betrifft nur noch die Würfel, nicht mehr den Hintergrund */
+XA.diceFx = (t, a) => { const m = VFX_DF[a]; if (!m) return; vfxSet('roll', m.roll); vfxSet('critical', m.critical); diceModal(); };
+XA.diceSnd = (t, a) => { vfxSet('diceSound', a === '1'); if (a === '1') { d3ac(); d3snd('land'); } diceModal(); };
+XA.diceTry = (t, a) => { const m = $('#modal'); m.hidden = true; S.modal = null; const n = a === 'n20' ? 20 : a === 'n1' ? 1 : 1 + Math.floor(vrand() * 20); pushLog({ label: 'Probewurf', total: n, detail: 'W20 [' + n + '] · nur zum Anschauen', sides: 20, nat: n, crit: n === 20, fumble: n === 1, preview: true }); };
 document.addEventListener('input', (ev) => { if (ev.target && ev.target.id === 'd3vol') d3set('hb_dice_vol', ev.target.value); });
 document.addEventListener('change', (ev) => { if (ev.target && ev.target.id === 'd3vol') d3snd('land'); });
 

@@ -73,7 +73,7 @@ function luCelebrate(lv) {
   const st = document.createElement('div'); st.className = 'd3stage lucel'; st.setAttribute('aria-hidden', 'true');
   st.style.cssText = '--x:' + window.innerWidth / 2 + 'px;--y:' + window.innerHeight * 0.42 + 'px;--c:#ffd36b;--c2:#fff6d6';
   let h = '<div class="sg-vig"></div><div class="sg-aura"></div><div class="sg-ring"></div><div class="sg-ring r2"></div><div class="lunum">' + lv + '</div>';
-  if (full) for (let i = 0; i < 28; i++) { const a = (i / 28) * Math.PI * 2; const d = 120 + Math.random() * 200; h += '<span class="d3p sg burst" style="--dx:' + (Math.cos(a) * d).toFixed(0) + 'px;--dy:' + (Math.sin(a) * d).toFixed(0) + 'px;--c:' + ['#ffd36b', '#fff6d6', '#ffb347'][i % 3] + ';--d:' + (Math.random() * 200).toFixed(0) + 'ms;--r:0deg;--sz:' + (1 + Math.random()).toFixed(2) + '"><i class="ps"></i></span>'; }
+  if (full) for (let i = 0; i < 28; i++) { const a = (i / 28) * Math.PI * 2; const d = 120 + vrand() * 200; h += '<span class="d3p sg burst" style="--dx:' + (Math.cos(a) * d).toFixed(0) + 'px;--dy:' + (Math.sin(a) * d).toFixed(0) + 'px;--c:' + ['#ffd36b', '#fff6d6', '#ffb347'][i % 3] + ';--d:' + (vrand() * 200).toFixed(0) + 'ms;--r:0deg;--sz:' + (1 + vrand()).toFixed(2) + '"><i class="ps"></i></span>'; }
   st.innerHTML = h; document.body.appendChild(st); if (typeof d3snd === 'function') d3snd('n20'); setTimeout(() => st.remove(), 2300);
 }
 Object.assign(XA, {

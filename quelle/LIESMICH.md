@@ -37,6 +37,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/befunde.test.js | Befunde B-01–B-20 des unabhängigen Grosstests v1.9.40: Neustart vor dem verzögerten Schreiben (Änderung und Löschung), voller Speicher, zwei Tabs, Import erst prüfen, SL-Notiz beim richtigen Raum, Maskierung (Unterklassenname, Porträt, Kennungen), Abenteuer-Blockprüfung, Spielerdokumente vom Tisch, sieben Regelfälle mit fixierten Würfeln |
 | tests/kontrast.test.js | Lesbarkeit: Text- und Akzentfarben aller Stimmungen erreichen 4,5:1 auf allen Flächen (Textfassungen `--gold-t`, `--wine-t` werden in theme.js berechnet) |
 | tests/stimmung.test.js | Stimmungen und Hintergrund-Effekte: 20 Wechsel ohne doppelte Ebenen oder Schleifen, Zeichenrate Handy ≤ ~20/s und PC ≤ ~30/s, Würfel-Teilchen schneller, «Dezent», «Aus» und reduzierte Bewegung; mit `--alt=<datei>` Vergleich der Rechenzeit (Diagnose) |
+| tests/vfx.test.js | Effekte-Einstellungen (vfx.js): neue Grundwerte, Übernahme der alten Schalter (auch ausdrückliches Aus), Würfel und Hintergrund getrennt, Würfel Normal/Kurz/Aus, reduzierte Bewegung, natürliche 20/1 getrennt vom Regel-Krit, Krit «Aus» ohne Ersatz-Effekt, Würfelschale ohne Krit-Markierung, Vibration nur mit Einwilligung, kein Regel-Zufall in Animationen, Hintergrund-Pause, Auto-Leistung, Lautstärke 0, Einstellungsfenster |
 | tests/handy.test.js | Langsames Handy: CPU gedrosselt (`--drossel=4`), Start, Reiter, Würfeln, Listen, Kampfstart, Speicher; mit `DDB_DIR` auch die grösste echte PDF |
 | tests/srd.test.js | Abgleich aller Zauber (339) und Monster (164), die es im SRD 5.2 gibt, mit `tests/srd2024-ref.json` (abgeleitet aus dem SRD 5.2, CC BY 4.0, über 5e-bits/5e-database); begründete Ausnahmen stehen im Test |
 | tests/echt.test.js | Echter Online-Tisch: SL (Chromium), iPhone (WebKit), Android (Firefox) über den öffentlichen Server; nur in GitHub Actions (hier gesperrt), lokal mit `--lokal`; `--ohne-speicher` simuliert einen Server, der gespeicherte Nachrichten verliert |
@@ -93,6 +94,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | assets.js, crests.js | Bilder (Base64) und Wappen |
 | extra.js | Gegenstände, Begleiter, Bestiarium, Rasten, Navigation |
 | scenes.js | Hintergrundbilder (Base64) |
+| vfx.js | Effekte-Einstellungen und Leistung: Grundwerte, Übernahme alter Schalter, Auto-Leistung, Hintergrund-Pause bei rollenden Würfeln, Vibration nur mit Einwilligung, sichtbarer Zufall `vrand()` getrennt vom Regel-Zufall `rnd()` |
 | theme.js, theme-fx.js | Stimmungen und Effekte |
 | turn.js | Zugleiste: Aktion, Bonusaktion, Reaktion, Bewegung |
 | effects.js | Effekte mit Dauer im gemeinsamen Kampf |

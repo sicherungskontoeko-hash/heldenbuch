@@ -26,6 +26,7 @@ SUITES=(
   "backup.test.js|Sichern und Wiederherstellen"
   "daten.test.js app/Heldenbuch.html|Daten in der App"
   "befunde.test.js|Befunde B-01–B-20"
+  "vfx.test.js|Effekte: Einstellungen und Vibration"
   "undo.test.js|Rückgängig"
   "dice.test.js|Würfel|1"
   "verlauf.test.js|Würfelverlauf"
