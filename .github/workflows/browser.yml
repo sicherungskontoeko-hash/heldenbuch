@@ -1,0 +1,83 @@
+# Prüft das Heldenbuch in den Browser-Engines, die es lokal nicht gibt:
+#   WebKit (Safari, iPhone) unter Linux und macOS, Firefox unter Linux,
+#   dazu einen echten Online-Tisch mit drei Geräten über die öffentlichen Server.
+# Läuft bei jedem Pull Request auf main und von Hand (Actions → Browser prüfen → Run workflow).
+name: Browser prüfen
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  engine:
+    name: ${{ matrix.engine }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, engine: webkit }
+          - { os: ubuntu-latest, engine: firefox }
+          - { os: macos-latest, engine: webkit }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Testwerkzeuge
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/t" && cd "$RUNNER_TEMP/t" && npm init -y >/dev/null
+          npm install --no-audit --no-fund playwright@1.63.0 aedes@1.2.0 websocket-stream@5.5.2
+          npx playwright install --with-deps ${{ matrix.engine }} chromium
+          echo "NODE_PATH=$RUNNER_TEMP/t/node_modules" >> "$GITHUB_ENV"
+      - name: Tests in ${{ matrix.engine }}
+        shell: bash
+        env:
+          HB_ENGINE: ${{ matrix.engine }}
+        run: bash quelle/tests/engines.sh
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: protokoll-${{ matrix.engine }}-${{ matrix.os }}
+          path: quelle/tests/engine-log
+
+  tisch:
+    name: Echter Online-Tisch (${{ matrix.server }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        server: [hivemq, emqx]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Testwerkzeuge
+        run: |
+          mkdir -p "$RUNNER_TEMP/t" && cd "$RUNNER_TEMP/t" && npm init -y >/dev/null
+          npm install --no-audit --no-fund playwright@1.63.0 aedes@1.2.0 websocket-stream@5.5.2
+          npx playwright install --with-deps chromium webkit firefox
+          echo "NODE_PATH=$RUNNER_TEMP/t/node_modules" >> "$GITHUB_ENV"
+      - name: App bauen
+        working-directory: quelle
+        run: |
+          bash build.sh >/dev/null
+          mkdir -p app; [ -e app/fonts ] || ln -s ../fonts app/fonts; [ -e app/assets ] || ln -s ../../www/icons app/assets
+          python3 build_app.py
+      - name: SL (Chromium), iPhone (WebKit), Android (Firefox) über ${{ matrix.server }}
+        working-directory: quelle
+        run: |
+          node tests/echt.test.js --server=${{ matrix.server }} || { echo "Zweiter Versuch (öffentlicher Server)"; sleep 20; node tests/echt.test.js --server=${{ matrix.server }}; }
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tisch-${{ matrix.server }}
+          path: quelle/tests/echt-bilder
