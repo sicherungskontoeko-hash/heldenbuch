@@ -91,6 +91,7 @@ function vfxTurn() {
 /* Rast: Bernsteinlicht (kurz) bzw. goldene Welle (lang) über dem Kopf des Bogens; die TP-Änderung zeigt die Rast selbst */
 function vfxRest(kind) {
   vfxQuiet(); if (typeof tonEvent === 'function') tonEvent('rest', kind); if (vfxLevel('status') === 'aus') return;
-  setTimeout(() => { const el = vfxVis('#view .shead .who|#top .curhero'); if (!el) return; const r = vfxBox(el);
+  /* weggescrollt: Welle oben in der Bildmitte statt gar nicht (die Rast soll man immer sehen) */
+  setTimeout(() => { const el = vfxVis('#view .shead .who|#top .curhero'); const w = Math.min(360, innerWidth - 40); const r = el ? vfxBox(el) : { x: (innerWidth - w) / 2, y: 70, w, h: 56 };
     vfxAt(r, 'vrest ' + (kind === 'long' ? 'long' : 'short'), '', kind === 'long' ? 640 : 440, 'width:' + Math.round(r.w) + 'px;height:' + Math.round(r.h) + 'px'); }, 0);
 }
