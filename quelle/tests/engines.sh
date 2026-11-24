@@ -28,6 +28,7 @@ SUITES=(
   "befunde.test.js|Befunde B-01–B-20"
   "vfx.test.js|Effekte: Einstellungen und Vibration"
   "ereignis.test.js|Effekte: Spielereignisse und lokale Krits"
+  "ui.test.js|Effekte: Bedien-Animationen"
   "undo.test.js|Rückgängig"
   "dice.test.js|Würfel|1"
   "verlauf.test.js|Würfelverlauf"

@@ -6,7 +6,7 @@
      hb_dice_snd 1/0            → Würfelgeräusche an/aus
    Ändert jemand einen alten Schalter (alte Version, anderer Tab), wird nur dieser Teil übernommen.
    Präsentation ändert nie Würfelergebnisse: sichtbarer Zufall kommt aus vrand(), nicht aus rnd(). */
-const VFX_DEF = Object.freeze({ profile: 'auto', roll: 'normal', critical: 'dezent', damage: 'dezent', status: 'dezent', background: 'dezent', dice3d: 'classic', diceSound: false, eventSound: false, ambience: false, haptics: false });
+const VFX_DEF = Object.freeze({ profile: 'auto', roll: 'normal', critical: 'dezent', damage: 'dezent', status: 'dezent', background: 'dezent', dice3d: 'classic', menu: true, diceSound: false, eventSound: false, ambience: false, haptics: false });
 const VFX_LV = ['aus', 'dezent', 'intensiv'];
 const VFX_OK = { profile: ['auto', 'eco', 'balanced', 'max'], roll: ['normal', 'kurz', 'aus'], critical: VFX_LV, damage: VFX_LV, status: VFX_LV, background: VFX_LV, dice3d: ['classic', 'artifact'] };
 const VFX_DF = { voll: { roll: 'normal', critical: 'intensiv' }, ruhig: { roll: 'aus', critical: 'dezent' }, aus: { roll: 'aus', critical: 'aus' } };
@@ -18,7 +18,7 @@ const vfxPut = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 function vfxClean(o) {
   const s = Object.assign({}, VFX_DEF);
   for (const [k, list] of Object.entries(VFX_OK)) if (o && list.includes(o[k])) s[k] = o[k];
-  s.diceSound = !!(o && o.diceSound === true); s.eventSound = !!(o && o.eventSound === true); s.ambience = !!(o && o.ambience === true); s.haptics = !!(o && o.haptics === true);
+  s.diceSound = !!(o && o.diceSound === true); s.eventSound = !!(o && o.eventSound === true); s.ambience = !!(o && o.ambience === true); s.haptics = !!(o && o.haptics === true); s.menu = !(o && o.menu === false);
   return s;
 }
 /* alte Schalter aus den neuen Einstellungen */
@@ -50,7 +50,7 @@ function vfxSet(k, v) {
   const c = vfxClean(s); vfxSave(c);
   if (k === 'haptics' && !c.haptics) { try { navigator.vibrate && navigator.vibrate(0); } catch (e) {} }
   if (k === 'profile') { VFX_RT.bad = VFX_RT.good = 0; }
-  if (typeof applyFxLevel === 'function') applyFxLevel();
+  if (typeof applyFxLevel === 'function') applyFxLevel(); if (typeof vfxUiApply === 'function') vfxUiApply();
   if ((k === 'background' || k === 'level' || k === 'profile') && typeof startFx === 'function') startFx();
   if (k === 'ambience' && typeof tonAmbSync === 'function') tonAmbSync();
   return c;
@@ -118,6 +118,7 @@ function vfxBlock() {
     row('Schaden und Heilung:', 'damage', lv, s.damage) +
     row('Zug, Rast, Stufe, Zustände:', 'status', lv, s.status) +
     row('Hintergrund:', 'background', lv, s.background) +
+    row('Bedien-Animationen:', 'menu', [['aus', 'Aus'], ['an', 'An']], s.menu ? 'an' : 'aus') +
     row('Würfelgeräusche:', 'diceSound', [['aus', 'Aus'], ['an', 'An']], s.diceSound ? 'an' : 'aus') +
     (s.diceSound ? '<div class="fxlv"><span>Lautstärke:</span><input type="range" min="0" max="1" step="0.05" value="' + esc(typeof d3vol === 'function' ? d3vol() : 0.6) + '" id="d3vol" aria-label="Lautstärke der Würfelgeräusche"></div>' : '') +
     row('Spielgeräusche:', 'eventSound', [['aus', 'Aus'], ['an', 'An']], s.eventSound ? 'an' : 'aus') +
@@ -128,7 +129,7 @@ function vfxBlock() {
 }
 XA.vfx = (t, a) => {
   const i = String(a).indexOf(':'); if (i < 0) return; const k = a.slice(0, i); let v = a.slice(i + 1);
-  const BOOL = ['diceSound', 'eventSound', 'ambience', 'haptics']; if (BOOL.includes(k)) v = v === 'an';
+  const BOOL = ['diceSound', 'eventSound', 'ambience', 'haptics', 'menu']; if (BOOL.includes(k)) v = v === 'an';
   if (k !== 'level' && !BOOL.includes(k) && !(VFX_OK[k] || []).includes(v)) return;
   if (k === 'level' && !VFX_LV.includes(v)) return;
   vfxSet(k, v);
@@ -138,3 +139,5 @@ XA.vfx = (t, a) => {
   if (S.modal === 'theme' && typeof openThemeModal === 'function') openThemeModal(); else if (S.modal === 'dice' && typeof diceModal === 'function') diceModal(); else render();
 };
 document.addEventListener('toggle', (ev) => { if (ev.target && ev.target.id === 'vfxMore') S.vfxMore = ev.target.open; }, true);
+/* Systemeinstellung «weniger Bewegung» ändert sich zur Laufzeit: sofort übernehmen */
+try { matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => { VFX_RT.cache = null; if (typeof applyFxLevel === 'function') applyFxLevel(); if (typeof vfxUiApply === 'function') vfxUiApply(); if (typeof startFx === 'function') startFx(); }); } catch (e) {}
