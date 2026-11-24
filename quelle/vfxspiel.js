@@ -72,7 +72,7 @@ function vfxDamage(e) {
 function vfxPlay(ev) {
   const lv = vfxLevel('status');
   for (const e of ev) {
-    if (e.k === 'hp') { vfxDamage(e); continue; }
+    if (e.k === 'hp') { if (typeof tonEvent === 'function') tonEvent(e.d < 0 ? 'damage' : 'heal'); vfxDamage(e); continue; }
     if (lv === 'aus') continue;
     if (e.k === 'temp') vfxFlash(vfxVis('#view .vb.hpb|#top .curhero'), 'vfx-shield', 320);
     else if (e.k === 'concEnd' && e.r) vfxAt(e.r, 'vconc', '<span>◎</span>', 420, 'width:' + Math.round(e.r.w) + 'px;height:' + Math.round(e.r.h) + 'px');
@@ -90,7 +90,7 @@ function vfxTurn() {
 }
 /* Rast: Bernsteinlicht (kurz) bzw. goldene Welle (lang) über dem Kopf des Bogens; die TP-Änderung zeigt die Rast selbst */
 function vfxRest(kind) {
-  vfxQuiet(); if (vfxLevel('status') === 'aus') return;
+  vfxQuiet(); if (typeof tonEvent === 'function') tonEvent('rest', kind); if (vfxLevel('status') === 'aus') return;
   setTimeout(() => { const el = vfxVis('#view .shead .who|#top .curhero'); if (!el) return; const r = vfxBox(el);
     vfxAt(r, 'vrest ' + (kind === 'long' ? 'long' : 'short'), '', kind === 'long' ? 640 : 440, 'width:' + Math.round(r.w) + 'px;height:' + Math.round(r.h) + 'px'); }, 0);
 }

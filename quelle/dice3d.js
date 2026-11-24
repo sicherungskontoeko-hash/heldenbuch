@@ -364,14 +364,34 @@ function d3stage1(dieEl, level, set) {
 
 /* ---- Geräusche (WebAudio, ohne Dateien) ---- */
 let D3_AC = null;
-function d3ac() { if (!d3sound()) return null; try { if (!D3_AC) D3_AC = new (window.AudioContext || window.webkitAudioContext)(); if (D3_AC.state === 'suspended') D3_AC.resume(); return D3_AC; } catch (e) { return null; } }
-function d3noise(ac, t, dur, f, g) { const n = Math.floor(ac.sampleRate * dur); const b = ac.createBuffer(1, n, ac.sampleRate); const d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (vrand() * 2 - 1) * (1 - i / n); const s = ac.createBufferSource(); s.buffer = b; const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 1.2; const gn = ac.createGain(); gn.gain.value = g; s.connect(bp); bp.connect(gn); gn.connect(ac.destination); s.start(t); }
-function d3tone(ac, t, f1, f2, dur, g, type) { const o = ac.createOscillator(); o.type = type || 'sine'; o.frequency.setValueAtTime(f1, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur); const gn = ac.createGain(); gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(g, t + 0.01); gn.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(gn); gn.connect(ac.destination); o.start(t); o.stop(t + dur + 0.05); }
-function d3snd(kind, n) {
+/* Ton: ein AudioContext, Sammelschiene mit Begrenzer, höchstens 8 gleichzeitige Stimmen, beendete Knoten werden getrennt.
+   Erst nach einer Berührung oder Taste (kein Ton beim Laden); fehlt WebAudio, bleibt es still. */
+const TON = { bus: null, voices: 0, gesture: false, nbuf: new Map() };
+['pointerdown', 'keydown', 'touchstart'].forEach((ev) => document.addEventListener(ev, () => { TON.gesture = true; }, { capture: true, passive: true }));
+function tonAc() {
+  if (!TON.gesture || document.hidden) return null;
+  try { if (!D3_AC) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; D3_AC = new C(); const comp = D3_AC.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 6; comp.attack.value = 0.003; comp.release.value = 0.15; TON.bus = D3_AC.createGain(); TON.bus.connect(comp); comp.connect(D3_AC.destination); }
+    if (D3_AC.state === 'suspended') D3_AC.resume(); return D3_AC; } catch (e) { return null; }
+}
+function d3ac() { if (!d3sound()) return null; return tonAc(); }
+function tonVoice(nodes, src) { TON.voices++; src.onended = () => { TON.voices = Math.max(0, TON.voices - 1); nodes.forEach((x) => { try { x.disconnect(); } catch (e) {} }); }; }
+function d3noise(ac, t, dur, f, g) {
+  if (TON.voices >= 8 || !(g > 0)) return; const key = Math.round(dur * 1000); let b = TON.nbuf.get(key);
+  if (!b) { const n = Math.floor(ac.sampleRate * dur); b = ac.createBuffer(1, n, ac.sampleRate); const d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (vrand() * 2 - 1) * (1 - i / n); TON.nbuf.set(key, b); if (TON.nbuf.size > 24) TON.nbuf.delete(TON.nbuf.keys().next().value); }
+  const s = ac.createBufferSource(); s.buffer = b; const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 1.2; const gn = ac.createGain(); gn.gain.value = g; s.connect(bp); bp.connect(gn); gn.connect(TON.bus || ac.destination); tonVoice([s, bp, gn], s); s.start(t);
+}
+function d3tone(ac, t, f1, f2, dur, g, type) {
+  if (TON.voices >= 8 || !(g > 0)) return; const o = ac.createOscillator(); o.type = type || 'sine'; o.frequency.setValueAtTime(f1, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  const gn = ac.createGain(); gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(g, t + 0.01); gn.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(gn); gn.connect(TON.bus || ac.destination); tonVoice([o, gn], o); o.start(t); o.stop(t + dur + 0.05);
+}
+/* Klang je Material: Gewicht, Filterfrequenz, Resonanz (Holz dumpf, Metall hell und schwer, Kristall gläsern, Knochen trocken, Magie mit leisem Nachklang) */
+const TON_MAT = { klassik: [0.85, 850, 115], koenigsgold: [1.15, 1800, 220], drachenfeuer: [1.0, 2700, 560], frostherz: [0.85, 3400, 760], arkanum: [0.9, 2600, 520], totenbein: [0.8, 1150, 140], weltenhain: [1.0, 2300, 470], eisenwerk: [1.45, 3400, 180], blutmond: [1.1, 1750, 240], himmelslicht: [1.25, 1450, 160], chaosprisma: [0.95, 2900, 650], schatten: [0.95, 2100, 400] };
+const TON_MAGIC = { arkanum: 1, chaosprisma: 1, blutmond: 1, schatten: 1, frostherz: 1, drachenfeuer: 1 };
+function d3snd(kind, n, set) {
   if (d3vol() <= 0) return; /* Lautstärke 0: gar nichts abspielen (eine Rampe auf 0 ist bei WebAudio nicht erlaubt) */
-  const ac = d3ac(); if (!ac) return; const t = ac.currentTime + 0.01; const v = d3vol() * 0.5;
-  if (kind === 'roll') { const k = Math.min(3, n || 1); for (let j = 0; j < k; j++) [0, 0.09, 0.17, 0.24, 0.3, 0.35, 0.39].forEach((dt, i) => d3noise(ac, t + dt + j * 0.03, 0.03, 1800 + vrand() * 1600, v * (1 - i * 0.12))); }
-  if (kind === 'land') d3tone(ac, t, 150, 60, 0.14, v * 0.8);
+  const ac = d3ac(); if (!ac) return; const t = ac.currentTime + 0.01; const v = d3vol() * 0.5; const [w, ff, res] = TON_MAT[set] || TON_MAT.klassik;
+  if (kind === 'roll') { const k = Math.min(3, n || 1); for (let j = 0; j < k; j++) [0, 0.09, 0.17, 0.24, 0.3, 0.35, 0.39].forEach((dt, i) => d3noise(ac, t + dt * w + j * 0.03, 0.03, ff * (0.8 + vrand() * 0.6), v * (1 - i * 0.12) * Math.min(1.2, w))); }
+  if (kind === 'land') { d3tone(ac, t, res * 1.3, res * 0.5, 0.1 + 0.08 * w, v * 0.8 * Math.min(1.2, w)); d3noise(ac, t, 0.03, ff, v * 0.5); if (TON_MAGIC[set]) d3tone(ac, t + 0.04, res * 4, res * 3.6, 0.5, v * 0.12, 'sine'); }
   if (kind === 'n20') [880, 1175, 1568, 2093].forEach((f, i) => d3tone(ac, t + i * 0.07, f, 0, 0.7, v * 0.35, 'triangle'));
   if (kind === 'n1') { d3tone(ac, t, 110, 70, 0.6, v * 0.5, 'sawtooth'); d3tone(ac, t, 117, 74, 0.6, v * 0.4, 'sawtooth'); d3noise(ac, t + 0.02, 0.12, 600, v); }
 }

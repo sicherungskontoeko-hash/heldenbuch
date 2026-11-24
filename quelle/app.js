@@ -383,7 +383,7 @@ function showMulti(e, flat) {
     els.forEach((el, i) => { const d = list[i]; const pair = (e.pairVals || []).includes(d.v); const cls = pair ? ' pair' : d.v === d.sides ? ' max' : d.v === 1 ? ' min' : '';
       if (el.dataset.d3) { if (el._h) el._h.skip(); el.innerHTML = d3h(d, d.v, 'land' + cls + (d.neg ? ' neg' : '')); return; }
       const tx = el.querySelector('text'); if (tx) tx.textContent = d.v; el.firstChild.className = 'die land' + cls + (d.neg ? ' neg' : ''); });
-    if (has3) d3snd('land');
+    if (has3) d3snd('land', n, set); if (typeof vfxVibrate === 'function') vfxVibrate('land');
     if ((e.pairVals || []).length) { const pb = document.createElement('div'); pb.className = 'tpair'; pb.textContent = 'Pasch!'; tray.appendChild(pb); }
     const sum = list.reduce((a, d) => a + (d.neg ? -d.v : d.v), 0);
     t.innerHTML = '<div class="tt">' + head + '<div class="tv">' + esc(e.total) + '</div><div class="td">' + esc(e.detail) + (extra ? ' · ' + extra + ' weitere Würfel nicht gezeigt' : '') + '</div></div>';
@@ -393,7 +393,7 @@ function showMulti(e, flat) {
     showToast.tm = setTimeout(() => { t.hidden = true; }, 7000);
   };
   if (reduce) return land();
-  if (has3) { d3snd('roll', n); t.onclick = () => { clearTimeout(showMulti.st); t.onclick = null; land(); }; }
+  if (has3) { d3snd('roll', n, set); t.onclick = () => { clearTimeout(showMulti.st); t.onclick = null; land(); }; }
   showMulti.iv = setInterval(() => els.forEach((el, i) => { if (el.dataset.d3) return; const tx = el.querySelector('text'); if (tx) tx.textContent = 1 + Math.floor(vrand() * list[i].sides); }), 80);
   showMulti.st = setTimeout(land, rollMs + n * 28);
 }
@@ -443,7 +443,7 @@ function showToast(e) {
     const tip = typeof rollTip === 'function' ? rollTip(e) : '';
     t.innerHTML = '<div class="trow"><div class="dice">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer' + (nat && nat < 20 ? ' (erweiterter Bereich)' : '') + '!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
     if (art) t.querySelectorAll('.die.d3').forEach((el, i) => { const svg = el.innerHTML; if (!W3D.still(el, sides, vals[i], set, { gold: i === keep && nat === 20, dim: i !== keep || nat === 1 })) el.innerHTML = svg; });
-    if (use3) { d3snd('land'); if (nat === 20 || nat === 1) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, nat === 20 ? 'n20' : 'n1', crl); d3snd(nat === 20 ? 'n20' : 'n1'); if (typeof vfxVibrate === 'function') vfxVibrate(nat === 20 ? 'n20' : 'n1'); } }
+    if (use3) { d3snd('land', 1, set); if (nat !== 20 && nat !== 1 && typeof vfxVibrate === 'function') vfxVibrate('land'); if (nat === 20 || nat === 1) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, nat === 20 ? 'n20' : 'n1', crl); d3snd(nat === 20 ? 'n20' : 'n1'); if (typeof vfxVibrate === 'function') vfxVibrate(nat === 20 ? 'n20' : 'n1'); } }
     showToast.tm = setTimeout(() => { t.hidden = true; }, tip ? 9000 : 6500);
   };
   t.hidden = false; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
@@ -451,7 +451,7 @@ function showToast(e) {
   if (use3) {
     if (!rollMs) return final();
     t.innerHTML = '<div class="trow"><div class="dice">' + vals.map(() => '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>').join('') + '</div><div class="tt">' + head + '<div class="tv dim">…</div></div></div>';
-    d3snd('roll', vals.length); let left = vals.length; const hs = [];
+    d3snd('roll', vals.length, set); let left = vals.length; const hs = [];
     t.querySelectorAll('.die').forEach((el, i) => { const o = { dur: Math.round(rollMs * 0.9) + i * (rollMs > 400 ? 140 : 50), onDone: () => { if (--left === 0) final(); } }; hs.push((art && W3D.roll(el, sides, vals[i], set, o)) || d3roll(el, sides, vals[i], set, o)); });
     t.onclick = () => { hs.forEach((h) => h.skip()); };
     return;

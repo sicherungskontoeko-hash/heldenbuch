@@ -77,6 +77,7 @@ run "Stimmungen: Wechsel, Zeichenrate, Aus und reduzierte Bewegung (stimmung.tes
 run "Effekte: Einstellungen, alte Schalter, Leistung, Vibration (vfx.test.js)" node tests/vfx.test.js
 run "Effekte: Schaden, Heilung, Rast, Stufe, Zustände, lokale Krits (ereignis.test.js)" node tests/ereignis.test.js
 run "Artefaktwürfel v5 (Prototyp): Schalter, WebGL, Rückfall (wuerfel3d.test.js)" node tests/wuerfel3d.test.js
+run "Effekte: Ton, Hintergrundgeräusche, Vibration (ton.test.js)" node tests/ton.test.js
 run "Langsames Handy: CPU 4× gedrosselt (handy.test.js app)" node tests/handy.test.js app/Heldenbuch.html --drossel=4
 run "Abgleich mit dem SRD 5.2: Zauber und Monster (srd.test.js)" node tests/srd.test.js
 run "Online-Tisch mit drei Geräten, lokal (echt.test.js --lokal)" node tests/echt.test.js --lokal
