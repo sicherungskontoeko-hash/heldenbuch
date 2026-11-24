@@ -530,7 +530,7 @@ ul.help{margin:0;padding-left:1.1em;display:grid;gap:8px;color:var(--ink)}ul.hel
 /* ---- Wappen, Porträts, Banner, Stimmungen ---- */
 .sigil.crest svg{width:56%;height:56%;color:var(--gold-hi);filter:drop-shadow(0 0 6px rgba(var(--gold-rgb),.45))}
 .sigil.art{background-size:cover;background-position:center 22%;color:transparent}
-.banner{position:relative;overflow:hidden;isolation:isolate;border:1px solid var(--line2);border-radius:22px;padding:42px 34px;min-height:224px;text-align:left;justify-items:start;align-content:center;background:linear-gradient(90deg,rgba(var(--bg-rgb),.95) 0%,rgba(var(--bg-rgb),.78) 30%,rgba(var(--bg-rgb),.24) 60%,rgba(var(--bg-rgb),.05) 100%),var(--art) right center/cover;box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.03) inset}
+.banner{position:relative;overflow:hidden;isolation:isolate;border:1px solid var(--line2);border-radius:22px;padding:42px 34px;min-height:224px;text-align:left;justify-items:start;align-content:center;background:linear-gradient(90deg,rgba(var(--bg-rgb),.95) 0%,rgba(var(--bg-rgb),.8) 30%,rgba(var(--bg-rgb),.36) 60%,rgba(var(--bg-rgb),.2) 100%),var(--art) right center/cover;box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.03) inset}
 .banner.slim{min-height:132px;padding:24px 30px;margin-bottom:16px}.banner.slim h1{font-size:clamp(1.4rem,3vw,2rem)}
 @media (max-width:820px){.banner.slim{min-height:96px;padding:16px;margin-bottom:12px}.banner.slim p{display:none}}
 .banner::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,rgba(var(--gold-rgb),.12),transparent 18%,transparent 74%,rgba(var(--glow1-rgb),.16));mix-blend-mode:screen;opacity:.9}
@@ -1195,7 +1195,14 @@ button.vb{cursor:pointer}button.vb:hover{border-color:var(--gold)}
 /* Hilfe-Stufe: Einsteiger-Tipps, Zug-Leitfaden, Auswahl */
 .nb{display:block;color:var(--muted);font-size:.8rem;line-height:1.4;font-style:normal;font-weight:400;letter-spacing:0;text-transform:none;margin:2px 0 0}
 p.nb{margin:-4px 0 10px;padding:6px 10px;border-left:3px solid rgba(var(--gold-rgb),.45);background:rgba(var(--gold-rgb),.05);border-radius:0 10px 10px 0;max-width:72ch}
-.shead+p.nb{margin:0 0 12px}.vitals+p.nb{margin:8px 0 4px}
+.shead+p.nb{margin:0 0 12px}
+/* Bogen-Kopf als Banner (gleiche Sprache wie Helden, Tisch, Erschaffen): Rahmen, Bild der Klasse rechts, Stimmungstönung */
+.sheet .shead .who{position:relative;isolation:isolate;overflow:hidden;flex:1 1 auto;border:1px solid var(--line2);border-radius:20px;padding:12px 18px;box-shadow:0 14px 36px rgba(0,0,0,.35)}
+.sheet .shead .who.hasart{background:linear-gradient(90deg,rgba(var(--bg-rgb),.95) 0%,rgba(var(--bg-rgb),.86) 40%,rgba(var(--bg-rgb),.4) 72%,rgba(var(--bg-rgb),.22) 100%),var(--art) right 30%/cover}
+.sheet .shead .who::after{content:'';position:absolute;inset:0;z-index:-1;background:rgb(var(--glow1-rgb));mix-blend-mode:color;opacity:.14;pointer-events:none}
+.sheet .shead .who h1,.sheet .shead .who p{text-shadow:0 1px 10px rgba(0,0,0,.85)}
+@media (max-width:820px){.sheet .shead .who.hasart{background:linear-gradient(90deg,rgba(var(--bg-rgb),.95) 0%,rgba(var(--bg-rgb),.9) 55%,rgba(var(--bg-rgb),.5) 82%,rgba(var(--bg-rgb),.25) 100%),var(--art) 80% center/cover}}
+@media (min-width:821px){.sheet .shead{margin-bottom:8px}.sheet .shead .who{padding:6px 18px 6px 8px}.sheet .shead .who .sigil{width:62px;height:62px;font-size:1.3rem}}.vitals+p.nb{margin:8px 0 4px}
 .tguide{padding:9px 12px;border:1px dashed rgba(var(--gold-rgb),.4);border-radius:12px;background:rgba(var(--gold-rgb),.05);font-size:.86rem;line-height:1.45}
 .tguide>b{font-family:var(--f-display);color:var(--gold-hi);font-size:.95rem}.tguide ol{list-style:none;margin:6px 0;padding:0;display:grid;gap:5px}
 .tguide li{display:flex;gap:8px;align-items:flex-start}.tguide li.done{opacity:.5}.tguide li.done span{text-decoration:line-through}
@@ -1333,6 +1340,10 @@ body{margin:0}
   /* Kampf-Reiter: Volk, Hintergrund und Gesinnung stehen unter «Werte»; so bleibt die erste Angriffstaste über der unteren Leiste */
   .sheet[data-mg="kampf"] .shead p .shx{display:none}
   .sheet .shead{margin-bottom:4px}
+  .sheet .shead .who{padding:3px 8px 3px 4px;border-radius:14px;box-shadow:none}
+  .sheet .shead .who .sigil{width:38px;height:38px;font-size:.85rem}
+  .sheet .shead{margin-bottom:2px}
+
   .sheet .turnblk{gap:4px}
   .sheet[data-mg]>.turnblk{margin-bottom:6px}
 }
