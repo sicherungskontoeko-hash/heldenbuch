@@ -53,7 +53,7 @@ const MODALS = [['Würfelverlauf', 'histOpen'], ['Hilfe-Einstellungen', 'hlOpen'
       const a = (c) => { const m = /rgba?\(([^)]+)\)/.exec(c); if (!m) return 0; const q = m[1].split(/[ ,/]+/).filter(Boolean); return q.length > 3 ? +q[3] : 1; };
       return ['#top', '.shbar', '#bnav', '.mnav'].filter((q) => { const e = document.querySelector(q); if (!e || !e.getClientRects().length || getComputedStyle(e).display === 'none') return false; const c = getComputedStyle(e); const bgImg = c.backgroundImage && c.backgroundImage !== 'none'; return a(c.backgroundColor) < 0.99 && !bgImg && (q !== '.mnav' || getComputedStyle(e).position === 'sticky' && !e.closest('.shbar')); }); });
     T(w + '×' + h + ': Leisten deckend', !trans.length, trans);
-    T(w + '×' + h + ': nichts dauerhaft verdeckt, nichts abgeschnitten, kein Querscrollen', !bad.length, bad.map((r) => ({ wo: r.name, verdeckt: r.covered.slice(0, 4), abgeschnitten: r.cut.slice(0, 4), quer: r.hscroll })));
+    T(w + '×' + h + ': nichts dauerhaft verdeckt, nichts abgeschnitten, kein Querscrollen', !bad.length, bad.map((r) => ({ wo: r.name, verdeckt: r.covered.slice(0, 4), abgeschnitten: r.cut.slice(0, 4), quer: r.hscroll, breit: r.wide })));
     await ctx.close();
   }
   T('Ansichten geprüft: ' + total, total >= VPS.length * (STATES.length + 3));

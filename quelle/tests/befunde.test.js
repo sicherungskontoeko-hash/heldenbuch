@@ -59,8 +59,9 @@ const KILL = () => { for (const k of Object.keys(LATER)) { clearTimeout(timers[k
     const p2 = await page(ctx, '/index.html');
     T('B-06 Vorbereitung: zweiter Tab sieht A0 und B0', await p2.evaluate(([a, bb]) => S.chars[a].name === 'A0' && S.chars[bb].name === 'B0', [ida, idb]));
     await p2.evaluate(() => window.removeEventListener('storage', lsExternal)); /* zweiter Tab mit veralteter Ansicht */
-    await p1.evaluate((a) => { S.chars[a].name = 'A1'; persist('c', a); }, ida);
-    await p2.evaluate((bb) => { S.chars[bb].name = 'B1'; persist('c', bb); }, idb);
+    /* Kurze Pausen wie zwischen zwei echten Eingaben: Safari gleicht den Speicher zwischen Tabs verzögert ab */
+    await p1.evaluate((a) => { S.chars[a].name = 'A1'; persist('c', a); }, ida); await p1.waitForTimeout(300);
+    await p2.evaluate((bb) => { S.chars[bb].name = 'B1'; persist('c', bb); }, idb); await p2.waitForTimeout(300);
     T('B-06: Gesamtstand enthält A1 und B1 (keine Änderung überschrieben)', await p1.evaluate(([a, bb]) => { const d = JSON.parse(localStorage.getItem('heldenbuch')); return d.chars[a].name === 'A1' && d.chars[bb].name === 'B1'; }, [ida, idb]), await p1.evaluate(() => Object.values(JSON.parse(localStorage.getItem('heldenbuch')).chars).map((c) => c.name)));
     await p2.evaluate(() => window.addEventListener('storage', lsExternal));
     await p1.evaluate((a) => { S.chars[a].name = 'A2'; persist('c', a); }, ida); await p2.waitForTimeout(300);

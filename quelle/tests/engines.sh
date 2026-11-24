@@ -6,8 +6,8 @@ ENG="${HB_ENGINE:-chromium}"
 bash build.sh >/dev/null || { echo "Build fehlgeschlagen"; exit 1; }
 mkdir -p app; [ -e app/fonts ] || ln -s ../fonts app/fonts; [ -e app/assets ] || ln -s ../../www/icons app/assets
 python3 build_app.py >/dev/null 2>&1 || echo "Hinweis: App-Version nicht gebaut"
+# boot.test.js fehlt absichtlich: Selbst-Update gibt es nur in der Android- und PC-App (beide Chromium).
 SUITES=(
-  "boot.test.js|Start und Grundfunktionen"
   "welcome.test.js|Erster Start"
   "m02.test.js|Held erschaffen am Handy"
   "m01.test.js|Kampfseite am Handy"

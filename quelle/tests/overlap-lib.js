@@ -58,6 +58,9 @@ const scanInPage = async () => {
       if (h === e || e.contains(h)) return null;
       if (h.contains(e)) return null; /* Rahmen des Elements erreicht: darüber liegt nichts Fremdes */
       if (h.id === 'ovscan') continue;
+      /* WebKit trifft Text auch über der Zeile (Oberlänge der Schrift): liegt der Punkt ausserhalb des Kastens eines
+         Geschwisters im selben Rahmen, verdeckt es nichts Sichtbares */
+      { const q = h.getBoundingClientRect(); if ((x < q.left - 1 || x > q.right + 1 || y < q.top - 1 || y > q.bottom + 1) && h.parentElement && h.parentElement === e.parentElement) continue; }
       if (!opaque(h)) continue;
       /* Eingebettetes Symbol (z. B. ⓘ im Chip): liegt ganz innerhalb des Elements und im selben Rahmen – gewollt */
       const er = e.getBoundingClientRect(), hr = h.getBoundingClientRect();
@@ -107,7 +110,9 @@ const scanInPage = async () => {
   const cut = cand.filter((e) => /^(BUTTON|A|SUMMARY)$/.test(e.tagName) && e.scrollWidth > e.clientWidth + 3 && cs(e).overflowX !== 'visible' && (e.innerText || '').trim().length > 1).map((e) => ({ el: desc(e), text: label(e) }));
   const hscroll = document.documentElement.scrollWidth > vw + 1;
   scroller.scrollTop = sy0; st.remove();
-  return { n: cand.length, covered: res, cut, hscroll };
+  /* Bei Querscrollen die Verursacher nennen (äusserste rechte Kanten), damit Fehler aus anderen Browsern lesbar sind */
+  const wide = hscroll ? [...document.querySelectorAll('body *')].map((e) => [e, e.getBoundingClientRect()]).filter(([e, q]) => q.width && q.right > vw + 1).sort((a, c) => c[1].right - a[1].right).slice(0, 6).map(([e, q]) => e.tagName + '.' + String(e.className).slice(0, 30) + ' r=' + Math.round(q.right) + ' w=' + Math.round(q.width) + ' «' + (e.textContent || '').trim().slice(0, 24) + '»') : [];
+  return { n: cand.length, covered: res, cut, hscroll, wide };
 };
 
 async function scan(page, name) {
