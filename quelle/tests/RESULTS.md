@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-24T11:07:16+01:00
-- Revision (SHA-256 von index.html, gekürzt): 614669899da03622
+- Zeitpunkt: 2026-11-24T12:58:03+01:00
+- Revision (SHA-256 von index.html, gekürzt): 1d49d0f5241e8666
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v819
@@ -59,6 +59,8 @@
 | Lesbarkeit: Kontrast in allen Stimmungen (kontrast.test.js) | 0 | ✔ Stimmung wueste 9 / 9 bestanden  |
 | Langsames Handy: CPU 4× gedrosselt (handy.test.js app) | 0 | ✔ Keine Skriptfehler  ([]) 18 / 18 bestanden  |
 | Abgleich mit dem SRD 5.2: Zauber und Monster (srd.test.js) | 0 | ✔ 339 Zauber und 164 Monster mit dem SRD 5.2 abgeglichen, 0 Abweichungen (8 begründete Ausnahmen)  |
+| Online-Tisch mit drei Geräten, lokal (echt.test.js --lokal) | 0 | ✔ Keine Skriptfehler auf den Geräten 12 / 12 bestanden (Server: lokal)  |
+| Online-Tisch, Server vergisst gespeicherte Nachrichten (echt.test.js --ohne-speicher) | 0 | ✔ Keine Skriptfehler auf den Geräten 12 / 12 bestanden (Server: lokal, ohne gespeicherte Nachrichten)  |
 | Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Tischhilfen: passive Werte, Rast für alle, EP nach dem Kampf (tablehelp.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
 | Gegenstände: SRD-Liste, Flüche, Ausrüstung (items.test.js) | 0 | ✔ Keine Skriptfehler 12 / 12 bestanden  |
