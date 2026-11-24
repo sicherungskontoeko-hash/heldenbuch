@@ -90,6 +90,7 @@ function derive(ch, hb) {
   c.styleN = styleN;
   (ch.styles || []).slice(0, styleN).forEach((id) => feats.push({ src: 'Kampfstil', id, f: featById(id, hb), slot: 'style' }));
   if (styleN && (ch.styles || []).filter(Boolean).length < styleN) warn.push('Kampfstil wählen (' + styleN + ').');
+  if (ch.bg !== 'custom' && ch.bgFeat && BACKGROUNDS[ch.bg] && ch.bgFeat !== BACKGROUNDS[ch.bg].feat && typeof rule === 'function' && rule('bgfeat')) warn.push('Herkunftstalent weicht vom Hintergrund ab (Hausregel) – unter Erschaffen › Herkunft zurücksetzen oder unter Hausregeln › Regeloptionen freischalten.');
   c.asiSlots = [];
   for (const e of classList) for (const al of asiLevels(e.C, e.lvl)) {
     const key = e.primary ? String(al) : e.id + al;

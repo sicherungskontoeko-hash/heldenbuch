@@ -6,6 +6,7 @@ const RULE_OPTS = {
   abilcap: { n: 'Attributsobergrenze 20', t: 'Attribute aus Hintergrund, Talenten und Erhöhungen steigen höchstens auf 20 (Ausnahmen laut Regeln, z. B. Epische Gaben bis 30).', d: true },
   restcombat: { n: 'Keine Rast während eines Kampfes', t: 'Kurze und lange Rast sind gesperrt, solange ein Kampf läuft (am Tisch oder im lokalen Kampfmodus).', d: true },
   restzero: { n: 'Lange Rast nur mit mindestens 1 TP', t: 'Wer bei 0 TP ist, erhält keine Vorteile einer langen Rast, bis er stabilisiert und geheilt wurde.', d: true },
+  bgfeat: { n: 'Herkunftstalent gehört zum Hintergrund', t: 'Jeder Hintergrund bringt sein festes Herkunftstalent mit (D&D 2024). Aus: Talent bei jedem Hintergrund frei wählbar (Hausregel). Ein frei gewähltes Talent gibt es auch mit «Eigener Hintergrund».', d: true },
   hdrest: { n: 'Trefferwürfel nur in einer kurzen Rast', t: 'Trefferwürfel gibst du im Dialog der kurzen Rast aus. Aus: auch direkt auf dem Bogen (Hausregel).', d: true }
 };
 function rule(k) { if (!S.rules) { try { S.rules = JSON.parse(localStorage.getItem('hb_rules') || '{}') || {}; } catch (e) { S.rules = {}; } } const v = S.rules[k]; return v === undefined ? !!(RULE_OPTS[k] || {}).d : !!v; }
