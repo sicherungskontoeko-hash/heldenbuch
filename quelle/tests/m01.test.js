@@ -20,7 +20,8 @@ const HELD = () => { localStorage.setItem('hb_dice_fx', 'aus'); localStorage.set
   S.chars[f.id] = f; S.cur = f.id; S.camp = ''; S.combat = null; S.view = 'sheet'; S.mg = 'kampf'; S.mode = 'normal'; S.hpOpen = false; render(); window.scrollTo(0, 0); };
 const lage = () => { const nav = document.querySelector('#bnav'); const navH = nav && getComputedStyle(nav).display !== 'none' ? nav.getBoundingClientRect().height : 0;
   const a = document.querySelector('#view .atk'); const r = a.getBoundingClientRect(); const y = (s) => { const e = document.querySelector(s); if (!e || !e.offsetParent) return null; return Math.round(e.getBoundingClientRect().top + scrollY); };
-  return { top: Math.round(r.top + scrollY), bottom: Math.round(r.bottom + scrollY), sichtbar: Math.round(innerHeight - navH), quer: document.documentElement.scrollWidth > innerWidth + 1,
+  const rb = a.querySelector('.rb'); const rbB = rb ? Math.round(rb.getBoundingClientRect().bottom + scrollY) : null;
+  return { top: Math.round(r.top + scrollY), bottom: Math.round(r.bottom + scrollY), rbBottom: rbB, sichtbar: Math.round(innerHeight - navH), quer: document.documentElement.scrollWidth > innerWidth + 1,
     conds: y('#conds'), strow: y('.strow'), death: y('.death'), turn: y('.turnblk'), shbar: y('.shbar'), hpb: y('.vb.hpb') }; };
 (async () => {
   const b = await chromium.launch();
@@ -35,6 +36,7 @@ const lage = () => { const nav = document.querySelector('#bnav'); const navH = n
     if (z) T(k + ': erste Waffe oben ≤ ' + z.top + ' px' + (z.bottom ? ', ganz sichtbar (unten ≤ ' + z.bottom + ')' : ''), m.top <= z.top && (!z.bottom || m.bottom <= z.bottom), m);
     if (PC_VORHER[k]) T(k + ': PC unverändert (erste Waffe ' + PC_VORHER[k] + ' ± 2 px)', Math.abs(m.top - PC_VORHER[k]) <= 2, m.top);
     T(k + ': kein Querscrollen', !m.quer);
+    if (mob) T(k + ': erste Angriffstaste ganz über der unteren Leiste (B-18)', m.rbBottom != null && m.rbBottom <= m.sichtbar, { rb: m.rbBottom, sichtbar: m.sichtbar });
     // Aktive Gefahren: Konzentration, Zustand, Erschöpfung – stehen über den Angriffen
     await p.evaluate(() => { const P = cur().play; P.conc = { id: 'bless', name: 'Segnen' }; P.cond = ['poisoned']; P.exh = 1; render(); window.scrollTo(0, 0); }); await p.waitForTimeout(100);
     const g = await p.evaluate(lage); mess[k].mit_warnung = g;

@@ -3,5 +3,5 @@ const MOB_SAVES = {'acolyte':[2,0,1,0,2,0], 'adult-red':[8,6,7,3,7,6], 'air-elem
 const MSAVE_AB = ['STÄ', 'GES', 'KON', 'INT', 'WEI', 'CHA'];
 function mobSaveRow(mid, name) {
   const v = mid && MOB_SAVES[mid]; if (!v) return '';
-  return '<div class="msaves"><span>Rettungswürfe</span>' + v.map((b, i) => '<button class="rb sm" data-act="xroll" data-mod="' + b + '" data-label="' + esc(name) + ': ' + MSAVE_AB[i] + '-Rettungswurf" title="' + MSAVE_AB[i] + '-Rettungswurf würfeln">' + MSAVE_AB[i] + ' ' + sgn(b) + '</button>').join('') + '</div>';
+  return '<div class="msaves"><span>Rettungswürfe</span>' + v.map((b, i) => '<button class="rb sm" data-act="xroll" data-mod="' + esc(b) + '" data-label="' + esc(name) + ': ' + MSAVE_AB[i] + '-Rettungswurf" title="' + MSAVE_AB[i] + '-Rettungswurf würfeln">' + MSAVE_AB[i] + ' ' + sgn(b) + '</button>').join('') + '</div>';
 }

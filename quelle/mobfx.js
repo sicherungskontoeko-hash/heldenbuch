@@ -21,13 +21,13 @@ function mobFeats(mid) {
   return (_mfCache[mid] = rech.length || la || lr ? { rech, la, lr } : null);
 }
 const mfNpc = (id) => ((S.combat && S.combat.npcs) || []).find((y) => y.id === id);
-const mfPips = (id, k, max, used) => { let h = ''; for (let i = 0; i < max; i++) h += '<button class="pip sm' + (i < max - used ? '' : ' used') + '" data-act="mfPip" data-arg="' + id + '" data-k="' + k + '" data-i="' + i + '" aria-label="' + (k === 'laU' ? 'Legendäre Aktion' : 'Legendärer Widerstand') + ' ' + (i + 1) + '"></button>'; return h; };
+const mfPips = (id, k, max, used) => { let h = ''; for (let i = 0; i < max; i++) h += '<button class="pip sm' + (i < max - used ? '' : ' used') + '" data-act="mfPip" data-arg="' + esc(id) + '" data-k="' + esc(k) + '" data-i="' + esc(i) + '" aria-label="' + (k === 'laU' ? 'Legendäre Aktion' : 'Legendärer Widerstand') + ' ' + (i + 1) + '"></button>'; return h; };
 function mobFxBits(x) {
   const n = mfNpc(x.id); const F = n && n.mid && mobFeats(n.mid); if (!F || n.hp <= 0) return '';
   const r = n.rech || {};
   let h = F.rech.map((a, j) => { const s = r[a.name] || {}; return s.used
-    ? '<button class="nfxb used" data-act="mfRoll" data-arg="' + n.id + '" data-j="' + j + '" title="Verbraucht – W6 würfeln: bei ' + a.min + (a.min < 6 ? '–6' : '') + ' wieder bereit (passiert auch automatisch zu Beginn seines Zugs)">⟳ ' + esc(a.name) + ' <small>' + a.min + (a.min < 6 ? '–6' : '') + (s.roll ? ' · W6 ' + s.roll : '') + '</small></button>'
-    : '<button class="nfxb ok" data-act="mfUse" data-arg="' + n.id + '" data-j="' + j + '" title="' + esc(a.txt) + ' – antippen zum Einsetzen">⚡ ' + esc(a.name) + '</button>'; }).join('');
+    ? '<button class="nfxb used" data-act="mfRoll" data-arg="' + esc(n.id) + '" data-j="' + esc(j) + '" title="Verbraucht – W6 würfeln: bei ' + a.min + (a.min < 6 ? '–6' : '') + ' wieder bereit (passiert auch automatisch zu Beginn seines Zugs)">⟳ ' + esc(a.name) + ' <small>' + a.min + (a.min < 6 ? '–6' : '') + (s.roll ? ' · W6 ' + s.roll : '') + '</small></button>'
+    : '<button class="nfxb ok" data-act="mfUse" data-arg="' + esc(n.id) + '" data-j="' + esc(j) + '" title="' + esc(a.txt) + ' – antippen zum Einsetzen">⚡ ' + esc(a.name) + '</button>'; }).join('');
   if (F.la) h += '<span class="nfxp" title="Legendäre Aktionen – zu Beginn seines Zugs wieder voll">LA ' + mfPips(n.id, 'laU', F.la, Math.min(F.la, n.laU || 0)) + '</span>';
   if (F.lr) h += '<span class="nfxp lr" title="Legendärer Widerstand (pro Tag): misslungenen Rettungswurf in Erfolg verwandeln">LW ' + mfPips(n.id, 'lrU', F.lr, Math.min(F.lr, n.lrU || 0)) + '</span>';
   return h ? '<span class="nfx">' + h + '</span>' : '';
@@ -81,7 +81,7 @@ function npcTurnBox(c, cur) {
   const x = (c.npcs || []).find((y) => y.id === cur.id); if (!x) return ''; const M = x.mid && BESTIARY[x.mid];
   const max = M ? mobAtkMax(x.mid) : 0; const n = x.atkN || 0; const done = !!max && n >= max; const ma = M && (/Mehrfachangriff[^.]*/.exec(M[8] || '') || [])[0];
   return '<div class="nturn' + (done ? ' done' : '') + '"><div class="nth' + (typeof mobPic === 'function' && mobPic(x.mid) ? ' wp' : '') + '">' + (typeof mobPic === 'function' ? mobPic(x.mid, 'mpicT') : '') + '<b>' + (typeof mobPic === 'function' && mobPic(x.mid) ? '' : '⚔ ') + esc(x.name) + ' ist am Zug</b><small>' + (M ? 'Angriffe ' + n + ' von ' + max + (ma && max > 1 ? ' · ' + esc(ma.replace(/^Mehrfachangriff:?\s*/, '')) : '') : 'Gegner ohne Werte: Angriffe würfelst du selbst') + '</small></div>' +
-    '<div class="chips">' + (M ? M[7].map((a, j) => '<button class="btn sm' + (done ? ' ghost' : '') + '" data-act="npcAtk" data-arg="' + x.id + '" data-j="' + j + '">' + esc(a[0]) + ' ' + sgn(a[1]) + '</button>').join('') : '') +
+    '<div class="chips">' + (M ? M[7].map((a, j) => '<button class="btn sm' + (done ? ' ghost' : '') + '" data-act="npcAtk" data-arg="' + esc(x.id) + '" data-j="' + esc(j) + '">' + esc(a[0]) + ' ' + sgn(a[1]) + '</button>').join('') : '') +
     '<button class="btn sm' + (done || !M ? ' glowbtn' : ' ghost') + '" data-act="turnEnd">Zug beenden ▸</button></div>' +
     (done ? '<p class="hint">Alle Angriffe gemacht. Noch Bewegung, Bonusaktion oder eine Fähigkeit? Sonst Zug beenden.</p>' : '') + '</div>';
 }

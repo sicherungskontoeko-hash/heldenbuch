@@ -388,7 +388,7 @@ function derive(ch, hb) {
   const att = [];
   const isMonk = !!lv('mon') && ar.type === 'none' && !ch.shield; c.martialArts = isMonk;
   const unarmedAb = isMonk && c.mod.dex > c.mod.str ? 'dex' : 'str';
-  att.push({ name: 'Waffenloser Schlag', ab: unarmedAb, die: isMonk ? '1' + maDie : '', atkParts: [AB_K[unarmedAb] + ' ' + sgn(c.mod[unarmedAb]), 'Übung ' + sgn(pb)].concat(+ch.misc.atk ? ['Sonstiges ' + sgn(+ch.misc.atk)] : []), dmgParts: isMonk ? ['1' + maDie, AB_K[unarmedAb] + ' ' + sgn(c.mod[unarmedAb])] : ['1 + STÄ ' + sgn(c.mod.str)], dmod: isMonk ? c.mod[unarmedAb] : Math.max(0, 1 + c.mod.str), gwf: false, light: false, finesse: false, ranged: false, atk: c.mod[unarmedAb] + pb + (+ch.misc.atk || 0), dmg: isMonk ? '1' + maDie + sgn(c.mod[unarmedAb]).replace('+0', '').replace('−0', '') : String(Math.max(1, 1 + c.mod.str)), dtype: 'Wucht', props: '', melee: true, prof: true });
+  att.push({ name: 'Waffenloser Schlag', ab: unarmedAb, die: isMonk ? '1' + maDie : '', atkParts: [AB_K[unarmedAb] + ' ' + sgn(c.mod[unarmedAb]), 'Übung ' + sgn(pb)].concat(+ch.misc.atk ? ['Sonstiges ' + sgn(+ch.misc.atk)] : []), dmgParts: isMonk ? ['1' + maDie, AB_K[unarmedAb] + ' ' + sgn(c.mod[unarmedAb])] : ['1 + STÄ ' + sgn(c.mod.str)], dmod: isMonk ? c.mod[unarmedAb] : Math.max(0, 1 + c.mod.str), gwf: false, light: false, finesse: false, ranged: false, unarmed: true, rage: rageDmg && unarmedAb === 'str' && ar.type !== 'heavy', atk: c.mod[unarmedAb] + pb + (+ch.misc.atk || 0), dmg: isMonk ? '1' + maDie + sgn(c.mod[unarmedAb]).replace('+0', '').replace('−0', '') : String(Math.max(1, 1 + c.mod.str)), dtype: 'Wucht', props: '', melee: true, prof: true });
   const masteryAny = classList.some((e) => e.C.mastery);
   const thrownAtt = []; const shillOn = !!((ch.play || {}).fx || {}).shill; const shillAb = ((c.extraSpells || []).find((e) => e.id === 'shillelagh') || {}).ab || (lv('dru') ? 'wis' : lv('wlk') ? 'cha' : 'wis');
   (ch.weapons || []).forEach((w, i) => {
@@ -430,7 +430,14 @@ function derive(ch, hb) {
   c.attacks = att;
   const wsF = ch.play && ch.play.ws && typeof BESTIARY !== 'undefined' ? BESTIARY[ch.play.ws] : null;
   if (wsF) {
-    c.wsForm = wsF[0]; c.ac = wsF[2]; c.acParts = [wsF[0] + ' (Tiergestalt) ' + wsF[2]]; c.speed = parseFloat(String(wsF[5]).replace(',', '.')) || c.speed; c.speedText = wsF[5];
+    c.wsForm = wsF[0]; c.ac = wsF[2]; c.acParts = [wsF[0] + ' (Tiergestalt) ' + wsF[2]];
+    /* Bewegung der Tierform; Erschöpfung und Zustände wie Gepackt gelten danach für alle Bewegungsarten */
+    const wsBase = parseFloat(String(wsF[5]).replace(',', '.')); let wsSp = Number.isFinite(wsBase) ? wsBase : c.speed; const wsParts = [wsF[0] + ' (Tiergestalt) ' + fmtM(wsSp)];
+    const wsAdj = (m) => (stop ? 0 : Math.max(0, m - 1.5 * ex));
+    if (ex) { wsSp -= 1.5 * ex; wsParts.push('Erschöpfung −' + fmtM(1.5 * ex)); }
+    if (stop) { wsSp = 0; wsParts.push(COND[stop].name + ': 0 m'); }
+    c.speed = Math.max(0, wsSp); c.speedParts = wsParts;
+    c.speedText = ex || stop ? String(wsF[5]).replace(/(\d+(?:[.,]\d+)?)\s*m\b/g, (m0, v) => fmtM(wsAdj(parseFloat(v.replace(',', '.'))))) : wsF[5];
     c.attacks = wsF[7].map(([n, b, dmg, t]) => { const m = /^(\d+W\d+)\s*([+−-]\s*\d+)?/.exec(String(dmg)); return { name: wsF[0] + ': ' + n, ab: 'str', atk: +b, die: m ? m[1] : '', dmod: m && m[2] ? +m[2].replace(/\s/g, '').replace('−', '-') : 0, dmg: String(dmg), dtype: t || '', melee: true, ranged: false, atkParts: [wsF[0] + ' ' + sgn(+b)], dmgParts: [String(dmg)], props: 'Tiergestalt', prof: true, ws: true }; });
     c.notes.push('Tiergestalt ' + wsF[0] + ': RK, Bewegung, Angriffe sowie STÄ, GES und KON der Tierform; deine Übungen, TP, INT, WEI und CHA bleiben. Keine Zauber.' + (wsS ? ' Sinne/Merkmale: ' + wsS.senses + '.' : ''));
   }

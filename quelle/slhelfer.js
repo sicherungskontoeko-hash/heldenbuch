@@ -84,7 +84,7 @@ function slOpen(keep) {
   const direct = !!SL_SAMPLE;
   m.innerHTML = '<div class="dlg sldlg" role="dialog" aria-modal="true" aria-label="Claude als Spielleiter-Helfer"><div class="dph"><b>Claude · Helfer der Spielleitung</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
     '<p class="hint">' + (direct ? 'Claude kennt die aktuelle Szene, die Gruppe, den Kampf und die letzten Würfe. Frag, was du brauchst.' : 'Schreib deine Frage, dann «Lage kopieren» und in der Claude-App einfügen. Die Szene, die Gruppe, der Kampf und die letzten Würfe sind schon dabei.') + '</p>' +
-    '<div class="chips slq">' + SL_QUICK.map(([k, l]) => '<button class="chip" data-act="slQuick" data-arg="' + k + '">' + l + '</button>').join('') + '</div>' +
+    '<div class="chips slq">' + SL_QUICK.map(([k, l]) => '<button class="chip" data-act="slQuick" data-arg="' + esc(k) + '">' + l + '</button>').join('') + '</div>' +
     '<textarea id="slQ" rows="3" placeholder="Was passiert, was brauchst du? z. B. «Die Helden wollen den Elch mit einem Spiegel verwirren»">' + esc(q) + '</textarea>' +
     (chat.length ? '<div class="slchat" id="slChat">' + chat.map((x) => '<div class="slm ' + x.r + '">' + (x.r === 'a' ? slMd(x.t) : '<p>' + esc(x.q) + '</p>') + '</div>').join('') + '</div>' : '') +
     '<div class="chips end">' + (direct ? '<button class="btn ghost" data-act="slCopy">Lage kopieren</button>' + (chat.length ? '<button class="btn ghost" data-act="slReset">Neu beginnen</button>' : '') + '<button class="btn" data-act="slAsk" id="slAskBtn">Claude fragen</button>'

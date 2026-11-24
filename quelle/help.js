@@ -86,7 +86,7 @@ const HELP = {
     'Der Hintergrund gibt zusätzlich +2/+1 oder dreimal +1 auf die angegebenen Attribute.',
     'Der Modifikator (in Klammern) ist das, was bei Würfen zählt: (Wert − 10) ÷ 2, abgerundet.']]
 };
-function helpBtn(k) { if (typeof hlOn === 'function' && !hlOn('erkl')) return ''; return '<button class="hlp" data-act="help" data-arg="' + k + '" aria-label="Hilfe: ' + esc(HELP[k][0]) + '" title="Erklärung">?</button>'; }
+function helpBtn(k) { if (typeof hlOn === 'function' && !hlOn('erkl')) return ''; return '<button class="hlp" data-act="help" data-arg="' + esc(k) + '" aria-label="Hilfe: ' + esc(HELP[k][0]) + '" title="Erklärung">?</button>'; }
 XA.help = (t, a) => {
   const h = HELP[a]; if (!h) return; const m = $('#modal'); S.modal = 'help';
   m.innerHTML = '<div class="dlg helpdlg" role="dialog" aria-modal="true" aria-label="' + esc(h[0]) + '"><div class="dph"><b>' + esc(h[0]) + '</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' + h[1].map((p) => '<p>' + esc(p) + '</p>').join('') + '</div>';

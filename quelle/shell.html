@@ -1325,8 +1325,13 @@ body{margin:0}
   .turnblk .tctx .chip{padding:3px 10px}
   .vrow .vb{padding:4px 7px 5px}
   .vrow .vb b{font-size:1.05rem}
-  .sheet[data-mg] .cols .blk[data-grp~="kampf"]{padding-top:10px}
-  .sheet[data-mg] .cols .blk[data-grp~="kampf"]>h2{margin-bottom:6px}
+  .sheet[data-mg] .cols .blk[data-grp~="kampf"]{padding-top:8px}
+  .sheet[data-mg] .cols .blk[data-grp~="kampf"]>h2{margin-bottom:2px}
+  /* Kampf-Reiter: Volk, Hintergrund und Gesinnung stehen unter «Werte»; so bleibt die erste Angriffstaste über der unteren Leiste */
+  .sheet[data-mg="kampf"] .shead p .shx{display:none}
+  .sheet .shead{margin-bottom:4px}
+  .sheet .turnblk{gap:4px}
+  .sheet[data-mg]>.turnblk{margin-bottom:6px}
 }
 
 /* ==== M03 Bestiarium am Handy (HB-UI-REDESIGN v1.2.0): Suche vor Einleitung. Banner schmal (wie Erschaffen). ==== */

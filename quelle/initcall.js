@@ -16,7 +16,7 @@ function fightPickHtml() {
   const ps = players(); S.fightInv = S.fightInv && S.fightInv.length ? S.fightInv.filter((u) => ps.some(([x]) => x === u)) : ps.map(([u]) => u);
   return '<div class="dlg" role="dialog" aria-modal="true" aria-label="Wer ist dabei?"><div class="dph"><h3>Wer ist im Kampf?</h3><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
     '<p class="hint">Nur die Ausgewählten werden zum Initiativewurf aufgefordert. Die anderen stehen unter „Noch nicht im Kampf“ und greifen mit „Eingreifen“ später ein.</p>' +
-    '<div class="chips">' + ps.map(([u, p]) => chip(S.fightInv.includes(u), esc(p.char || '?') + (p.pl ? ' <small>(' + esc(p.pl) + ')</small>' : ''), 'data-act="fightPickTog" data-arg="' + u + '"')).join('') + '</div>' +
+    '<div class="chips">' + ps.map(([u, p]) => chip(S.fightInv.includes(u), esc(p.char || '?') + (p.pl ? ' <small>(' + esc(p.pl) + ')</small>' : ''), 'data-act="fightPickTog" data-arg="' + esc(u) + '"')).join('') + '</div>' +
     '<div class="chips end"><button class="btn ghost" data-act="closeModal">Abbrechen</button><button class="btn" data-act="fightStart"' + (S.fightInv.length ? '' : ' disabled') + '>Kampf beginnen (' + S.fightInv.length + ')</button></div></div>';
 }
 XA.fightPick = () => { S.fightInv = null; S.modal = 'fightpick'; const m = $('#modal'); m.innerHTML = fightPickHtml(); m.hidden = false; };

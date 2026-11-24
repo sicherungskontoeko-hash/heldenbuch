@@ -69,8 +69,8 @@ function openSearch() {
   S.sq = S.sq || { q: '', cat: '', src: '' };
   const m = $('#modal'); S.modal = 'search';
   m.innerHTML = '<div class="dlg srchdlg" role="dialog" aria-modal="true" aria-label="Suche"><div class="srchtop"><input type="search" id="srchQ" placeholder="Zauber, Talent, Fähigkeit, Gegenstand, Regel, Monster …" value="' + esc(S.sq.q) + '" autocomplete="off" aria-label="Suchbegriff"><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
-    '<div class="chips srchcats">' + [['', 'Alles']].concat(Object.entries(SRCH_CAT).filter(([k]) => k !== 'option')).map(([k, l]) => chip(S.sq.cat === k, l, 'data-act="srchCat" data-arg="' + k + '"')).join('') + '</div>' +
-    '<div class="chips srchcats">' + [['', 'Alle Quellen'], ['srd', 'SRD 5.2.1'], ['eigen', '✦ eigene'], ['haus', 'Hausregeln']].map(([k, l]) => chip(S.sq.src === k, l, 'data-act="srchSrc" data-arg="' + k + '"')).join('') + '</div>' +
+    '<div class="chips srchcats">' + [['', 'Alles']].concat(Object.entries(SRCH_CAT).filter(([k]) => k !== 'option')).map(([k, l]) => chip(S.sq.cat === k, l, 'data-act="srchCat" data-arg="' + esc(k) + '"')).join('') + '</div>' +
+    '<div class="chips srchcats">' + [['', 'Alle Quellen'], ['srd', 'SRD 5.2.1'], ['eigen', '✦ eigene'], ['haus', 'Hausregeln']].map(([k, l]) => chip(S.sq.src === k, l, 'data-act="srchSrc" data-arg="' + esc(k) + '"')).join('') + '</div>' +
     '<div id="srchRes" class="srchres"></div></div>';
   m.hidden = false; srchPaint(); const i = $('#srchQ'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
 }
@@ -78,17 +78,17 @@ function srchPaint() {
   const el = $('#srchRes'); if (!el) return; const q = S.sq.q;
   if (!q.trim() && !S.sq.cat) { el.innerHTML = '<p class="hint">Tippe einen Begriff – z. B. „Feuerball“, „gepackt“, „Rast“ oder „Goblin“. Auch englische Zaubernamen funktionieren.</p>'; return; }
   const r = srchRun(q, S.sq.cat, S.sq.src);
-  el.innerHTML = r.length ? r.map((e, i) => '<button class="srow" data-act="srchOpen" data-arg="' + i + '"><span class="scat">' + SRCH_CAT[e.cat] + '</span><b>' + esc(e.name) + '</b><small>' + esc(e.sub) + (e.src !== 'srd' ? ' · ' + SRC_DE[e.src] : '') + '</small></button>').join('') : '<p class="hint">Nichts gefunden.</p>';
+  el.innerHTML = r.length ? r.map((e, i) => '<button class="srow" data-act="srchOpen" data-arg="' + esc(i) + '"><span class="scat">' + SRCH_CAT[e.cat] + '</span><b>' + esc(e.name) + '</b><small>' + esc(e.sub) + (e.src !== 'srd' ? ' · ' + SRC_DE[e.src] : '') + '</small></button>').join('') : '<p class="hint">Nichts gefunden.</p>';
   S.srchLast = r;
 }
 function srchDetail(e) {
   const ch = cur(); const lead = S.camp && (!S.meta.dm || isDM());
   const acts = [];
-  if (e.cat === 'cond' && ch) acts.push('<button class="btn sm" data-act="cond" data-arg="' + e.id + '">' + ((ch.play.cond || []).includes(e.id) ? 'Bei mir entfernen' : 'Auf meinen Helden setzen') + '</button>');
-  if (e.cat === 'item' && ch) acts.push('<button class="btn sm" data-act="srchItem" data-arg="' + e.id + '">Ins Inventar von ' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</button>');
-  if (e.cat === 'monster' && lead && S.combat && S.combat.active) acts.push('<button class="btn sm" data-act="srchMob" data-arg="' + e.id + '">Zum Kampf hinzufügen</button>');
+  if (e.cat === 'cond' && ch) acts.push('<button class="btn sm" data-act="cond" data-arg="' + esc(e.id) + '">' + ((ch.play.cond || []).includes(e.id) ? 'Bei mir entfernen' : 'Auf meinen Helden setzen') + '</button>');
+  if (e.cat === 'item' && ch) acts.push('<button class="btn sm" data-act="srchItem" data-arg="' + esc(e.id) + '">Ins Inventar von ' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</button>');
+  if (e.cat === 'monster' && lead && S.combat && S.combat.active) acts.push('<button class="btn sm" data-act="srchMob" data-arg="' + esc(e.id) + '">Zum Kampf hinzufügen</button>');
   if (e.cat === 'spell') { const d = ch && derive(ch, S.hb); if (d && d.spell.byId && d.spell.byId[e.id]) acts.push('<span class="hint" style="margin:0">Dein Held kennt diesen Zauber.</span>'); const dice = d ? spellDice(getSpell(e.id), getSpell(e.id).lvl, d, (d.spell && d.spell.mod) || 0) : null; if (dice) acts.push('<button class="btn sm ghost" data-act="dmg" data-expr="' + esc(dice) + '" data-label="' + esc(e.name) + '">Würfeln: ' + esc(dice) + '</button>'); }
-  if (e.cat === 'monster') { const M = BESTIARY[e.id]; M[7].forEach(([n, b, d]) => acts.push('<button class="btn sm ghost" data-act="xroll" data-atk="1" data-mod="' + b + '" data-label="' + esc(M[0] + ': ' + n) + '">' + esc(n) + ' ' + sgn(b) + '</button><button class="btn sm ghost" data-act="dmg" data-expr="' + esc(d) + '" data-label="' + esc(M[0] + ': ' + n + ' Schaden') + '">' + esc(d) + '</button>')); }
+  if (e.cat === 'monster') { const M = BESTIARY[e.id]; M[7].forEach(([n, b, d]) => acts.push('<button class="btn sm ghost" data-act="xroll" data-atk="1" data-mod="' + esc(b) + '" data-label="' + esc(M[0] + ': ' + n) + '">' + esc(n) + ' ' + sgn(b) + '</button><button class="btn sm ghost" data-act="dmg" data-expr="' + esc(d) + '" data-label="' + esc(M[0] + ': ' + n + ' Schaden') + '">' + esc(d) + '</button>')); }
   const m = $('#modal'); S.modal = 'search';
   m.innerHTML = '<div class="dlg srchdlg" role="dialog" aria-modal="true" aria-label="' + esc(e.name) + '"><div class="dph"><button class="link" data-act="srchBack">← Zurück zur Suche</button><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
     '<span class="scat">' + SRCH_CAT[e.cat] + ' · ' + SRC_DE[e.src] + '</span><h2 class="sdh">' + esc(e.name) + (e.en ? ' <small lang="en">' + esc(e.en) + '</small>' : '') + '</h2><p class="hint" style="margin-top:0">' + esc(e.sub) + '</p>' +

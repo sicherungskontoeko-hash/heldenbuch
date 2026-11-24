@@ -4,8 +4,6 @@ const S = { chars: {}, hb: {}, cur: null, view: 'heroes', step: 0, mode: 'normal
 (() => { let mi = null; try { const o = JSON.parse(localStorage.getItem('heldenbuch_myinit') || 'null'); if (o && o.camp && o.v) mi = o; } catch (e) {}
   Object.defineProperty(S, 'myInit', { configurable: true, enumerable: true, get: () => (mi && mi.camp === S.camp ? mi.v : null), set: (v) => { mi = v ? { camp: S.camp, v } : null; try { localStorage.setItem('heldenbuch_myinit', JSON.stringify(mi)); } catch (e) {} } }); })();
 const $ = (s, r = document) => r.querySelector(s);
-const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }; const ESC_RE = /[&<>"]/g;
-const esc = (s) => { s = String(s ?? ''); return ESC_RE.test(s) ? (ESC_RE.lastIndex = 0, s.replace(ESC_RE, (m) => ESC_MAP[m])) : s; };
 const cur = () => S.chars[S.cur];
 const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
 function setP(o, p, v) { const ks = p.split('.'); let t = o; ks.slice(0, -1).forEach((k) => { if (t[k] == null || typeof t[k] !== 'object') t[k] = {}; t = t[k]; }); t[ks[ks.length - 1]] = v; }
@@ -14,27 +12,77 @@ const STEPS = ['Klasse', 'Herkunft', 'Attribute', 'Fertigkeiten & Talente', 'Zau
 
 /* ---------- Speicherung ---------- */
 let DB = null, UID = null; const timers = {};
-function lsGet() { try { const raw = localStorage.getItem('heldenbuch'); if (raw && typeof backupOnce === 'function' && /"v":\s*2/.test(raw) === false) backupOnce(raw); return JSON.parse(raw || 'null'); } catch (e) { return null; } }
-function lsSet() {
-  const data = JSON.stringify({ v: 2, chars: S.chars, hb: S.hb, cur: S.cur });
-  try { localStorage.setItem('heldenbuch', data); if (localStorage.getItem('heldenbuch') !== data) throw new Error('verify'); if (S.saveErr) { S.saveErr = false; paintSave(); } }
+/* Gesamtstand im Browser. Je Aufruf werden nur die genannten Datensätze geschrieben, damit ein zweiter Tab nichts überschreibt. */
+let LS_LAST = null;
+function lsGet() { try { const raw = localStorage.getItem('heldenbuch'); LS_LAST = raw; if (raw && typeof backupOnce === 'function' && /"v":\s*2/.test(raw) === false) backupOnce(raw); return JSON.parse(raw || 'null'); } catch (e) { return null; } }
+function lsSet(keys) {
+  let chars = S.chars, hb = S.hb;
+  if (keys && !S.saveErr) {
+    try {
+      const raw = localStorage.getItem('heldenbuch');
+      if (raw && raw !== LS_LAST) { const o = JSON.parse(raw);
+        if (o && o.v === 2 && o.chars && typeof o.chars === 'object') {
+          chars = Object.assign({}, o.chars); hb = Object.assign({}, o.hb && typeof o.hb === 'object' ? o.hb : {});
+          for (const k of keys) { const i = k.slice(2), src = k[0] === 'c' ? S.chars : S.hb, dst = k[0] === 'c' ? chars : hb; if (src[i]) dst[i] = src[i]; else delete dst[i]; }
+        } }
+    } catch (e) { chars = S.chars; hb = S.hb; }
+  }
+  const data = JSON.stringify({ v: 2, chars, hb, cur: S.cur });
+  try { localStorage.setItem('heldenbuch', data); if (localStorage.getItem('heldenbuch') !== data) throw new Error('verify'); LS_LAST = data; if (S.saveErr) { S.saveErr = false; paintSave(); } }
   catch (e) { if (!S.saveErr) { S.saveErr = true; bannerToast('Speichern im Browser fehlgeschlagen', (e && /quota/i.test(e.name + e.message) ? 'Der Speicher ist voll. ' : '') + 'Sichere deine Helden jetzt über „Exportieren“.'); } paintSave(); }
 }
+/* Ein anderer Tab hat gespeichert: dessen Stand übernehmen, ausser dem Helden, an dem hier gerade getippt wird. */
+function lsExternal(e) {
+  if (!e || e.key !== 'heldenbuch' || !e.newValue) return;
+  let d; try { d = JSON.parse(e.newValue); } catch (x) { return; }
+  if (!d || d.v !== 2 || !d.chars || typeof d.chars !== 'object') return;
+  const a = document.activeElement, typing = !!a && (a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && !/^(button|checkbox|radio|range|file)$/.test(a.type)));
+  const keep = (kind, i) => typing && kind === 'c' && i === S.cur;
+  let changed = false;
+  for (const [kind, src, dst] of [['c', d.chars, S.chars], ['h', d.hb && typeof d.hb === 'object' ? d.hb : {}, S.hb]]) {
+    for (const i of Object.keys(dst)) if (!(i in src) && !keep(kind, i)) { delete dst[i]; changed = true; }
+    for (const [i, v] of Object.entries(src)) { if (!v || typeof v !== 'object' || keep(kind, i)) continue; if (JSON.stringify(dst[i]) !== JSON.stringify(v)) { dst[i] = kind === 'c' ? normChar(v) : v; changed = true; } }
+  }
+  LS_LAST = e.newValue;
+  if (!changed) return;
+  if (!S.chars[S.cur]) { S.cur = Object.keys(S.chars)[0] || null; if (!S.cur && (S.view === 'sheet' || S.view === 'build')) S.view = 'heroes'; }
+  if (!typing) render();
+}
+/* Verzögerte Schreibvorgänge; beim Verlassen der Seite sofort ausführen. */
+const LATER = {};
+function later(key, ms, fn) { clearTimeout(timers[key]); LATER[key] = fn; timers[key] = setTimeout(() => { delete LATER[key]; fn(); }, ms); }
+function flushLater() { for (const k of Object.keys(LATER)) { const fn = LATER[k]; delete LATER[k]; clearTimeout(timers[k]); try { fn(); } catch (e) {} } }
+/* Ausstehende Einzelkopien: bis zur bestätigten Übertragung gilt beim Start der lokale Stand. */
+const PEND = 'hb_pend:';
+function pendMark(key) { if (!(window.claude && window.claude.use)) return 0; const t = Date.now() + Math.random(); try { localStorage.setItem(PEND + key, String(t)); } catch (e) {} return t; }
+function pendClear(key, t) { try { if (localStorage.getItem(PEND + key) === String(t)) localStorage.removeItem(PEND + key); } catch (e) {} }
+function pendKeys() { const out = new Set(); try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(PEND)) out.add(k.slice(PEND.length)); } } catch (e) {} return out; }
 function persist(kind, id) {
-  lsSet();
+  const key = kind + '_' + id; const t = pendMark(key);
+  lsSet([key]);
   if (!DB) return;
-  const key = kind + '_' + id; clearTimeout(timers[key]);
   S.saving = 'Speichert …'; paintSave();
-  timers[key] = setTimeout(async () => {
+  later(key, 700, async () => {
     try {
       const obj = kind === 'c' ? S.chars[id] : S.hb[id];
       const ref = DB.collection('data/users/' + UID).doc(key);
       if (obj) await ref.set({ kind, json: JSON.stringify(obj) }); else await ref.delete();
-      S.saving = 'Gespeichert'; } catch (e) { S.saving = 'Speichern fehlgeschlagen – lokal gesichert'; }
+      S.dbErr = false; S.saving = 'Gespeichert'; pendClear(key, t);
+    } catch (e) { S.dbErr = true; S.saving = S.saveErr ? 'Speichern fehlgeschlagen' : 'Speichern fehlgeschlagen – lokal gesichert'; }
     paintSave();
-  }, 700);
+  });
 }
-function paintSave() { const el = $('#saveState'); if (el && S.saveErr && S.store !== 'db') { el.textContent = '⚠ Nicht gespeichert – bitte exportieren'; return; } if (el) el.textContent = S.store === 'db' ? (S.saving || (isApp() ? 'Auf diesem Gerät gespeichert' : 'In deinem Konto gespeichert')) : 'Nur in diesem Browser gespeichert'; }
+if (typeof window !== 'undefined' && window.addEventListener) {
+  window.addEventListener('storage', lsExternal);
+  window.addEventListener('pagehide', flushLater);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushLater(); });
+}
+function paintSave() {
+  const el = $('#saveState'); if (!el) return;
+  const ok = S.store === 'db' && S.saving === 'Gespeichert';
+  if (S.saveErr && !ok) { el.textContent = '⚠ Nicht gespeichert – bitte exportieren'; return; }
+  el.textContent = S.store === 'db' ? (S.saving ? S.saving + (S.saveErr ? ' · ' + (isApp() ? 'Gerätespeicher' : 'Browserspeicher') + ' voll' : '') : (isApp() ? 'Auf diesem Gerät gespeichert' : 'In deinem Konto gespeichert')) : 'Nur in diesem Browser gespeichert';
+}
 async function connectDb() {
   try {
     if (!window.claude || !window.claude.use) return;
@@ -43,13 +91,22 @@ async function connectDb() {
     const id = await user.id(); if (!id) return;
     DB = db; UID = id; S.store = 'db';
     const snap = await db.collection('data/users/' + id).get();
-    if (snap.empty) { Object.keys(S.chars).forEach((k) => persist('c', k)); Object.keys(S.hb).forEach((k) => persist('h', k)); }
-    else {
-      const chars = {}, hb = {};
-      snap.docs.forEach((d) => { const v = d.data(); try { const o = JSON.parse(v.json); if (v.kind === 'c') chars[o.id] = normChar(o); else if (v.kind === 'n') { try { if (o.camp && !localStorage.getItem('heldenbuch_dm_' + o.camp)) localStorage.setItem('heldenbuch_dm_' + o.camp, o.text || ''); } catch (x) {} } else hb[o.id] = o; } catch (e) {} });
-      if (Object.keys(chars).length) { S.chars = chars; if (!S.chars[S.cur]) S.cur = Object.keys(chars)[0]; }
-      S.hb = hb; lsSet();
-    }
+    /* Je Datensatz zusammenführen: ausstehende lokale Änderungen (auch Löschungen) gewinnen, bei Helden sonst der neuere Stand.
+       Nur lokal vorhandene Datensätze werden beim ersten Abgleich und bei leerer Kopie übernommen, später gelten sie als anderswo gelöscht. */
+    const pend = pendKeys(); let first = true; try { first = !localStorage.getItem('hb_merge2'); } catch (e) {}
+    const dbC = {}, dbH = {};
+    snap.docs.forEach((d) => { const v = d.data(); try { const o = JSON.parse(v.json); if (v.kind === 'n') { try { if (o.camp && !localStorage.getItem('heldenbuch_dm_' + o.camp)) localStorage.setItem('heldenbuch_dm_' + o.camp, o.text || ''); } catch (x) {} return; }
+      if (!o || typeof o !== 'object' || typeof o.id !== 'string' || !o.id) return; if (v.kind === 'c') dbC[o.id] = normChar(o); else if (v.kind === 'h') dbH[o.id] = o; } catch (e) {} });
+    const push = new Set(pend);
+    const pick = (kind, local, remote, union) => { const out = {};
+      for (const [i, o] of Object.entries(remote)) { const k = kind + '_' + i; if (pend.has(k)) continue; const l = local[i]; if (kind === 'c' && l && (+l.updated || 0) > (+o.updated || 0)) { out[i] = l; push.add(k); } else out[i] = o; }
+      for (const [i, l] of Object.entries(local)) { const k = kind + '_' + i; if (pend.has(k) || (union && !(i in remote))) { out[i] = l; push.add(k); } }
+      return out; };
+    S.chars = pick('c', S.chars, dbC, first || snap.empty || !Object.keys(dbC).length);
+    S.hb = pick('h', S.hb, dbH, first || snap.empty);
+    if (!S.chars[S.cur]) S.cur = Object.keys(S.chars)[0] || null;
+    lsSet(); try { localStorage.setItem('hb_merge2', '1'); } catch (e) {}
+    push.forEach((k) => persist(k[0], k.slice(2)));
     if (S.camp) joinCamp(S.camp, true);
     if (isApp()) appAutoJoin();
     render();
@@ -176,7 +233,7 @@ function weaponAttack(ch, i, o = {}) {
   const tg = typeof tgtEntry === 'function' ? tgtEntry() : null;
   const total = d20(a.atk + holy, a.name + ': Angriff' + (o.cleave ? ' (Durchspalten)' : '') + (holy ? ' (Heilige Waffe +' + holy + ')' : '') + (tg ? ' gegen ' + tg.name : ''), { kind: 'attack:' + (o.trueStrike ? 'spell' : a.ab) + (a.melee ? ':melee' : ''), crit: c.critRange, parts: (a.atkParts || []).concat(holy ? ['Heilige Waffe +' + holy] : []) }); if (fx.aim) { delete fx.aim; } if (total === null) return;
   const la = S.lastAttack || {};
-  const sneakOk = !!c.lv('rog') && (a.finesse || a.ranged) && !onceUsed(ch, 'sneak') && la.mode !== 'dis';
+  const sneakOk = !!c.lv('rog') && (a.finesse || (a.ranged && !a.thrown)) && !onceUsed(ch, 'sneak') && la.mode !== 'dis';
   const auto = !la.fumble && typeof tgtAutoCrit === 'function' && tgtAutoCrit(a); S.atkDist = null;
   S.dp = { i, a, crit: !!la.crit || auto, crit0: !!la.crit, autoCrit: auto, nat: la.nat || 0, xd: [], fumble: !!la.fumble, total, mode: la.mode, two: !!a.twoOnly, sneak: sneakOk && la.mode === 'adv', smite: 0, fiend: false, off: !!o.off, cleave: !!o.cleave, savage: !onceUsed(ch, 'savage'), ts: o.trueStrike || null, tgt: tg ? tg.key : '' };
   setTimeout(renderDmgPrompt, 650);
@@ -184,16 +241,16 @@ function weaponAttack(ch, i, o = {}) {
 function renderDmgPrompt() {
   const ch = cur(); const d = S.dp; if (!d) return orbPrompt(''); const c = derive(ch, S.hb); const a = d.a || c.attacks[d.i]; const P = ch.play; const inF = inFight(ch);
   const opts = [];
-  if (a.vers) opts.push(chip(d.two, 'Zweihändig geführt (' + a.vers + ')', 'data-act="dpT" data-arg="two"'));
-  if (c.lv('rog') && (a.finesse || a.ranged)) { const used = onceUsed(ch, 'sneak'); const dis = d.mode === 'dis'; opts.push(chip(d.sneak, 'Hinterhältiger Angriff ' + c.sneak + (used ? ' – in diesem Zug schon genutzt' : dis ? ' – nicht mit Nachteil' : d.mode === 'adv' ? '' : ' (nur mit Verbündetem neben dem Ziel)'), 'data-act="dpT" data-arg="sneak"', used || dis)); }
+  if (a.vers) { if (ch.shield) d.two = false; opts.push(chip(d.two, 'Zweihändig geführt (' + a.vers + ')' + (ch.shield ? ' – nicht mit Schild' : ''), 'data-act="dpT" data-arg="two"', !!ch.shield)); }
+  if (c.lv('rog') && (a.finesse || (a.ranged && !a.thrown))) { const used = onceUsed(ch, 'sneak'); const dis = d.mode === 'dis'; opts.push(chip(d.sneak, 'Hinterhältiger Angriff ' + c.sneak + (used ? ' – in diesem Zug schon genutzt' : dis ? ' – nicht mit Nachteil' : d.mode === 'adv' ? '' : ' (nur mit Verbündetem neben dem Ziel)'), 'data-act="dpT" data-arg="sneak"', used || dis)); }
   if (d.autoCrit) opts.push(chip(d.crit, 'Ziel gelähmt/bewusstlos: Nahkampftreffer aus 1,5 m ist kritisch', 'data-act="dpT" data-arg="crit"'));
   if (a.light && !d.cleave) opts.push(chip(d.off, 'Zusatzangriff mit Zweitwaffe', 'data-act="dpT" data-arg="off" title="Ohne Attributsmodifikator, ausser mit Kampf mit zwei Waffen"'));
   if (a.idx !== undefined && c.feats.some((x) => x.id === 'savage')) { const used = onceUsed(ch, 'savage'); opts.push(chip(d.savage && !used, 'Wilder Angreifer (1× pro Zug)' + (used ? ' – schon genutzt' : ''), 'data-act="dpT" data-arg="savage"', used)); }
   if (c.critMark && !d.fumble && (d.crit0 === undefined ? !d.crit : !d.crit0) && d.nat >= c.critMark) opts.push(chip(d.crit, 'Gegen ' + c.critMarkLabel + ': kritisch (' + c.critMark + '+)', 'data-act="dpT" data-arg="crit"'));
   const bo = typeof boostOpts === 'function' ? boostOpts(c, 'attack') : []; const bown = bo.filter((x) => !x.ext);
-  if (!d.fumble || bown.some((x) => x.how !== 'add')) opts.push('<span class="bsep">Nachbessern:</span>' + bown.map((x) => '<button class="chip" data-act="boostAtk" data-arg="' + x.k + '">' + esc(x.label) + '</button>').join('') + bo.filter((x) => x.ext && ['xW4', 'xW6', 'xW8'].includes(x.k)).map((x) => '<button class="chip" data-act="boostAtk" data-arg="' + x.k + '">' + x.label + '</button>').join(''));
-  (c.dmgExtras || []).forEach((x) => { const r = x.res && c.res.find((y) => y.k === x.res); const left = r ? r.max - (+P.res[x.res] || 0) : 1; const used = !XD_MULTI.has(x.k) && onceUsed(ch, 'xd_' + x.k); opts.push(chip((d.xd || []).includes(x.k) && !used, esc(x.label) + (x.n ? ' +' + x.n + 'W' + x.s : '') + (x.flat ? ' +' + x.flat : '') + (used ? ' – schon genutzt' : ''), 'data-act="dpX" data-arg="' + x.k + '"', !left || used)); });
-  for (const [k, R] of Object.entries(RIDERS)) if (P.fx && P.fx[k] && (k !== 'ewpn' || a.idx !== undefined)) { const on = d['r_' + k] !== false; opts.push(chip(on, R.tag + ' +' + R.n(+P.fx[k + '_L'] || 1) + 'W' + R.s + (R.ask ? ' (' + R.ask + '?)' : ''), 'data-act="dpR" data-arg="' + k + '"')); }
+  if (!d.fumble || bown.some((x) => x.how !== 'add')) opts.push('<span class="bsep">Nachbessern:</span>' + bown.map((x) => '<button class="chip" data-act="boostAtk" data-arg="' + esc(x.k) + '">' + esc(x.label) + '</button>').join('') + bo.filter((x) => x.ext && ['xW4', 'xW6', 'xW8'].includes(x.k)).map((x) => '<button class="chip" data-act="boostAtk" data-arg="' + esc(x.k) + '">' + x.label + '</button>').join(''));
+  (c.dmgExtras || []).forEach((x) => { const r = x.res && c.res.find((y) => y.k === x.res); const left = r ? r.max - (+P.res[x.res] || 0) : 1; const used = !XD_MULTI.has(x.k) && onceUsed(ch, 'xd_' + x.k); opts.push(chip((d.xd || []).includes(x.k) && !used, esc(x.label) + (x.n ? ' +' + x.n + 'W' + x.s : '') + (x.flat ? ' +' + x.flat : '') + (used ? ' – schon genutzt' : ''), 'data-act="dpX" data-arg="' + esc(x.k) + '"', !left || used)); });
+  for (const [k, R] of Object.entries(RIDERS)) if (P.fx && P.fx[k] && (k !== 'ewpn' || a.idx !== undefined)) { const on = d['r_' + k] !== false; opts.push(chip(on, R.tag + ' +' + R.n(+P.fx[k + '_L'] || 1) + 'W' + R.s + (R.ask ? ' (' + R.ask + '?)' : ''), 'data-act="dpR" data-arg="' + esc(k) + '"')); }
   if (P.fx && P.fx.hm) { const ok = markOk(P, 'hm', d.tgt); const on = ok && d.hm !== false; d.hm = on; opts.push(chip(on, 'Mal des Jägers +1W' + (c.lv('ran') >= 20 ? 10 : 6) + (P.fx.hmTgt ? ' (auf ' + partName(P.fx.hmTgt) + ')' : ' (gegen das markierte Ziel)') + (ok ? '' : ' – nicht das markierte Ziel'), 'data-act="dpT" data-arg="hm"', !ok)); }
   if (P.fx && P.fx.hex) { const ok = markOk(P, 'hex', d.tgt); const on = ok && d.hex !== false; d.hex = on; opts.push(chip(on, 'Verhexen +1W6' + (P.fx.hexTgt ? ' (auf ' + partName(P.fx.hexTgt) + ')' : ' (gegen das verhexte Ziel)') + (ok ? '' : ' – nicht das verhexte Ziel'), 'data-act="dpT" data-arg="hex"', !ok)); }
   let smite = '';
@@ -207,10 +264,10 @@ function renderDmgPrompt() {
     const ch2 = sBlock ? [] : slotBlock ? choices.filter(([v]) => v === 'free') : choices;
     if (choices.length && !ch2.length) smite = '<div class="dpsm"><span>Göttliches Niederstrecken: nicht möglich – ' + esc(sBlock || 'in diesem Zug wurde schon ein Zauberplatz verbraucht') + '.</span></div>';
     else if (ch2 !== choices) { const keep = ch2.slice(); choices.length = 0; choices.push(...keep); }
-    if (choices.length && !smite) smite = '<div class="dpsm"><span>Göttliches Niederstrecken (Bonusaktion):</span>' + chip(!d.smite, 'Nein', 'data-act="dpSmite" data-arg="0"') + choices.map(([v, l]) => chip(String(d.smite) === v, l, 'data-act="dpSmite" data-arg="' + v + '"')).join('') + (d.smite ? chip(d.fiend, 'Gegen Unhold/Untoten (+1W8)', 'data-act="dpT" data-arg="fiend"') : '') + '</div>';
+    if (choices.length && !smite) smite = '<div class="dpsm"><span>Göttliches Niederstrecken (Bonusaktion):</span>' + chip(!d.smite, 'Nein', 'data-act="dpSmite" data-arg="0"') + choices.map(([v, l]) => chip(String(d.smite) === v, l, 'data-act="dpSmite" data-arg="' + esc(v) + '"')).join('') + (d.smite ? chip(d.fiend, 'Gegen Unhold/Untoten (+1W8)', 'data-act="dpT" data-arg="fiend"') : '') + '</div>';
   }
   const fx = [];
-  if (P.fx && P.fx.df) fx.push('Göttliche Gunst');
+  if (P.fx && P.fx.df && a.idx !== undefined) fx.push('Göttliche Gunst');
   if (P.raging && a.rage) fx.push('Kampfrausch +' + c.rageDmg);
   if (a.mastery && MASTERY[a.mastery]) fx.push('Meisterschaft ' + MASTERY[a.mastery][0]);
   if (d.ts) fx.push('Wahrer Schlag');
@@ -224,17 +281,18 @@ function dmgRoll(ch) {
   if (d.tgt && onlineFight() && !order().some((x) => x.key === d.tgt)) { d.tgt = ''; bannerToast('Ziel nicht mehr im Kampf', 'Zielgebundene Boni entfallen.'); }
   const parts = []; let flat = a.dmod; const once = [];
   if (d.cleave && flat > 0) flat = 0;
-  const base = dieOf(d.two && a.vers ? a.vers : a.die);
+  const base = dieOf(d.two && a.vers && !ch.shield ? a.vers : a.die);
   const gwf = c.feats.some((x) => x.id === 'fs-gwf') && a.gwf && (a.twoOnly || d.two);
   const sav = a.idx !== undefined && d.savage && c.feats.some((x) => x.id === 'savage') && !onceUsed(ch, 'savage'); if (sav) once.push('savage');
   if (base) parts.push({ n: base.n, s: base.s, tag: a.name.replace(/ \+\d$/, ''), gwf, savage: sav });
   if (d.ts) { const tsd = spellDice(getSpell('true-strike'), 0, c, d.ts.mod); const m2 = tsd && /^(\d+)W(\d+)/.exec(tsd); if (m2) parts.push({ n: +m2[1], s: +m2[2], tag: 'Wahrer Schlag (gleissend)' }); }
   if (a.duel && (d.two || d.off)) flat -= a.duel;
-  if (d.off && !c.feats.some((x) => x.id === 'fs-twf')) flat = Math.min(0, flat);
+  /* Zusatzangriff mit leichter Waffe: nur ein positiver Attributsmodifikator entfällt, magische Boni bleiben */
+  if (d.off && !c.feats.some((x) => x.id === 'fs-twf')) flat -= Math.max(0, +c.mod[a.ab] || 0);
   if (P.raging && a.rage) flat += c.rageDmg;
-  if (d.sneak && c.lv('rog') && (a.finesse || a.ranged) && !onceUsed(ch, 'sneak') && d.mode !== 'dis') { parts.push({ n: Math.ceil(c.lv('rog') / 2), s: 6, tag: 'Hinterhältig' }); once.push('sneak'); }
+  if (d.sneak && c.lv('rog') && (a.finesse || (a.ranged && !a.thrown)) && !onceUsed(ch, 'sneak') && d.mode !== 'dis') { parts.push({ n: Math.ceil(c.lv('rog') / 2), s: 6, tag: 'Hinterhältig' }); once.push('sneak'); }
   if (P.fx && P.fx.hm && d.hm !== false && markOk(P, 'hm', d.tgt)) parts.push({ n: 1, s: c.lv('ran') >= 20 ? 10 : 6, tag: 'Mal des Jägers' });
-  if (P.fx && P.fx.df) parts.push({ n: 1, s: 4, tag: 'Göttliche Gunst' });
+  if (P.fx && P.fx.df && a.idx !== undefined) parts.push({ n: 1, s: 4, tag: 'Göttliche Gunst' });
   for (const [k, R] of Object.entries(RIDERS)) if (P.fx && P.fx[k] && (k !== 'ewpn' || a.idx !== undefined) && d['r_' + k] !== false) parts.push({ n: R.n(+P.fx[k + '_L'] || 1), s: R.s, tag: R.tag });
   if (P.fx && P.fx.hex && d.hex !== false && markOk(P, 'hex', d.tgt)) parts.push({ n: 1, s: 6, tag: 'Verhexen (nekrotisch)' });
   if (c.lv('pal') >= 11 && !a.ranged) parts.push({ n: 1, s: 8, tag: 'Strahlende Schläge' });
@@ -344,8 +402,8 @@ function renderDicePanel() {
   const d = S.dr || (S.dr = { n: 1, d: 20, mod: 0 });
   const expr = d.n + 'W' + d.d + (d.mod ? sgn(d.mod).replace('−', '-') : '');
   $('#dicePanel').innerHTML = '<div class="dph"><h3>Würfelbecher</h3><button class="link" data-act="histOpen">Verlauf</button><button class="x" data-act="drClose" aria-label="Schliessen">×</button></div>' +
-    '<div class="chips">' + [4, 6, 8, 10, 12, 20, 100].map((s) => chip(d.d === s, 'W' + s, 'data-act="drDie" data-arg="' + s + '"')).join('') + '</div>' +
-    '<div class="dprow"><span>Anzahl</span><div class="stepper"><button data-act="drN" data-arg="-1" aria-label="weniger">−</button><b>' + d.n + '</b><button data-act="drN" data-arg="1" aria-label="mehr">+</button></div><div class="chips">' + [2, 4, 6, 8, 10, 20, 30].map((v) => chip(d.n === v, String(v), 'data-act="drSet" data-arg="' + v + '"')).join('') + '</div></div>' +
+    '<div class="chips">' + [4, 6, 8, 10, 12, 20, 100].map((s) => chip(d.d === s, 'W' + s, 'data-act="drDie" data-arg="' + esc(s) + '"')).join('') + '</div>' +
+    '<div class="dprow"><span>Anzahl</span><div class="stepper"><button data-act="drN" data-arg="-1" aria-label="weniger">−</button><b>' + d.n + '</b><button data-act="drN" data-arg="1" aria-label="mehr">+</button></div><div class="chips">' + [2, 4, 6, 8, 10, 20, 30].map((v) => chip(d.n === v, String(v), 'data-act="drSet" data-arg="' + esc(v) + '"')).join('') + '</div></div>' +
     '<div class="dprow"><span>Bonus</span><div class="stepper"><button data-act="drM" data-arg="-1" aria-label="weniger">−</button><b>' + sgn(d.mod) + '</b><button data-act="drM" data-arg="1" aria-label="mehr">+</button></div></div>' +
     (typeof diceRow === 'function' ? diceRow(cur(), true) : '') + '<button class="btn big" data-act="drRoll">' + esc(expr.replace('-', '−')) + ' würfeln</button>';
 }
@@ -402,10 +460,10 @@ const logHtml = () => S.log.length ? S.log.map((e) => '<li><span>' + esc(e.label
 
 /* ---------- Bausteine ---------- */
 const chip = (on, label, attrs, dis) => '<button type="button" class="chip' + (on ? ' on' : '') + '"' + (dis && !on ? ' disabled' : '') + ' ' + attrs + '>' + label + '</button>';
-const sel = (path, val, opts, extra = '') => '<select data-bind="' + path + '" ' + extra + '>' + opts.map(([v, l]) => '<option value="' + esc(v) + '"' + (String(v) === String(val) ? ' selected' : '') + '>' + esc(l) + '</option>').join('') + '</select>';
-const num = (path, val, extra = '') => '<input type="number" inputmode="numeric" data-bind="' + path + '" data-type="num" value="' + esc(val) + '" ' + extra + '>';
-const txt = (path, val, ph = '', extra = '') => '<input type="text" data-bind="' + path + '" value="' + esc(val) + '" placeholder="' + esc(ph) + '" ' + extra + '>';
-const area = (path, val, ph = '', rows = 4) => '<textarea data-bind="' + path + '" data-norender rows="' + rows + '" placeholder="' + esc(ph) + '">' + esc(val) + '</textarea>';
+const sel = (path, val, opts, extra = '') => '<select data-bind="' + esc(path) + '" ' + extra + '>' + opts.map(([v, l]) => '<option value="' + esc(v) + '"' + (String(v) === String(val) ? ' selected' : '') + '>' + esc(l) + '</option>').join('') + '</select>';
+const num = (path, val, extra = '') => '<input type="number" inputmode="numeric" data-bind="' + esc(path) + '" data-type="num" value="' + esc(val) + '" ' + extra + '>';
+const txt = (path, val, ph = '', extra = '') => '<input type="text" data-bind="' + esc(path) + '" value="' + esc(val) + '" placeholder="' + esc(ph) + '" ' + extra + '>';
+const area = (path, val, ph = '', rows = 4) => '<textarea data-bind="' + esc(path) + '" data-norender rows="' + rows + '" placeholder="' + esc(ph) + '">' + esc(val) + '</textarea>';
 const field = (label, inner, hint) => '<label class="fld"><span>' + label + '</span>' + inner + (hint ? '<em>' + hint + '</em>' : '') + '</label>';
 const abOpts = (list) => (list || AB).map((k) => [k, AB_DE[k]]);
 function featOptions(cat, hb, cls, lv) {
@@ -423,13 +481,16 @@ const spellName = (id) => (getSpell(id, S.hb) || { name: id }).name;
 
 /* ---------- Kopfzeile ---------- */
 const HUE = { bar:'#C8553D', brd:'#C77DBA', cle:'#E8C66A', dru:'#7FA65A', fig:'#B8875A', mon:'#5FA8A0', pal:'#E2AE52', ran:'#6E9F6A', rog:'#8C8FA8', sor:'#D9603B', wlk:'#9A6BD1', wiz:'#5B8FD9' };
+/* Nur echte Rasterbilder als Porträt: fremde Daten vom Tisch oder aus Dateien gelangen sonst in ein Style-Attribut */
+const safeImg = (d) => (typeof d === 'string' && d.length < 4e6 && /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/.test(d) ? d : '');
+const ownKey = (o, k) => typeof k === 'string' && Object.prototype.hasOwnProperty.call(o, k);
 function sigil(ch, extra) {
-  const pt = ch.portrait || '';
-  if (pt === 'img' && ch.portraitImg) return '<span class="sigil art" style="background-image:url(' + imgUrl(ch.portraitImg) + ')"' + (extra || '') + ' aria-hidden="true"></span>';
-  if (pt.startsWith('art:') && ART[pt.slice(4)]) return '<span class="sigil art" style="background-image:url(' + imgUrl(ART[pt.slice(4)]) + ')"' + (extra || '') + ' aria-hidden="true"></span>';
-  if (pt === 'ini' || !CREST[ch.cls]) { const ini = (ch.name || '?').replace(/^Beispiel:\s*/, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '?';
-    return '<span class="sigil" style="--h:' + (HUE[ch.cls] || 'var(--gold)') + '"' + (extra || '') + ' aria-hidden="true">' + esc(ini) + '</span>'; }
-  return '<span class="sigil crest" style="--h:' + (HUE[ch.cls] || 'var(--gold)') + '"' + (extra || '') + ' aria-hidden="true">' + crestSvg(ch.cls) + '</span>';
+  const pt = typeof ch.portrait === 'string' ? ch.portrait : ''; const cls = ownKey(HUE, ch.cls) ? ch.cls : ''; const img = pt === 'img' ? safeImg(ch.portraitImg) : '';
+  if (img) return '<span class="sigil art" style="background-image:url(' + imgUrl(img) + ')"' + (extra || '') + ' aria-hidden="true"></span>';
+  if (pt.startsWith('art:') && ownKey(ART, pt.slice(4))) return '<span class="sigil art" style="background-image:url(' + imgUrl(ART[pt.slice(4)]) + ')"' + (extra || '') + ' aria-hidden="true"></span>';
+  if (pt === 'ini' || !ownKey(CREST, cls)) { const ini = String(ch.name || '?').replace(/^Beispiel:\s*/, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '?';
+    return '<span class="sigil" style="--h:' + (HUE[cls] || 'var(--gold)') + '"' + (extra || '') + ' aria-hidden="true">' + esc(ini) + '</span>'; }
+  return '<span class="sigil crest" style="--h:' + (HUE[cls] || 'var(--gold)') + '"' + (extra || '') + ' aria-hidden="true">' + crestSvg(cls) + '</span>';
 }
 const psig = (p) => sigil({ name: p.char, cls: p.cls, portrait: p.portrait, portraitImg: p.pimg });
 const LOGO = '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><polygon points="16,2.5 27.7,9.25 27.7,22.75 16,29.5 4.3,22.75 4.3,9.25"/><polygon points="16,9.5 22,20 10,20"/><path d="M16 9.5V2.5M22 20l5.7 2.75M10 20l-5.7 2.75M16 9.5 4.3 9.25M16 9.5l11.7-.25M22 20l-6 9.5M10 20l6 9.5M22 20l5.7-10.75M10 20 4.3 9.25" opacity=".7"/></svg>';
@@ -438,8 +499,8 @@ function renderTop() {
   const tabs = [['heroes', 'Helden'], ['sheet', 'Bogen'], ['build', 'Erschaffen'], ['camp', 'Tisch'], ['spells', 'Zauberbuch']];
   const more = [['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe']]; const moreOn = more.some(([k]) => S.view === k);
   $('#top').innerHTML = '<div class="wrap"><div class="bar"><button class="brand" data-act="view" data-arg="heroes">' + LOGO + 'Heldenbuch</button>' +
-    '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') +
-      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + k + '">' + l + '</button>').join('') + '<hr><button data-act="histOpen">Würfelverlauf</button><button data-act="chrOpen">📜 Chronik und Personen</button><button data-act="slOpen">✦ Claude fragen</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="stOpen">Stolperstein melden</button></div></details></nav>' +
+    '<nav class="tabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" aria-selected="' + (S.view === k) + '" class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + esc(k) + '">' + l + '</button>').join('') +
+      '<details class="mnu tmore"><summary class="' + (moreOn ? 'on' : '') + '">' + (moreOn ? more.find(([k]) => S.view === k)[1] : 'Mehr') + ' <span aria-hidden="true">▾</span></summary><div class="mnul">' + more.map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + esc(k) + '">' + l + '</button>').join('') + '<hr><button data-act="histOpen">Würfelverlauf</button><button data-act="chrOpen">📜 Chronik und Personen</button><button data-act="slOpen">✦ Claude fragen</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="stOpen">Stolperstein melden</button></div></details></nav>' +
     '<button class="mbtn mwarn" data-act="warnOpen" hidden aria-label="Offene Punkte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg><b></b></button><button class="mbtn mdice" data-act="drOpen" aria-label="Würfelbecher"><svg viewBox="0 0 64 64" aria-hidden="true"><polygon points="32,4 56,18 56,46 32,60 8,46 8,18"/><polygon points="32,18 46,42 18,42"/></svg></button>' +
     '<button class="tbtn tsearch" data-act="search" title="Suchen (Strg+K oder /)" aria-label="Suchen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>' +
     '<button class="tbtn" data-act="themeOpen" title="Stimmung wählen" aria-label="Stimmung wählen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.2-1-1.6-1-2.6 0-1 .8-1.7 1.9-1.7H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z"/><circle cx="7.5" cy="11" r="1.3"/><circle cx="10.5" cy="7" r="1.3"/><circle cx="15" cy="7.5" r="1.3"/></svg></button>' + (ch ? '<button class="curhero" data-act="view" data-arg="heroes" title="Helden wechseln">' + sigil(ch) + '<span>' + esc(ch.name.replace(/^Beispiel:\s*/, '')) + '</span></button>' : '') +
@@ -457,12 +518,12 @@ function renderHeroes() {
     const ch = S.chars[id]; let c; try { c = derive(ch, S.hb); } catch (e) { continue; }
     const conf = S.confirm === 'del:' + id;
     h += '<article class="hero' + (id === S.cur ? ' cur' : '') + '">' + (id === S.cur ? '<span class="curlbl">Aktiv</span>' : '') + sigil(ch) +
-      '<div><h3>' + esc(ch.name) + '</h3><p>' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' · ' + c.subName : '') + '<br class="hbr"><span class="hdot"> · </span>' + c.sp.name + ' · ' + esc(c.bg.name) + '</p></div>' +
+      '<div><h3>' + esc(ch.name) + '</h3><p>' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' · ' + esc(c.subName) : '') + '<br class="hbr"><span class="hdot"> · </span>' + c.sp.name + ' · ' + esc(c.bg.name) + '</p></div>' +
       '<div class="mini"><span><b>' + c.ac + '</b>RK</span><span><b>' + c.hpMax + '</b>TP</span><span><b>' + sgn(c.init) + '</b>Init</span></div>' +
       (c.warn.length ? '<p class="warnline">' + c.warn.length + ' Auswahl(en) offen</p>' : '') +
-      '<div class="acts"><button class="btn" data-act="play" data-arg="' + id + '">Spielen</button><button class="btn ghost" data-act="edit" data-arg="' + id + '">Bearbeiten</button></div>' +
-      '<div class="acts2"><button data-act="exportOne" data-arg="' + id + '">Exportieren</button><button data-act="dupChar" data-arg="' + id + '">Duplizieren</button>' +
-      (conf ? '<button class="del" data-act="delChar" data-arg="' + id + '">Wirklich löschen?</button><button data-act="noDel">Nein</button>' : '<button class="del" data-act="askDel" data-arg="' + id + '">Löschen</button>') + '</div></article>';
+      '<div class="acts"><button class="btn" data-act="play" data-arg="' + esc(id) + '">Spielen</button><button class="btn ghost" data-act="edit" data-arg="' + esc(id) + '">Bearbeiten</button></div>' +
+      '<div class="acts2"><button data-act="exportOne" data-arg="' + esc(id) + '">Exportieren</button><button data-act="dupChar" data-arg="' + esc(id) + '">Duplizieren</button>' +
+      (conf ? '<button class="del" data-act="delChar" data-arg="' + esc(id) + '">Wirklich löschen?</button><button data-act="noDel">Nein</button>' : '<button class="del" data-act="askDel" data-arg="' + esc(id) + '">Löschen</button>') + '</div></article>';
   }
   h += '</div>' + (isApp() ? transferHtml() : '') + '<div class="herobar"><label class="btn ghost filebtn" title="Heldenbuch-Datei (.json) oder Charakterbogen-PDF aus D&amp;D Beyond">Helden aus Datei laden<input type="file" id="importFile" accept=".json,application/json,.pdf,application/pdf"></label><button class="btn ghost" data-act="importText">Text einfügen</button>' + (ids.length ? '<button class="btn ghost" data-act="exportAll" title="Helden, Hausregeln, eigene Monster, Begegnungen und SL-Notizen in einer Datei">Alles sichern</button>' : '') + '</div>';
   return h;
@@ -491,7 +552,7 @@ function restoreExtras(x) {
     Object.entries(x.stand).forEach(([k, v]) => { if (!v || typeof v !== 'object' || !/^(adv:[a-z0-9-]{1,40}|tisch:.{1,60}|frei)$/.test(k)) return; const cur0 = d[k] || {}; const have = new Set((cur0.abende || []).map((a) => a && a.id)); const add = (Array.isArray(v.abende) ? v.abende : []).filter((a) => a && a.id && typeof a.t === 'number' && typeof a.x === 'string' && !have.has(a.id));
       const g = v.gesamt && typeof v.gesamt.x === 'string' && (!cur0.gesamt || (+v.gesamt.t || 0) > (+cur0.gesamt.t || 0)) ? v.gesamt : cur0.gesamt; if (add.length || g !== cur0.gesamt) { d[k] = { gesamt: g || null, abende: (cur0.abende || []).concat(add).sort((a, b) => a.t - b.t) }; n += add.length || 1; } });
     if (n) { standSaveDb(d); done.push('Spielstand (' + n + ')'); } }
-  if (Array.isArray(x.adv) && x.adv.length && typeof advImport === 'function') { const n = advImport(x.adv); if (n) done.push(n === 1 ? 'das Abenteuer „' + String((x.adv.find((a) => a && a.title) || {}).title || '').slice(0, 40) + '“' : n + ' Abenteuer'); }
+  if (Array.isArray(x.adv) && x.adv.length && typeof advImport === 'function') { const n = advImport(x.adv); if (advImport.errs && advImport.errs.length) bannerToast('Abenteuer nicht geladen', advImport.errs.slice(0, 3).join(' · ')); if (n) done.push(n === 1 ? 'das Abenteuer „' + String((x.adv.find((a) => a && a.title) || {}).title || '').slice(0, 40) + '“' : n + ' Abenteuer'); }
   if (x.advSt && typeof x.advSt === 'object' && typeof advDb === 'function') { const d = advDb(); let n = 0; Object.entries(x.advSt).forEach(([id, st]) => { if (!st || typeof st !== 'object' || !/^[a-z0-9-]{1,40}$/.test(id)) return; if (d.st[id] && (+d.st[id].t || 0) >= (+st.t || 0)) return; d.st[id] = st; n++; }); if (n) { advSave(d); done.push('Abenteuer-Fortschritt'); } }
   return done;
 }
@@ -510,14 +571,18 @@ async function doExport(list, fname, full) {
 function fileName(ch) { return (ch.name || 'held').replace(/^Beispiel:\s*/, '').replace(/[^\wäöüÄÖÜss -]/g, '').trim().replace(/\s+/g, '_') + '_Heldenbuch.json'; }
 function importJson(text) {
   let d; try { d = JSON.parse(text); } catch (e) { throw new Error('Kein gültiger Heldentext (JSON fehlerhaft).'); }
+  if (!d || typeof d !== 'object') throw new Error('Im Text wurde kein Held gefunden.');
   const list = Array.isArray(d.chars) ? d.chars : (d && d.id && d.cls ? [d] : []);
   if (!list.length && !(d && d.extra)) throw new Error('Im Text wurde kein Held gefunden.');
   const errs = []; list.forEach((c, i) => { const e = validateChar(c); if (e.length) errs.push((c && c.name ? '„' + c.name + '“' : 'Held ' + (i + 1)) + ': ' + e.join(' ')); });
   if (errs.length) throw new Error('Nicht geladen – bestehende Helden bleiben unverändert. ' + errs.join(' | '));
   if (d.hb !== undefined && !Array.isArray(d.hb)) throw new Error('Hausregeln im Text sind ungültig.');
+  /* Erst alles prüfen, dann übernehmen: ein Fehler darf nichts halb geladen zurücklassen */
+  const hbErrs = []; (d.hb || []).forEach((h, i) => { const e = validHb(h); if (e) hbErrs.push('Hausregel ' + (i + 1) + (h && typeof h.name === 'string' && h.name.trim() ? ' „' + h.name.trim().slice(0, 40) + '“' : '') + ': ' + e); });
+  if (hbErrs.length) throw new Error('Nicht geladen – bestehende Helden und Hausregeln bleiben unverändert. ' + hbErrs.join(' | '));
   (d.hb || []).forEach((h) => { S.hb[h.id] = h; persist('h', h.id); });
   let last = null;
-  const notes = []; list.forEach((c) => { const n = normChar(JSON.parse(JSON.stringify(c))); notes.push(...cleanRefs(n)); if (typeof n.id !== 'string' || !n.id || S.chars[n.id]) n.id = freshId(); S.chars[n.id] = n; persist('c', n.id); last = n.id; }); if (notes.length) bannerToast('Beim Laden bereinigt', notes.join(' · '));
+  const notes = []; list.forEach((c) => { const n = normChar(JSON.parse(JSON.stringify(c))); notes.push(...cleanRefs(n)); if (typeof n.id !== 'string' || !/^[A-Za-z0-9_-]{1,60}$/.test(n.id) || S.chars[n.id]) n.id = freshId(); S.chars[n.id] = n; persist('c', n.id); last = n.id; }); if (notes.length) bannerToast('Beim Laden bereinigt', notes.join(' · '));
   const ex = restoreExtras(d.extra);
   const advOnly = !list.length && d.extra && Array.isArray(d.extra.adv) && d.extra.adv.some((a) => typeof advGet === 'function' && a && advGet(a.id));
   if (last) S.cur = last; S.view = advOnly ? 'adv' : 'heroes'; if (advOnly) S.adv = d.extra.adv.find((a) => a && advGet(a.id)).id; S.modal = null; render();
@@ -543,49 +608,49 @@ function renderBuild(c) {
   if (st === 0) {
     body += '<div class="row hname">' + field('Name deines Helden', txt('name', ch.name === 'Neuer Held' ? '' : ch.name, 'z. B. Brakk Eisenfaust', 'autocomplete="off"')) + '</div>';
     body += '<h2>Klasse wählen</h2><div class="cards pics">' + Object.entries(CLASSES).map(([k, C]) =>
-      '<button class="card haspic' + (ch.cls === k ? ' on' : '') + '" data-act="setCls" data-arg="' + k + '">' + picOf('cls', k) + '<b>' + C.name + '</b><small>W' + C.hd + ' · ' + C.prim.map((a) => AB_K[a]).join('/') + (C.caster ? ' · Zauber' : '') + '</small><small class="sub">' + (C.subs ? C.subs.length + ' Unterklassen' : C.sub.name) + (C.home ? ' · ✦ Heldenbuch' : '') + '</small>' + ii('cls', k, C.name) + '</button>').join('') + '</div>' + flavBox(c.cls.name, c.cls.flavor, 'cls', ch.cls);
+      '<button class="card haspic' + (ch.cls === k ? ' on' : '') + '" data-act="setCls" data-arg="' + esc(k) + '">' + picOf('cls', k) + '<b>' + C.name + '</b><small>W' + C.hd + ' · ' + C.prim.map((a) => AB_K[a]).join('/') + (C.caster ? ' · Zauber' : '') + '</small><small class="sub">' + (C.subs ? C.subs.length + ' Unterklassen' : C.sub.name) + (C.home ? ' · ✦ Heldenbuch' : '') + '</small>' + ii('cls', k, C.name) + '</button>').join('') + '</div>' + flavBox(c.cls.name, c.cls.flavor, 'cls', ch.cls);
     body += '<div class="row">' + field('Stufe', '<div class="stepper"><button data-act="lvl" data-arg="-1" aria-label="Stufe senken">−</button><b>' + ch.level + '</b><button data-act="lvl" data-arg="1" aria-label="Stufe erhöhen">+</button></div>', 'Übungsbonus ' + sgn(c.pb)) +
       field('Trefferpunkte pro Stufe', sel('hpMode', ch.hpMode, [['avg', 'Durchschnitt (' + (c.hd / 2 + 1) + ')'], ['roll', 'Selbst gewürfelt']])) + '</div>';
     if (ch.hpMode === 'roll' && ch.level > 1) {
       body += '<div class="rolls">' + Array.from({ length: ch.level - 1 }, (_, i) => i + 2).map((l) => field(c.cls.name + ' ' + l + ' (W' + c.hd + ')', num('hpRolls.' + l, ch.hpRolls[l] || '', 'min="1" max="' + c.hd + '"'))).join('') + '</div>';
     }
-    if (c.cls.order) body += '<h3 id="a-order">' + c.cls.order.label + '</h3><div class="opts">' + Object.entries(c.cls.order.opts).map(([k, [n, t]]) => '<button class="opt' + (ch.order === k ? ' on' : '') + '" data-act="pick" data-path="order" data-val="' + k + '"><b>' + n + '</b><span>' + t + '</span></button>').join('') + '</div>';
-    if (ch.cls === 'dru' && c.lv('dru') >= 3 && c.subOf('dru') === 'land') body += '<h3>Landschaft (Zirkel des Landes)</h3><div class="chips">' + Object.entries(LAND).map(([k, l]) => chip(ch.land === k, l.name, 'data-act="pick" data-path="land" data-val="' + k + '"')).join('') + '</div>';
-    body += '<h3>' + c.cls.name + ' bis Stufe ' + ch.level + '</h3><div class="tbl"><table><tbody>' + c.cls.table(ch.level).map(([a, b]) => '<tr><th>' + a + '</th><td>' + b + '</td></tr>').join('') + (c.hasSub ? '<tr><th>Unterklasse</th><td>' + (c.subName || 'noch wählen (' + (c.cls.subs || []).length + ' zur Wahl)') + '</td></tr>' : '<tr><th>Unterklasse</th><td>ab Stufe 3' + (c.cls.subs ? ' (' + c.cls.subs.length + ' zur Wahl)' : ': ' + c.cls.sub.name) + '</td></tr>') + '</tbody></table></div>';
-    if (c.cls.subs && ch.level >= 3) body += '<h3 id="a-sub">Unterklasse</h3><div class="opts">' + c.cls.subs.map((sb) => '<button class="opt' + (subPic(ch.cls, sb.id) ? ' haspic' : '') + (ch.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="sub" data-val="' + sb.id + '">' + subPic(ch.cls, sb.id) + '<b>' + sb.name + '</b><span>' + esc(sb.desc || (sb.feats[0][1] + ': ' + sb.feats[0][2])) + '</span>' + (sb.desc ? '<small class="ofeat">Ab Stufe 3: ' + esc(sb.feats.filter((f) => f[0] <= 3).map((f) => f[1]).join(', ')) + '</small>' : '') + ii('sub', ch.cls + '/' + sb.id, sb.name) + '</button>').join('') + subEigenBtn(ch, '') + '</div>' + subEigenEdit(ch, '', ch.cls, hb);
+    if (c.cls.order) body += '<h3 id="a-order">' + c.cls.order.label + '</h3><div class="opts">' + Object.entries(c.cls.order.opts).map(([k, [n, t]]) => '<button class="opt' + (ch.order === k ? ' on' : '') + '" data-act="pick" data-path="order" data-val="' + esc(k) + '"><b>' + n + '</b><span>' + t + '</span></button>').join('') + '</div>';
+    if (ch.cls === 'dru' && c.lv('dru') >= 3 && c.subOf('dru') === 'land') body += '<h3>Landschaft (Zirkel des Landes)</h3><div class="chips">' + Object.entries(LAND).map(([k, l]) => chip(ch.land === k, l.name, 'data-act="pick" data-path="land" data-val="' + esc(k) + '"')).join('') + '</div>';
+    body += '<h3>' + c.cls.name + ' bis Stufe ' + ch.level + '</h3><div class="tbl"><table><tbody>' + c.cls.table(ch.level).map(([a, b]) => '<tr><th>' + a + '</th><td>' + b + '</td></tr>').join('') + (c.hasSub ? '<tr><th>Unterklasse</th><td>' + (esc(c.subName) || 'noch wählen (' + (c.cls.subs || []).length + ' zur Wahl)') + '</td></tr>' : '<tr><th>Unterklasse</th><td>ab Stufe 3' + (c.cls.subs ? ' (' + c.cls.subs.length + ' zur Wahl)' : ': ' + c.cls.sub.name) + '</td></tr>') + '</tbody></table></div>';
+    if (c.cls.subs && ch.level >= 3) body += '<h3 id="a-sub">Unterklasse</h3><div class="opts">' + c.cls.subs.map((sb) => '<button class="opt' + (subPic(ch.cls, sb.id) ? ' haspic' : '') + (ch.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="sub" data-val="' + esc(sb.id) + '">' + subPic(ch.cls, sb.id) + '<b>' + sb.name + '</b><span>' + esc(sb.desc || (sb.feats[0][1] + ': ' + sb.feats[0][2])) + '</span>' + (sb.desc ? '<small class="ofeat">Ab Stufe 3: ' + esc(sb.feats.filter((f) => f[0] <= 3).map((f) => f[1]).join(', ')) + '</small>' : '') + ii('sub', ch.cls + '/' + sb.id, sb.name) + '</button>').join('') + subEigenBtn(ch, '') + '</div>' + subEigenEdit(ch, '', ch.cls, hb);
     body += featList(c.features.filter((f) => f.src === c.cls.name || f.src === c.subName));
     body += mcSection(c);
   }
   if (st === 1) {
-    body += '<h2>Spezies</h2><div class="cards pics sp">' + Object.entries(SPECIES).map(([k, s]) => '<button class="card haspic' + (ch.species === k ? ' on' : '') + '" data-act="setSpecies" data-arg="' + k + '">' + picOf('sp', k) + '<b>' + s.name + '</b><small>' + s.size + ' · ' + fmtM(s.speed) + (s.dv ? ' · Dunkelsicht' : '') + '</small>' + ii('sp', k, s.name) + '</button>').join('') + '</div>' + flavBox(SPECIES[ch.species] && SPECIES[ch.species].name, SPECIES[ch.species] && SPECIES[ch.species].flavor, 'sp', ch.species);
+    body += '<h2>Spezies</h2><div class="cards pics sp">' + Object.entries(SPECIES).map(([k, s]) => '<button class="card haspic' + (ch.species === k ? ' on' : '') + '" data-act="setSpecies" data-arg="' + esc(k) + '">' + picOf('sp', k) + '<b>' + s.name + '</b><small>' + s.size + ' · ' + fmtM(s.speed) + (s.dv ? ' · Dunkelsicht' : '') + '</small>' + ii('sp', k, s.name) + '</button>').join('') + '</div>' + flavBox(SPECIES[ch.species] && SPECIES[ch.species].name, SPECIES[ch.species] && SPECIES[ch.species].flavor, 'sp', ch.species);
     const sp = c.sp;
-    if (sp.choice) body += '<h3>' + sp.choice.label + '</h3><div class="chips">' + Object.entries(sp.choice.opts).map(([k, l]) => chip(ch.speciesChoice === k, l, 'data-act="pick" data-path="speciesChoice" data-val="' + k + '"')).join('') + '</div>';
-    if (sp.skillPick) body += '<h3 id="a-spskill">Fertigkeit (' + sp.name + ')</h3><div class="chips">' + sp.skillPick.map((s) => chipI(ch.speciesSkill === s, SKILLS[s][0], 'data-act="pick" data-path="speciesSkill" data-val="' + s + '"', false, 'sk', s, SKILLS[s][0])).join('') + '</div>';
+    if (sp.choice) body += '<h3>' + sp.choice.label + '</h3><div class="chips">' + Object.entries(sp.choice.opts).map(([k, l]) => chip(ch.speciesChoice === k, l, 'data-act="pick" data-path="speciesChoice" data-val="' + esc(k) + '"')).join('') + '</div>';
+    if (sp.skillPick) body += '<h3 id="a-spskill">Fertigkeit (' + sp.name + ')</h3><div class="chips">' + sp.skillPick.map((s) => chipI(ch.speciesSkill === s, SKILLS[s][0], 'data-act="pick" data-path="speciesSkill" data-val="' + esc(s) + '"', false, 'sk', s, SKILLS[s][0])).join('') + '</div>';
     if (sp.spellAbility) body += '<div class="row">' + field('Zauberattribut für Spezies-Zauber', sel('speciesSpellAbility', ch.speciesSpellAbility, abOpts(['int', 'wis', 'cha']))) + '</div>';
     if (sp.bonusFeat) body += '<div class="row">' + field('Herkunftstalent (Vielseitig)', sel('humanFeat', ch.humanFeat, featOptions('origin', hb))) + '</div>' + (featById(ch.humanFeat, hb) ? '<p class="hint">' + esc(featById(ch.humanFeat, hb).text) + '</p>' : '') + miPicker(c, 'human');
     body += featList(c.features.filter((f) => f.src === sp.name));
-    body += '<h2>Hintergrund</h2><div class="cards pics sp bgs">' + Object.entries(BACKGROUNDS).map(([k, b]) => '<button class="card haspic' + (ch.bg === k ? ' on' : '') + '" data-act="setBg" data-arg="' + k + '">' + (picOf('bg', k) || '<span class="cpic nopic" aria-hidden="true">✎</span>') + '<b>' + b.name + '</b><small>' + (b.abil ? b.abil.map((a) => AB_K[a]).join(', ') + ' · ' + FEATS[b.feat].name : 'Selbst zusammenstellen') + '</small>' + ii('bg', k, b.name) + '</button>').join('') + '</div>' + flavBox(bgOf(ch).name, (BACKGROUNDS[ch.bg] || {}).flavor, 'bg', ch.bg);
+    body += '<h2>Hintergrund</h2><div class="cards pics sp bgs">' + Object.entries(BACKGROUNDS).map(([k, b]) => '<button class="card haspic' + (ch.bg === k ? ' on' : '') + '" data-act="setBg" data-arg="' + esc(k) + '">' + (picOf('bg', k) || '<span class="cpic nopic" aria-hidden="true">✎</span>') + '<b>' + b.name + '</b><small>' + (b.abil ? b.abil.map((a) => AB_K[a]).join(', ') + ' · ' + FEATS[b.feat].name : 'Selbst zusammenstellen') + '</small>' + ii('bg', k, b.name) + '</button>').join('') + '</div>' + flavBox(bgOf(ch).name, (BACKGROUNDS[ch.bg] || {}).flavor, 'bg', ch.bg);
     if (ch.bg === 'custom') {
       const bc = ch.bgCustom;
       body += '<div class="box"><div class="row">' + field('Name', txt('bgCustom.name', bc.name, 'z. B. Schmied')) + field('Herkunftstalent', sel('bgCustom.feat', bc.feat, featOptions('origin', hb))) + '</div>' +
-        '<h4>Drei Attribute</h4><div class="chips">' + AB.map((a) => chip(bc.abil.includes(a), AB_DE[a], 'data-act="toggle" data-path="bgCustom.abil" data-val="' + a + '" data-max="3"', bc.abil.length >= 3)).join('') + '</div>' +
-        '<h4>Zwei Fertigkeiten</h4><div class="chips">' + ALL_SKILLS.map((s) => chipI(bc.skills.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="bgCustom.skills" data-val="' + s + '" data-max="2"', bc.skills.length >= 2, 'sk', s, SKILLS[s][0])).join('') + '</div></div>';
+        '<h4>Drei Attribute</h4><div class="chips">' + AB.map((a) => chip(bc.abil.includes(a), AB_DE[a], 'data-act="toggle" data-path="bgCustom.abil" data-val="' + esc(a) + '" data-max="3"', bc.abil.length >= 3)).join('') + '</div>' +
+        '<h4>Zwei Fertigkeiten</h4><div class="chips">' + ALL_SKILLS.map((s) => chipI(bc.skills.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="bgCustom.skills" data-val="' + esc(s) + '" data-max="2"', bc.skills.length >= 2, 'sk', s, SKILLS[s][0])).join('') + '</div></div>';
     }
     const bg = c.bg;
     body += '<h3 id="a-bgplus">Attributsboni aus „' + esc(bg.name) + '“</h3><div class="chips">' + chip(ch.bgMode === '21', '+2 und +1', 'data-act="bgMode" data-arg="21"') + chip(ch.bgMode === '111', '+1 / +1 / +1', 'data-act="bgMode" data-arg="111"') + '</div>';
-    body += '<div class="bgplus">' + (bg.abil || []).map((a) => '<div class="bp"><span>' + AB_DE[a] + '</span><div class="chips">' + (ch.bgMode === '21' ? [0, 1, 2] : [0, 1]).map((v) => chip((+ch.bgPlus[a] || 0) === v, v ? '+' + v : '0', 'data-act="bgPlus" data-path="' + a + '" data-val="' + v + '"')).join('') + '</div></div>').join('') + '</div>';
+    body += '<div class="bgplus">' + (bg.abil || []).map((a) => '<div class="bp"><span>' + AB_DE[a] + '</span><div class="chips">' + (ch.bgMode === '21' ? [0, 1, 2] : [0, 1]).map((v) => chip((+ch.bgPlus[a] || 0) === v, v ? '+' + v : '0', 'data-act="bgPlus" data-path="' + esc(a) + '" data-val="' + esc(v) + '"')).join('') + '</div></div>').join('') + '</div>';
     if (ch.bg !== 'custom' && featById(bg.feat, hb)) body += '<div class="row">' + field('Herkunftstalent', sel('bgFeat', ch.bgFeat || bg.feat, featOptions('origin', hb))) + '</div><p class="hint">' + esc(featById(ch.bgFeat || bg.feat, hb).text) + ' <em>(Laut Regeln gehört „' + esc(FEATS[BACKGROUNDS[ch.bg].feat].name) + '“ zu ' + esc(bg.name) + ' – ein anderes Talent zu wählen ist eine Hausregel.)</em></p>';
     body += '<p class="hint">Fertigkeiten: ' + (bg.skills || []).map((s) => SKILLS[s][0]).join(', ') + (bg.tool ? ' · Werkzeug: ' + bg.tool : '') + (bg.equip ? '<br>Ausrüstung: ' + bg.equip : '') + '</p>';
     body += miPicker(c, 'bg');
   }
   if (st === 2) {
-    body += '<h2>Attributswerte</h2><div class="chips">' + [['standard', 'Standardwerte'], ['pointbuy', 'Punktekauf (27)'], ['manual', 'Gewürfelt / frei']].map(([k, l]) => chip(ch.method === k, l, 'data-act="method" data-arg="' + k + '"')).join('') + '</div>';
+    body += '<h2>Attributswerte</h2><div class="chips">' + [['standard', 'Standardwerte'], ['pointbuy', 'Punktekauf (27)'], ['manual', 'Gewürfelt / frei']].map(([k, l]) => chip(ch.method === k, l, 'data-act="method" data-arg="' + esc(k) + '"')).join('') + '</div>';
     if (ch.method === 'pointbuy') body += '<p class="hint">Punkte: <b>' + (c.pointsUsed ?? 0) + '</b> / 27 · Werte 8–15, 14 kostet 7, 15 kostet 9.</p>';
     if (ch.method === 'standard') body += '<p class="hint">Verteile 15, 14, 13, 12, 10 und 8. Für ' + c.cls.name + ' zuerst ' + c.cls.prim.map((a) => AB_DE[a]).join(' und ') + '.</p>';
     body += '<div class="abgrid" id="a-abil">' + AB.map((a) => {
       let inp;
       if (ch.method === 'standard') inp = sel('base.' + a, ch.base[a], [15, 14, 13, 12, 10, 8].map((v) => [v, v]), 'data-type="num" aria-label="' + AB_DE[a] + '"');
-      else if (ch.method === 'pointbuy') inp = '<div class="stepper"><button data-act="pb" data-path="' + a + '" data-arg="-1" aria-label="weniger">−</button><b>' + ch.base[a] + '</b><button data-act="pb" data-path="' + a + '" data-arg="1" aria-label="mehr">+</button></div>';
+      else if (ch.method === 'pointbuy') inp = '<div class="stepper"><button data-act="pb" data-path="' + esc(a) + '" data-arg="-1" aria-label="weniger">−</button><b>' + ch.base[a] + '</b><button data-act="pb" data-path="' + esc(a) + '" data-arg="1" aria-label="mehr">+</button></div>';
       else inp = num('base.' + a, ch.base[a], 'min="1" max="20" aria-label="' + AB_DE[a] + '"');
       return '<div class="abbox' + (c.cls.prim.includes(a) ? ' prim' : '') + '"><span class="abn">' + AB_DE[a] + '</span>' + inp + '<div class="abres"><b>' + c.abil[a] + '</b><span>' + sgn(c.mod[a]) + '</span></div><small>' + c.breakdown[a].slice(1).join(' · ') + '</small></div>';
     }).join('') + '</div>';
@@ -595,9 +660,9 @@ function renderBuild(c) {
       body += lvls.map((slot) => { const lv = slot.key;
         const a = ch.asi[lv] || {}; const fid = a.feat || (slot.al === 19 ? '' : 'asi'); const f = featById(fid, hb);
         let pl = '';
-        if (f && f.asi) pl = '<div class="asiplus">' + AB.map((k) => '<div class="bp"><span>' + AB_K[k] + '</span><div class="chips">' + [0, 1, 2].map((v) => chip((+(a.plus || {})[k] || 0) === v, v ? '+' + v : '0', 'data-act="asiPlus" data-arg="' + lv + '" data-path="' + k + '" data-val="' + v + '"')).join('') + '</div></div>').join('') + '</div>';
-        else if (f && f.plus) pl = '<div class="chips">' + f.plus.map((k) => chip((a.plus || {})[k], AB_DE[k] + ' +1', 'data-act="asiOne" data-arg="' + lv + '" data-path="' + k + '"')).join('') + '</div>';
-        if (f && f.saveChoice) pl += '<h4>Rettungswurf mit Übung</h4><div class="chips">' + f.saveChoice.map((k) => chip(a.save === k, AB_DE[k], 'data-act="asiSave" data-arg="' + lv + '" data-path="' + k + '"', c.cls.saves.includes(k))).join('') + '</div>';
+        if (f && f.asi) pl = '<div class="asiplus">' + AB.map((k) => '<div class="bp"><span>' + AB_K[k] + '</span><div class="chips">' + [0, 1, 2].map((v) => chip((+(a.plus || {})[k] || 0) === v, v ? '+' + v : '0', 'data-act="asiPlus" data-arg="' + esc(lv) + '" data-path="' + esc(k) + '" data-val="' + esc(v) + '"')).join('') + '</div></div>').join('') + '</div>';
+        else if (f && f.plus) pl = '<div class="chips">' + f.plus.map((k) => chip((a.plus || {})[k], AB_DE[k] + ' +1', 'data-act="asiOne" data-arg="' + esc(lv) + '" data-path="' + esc(k) + '"')).join('') + '</div>';
+        if (f && f.saveChoice) pl += '<h4>Rettungswurf mit Übung</h4><div class="chips">' + f.saveChoice.map((k) => chip(a.save === k, AB_DE[k], 'data-act="asiSave" data-arg="' + esc(lv) + '" data-path="' + esc(k) + '"', c.cls.saves.includes(k))).join('') + '</div>';
         return '<div class="box" id="a-asi-' + lv + '"><div class="row">' + field(slot.label + (slot.al === 19 ? ' (Epische Gabe)' : ''), sel('asi.' + lv + '.feat', fid, (slot.al === 19 ? [['', '— wählen —']] : []).concat(featOptions('asi', hb, { fightingStyle: c.styleN }, slot.al)))) + '</div>' + (f ? '<p class="hint">' + esc(f.text) + '</p>' : '') + pl + (f && f.mi ? miPicker(c, 'asi' + lv) : '') + '</div>';
       }).join('');
     }
@@ -605,20 +670,20 @@ function renderBuild(c) {
   if (st === 3) {
     const C = c.cls;
     body += '<h2 id="a-skills">Fertigkeiten</h2><p class="hint">' + C.name + ': wähle ' + C.skillN + '. Vom Hintergrund: ' + (c.bg.skills || []).map((s) => SKILLS[s][0]).join(', ') + '.</p><div class="chips">' +
-      C.skills.map((s) => { const fromBg = (c.bg.skills || []).includes(s); return chipI(ch.classSkills.includes(s), SKILLS[s][0] + (fromBg ? ' (Hintergrund)' : ''), 'data-act="toggle" data-path="classSkills" data-val="' + s + '" data-max="' + C.skillN + '"', ch.classSkills.length >= C.skillN || fromBg, 'sk', s, SKILLS[s][0]); }).join('') + '</div>';
-    if (c.extraN) body += '<h3 id="a-extra">Zusätzliche Fertigkeiten (' + c.extraN + ')</h3><p class="hint">' + c.extraSrc.join(', ') + '</p><div class="chips">' + ALL_SKILLS.map((s) => chipI(ch.extraSkills.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="extraSkills" data-val="' + s + '" data-max="' + c.extraN + '"', ch.extraSkills.length >= c.extraN, 'sk', s, SKILLS[s][0])).join('') + '</div>';
-    if ((ch.freeSkills || []).length || (ch.freeExp || []).length) body += '<h3 id="a-free">Übernommene Übungen</h3><p class="hint">Aus dem Import (z. B. D&amp;D Beyond) ohne Regelquelle im Heldenbuch. Antippen entfernt.</p><div class="chips">' + (ch.freeSkills || []).filter((s) => SKILLS[s]).map((s) => chip(true, SKILLS[s][0], 'data-act="toggle" data-path="freeSkills" data-val="' + s + '"')).join('') + (ch.freeExp || []).filter((s) => SKILLS[s]).map((s) => chip(true, SKILLS[s][0] + ' (Expertise)', 'data-act="toggle" data-path="freeExp" data-val="' + s + '"')).join('') + '</div>';
-    if (c.expN) body += '<h3 id="a-exp">Expertise (' + c.expN + ')</h3><div class="chips">' + ALL_SKILLS.filter((s) => c.skills[s].prof && (!c.expFrom || c.expFrom.includes(s))).map((s) => chipI(ch.expertise.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="expertise" data-val="' + s + '" data-max="' + c.expN + '"', ch.expertise.filter((x) => c.skills[x].prof).length >= c.expN, 'sk', s, SKILLS[s][0])).join('') + '</div>';
+      C.skills.map((s) => { const fromBg = (c.bg.skills || []).includes(s); return chipI(ch.classSkills.includes(s), SKILLS[s][0] + (fromBg ? ' (Hintergrund)' : ''), 'data-act="toggle" data-path="classSkills" data-val="' + esc(s) + '" data-max="' + esc(C.skillN) + '"', ch.classSkills.length >= C.skillN || fromBg, 'sk', s, SKILLS[s][0]); }).join('') + '</div>';
+    if (c.extraN) body += '<h3 id="a-extra">Zusätzliche Fertigkeiten (' + c.extraN + ')</h3><p class="hint">' + c.extraSrc.join(', ') + '</p><div class="chips">' + ALL_SKILLS.map((s) => chipI(ch.extraSkills.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="extraSkills" data-val="' + esc(s) + '" data-max="' + esc(c.extraN) + '"', ch.extraSkills.length >= c.extraN, 'sk', s, SKILLS[s][0])).join('') + '</div>';
+    if ((ch.freeSkills || []).length || (ch.freeExp || []).length) body += '<h3 id="a-free">Übernommene Übungen</h3><p class="hint">Aus dem Import (z. B. D&amp;D Beyond) ohne Regelquelle im Heldenbuch. Antippen entfernt.</p><div class="chips">' + (ch.freeSkills || []).filter((s) => SKILLS[s]).map((s) => chip(true, SKILLS[s][0], 'data-act="toggle" data-path="freeSkills" data-val="' + esc(s) + '"')).join('') + (ch.freeExp || []).filter((s) => SKILLS[s]).map((s) => chip(true, SKILLS[s][0] + ' (Expertise)', 'data-act="toggle" data-path="freeExp" data-val="' + esc(s) + '"')).join('') + '</div>';
+    if (c.expN) body += '<h3 id="a-exp">Expertise (' + c.expN + ')</h3><div class="chips">' + ALL_SKILLS.filter((s) => c.skills[s].prof && (!c.expFrom || c.expFrom.includes(s))).map((s) => chipI(ch.expertise.includes(s), SKILLS[s][0], 'data-act="toggle" data-path="expertise" data-val="' + esc(s) + '" data-max="' + esc(c.expN) + '"', ch.expertise.filter((x) => c.skills[x].prof).length >= c.expN, 'sk', s, SKILLS[s][0])).join('') + '</div>';
     body += '<div class="skillgrid">' + ALL_SKILLS.map((s) => '<div class="sk' + (c.skills[s].prof ? ' p' + c.skills[s].prof : '') + '"><span>' + SKILLS[s][0] + ' <small>' + AB_K[SKILLS[s][1]] + '</small></span><b>' + sgn(c.skills[s].val) + '</b></div>').join('') + '</div>';
     const styleN = c.styleN;
     if (styleN) {
-      body += '<h3 id="a-style">Kampfstil (' + styleN + ')</h3><div class="opts">' + featOptions('style', S.hb).map(([id, n]) => { const f = featById(id, S.hb); return '<button class="opt' + (ch.styles.includes(id) ? ' on' : '') + '" data-act="toggle" data-path="styles" data-val="' + id + '" data-max="' + styleN + '"><b>' + esc(n.replace('Kampfstil: ', '')) + '</b><span>' + esc(f.text) + '</span></button>'; }).join('') + '</div>';
+      body += '<h3 id="a-style">Kampfstil (' + styleN + ')</h3><div class="opts">' + featOptions('style', S.hb).map(([id, n]) => { const f = featById(id, S.hb); return '<button class="opt' + (ch.styles.includes(id) ? ' on' : '') + '" data-act="toggle" data-path="styles" data-val="' + esc(id) + '" data-max="' + esc(styleN) + '"><b>' + esc(n.replace('Kampfstil: ', '')) + '</b><span>' + esc(f.text) + '</span></button>'; }).join('') + '</div>';
     }
     if (c.lv('wlk')) {
-      body += '<h3 id="a-inv">Schauerliche Anrufungen (' + c.invN + ')</h3><div class="opts">' + Object.entries(INVOCATIONS).map(([k, [n, t, lv]]) => (c.lv('wlk') >= lv || ch.invocations.includes(k)) ? '<button class="opt' + (ch.invocations.includes(k) ? ' on' : '') + '" data-act="toggle" data-path="invocations" data-val="' + k + '" data-max="' + c.invN + '"><b>' + n + '</b><span>' + t + '</span></button>' : '').join('') + '</div>';
+      body += '<h3 id="a-inv">Schauerliche Anrufungen (' + c.invN + ')</h3><div class="opts">' + Object.entries(INVOCATIONS).map(([k, [n, t, lv]]) => (c.lv('wlk') >= lv || ch.invocations.includes(k)) ? '<button class="opt' + (ch.invocations.includes(k) ? ' on' : '') + '" data-act="toggle" data-path="invocations" data-val="' + esc(k) + '" data-max="' + esc(c.invN) + '"><b>' + n + '</b><span>' + t + '</span></button>' : '').join('') + '</div>';
       if ((ch.invocations || []).includes('lessons')) body += '<div class="row">' + field('Herkunftstalent (Lehren der Ersten)', sel('lessonsFeat', ch.lessonsFeat || '', [['', '— wählen —']].concat(featOptions('origin', hb)))) + '</div>' + (featById(ch.lessonsFeat, hb) ? '<p class="hint">' + esc(featById(ch.lessonsFeat, hb).text) + '</p>' : '') + miPicker(c, 'lessons');
     }
-    (c.optSets || []).forEach((o) => { body += '<h3 id="a-opt-' + o.key + '">' + o.label + ' <span class="cnt">' + o.chosen.length + ' / ' + o.n + '</span></h3><div class="opts">' + o.items.map((it) => { if ((o.granted || []).includes(it.k)) return '<button class="opt on" disabled title="Durch deine Unterklasse bekannt"><b>' + esc(it.name) + ' <small>Unterklasse</small></b><span>' + esc(it.text) + '</span></button>'; const on = o.chosen.includes(it.k); const locked = it.min > o.lvl; return '<button class="opt' + (on ? ' on' : '') + '"' + (locked && !on ? ' disabled' : '') + ' data-act="toggle" data-path="' + o.path + '" data-val="' + it.k + '" data-max="' + o.n + '"><b>' + esc(it.name) + (it.min > 1 ? ' <small>ab Stufe ' + it.min + '</small>' : '') + '</b><span>' + esc(it.text) + '</span></button>'; }).join('') + '</div>'; });
+    (c.optSets || []).forEach((o) => { body += '<h3 id="a-opt-' + o.key + '">' + o.label + ' <span class="cnt">' + o.chosen.length + ' / ' + o.n + '</span></h3><div class="opts">' + o.items.map((it) => { if ((o.granted || []).includes(it.k)) return '<button class="opt on" disabled title="Durch deine Unterklasse bekannt"><b>' + esc(it.name) + ' <small>Unterklasse</small></b><span>' + esc(it.text) + '</span></button>'; const on = o.chosen.includes(it.k); const locked = it.min > o.lvl; return '<button class="opt' + (on ? ' on' : '') + '"' + (locked && !on ? ' disabled' : '') + ' data-act="toggle" data-path="' + esc(o.path) + '" data-val="' + esc(it.k) + '" data-max="' + esc(o.n) + '"><b>' + esc(it.name) + (it.min > 1 ? ' <small>ab Stufe ' + it.min + '</small>' : '') + '</b><span>' + esc(it.text) + '</span></button>'; }).join('') + '</div>'; });
     body += '<h3>Talente</h3>' + featList(c.features.filter((f) => f.feat));
   }
   if (st === 4) {
@@ -650,39 +715,39 @@ function renderBuild(c) {
       return '<div class="wrow"><div class="wn"><b>' + W[0] + ii('w', w.w, W[0]) + '</b><small>' + a.props + '</small></div><div class="wv">' + sgn(a.atk) + ' · ' + a.dmg + (a.dmg2 ? ' / ' + a.dmg2 : '') + ' ' + a.dtype + '</div>' +
         field('Bonus', num('weapons.' + i + '.bonus', w.bonus || 0, 'min="0" max="3"')) + field('Attribut', sel('weapons.' + i + '.ab', w.ab || 'auto', [['auto', 'Automatisch'], ['str', 'STÄ'], ['dex', 'GES'], ['cha', 'CHA'], ['wis', 'WEI'], ['int', 'INT']])) +
         (c.masteryN ? chip(w.mastery, 'Meisterschaft: ' + MASTERY[W[6]][0], 'data-act="flip" data-path="weapons.' + i + '.mastery" title="' + esc(MASTERY[W[6]][1]) + '"') : '') +
-        '<button class="x" data-act="rmW" data-arg="' + i + '" aria-label="Entfernen">×</button></div>'; }).join('') + '</div>';
+        '<button class="x" data-act="rmW" data-arg="' + esc(i) + '" aria-label="Entfernen">×</button></div>'; }).join('') + '</div>';
     body += '<h2>Hausregeln & Gegenstände</h2>';
     const hbs = Object.values(S.hb).filter((h) => h.kind !== 'spell');
-    body += hbs.length ? '<div class="opts">' + hbs.map((h) => '<button class="opt' + (ch.homebrew.includes(h.id) ? ' on' : '') + '" data-act="toggle" data-path="homebrew" data-val="' + h.id + '"><b>' + esc(h.name) + '</b><span>' + esc({ feature: 'Merkmal', item: 'Gegenstand', feat: 'Talent' }[h.kind] || '') + bonusText(h) + '</span></button>').join('') + '</div>' : '<p class="empty">Noch keine Hausregeln. Lege unter „Hausregeln“ eigene Merkmale oder Gegenstände an (z. B. deine Äthermaschine) und hake sie hier an.</p>';
+    body += hbs.length ? '<div class="opts">' + hbs.map((h) => '<button class="opt' + (ch.homebrew.includes(h.id) ? ' on' : '') + '" data-act="toggle" data-path="homebrew" data-val="' + esc(h.id) + '"><b>' + esc(h.name) + '</b><span>' + esc({ feature: 'Merkmal', item: 'Gegenstand', feat: 'Talent' }[h.kind] || '') + bonusText(h) + '</span></button>').join('') + '</div>' : '<p class="empty">Noch keine Hausregeln. Lege unter „Hausregeln“ eigene Merkmale oder Gegenstände an (z. B. deine Äthermaschine) und hake sie hier an.</p>';
     body += '<h3>Sonstige Boni</h3><div class="row misc">' + [['ac', 'RK'], ['save', 'Rettungswürfe'], ['dc', 'Zauber-SG'], ['atk', 'Angriff'], ['init', 'Initiative'], ['hp', 'TP-Maximum'], ['speed', 'Bewegung (m)']].map(([k, l]) => field(l, num('misc.' + k, ch.misc[k] || 0))).join('') + '</div>';
     body += gearBlock(c, true);
   }
   if (st === 6) {
     body += '<h2>Abschluss</h2><p class="hint">Gib deinem Helden einen Namen und eine Geschichte. Danach kannst du ihn sichern und losspielen.</p><div class="row">' + field('Name', txt('name', ch.name === 'Neuer Held' ? '' : ch.name, 'z. B. Brakk Eisenfaust', 'autocomplete="off"')) + field('Spieler', txt('player', ch.player)) + '</div><h3>Porträt</h3>' + portraitPicker(ch) + (typeof diceRow === 'function' ? '<h3>Würfel-Set</h3>' + diceRow(ch) : '') + alignPicker(ch) + '<div class="row">' + field('Sprachen', txt('languages', ch.languages)) + '</div>' +
       field('Aussehen & Persönlichkeit', area('appearance', ch.appearance, 'Aussehen, Ideale, Bindungen, Makel …')) + field('Notizen', area('notes', ch.notes, 'Hintergrundgeschichte, Kampagnennotizen …', 6));
-    body += '<div class="finish"><h3>' + (c.warn.length ? 'Fast geschafft' : 'Dein Held ist bereit') + '</h3><p class="hint" style="margin:0">' + (c.warn.length ? 'Es sind noch ' + c.warn.length + ' Auswahl(en) offen (⚠ antippen). Du kannst trotzdem schon sichern.' : 'Sichere ihn als Datei, damit du ihn jederzeit wieder laden oder weitergeben kannst.') + '</p><div class="chips"><button class="btn big" data-act="exportOne" data-arg="' + ch.id + '">Helden exportieren</button><button class="btn big ghost" data-act="view" data-arg="sheet">Zum Charakterbogen</button></div></div>';
+    body += '<div class="finish"><h3>' + (c.warn.length ? 'Fast geschafft' : 'Dein Held ist bereit') + '</h3><p class="hint" style="margin:0">' + (c.warn.length ? 'Es sind noch ' + c.warn.length + ' Auswahl(en) offen (⚠ antippen). Du kannst trotzdem schon sichern.' : 'Sichere ihn als Datei, damit du ihn jederzeit wieder laden oder weitergeben kannst.') + '</p><div class="chips"><button class="btn big" data-act="exportOne" data-arg="' + esc(ch.id) + '">Helden exportieren</button><button class="btn big ghost" data-act="view" data-arg="sheet">Zum Charakterbogen</button></div></div>';
   }
   const nav = '<div class="stepnav">' + (st > 0 ? '<button class="btn ghost" data-act="step" data-arg="' + (st - 1) + '">← ' + STEPS[st - 1] + '</button>' : '<span></span>') + (st < STEPS.length - 1 ? '<button class="btn" data-act="step" data-arg="' + (st + 1) + '">' + STEPS[st + 1] + ' →</button>' : '<button class="btn" data-act="view" data-arg="sheet">Losspielen →</button>') + '</div>';
-  return '<div class="build"><ol class="steps" aria-label="Schritte">' + STEPS.map((s, i) => '<li><button class="' + (i === st ? 'on' : '') + '" data-act="step" data-arg="' + i + '"' + (i === st ? ' aria-current="step"' : '') + ' title="' + esc(s) + '"><span>' + (i + 1) + '</span><em>' + s + '</em></button></li>').join('') + '</ol><section class="panel">' + body + nav + '</section>' + summary(c) + '</div>';
+  return '<div class="build"><ol class="steps" aria-label="Schritte">' + STEPS.map((s, i) => '<li><button class="' + (i === st ? 'on' : '') + '" data-act="step" data-arg="' + esc(i) + '"' + (i === st ? ' aria-current="step"' : '') + ' title="' + esc(s) + '"><span>' + (i + 1) + '</span><em>' + s + '</em></button></li>').join('') + '</ol><section class="panel">' + body + nav + '</section>' + summary(c) + '</div>';
 }
 function bonusText(h) { const b = []; if (+h.ac) b.push('RK ' + sgn(+h.ac)); if (+h.save) b.push('RW ' + sgn(+h.save)); if (+h.atk) b.push('Zauberangriff ' + sgn(+h.atk)); if (+h.dc) b.push('SG ' + sgn(+h.dc)); if (+h.hpPerLevel) b.push('+' + h.hpPerLevel + ' TP/Stufe'); if (+h.init) b.push('Init ' + sgn(+h.init)); if (+h.speed) b.push('+' + h.speed + ' m'); if (+h.uses) b.push(h.uses + '× pro ' + RESET_DE[h.reset || 'long']); return b.length ? ' · ' + b.join(', ') : ''; }
 function miPicker(c, slot) {
   const x = c.feats.find((f) => (f.slot === 'asi' ? 'asi' + f.lv : f.slot) === slot && f.f.mi); if (!x) return '';
   const ch = c.char; const m = ch.mi[slot] || {}; const list = spellList(x.f.mi, S.hb); const nC = x.f.miC || 2;
   return '<div class="box" id="a-mi-' + slot + '"><h4>' + esc(x.f.name) + '</h4><div class="row">' + field('Zauberattribut', sel('mi.' + slot + '.ability', m.ability || 'wis', abOpts(['int', 'wis', 'cha']))) + (x.f.miSpell === false ? '' : field('Grad-1-Zauber', sel('mi.' + slot + '.spell', m.spell || '', [['', '— wählen —']].concat(list.filter((s) => s.lvl === 1).map((s) => [s.id, s.name]))))) + '</div>' +
-    '<h4>' + nC + ' Zaubertrick' + (nC > 1 ? 's' : '') + '</h4><div class="chips">' + list.filter((s) => s.lvl === 0).map((s) => chipI((m.cantrips || []).includes(s.id), s.name, 'data-act="toggle" data-path="mi.' + slot + '.cantrips" data-val="' + s.id + '" data-max="' + nC + '"', (m.cantrips || []).length >= nC, 'sp1', s.id, s.name)).join('') + '</div></div>';
+    '<h4>' + nC + ' Zaubertrick' + (nC > 1 ? 's' : '') + '</h4><div class="chips">' + list.filter((s) => s.lvl === 0).map((s) => chipI((m.cantrips || []).includes(s.id), s.name, 'data-act="toggle" data-path="mi.' + slot + '.cantrips" data-val="' + esc(s.id) + '" data-max="' + esc(nC) + '"', (m.cantrips || []).length >= nC, 'sp1', s.id, s.name)).join('') + '</div></div>';
 }
 function spellPicker(list, chosen, path, max, always) {
   const by = {}; list.forEach((s) => (by[s.lvl] = by[s.lvl] || []).push(s));
   const full = chosen.filter((id) => !always.includes(id)).length >= max;
-  return Object.entries(by).map(([lv, arr]) => (lv > 0 ? '<h4>Grad ' + lv + '</h4>' : '') + '<div class="chips">' + arr.map((s) => always.includes(s.id) ? '' : chipI(chosen.includes(s.id), esc(s.name) + (s.conc ? ' <i>K</i>' : '') + (s.ritual ? ' <i>R</i>' : ''), 'data-act="toggle" data-path="' + path + '" data-val="' + s.id + '"', full, 'sp1', s.id, s.name)).join('') + '</div>').join('');
+  return Object.entries(by).map(([lv, arr]) => (lv > 0 ? '<h4>Grad ' + lv + '</h4>' : '') + '<div class="chips">' + arr.map((s) => always.includes(s.id) ? '' : chipI(chosen.includes(s.id), esc(s.name) + (s.conc ? ' <i>K</i>' : '') + (s.ritual ? ' <i>R</i>' : ''), 'data-act="toggle" data-path="' + esc(path) + '" data-val="' + esc(s.id) + '"', full, 'sp1', s.id, s.name)).join('') + '</div>').join('');
 }
 function featList(fl) {
   if (!fl.length) return '';
   return '<div class="feats">' + fl.map((f) => '<details><summary><b>' + esc(f.n) + '</b><small>' + (f.lv ? 'Stufe ' + f.lv + ' · ' : '') + esc(f.src) + '</small></summary><p>' + esc(f.t) + '</p>' + (String(f.t || '').length > 240 ? '<button type="button" class="link dclose" data-act="dClose">▲ zuklappen</button>' : '') + '</details>').join('') + '</div>';
 }
 function summary(c) {
-  return '<aside class="summary' + (S.sumOpen ? ' open' : '') + '" aria-label="Live-Werte"><div class="shd">' + sigil(c.char) + '<div><h3>' + esc(c.char.name) + '</h3><p class="sub">' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' · ' + c.subName : '') + '<br>' + c.sp.name + ' · ' + esc(c.bg.name) + '</p></div><button type="button" class="sumtg" data-act="sumToggle" aria-expanded="' + !!S.sumOpen + '" aria-label="Alle Werte ein- oder ausblenden">▾</button></div>' +
+  return '<aside class="summary' + (S.sumOpen ? ' open' : '') + '" aria-label="Live-Werte"><div class="shd">' + sigil(c.char) + '<div><h3>' + esc(c.char.name) + '</h3><p class="sub">' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' · ' + esc(c.subName) : '') + '<br>' + c.sp.name + ' · ' + esc(c.bg.name) + '</p></div><button type="button" class="sumtg" data-act="sumToggle" aria-expanded="' + !!S.sumOpen + '" aria-label="Alle Werte ein- oder ausblenden">▾</button></div>' +
     '<p class="smini">RK <b>' + c.ac + '</b> · TP <b>' + c.hpMax + '</b> · Init <b>' + sgn(c.init) + '</b>' + (c.spell.has ? ' · SG <b>' + c.spell.dc + '</b>' : '') + '</p>' +
     '<div class="sgrid"><div><span>RK</span><b>' + c.ac + '</b></div><div><span>TP</span><b>' + c.hpMax + '</b></div><div><span>Initiative</span><b>' + sgn(c.init) + '</b></div><div><span>Bewegung</span><b>' + fmtM(c.speed) + '</b></div><div><span>Übungsbonus</span><b>' + sgn(c.pb) + '</b></div>' + (c.spell.has ? '<div><span>Zauber-SG</span><b>' + c.spell.dc + '</b></div>' : '<div><span>Passive Wahrn.</span><b>' + c.passive + '</b></div>') + '</div>' +
     '<div class="abmini">' + AB.map((a) => '<div><span>' + AB_K[a] + '</span><b>' + c.abil[a] + '</b><small>' + sgn(c.mod[a]) + '</small></div>').join('') + '</div>' +
@@ -694,11 +759,11 @@ function mcSection(c) {
   let h = '<h2 id="a-multi" class="mch">Multiclassing <small>Gesamtstufe ' + total + ' / 20</small></h2><p class="hint">Mit Multiclassing nimmst du Stufen in einer weiteren Klasse. Voraussetzung: mindestens 13 im Hauptattribut der bisherigen und der neuen Klasse. Rettungswürfe gibt nur die erste Klasse; von weiteren Klassen bekommst du nur einen Teil der Übungen. Zauberplätze werden gemeinsam berechnet, Paktplätze bleiben getrennt.</p>';
   (ch.multi || []).forEach((m, i) => {
     const C = CLASSES[m.cls]; if (!C) return;
-    h += '<div class="box mcbox"><div class="mcrow"><b>' + C.name + '</b><div class="stepper sm"><button data-act="mcLvl" data-arg="' + i + '" data-d="-1" aria-label="Stufe senken">−</button><b>' + m.level + '</b><button data-act="mcLvl" data-arg="' + i + '" data-d="1" aria-label="Stufe erhöhen">+</button></div><span class="hint" style="margin:0">W' + C.hd + (m.level >= 3 ? ' · ' + ((c.classes || []).find((e) => e.id === m.cls) || {}).subName : ' · Unterklasse ab Stufe 3') + '</span><button class="x" data-act="mcDel" data-arg="' + i + '" aria-label="Klasse entfernen">×</button></div>';
-    if (C.order) h += '<div class="opts">' + Object.entries(C.order.opts).map(([k, [n, t]]) => '<button class="opt' + (m.order === k ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.order" data-val="' + k + '"><b>' + n + '</b><span>' + t + '</span></button>').join('') + '</div>';
-    if (m.cls === 'dru' && m.level >= 3 && c.subOf('dru') === 'land') h += '<div class="chips">' + Object.entries(LAND).map(([k, l]) => chip((m.land || 'temperate') === k, l.name, 'data-act="pick" data-path="multi.' + i + '.land" data-val="' + k + '"')).join('') + '</div>';
+    h += '<div class="box mcbox"><div class="mcrow"><b>' + C.name + '</b><div class="stepper sm"><button data-act="mcLvl" data-arg="' + esc(i) + '" data-d="-1" aria-label="Stufe senken">−</button><b>' + m.level + '</b><button data-act="mcLvl" data-arg="' + esc(i) + '" data-d="1" aria-label="Stufe erhöhen">+</button></div><span class="hint" style="margin:0">W' + C.hd + (m.level >= 3 ? ' · ' + esc(((c.classes || []).find((e) => e.id === m.cls) || {}).subName || '') : ' · Unterklasse ab Stufe 3') + '</span><button class="x" data-act="mcDel" data-arg="' + esc(i) + '" aria-label="Klasse entfernen">×</button></div>';
+    if (C.order) h += '<div class="opts">' + Object.entries(C.order.opts).map(([k, [n, t]]) => '<button class="opt' + (m.order === k ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.order" data-val="' + esc(k) + '"><b>' + n + '</b><span>' + t + '</span></button>').join('') + '</div>';
+    if (m.cls === 'dru' && m.level >= 3 && c.subOf('dru') === 'land') h += '<div class="chips">' + Object.entries(LAND).map(([k, l]) => chip((m.land || 'temperate') === k, l.name, 'data-act="pick" data-path="multi.' + i + '.land" data-val="' + esc(k) + '"')).join('') + '</div>';
     const ce = (c.classes || []).find((e) => e.id === m.cls) || {};
-    if (C.subs && m.level >= 3) h += '<div class="opts">' + C.subs.map((sb) => '<button class="opt' + (subPic(m.cls, sb.id) ? ' haspic' : '') + (m.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.sub" data-val="' + sb.id + '">' + subPic(m.cls, sb.id) + '<b>' + sb.name + '</b><span>' + esc(sb.desc || sb.feats[0][1]) + '</span>' + ii('sub', m.cls + '/' + sb.id, sb.name) + '</button>').join('') + subEigenBtn(m, 'multi.' + i + '.') + '</div>' + subEigenEdit(m, 'multi.' + i + '.', m.cls, S.hb);
+    if (C.subs && m.level >= 3) h += '<div class="opts">' + C.subs.map((sb) => '<button class="opt' + (subPic(m.cls, sb.id) ? ' haspic' : '') + (m.sub === sb.id ? ' on' : '') + '" data-act="pick" data-path="multi.' + i + '.sub" data-val="' + esc(sb.id) + '">' + subPic(m.cls, sb.id) + '<b>' + sb.name + '</b><span>' + esc(sb.desc || sb.feats[0][1]) + '</span>' + ii('sub', m.cls + '/' + sb.id, sb.name) + '</button>').join('') + subEigenBtn(m, 'multi.' + i + '.') + '</div>' + subEigenEdit(m, 'multi.' + i + '.', m.cls, S.hb);
     h += featList(c.features.filter((f) => f.src === C.name || f.src === ce.subName));
     h += '</div>';
   });
@@ -735,7 +800,7 @@ function vbarHtml(c) {
   return '<div class="vrow"><div class="vbar">' +
     '<button type="button" class="vb hpb' + st + '" data-act="hpTog" aria-expanded="' + !!S.hpOpen + '" title="Schaden oder Heilung eintragen"><span>TP</span><b>' + P.hp + '<small>/' + c.hpMax + '</small>' + (P.temp ? '<em>+' + P.temp + '</em>' : '') + '</b><i class="hpbar"><i style="width:' + pct + '%"></i></i><u aria-hidden="true">±</u></button>' +
     '<div class="vb" title="' + esc('Rüstungsklasse: ' + c.acParts.join(' + ')) + '"><span>RK</span><b>' + c.ac + '</b></div>' +
-    '<button type="button" class="vb roll" data-act="d20" data-kind="init" data-mod="' + c.init + '" data-label="Initiative" title="Initiative würfeln' + (c.initAdv ? ' (mit Vorteil)' : '') + '"><span>Init.' + (c.initAdv ? ' V' : '') + '</span><b>' + sgn(c.init) + '</b></button>' +
+    '<button type="button" class="vb roll" data-act="d20" data-kind="init" data-mod="' + esc(c.init) + '" data-label="Initiative" title="Initiative würfeln' + (c.initAdv ? ' (mit Vorteil)' : '') + '"><span>Init.' + (c.initAdv ? ' V' : '') + '</span><b>' + sgn(c.init) + '</b></button>' +
     '<div class="vb" title="Bewegung"><span>Bew.</span><b>' + fmtM(c.speed) + '</b></div>' +
     (P.conc ? '<button type="button" class="vb vconc" data-act="goConds" title="Konzentration: ' + esc(P.conc.name) + '"><span>Konz.</span><b>' + esc(P.conc.name) + '</b></button>' : '') +
     (conds.length ? '<button type="button" class="vb vcond" data-act="goConds" title="' + esc(conds.join(', ')) + '"><span>Zustand</span><b>' + esc(conds.join(', ')) + '</b></button>' : '') +
@@ -752,7 +817,7 @@ function statsBlock(c) {
   const P = c.char.play;
   return '<section class="blk kwerte" data-grp="werte"><h2>Grundwerte und Stufe</h2><div class="vitals">' + (explainOn() ? 
     '<div class="vt ac" title="' + esc(c.acParts.join(' + ')) + '"><span>RK</span><b>' + c.ac + '</b>' + xpl(c.acParts) + '</div>' +
-    '<button class="vt roll" data-act="d20" data-kind="init" data-mod="' + c.init + '" data-label="Initiative"><span>Initiative' + (c.initAdv ? ' (Vorteil)' : '') + '</span><b>' + sgn(c.init) + '</b>' + xpl(c.initParts) + '</button>' +
+    '<button class="vt roll" data-act="d20" data-kind="init" data-mod="' + esc(c.init) + '" data-label="Initiative"><span>Initiative' + (c.initAdv ? ' (Vorteil)' : '') + '</span><b>' + sgn(c.init) + '</b>' + xpl(c.initParts) + '</button>' +
     '<div class="vt"><span>Bewegung</span><b>' + fmtM(c.speed) + '</b>' + xpl(c.speedParts) + '</div>' : '') +
     '<div class="vt"><span>Übungsbonus</span><b>' + sgn(c.pb) + '</b></div>' +
     '<div class="vt"><span>Passive Wahrn.</span><b>' + c.passive + '</b></div>' +
@@ -764,9 +829,9 @@ function renderSheet(c) {
   if (P.hp == null || P.hp > c.hpMax) P.hp = Math.min(P.hp ?? c.hpMax, c.hpMax);
   const hpPct = Math.max(0, Math.min(100, (P.hp / c.hpMax) * 100));
   let h = P.dead ? fallenHtml(ch, c) + '<div class="sheet fallen" aria-hidden="true" inert>' : (mgOf(c) === 'alle' ? '<div class="sheet' + (explainOn() ? ' explain' : '') + '">' : '<div class="sheet' + (explainOn() ? ' explain' : '') + '" data-mg="' + mgOf(c) + '">');
-  h += '<header class="shead"><div class="who">' + sigil(ch) + '<div><h1><button type="button" class="hrn" data-act="renameHero" title="Namen ändern">' + esc(ch.name) + '<span aria-hidden="true">✎</span></button></h1><p>' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' (' + c.subName + ')' : '') + ' · ' + c.sp.name + ' · ' + esc(c.bg.name) + (ch.alignment ? ' · ' + esc(ch.alignment) + (typeof alignKey === 'function' && alignKey(ch.alignment) ? ' ' + ii('al', alignKey(ch.alignment), ch.alignment) : '') : '') + '</p></div></div>' +
-    '<div class="sctl"><div class="seg" role="group" aria-label="Würfelmodus">' + [['dis', 'Nachteil'], ['normal', 'Normal'], ['adv', 'Vorteil']].map(([k, l]) => '<button class="' + (S.mode === k ? 'on' : '') + '" data-act="mode" data-arg="' + k + '">' + l + '</button>').join('') + '</div>' +
-    '<details class="mnu smore"><summary class="btn ghost" aria-label="Rast und weitere Aktionen" title="Rast und weitere Aktionen">Rast · ⋯</summary><div class="mnul"><button data-act="rest" data-arg="short">Kurze Rast</button><button data-act="rest" data-arg="long" data-confirm="Lange Rast: TP, Trefferwürfel, Zauberplätze und alle Ressourcen werden zurückgesetzt.">Lange Rast</button><hr><button data-act="exportOne" data-arg="' + ch.id + '">Exportieren</button><button data-act="print">Drucken</button><button data-act="renameHero">Namen ändern</button><button data-act="diceOpen">Würfel-Set</button><hr><button data-act="turnBack">⟲ Zug zurückspulen</button><button data-act="histOpen">Würfelverlauf</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="stOpen">Stolperstein melden</button><button data-act="explain">Rechenweg ' + (explainOn() ? 'ausblenden' : 'anzeigen') + '</button></div></details></div></header>' + hlTip('Würfelmodus: Bei <b>Vorteil</b> würfelst du zwei W20 und nimmst den höheren, bei <b>Nachteil</b> den niedrigeren. Viele Fälle (Zustände, Ziel) erkennt die App selbst – sonst sagt es dir die Spielleitung.', 'p');
+  h += '<header class="shead"><div class="who">' + sigil(ch) + '<div><h1><button type="button" class="hrn" data-act="renameHero" title="Namen ändern">' + esc(ch.name) + '<span aria-hidden="true">✎</span></button></h1><p>' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' (' + esc(c.subName) + ')' : '') + '<span class="shx"> · ' + c.sp.name + ' · ' + esc(c.bg.name) + (ch.alignment ? ' · ' + esc(ch.alignment) + (typeof alignKey === 'function' && alignKey(ch.alignment) ? ' ' + ii('al', alignKey(ch.alignment), ch.alignment) : '') : '') + '</span></p></div></div>' +
+    '<div class="sctl"><div class="seg" role="group" aria-label="Würfelmodus">' + [['dis', 'Nachteil'], ['normal', 'Normal'], ['adv', 'Vorteil']].map(([k, l]) => '<button class="' + (S.mode === k ? 'on' : '') + '" data-act="mode" data-arg="' + esc(k) + '">' + l + '</button>').join('') + '</div>' +
+    '<details class="mnu smore"><summary class="btn ghost" aria-label="Rast und weitere Aktionen" title="Rast und weitere Aktionen">Rast · ⋯</summary><div class="mnul"><button data-act="rest" data-arg="short">Kurze Rast</button><button data-act="rest" data-arg="long" data-confirm="Lange Rast: TP, Trefferwürfel, Zauberplätze und alle Ressourcen werden zurückgesetzt.">Lange Rast</button><hr><button data-act="exportOne" data-arg="' + esc(ch.id) + '">Exportieren</button><button data-act="print">Drucken</button><button data-act="renameHero">Namen ändern</button><button data-act="diceOpen">Würfel-Set</button><hr><button data-act="turnBack">⟲ Zug zurückspulen</button><button data-act="histOpen">Würfelverlauf</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="stOpen">Stolperstein melden</button><button data-act="explain">Rechenweg ' + (explainOn() ? 'ausblenden' : 'anzeigen') + '</button></div></details></div></header>' + hlTip('Würfelmodus: Bei <b>Vorteil</b> würfelst du zwei W20 und nimmst den höheren, bei <b>Nachteil</b> den niedrigeren. Viele Fälle (Zustände, Ziel) erkennt die App selbst – sonst sagt es dir die Spielleitung.', 'p');
   /* Kopfleiste: Reiter und die Kernwerte (TP, RK, Initiative, Bewegung, Konzentration, Zustände) – bleibt beim Scrollen oben */
   h += '<div class="shbar' + (S.hpOpen || P.hp <= 0 ? ' hpo' : '') + '">' + sheetNav(c) + vbarHtml(c) + '</div>';
   if (typeof hintBlock === 'function') h += hintBlock(c);
@@ -790,16 +855,16 @@ function renderSheet(c) {
     const rage = a.rage && P.raging ? c.rageDmg : 0; const dm = (d) => rage ? d + '+' + rage : d;
     const sub = a.thrown && order.some((j) => j !== ai && c.attacks[j].idx === a.idx && !c.attacks[j].thrown);
     return '<div class="atk' + (sub ? ' sub' : '') + '"><div class="an"><b>' + (sub ? '<span aria-hidden="true">↳ </span>geworfen' : esc(a.name)) + '</b>' + xpl(a.atkParts ? ['Angriff: ' + a.atkParts.join(' + '), 'Schaden: ' + (a.dmgParts || []).join(' + ')] : null) + '<small>' + esc(a.props) + (a.mastery ? ' · <abbr title="' + esc(MASTERY[a.mastery][1]) + '">' + MASTERY[a.mastery][0] + '</abbr>' : '') + '</small></div>' +
-      '<button class="rb" data-act="atk" data-arg="' + ai + '">' + sgn(a.atk) + '</button>' +
+      '<button class="rb" data-act="atk" data-arg="' + esc(ai) + '">' + sgn(a.atk) + '</button>' +
       '<button class="rb dmgb" data-act="dmg" data-expr="' + esc(dm(a.dmg)) + '" data-label="' + esc(a.name) + ': Schaden">' + esc(dm(a.dmg)) + ' <small>' + a.dtype + '</small></button>' +
       (a.dmg2 ? '<button class="rb dmgb" data-act="dmg" data-expr="' + esc(dm(a.dmg2)) + '" data-label="' + esc(a.name) + ' zweihändig">' + esc(dm(a.dmg2)) + ' <small>2H</small></button>' : '') + '</div>';
-  }).join('') + atkCantrips(c) + (c.sneak ? '<div class="atk"><div class="an"><b>Hinterhältiger Angriff</b><small>1× pro Zug</small></div><button class="rb dmgb" data-act="dmg" data-expr="' + c.sneak + '" data-label="Hinterhältiger Angriff">' + c.sneak + '</button></div>' : '') + '</div></section>';
+  }).join('') + atkCantrips(c) + (c.sneak ? '<div class="atk"><div class="an"><b>Hinterhältiger Angriff</b><small>1× pro Zug</small></div><button class="rb dmgb" data-act="dmg" data-expr="' + esc(c.sneak) + '" data-label="Hinterhältiger Angriff">' + c.sneak + '</button></div>' : '') + '</div></section>';
   if (!c.res.length) h += slotsMini(c);
   if (c.spell.has || c.extraSpells.length) h += spellBlock(c);
   if (c.res.length) h += '<section class="blk" data-grp="kampf faehig"><h2>Ressourcen' + (c.classDC && c.classDC.length ? ' <small>' + c.classDC.map(([l, v]) => l + ' ' + v).join(' · ') + '</small>' : '') + '</h2>' + hlTip('Fähigkeiten mit begrenzten Nutzungen. Gefüllt = noch verfügbar; antippen verbraucht eine. Rasten füllen sie wieder auf.', 'p') + slotsRows(c) + '<div class="res">' + c.res.map((r) => {
     const used = +P.res[r.k] || 0;
-    if (r.pool) return '<div class="rs"><div><b>' + esc(r.n) + '</b><small>' + (r.max - used) + ' von ' + r.max + ' · ' + RESET_DE[r.reset] + '</small></div><div class="pool"><input type="number" id="pool_' + r.k + '" min="1" placeholder="TP" aria-label="Punkte"><button class="btn sm" data-act="pool" data-arg="' + r.k + '" data-max="' + r.max + '">Ausgeben</button></div></div>';
-    return '<div class="rs"><div><b>' + esc(r.n) + '</b><small>' + RESET_DE[r.reset] + (r.note ? ' · ' + r.note : '') + '</small></div>' + (r.max > 8 ? '<div class="stepper sm"><button data-act="resUse" data-arg="' + r.k + '" data-max="' + r.max + '" data-d="1" aria-label="verbrauchen">−</button><b>' + (r.max - used) + '/' + r.max + '</b><button data-act="resUse" data-arg="' + r.k + '" data-max="' + r.max + '" data-d="-1" aria-label="zurück">+</button></div>' : pips('res.' + r.k, r.max, used)) + '</div>';
+    if (r.pool) return '<div class="rs"><div><b>' + esc(r.n) + '</b><small>' + (r.max - used) + ' von ' + r.max + ' · ' + RESET_DE[r.reset] + '</small></div><div class="pool"><input type="number" id="pool_' + r.k + '" min="1" placeholder="TP" aria-label="Punkte"><button class="btn sm" data-act="pool" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '">Ausgeben</button></div></div>';
+    return '<div class="rs"><div><b>' + esc(r.n) + '</b><small>' + RESET_DE[r.reset] + (r.note ? ' · ' + r.note : '') + '</small></div>' + (r.max > 8 ? '<div class="stepper sm"><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="1" aria-label="verbrauchen">−</button><b>' + (r.max - used) + '/' + r.max + '</b><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="-1" aria-label="zurück">+</button></div>' : pips('res.' + r.k, r.max, used)) + '</div>';
   }).join('') + '</div></section>';
   h += optBlock(c);
   h += compBlock(c);
@@ -826,8 +891,8 @@ function condBlock(P) {
   const head = '<h2>Zustände <small>' + (on.length ? on.length + ' aktiv · wirken automatisch auf deine Würfe' : 'keine') + '</small></h2>';
   const tip = hlTip('Die Spielleitung sagt dir, wenn du einen Zustand bekommst, z. B. «liegend» oder «vergiftet». Hier eintragen – er wirkt dann automatisch auf deine Würfe.', 'p');
   const exh = '<label class="exh">Erschöpfung ' + sel('play.exh', P.exh, [0, 1, 2, 3, 4, 5, 6].map((v) => [v, v ? 'Stufe ' + v + ' (−' + 2 * v + ' auf W20)' : 'keine'])) + '</label>';
-  const chips = '<div class="chips">' + on.map((k) => chip(true, COND[k].name + ' ×', 'data-act="cond" data-arg="' + k + '" title="' + esc(COND[k].text) + ' – antippen zum Entfernen"')).join('') +
-    '<details class="condpick"' + (S.condOpen ? ' open' : '') + '><summary>+ Zustand</summary><div class="chips">' + Object.entries(COND).filter(([k]) => !on.includes(k)).map(([k, c]) => chip(false, c.name, 'data-act="cond" data-arg="' + k + '" title="' + esc(c.text) + '"')).join('') + '</div></details>' +
+  const chips = '<div class="chips">' + on.map((k) => chip(true, COND[k].name + ' ×', 'data-act="cond" data-arg="' + esc(k) + '" title="' + esc(COND[k].text) + ' – antippen zum Entfernen"')).join('') +
+    '<details class="condpick"' + (S.condOpen ? ' open' : '') + '><summary>+ Zustand</summary><div class="chips">' + Object.entries(COND).filter(([k]) => !on.includes(k)).map(([k, c]) => chip(false, c.name, 'data-act="cond" data-arg="' + esc(k) + '" title="' + esc(c.text) + '"')).join('') + '</div></details>' +
     (on.length > 1 ? '<button class="link" data-act="condClear">alle entfernen</button>' : '') + exh + '</div>';
   /* ohne Zustände nur eine Zeile */
   let h = '<section class="blk conds' + (on.length ? '' : ' none') + (on.length || +P.exh ? '' : ' quiet') + '" id="conds" data-grp="kampf">' + (on.length ? head + tip + chips : '<div class="cline">' + head + chips + '</div>' + tip);
@@ -846,7 +911,7 @@ function slotsMini(c) {
     sc.slots.map((n, i) => '<div class="sl"><small>Grad ' + (i + 1) + '</small>' + pips('slots.' + (i + 1), n, +P.slots[i + 1] || 0) + '</div>').join('') +
     (sc.pact ? '<div class="sl"><small>Pakt (Grad ' + sc.pact.lvl + ')</small>' + pips('pact', sc.pact.n, +P.pact || 0) + '</div>' : '') + '</div></section>';
 }
-function pips(path, max, used) { return '<div class="pips">' + Array.from({ length: max }, (_, i) => '<button class="pip' + (i < used ? ' used' : '') + '" data-act="pip" data-path="' + path + '" data-arg="' + (i < used ? i : i + 1) + '" aria-label="' + (i + 1) + '"></button>').join('') + '</div>'; }
+function pips(path, max, used) { return '<div class="pips">' + Array.from({ length: max }, (_, i) => '<button class="pip' + (i < used ? ' used' : '') + '" data-act="pip" data-path="' + esc(path) + '" data-arg="' + (i < used ? i : i + 1) + '" aria-label="' + (i + 1) + '"></button>').join('') + '</div>'; }
 function spellBlock(c) {
   const ch = c.char, P = ch.play, sc = c.spell;
   let h = '<section class="blk" id="spellsBlk" data-grp="zauber"><h2>Zauber' + (sc.has ? ' <small>' + sc.classes.map((x) => (sc.classes.length > 1 ? x.name + ' ' : '') + 'SG ' + x.dc + ' · Angriff ' + sgn(x.atk) + ' · ' + AB_K[x.ability]).join(' | ') + '</small>' : '') + '</h2>' + (sc.has ? sc.classes.map((x) => xpl(['SG: ' + x.dcParts.join(' + ')]) + xpl(['Angriff: ' + x.atkParts.join(' + ')])).join('') : '');
@@ -855,7 +920,7 @@ function spellBlock(c) {
     h += '<div class="slots">';
     sc.slots.forEach((n, i) => { h += '<div class="sl"><span>Grad ' + (i + 1) + '</span>' + pips('slots.' + (i + 1), n, +(P.slots[i + 1] || 0)) + '</div>'; });
     if (sc.pact) h += '<div class="sl"><span>Paktplätze · Grad ' + sc.pact.lvl + '</span>' + pips('pact', sc.pact.n, +P.pact || 0) + '</div>';
-    h += '<button class="btn sm ghost" data-act="d20" data-kind="attack:spell" data-mod="' + sc.atk + '" data-label="Zauberangriff">Zauberangriff würfeln</button></div>';
+    h += '<button class="btn sm ghost" data-act="d20" data-kind="attack:spell" data-mod="' + esc(sc.atk) + '" data-label="Zauberangriff">Zauberangriff würfeln</button></div>';
   }
   const seen = new Set(); const all = [];
   for (const info of sc.classes || []) { const t = sc.classes.length > 1 ? info.name : ''; info.always.forEach((id) => { if (!seen.has(id)) { seen.add(id); all.push({ id, s: getSpell(id, S.hb), tag: (t ? t + ' · ' : '') + 'immer' }); } }); info.cantrips.concat(info.prepared).forEach((id) => { if (!seen.has(id)) { seen.add(id); all.push({ id, s: getSpell(id, S.hb), tag: t }); } }); }
@@ -921,14 +986,14 @@ function castCard(x, c) {
   const lv = isExtra ? [] : slotLevels(c, s); const pa = isExtra ? 0 : pactAvail(c, s); const ctx = spellCtx(c, s.id); const preferPact = pa && (ctx.cls === 'wlk' || !lv.length);
   const fr = s.lvl > 0 ? freeRes(c, s) : null; const frLeft = fr ? fr.max - (+P.res[fr.k] || 0) : 0;
   let btns = '';
-  if (x.ritualOnly) btns = '<button class="btn sm ghost" data-act="castSp" data-id="' + s.id + '" data-lvl="' + s.lvl + '" data-mode="ritual" title="Dauert 10 Minuten länger, verbraucht keinen Platz">Als Ritual wirken</button>';
-  else if (s.lvl === 0) btns = '<button class="btn sm cast" data-act="castSp" data-id="' + s.id + '" data-lvl="0">Wirken</button>';
+  if (x.ritualOnly) btns = '<button class="btn sm ghost" data-act="castSp" data-id="' + esc(s.id) + '" data-lvl="' + esc(s.lvl) + '" data-mode="ritual" title="Dauert 10 Minuten länger, verbraucht keinen Platz">Als Ritual wirken</button>';
+  else if (s.lvl === 0) btns = '<button class="btn sm cast" data-act="castSp" data-id="' + esc(s.id) + '" data-lvl="0">Wirken</button>';
   else {
-    if (fr && frLeft > 0) btns += '<button class="btn sm cast" data-act="castSp" data-id="' + s.id + '" data-lvl="' + s.lvl + '" data-mode="free" data-res="' + fr.k + '">Gratis wirken</button>';
-    if (preferPact) btns += '<button class="btn sm ' + (fr && frLeft > 0 ? 'ghost ' : '') + 'cast" data-act="castSp" data-id="' + s.id + '" data-lvl="' + pa + '" data-mode="pact">Wirken · Paktplatz' + (pa > s.lvl ? ' (als Grad ' + pa + ')' : '') + '</button>';
-    else if (lv.length) btns += '<button class="btn sm ' + (fr && frLeft > 0 ? 'ghost ' : '') + 'cast" data-act="castSp" data-id="' + s.id + '" data-lvl="' + lv[0] + '">Wirken · Grad ' + lv[0] + '</button>';
+    if (fr && frLeft > 0) btns += '<button class="btn sm cast" data-act="castSp" data-id="' + esc(s.id) + '" data-lvl="' + esc(s.lvl) + '" data-mode="free" data-res="' + esc(fr.k) + '">Gratis wirken</button>';
+    if (preferPact) btns += '<button class="btn sm ' + (fr && frLeft > 0 ? 'ghost ' : '') + 'cast" data-act="castSp" data-id="' + esc(s.id) + '" data-lvl="' + esc(pa) + '" data-mode="pact">Wirken · Paktplatz' + (pa > s.lvl ? ' (als Grad ' + pa + ')' : '') + '</button>';
+    else if (lv.length) btns += '<button class="btn sm ' + (fr && frLeft > 0 ? 'ghost ' : '') + 'cast" data-act="castSp" data-id="' + esc(s.id) + '" data-lvl="' + esc(lv[0]) + '">Wirken · Grad ' + lv[0] + '</button>';
     if (!btns && !isExtra) btns = '<span class="noslot">kein Platz frei</span>';
-    if (s.ritual && !isExtra && sc.has) btns += '<button class="btn sm ghost" data-act="castSp" data-id="' + s.id + '" data-lvl="' + s.lvl + '" data-mode="ritual" title="Dauert 10 Minuten länger, verbraucht keinen Platz">Ritual</button>';
+    if (s.ritual && !isExtra && sc.has) btns += '<button class="btn sm ghost" data-act="castSp" data-id="' + esc(s.id) + '" data-lvl="' + esc(s.lvl) + '" data-mode="ritual" title="Dauert 10 Minuten länger, verbraucht keinen Platz">Ritual</button>';
   }
   const abMod = ctx.mod;
   const dice = spellDice(s, s.lvl, c, abMod);
@@ -936,7 +1001,7 @@ function castCard(x, c) {
   const isConc = P.conc && P.conc.id === s.id;
   return '<details class="spell' + (isConc ? ' concon' : '') + '"><summary><b>' + esc(s.name) + '</b>' + (s.conc ? '<i title="Konzentration">K</i>' : '') + (s.ritual ? '<i title="Ritual">R</i>' : '') + (s.matCost ? '<i class="gm" title="' + esc(s.mat) + '">GM</i>' : '') + (x.tag ? '<em>' + esc(x.tag) + '</em>' : '') + (isConc ? '<em class="cc">aktiv</em>' : '') + '<small>' + esc(s.time) + ' · ' + esc(s.range) + '</small><span class="castbtns">' + btns + '</span></summary>' +
     '<div class="sbody">' + (typeof SPELL_FLAV !== 'undefined' && SPELL_FLAV[s.id] ? '<p class="sflav">' + esc(SPELL_FLAV[s.id]) + '</p>' : '') + '<p class="meta">' + (s.lvl ? 'Grad ' + s.lvl : 'Zaubertrick') + ', ' + SCHOOL[s.school] + ' · ' + esc(s.comp) + ' · ' + esc(s.dur) + (s.conc ? ' (Konzentration)' : '') + ' · <span lang="en">' + esc(s.en) + '</span></p><p>' + esc(s.text) + '</p>' + (s.mat ? '<p class="mat' + (s.matCost ? ' cost' : '') + '"><b>Material:</b> ' + esc(s.mat) + (s.matUsed ? ' <span class="used">wird verbraucht</span>' : '') + (s.matCost ? '' : ' <small>(oder Zauberfokus / Komponentenbeutel)</small>') + '</p>' : '') +
-    (upOpts.length ? '<div class="chips upc"><span>Anders wirken:</span>' + upOpts.map(([m, g]) => '<button class="btn sm ghost" data-act="castSp" data-id="' + s.id + '" data-lvl="' + g + '"' + (m === 'pact' ? ' data-mode="pact"' : '') + '>' + (m === 'pact' ? 'Paktplatz (Grad ' + g + ')' : 'Grad ' + g) + (spellDice(s, g, c, abMod) && spellDice(s, g, c, abMod) !== dice ? ' · ' + spellDice(s, g, c, abMod) : '') + '</button>').join('') + '</div>' : '') +
+    (upOpts.length ? '<div class="chips upc"><span>Anders wirken:</span>' + upOpts.map(([m, g]) => '<button class="btn sm ghost" data-act="castSp" data-id="' + esc(s.id) + '" data-lvl="' + esc(g) + '"' + (m === 'pact' ? ' data-mode="pact"' : '') + '>' + (m === 'pact' ? 'Paktplatz (Grad ' + g + ')' : 'Grad ' + g) + (spellDice(s, g, c, abMod) && spellDice(s, g, c, abMod) !== dice ? ' · ' + spellDice(s, g, c, abMod) : '') + '</button>').join('') + '</div>' : '') +
     (dice ? '<div class="chips"><button class="btn sm ghost" data-act="dmg" data-expr="' + esc(dice) + '" data-label="' + esc(s.name) + '">Nur würfeln: ' + esc(dice) + '</button></div>' : '') + (String(s.text || '').length > 240 ? '<button type="button" class="link dclose" data-act="dClose">▲ zuklappen</button>' : '') + '</div></details>';
 }
 const NO_ROLL = new Set(['shield', 'conjure-minor-elementals', 'bless', 'bane', 'guidance', 'resistance', 'blade-ward', 'hex', 'hunters-mark', 'divine-favor', 'crusaders-mantle', 'elemental-weapon', 'alter-self', 'enlarge-reduce', 'ray-of-enfeeblement', 'bestow-curse', 'contact-other-plane', 'dream', 'shillelagh', 'symbol', 'glyph-of-warding', 'forbiddance', 'geas', 'faithful-hound', 'giant-insect', 'armor-of-agathys', 'magic-weapon', 'heroism']);
@@ -959,7 +1024,7 @@ function castSpell(ch, id, lvl, mode, resKey) {
   if (id === 'shield') { commit(); pushLog({ label: s.name, total: '+5 RK', detail: (used ? used + ' verbraucht · ' : '') + 'RK +5 bis zum Beginn deines nächsten Zuges, auch gegen den auslösenden Angriff. Magisches Geschoss trifft dich nicht.', share: true }); return; }
   if (id === 'hunters-mark') P.fx.hmTgt = S.tgt || null; if (id === 'hex') P.fx.hexTgt = S.tgt || null;
   if (id === 'produce-flame') { fxSet(P, 'flame', true); pushLog({ label: s.name, total: '✦', detail: 'Eine Flamme in deiner Hand (10 Minuten). Werfen: „Flamme werfen“ in der Zugleiste (Magieaktion, Zauberangriff).', share: true }); commit(); return; }
-  if (id === 'true-strike') { const ctxT = spellCtx(c, id); const ws = c.attacks.filter((x) => x.idx !== undefined && x.prof && !x.ws); commit(); if (!ws.length) { pushLog({ label: s.name, total: '✗', detail: 'Keine Waffe mit Übung ausgerüstet.' }); return; } S.tsPend = { ab: ctxT.ability, mod: ctxT.mod }; orbPrompt('<div class="pr"><b>Wahrer Schlag: Waffe wählen</b><p>Angriff und Schaden mit ' + AB_K[ctxT.ability] + ' ' + sgn(ctxT.mod) + '; der Schaden darf gleissend sein.' + (c.level >= 5 ? ' Zusätzlich ' + spellDice(s, 0, c, ctxT.mod) + ' gleissend.' : '') + '</p><div class="chips">' + c.attacks.map((x, i) => (x.idx !== undefined && x.prof && !x.ws ? '<button class="btn sm" data-act="tsGo" data-arg="' + i + '">' + esc(x.name) + '</button>' : '')).join('') + '<button class="btn sm ghost" data-act="mastNo">Abbrechen</button></div></div>'); return; }
+  if (id === 'true-strike') { const ctxT = spellCtx(c, id); const ws = c.attacks.filter((x) => x.idx !== undefined && x.prof && !x.ws); commit(); if (!ws.length) { pushLog({ label: s.name, total: '✗', detail: 'Keine Waffe mit Übung ausgerüstet.' }); return; } S.tsPend = { ab: ctxT.ability, mod: ctxT.mod }; orbPrompt('<div class="pr"><b>Wahrer Schlag: Waffe wählen</b><p>Angriff und Schaden mit ' + AB_K[ctxT.ability] + ' ' + sgn(ctxT.mod) + '; der Schaden darf gleissend sein.' + (c.level >= 5 ? ' Zusätzlich ' + spellDice(s, 0, c, ctxT.mod) + ' gleissend.' : '') + '</p><div class="chips">' + c.attacks.map((x, i) => (x.idx !== undefined && x.prof && !x.ws ? '<button class="btn sm" data-act="tsGo" data-arg="' + esc(i) + '">' + esc(x.name) + '</button>' : '')).join('') + '<button class="btn sm ghost" data-act="mastNo">Abbrechen</button></div></div>'); return; }
   const ctxS = spellCtx(c, id); const ex = ctxS.extra ? c.extraSpells.find((e) => e.id === id) : null;
   const abMod = ctxS.mod;
   const dice = spellDice(s, lvl || s.lvl, c, abMod, { noSlot: s.lvl > 0 && !slotUsed });
@@ -1016,18 +1081,21 @@ function chromaticOrb(ch, lvl, used, concNote) {
 function orbAttack() {
   const o = S.orb; if (!o) return; const c = derive(cur(), S.hb);
   const who = o.i === 0 ? 'Ziel 1' : 'Ziel ' + (o.i + 1) + ' (Sprung ' + o.i + ' von ' + o.max + ')';
-  const total = d20(spellCtx(c, 'chromatic-orb').atk, 'Chromatische Kugel · ' + who + ': Angriff', { kind: 'attack', crit: 20 });
-  orbPrompt('<div class="pr"><b>Chromatische Kugel · ' + esc(who) + '</b><p>Angriffswurf: <strong>' + esc(total) + '</strong>. Trifft das die RK des Ziels? ' + slTag() + '</p><div class="chips"><button class="btn ghost" data-act="orbMiss">Verfehlt</button><button class="btn" data-act="orbHit">Treffer – Schaden würfeln</button></div></div>');
+  S.lastAttack = null;
+  const total = d20(spellCtx(c, 'chromatic-orb').atk, 'Chromatische Kugel · ' + who + ': Angriff', { kind: 'attack', crit: 20 }); if (total === null) { S.orb = null; return; }
+  /* Kritisch und Patzer gelten je Sprung bis zum zugehörigen Schadenswurf */
+  const la = S.lastAttack || {}; o.crit = !!la.crit; const fumble = !!la.fumble;
+  orbPrompt('<div class="pr' + (o.crit ? ' crit' : '') + '"><b>Chromatische Kugel · ' + esc(who) + (o.crit ? ': Kritischer Treffer!' : '') + '</b><p>Angriffswurf: <strong>' + esc(total) + '</strong>. ' + (o.crit ? 'Die Schadenswürfel werden verdoppelt.' : fumble ? 'Eine natürliche 1 verfehlt immer.' : 'Trifft das die RK des Ziels? ' + slTag()) + '</p><div class="chips"><button class="btn ghost" data-act="orbMiss">Verfehlt</button><button class="btn" data-act="orbHit"' + (fumble ? ' disabled' : '') + '>' + (o.crit ? 'Kritischen Schaden würfeln' : 'Treffer – Schaden würfeln') + '</button></div></div>');
 }
 function orbHit() {
   const o = S.orb; if (!o) return;
-  const r = rollExpr(o.n + 'W8'); const rolls = r.groups[0].rolls;
+  const crit = !!o.crit; o.crit = false; const r = rollExpr((crit ? o.n * 2 : o.n) + 'W8'); const rolls = r.groups[0].rolls;
   const cnt = {}; rolls.forEach((v) => { cnt[v] = (cnt[v] || 0) + 1; });
   const pairs = Object.keys(cnt).filter((v) => cnt[v] > 1).map(Number);
   const left = o.max - o.i;
   const who = o.i === 0 ? 'Ziel 1' : 'Ziel ' + (o.i + 1);
   const tail = (o.i === 0 && o.used ? o.used + ' verbraucht' : '') + (o.i === 0 ? o.conc : '') + (pairs.length ? ' · Pasch (' + pairs.join(', ') + ')' : '');
-  pushLog({ label: 'Chromatische Kugel · ' + who + ': Schaden', groups: r.groups, total: r.total, detail: r.detail + (tail ? ' · ' + tail.replace(/^ · /, '') : ''), sides: 8, nat: r.total, pairVals: pairs });
+  pushLog({ label: 'Chromatische Kugel · ' + who + ': ' + (crit ? 'kritischer ' : '') + 'Schaden', crit, groups: r.groups, total: r.total, detail: r.detail + (tail ? ' · ' + tail.replace(/^ · /, '') : ''), sides: 8, nat: r.total, pairVals: pairs });
   if (pairs.length && left > 0) {
     orbPrompt('<div class="pr pair"><b>Pasch (' + pairs.join(', ') + ')! Die Kugel kann springen.</b><p>Wähle ein neues Ziel in höchstens 9 m vom letzten Ziel. Jede Kreatur kann nur einmal getroffen werden. Noch ' + left + (left > 1 ? ' Sprünge' : ' Sprung') + ' möglich.</p><div class="chips"><button class="btn ghost" data-act="orbStop">Nicht springen</button><button class="btn" data-act="orbLeap">Ziel gewählt – Angriff würfeln</button></div></div>');
   } else {
@@ -1046,7 +1114,7 @@ function spellCard(s, tag, cast) {
   const dice = (s.text.match(/\d+W\d+(?:\s?\+\s?\d+)?/) || [])[0];
   return '<details class="spell"><summary><b>' + esc(s.name) + '</b>' + (s.conc ? '<i title="Konzentration">K</i>' : '') + (s.ritual ? '<i title="Ritual">R</i>' : '') + (s.matCost ? '<i class="gm" title="' + esc(s.mat) + '">GM</i>' : '') + (tag ? '<em>' + esc(tag) + '</em>' : '') + '<small>' + esc(s.time) + ' · ' + esc(s.range) + '</small></summary>' +
     '<div class="sbody">' + (typeof SPELL_FLAV !== 'undefined' && SPELL_FLAV[s.id] ? '<p class="sflav">' + esc(SPELL_FLAV[s.id]) + '</p>' : '') + '<p class="meta">' + (s.lvl ? 'Grad ' + s.lvl : 'Zaubertrick') + ', ' + SCHOOL[s.school] + ' · ' + esc(s.comp) + ' · ' + esc(s.dur) + (s.conc ? ' (Konzentration)' : '') + ' · <span lang="en">' + esc(s.en) + '</span></p><p>' + esc(s.text) + '</p>' + (s.mat ? '<p class="mat' + (s.matCost ? ' cost' : '') + '"><b>Material:</b> ' + esc(s.mat) + (s.matUsed ? ' <span class="used">wird verbraucht</span>' : '') + (s.matCost ? '' : ' <small>(oder Zauberfokus / Komponentenbeutel)</small>') + '</p>' : '') +
-    '<div class="chips">' + (cast ? '<button class="btn sm" data-act="cast" data-arg="' + s.lvl + '" data-label="' + esc(s.name) + '">Wirken (Platz verbrauchen)</button>' : '') + (dice ? '<button class="btn sm ghost" data-act="dmg" data-expr="' + esc(dice.replace(/\s/g, '')) + '" data-label="' + esc(s.name) + '">' + esc(dice) + ' würfeln</button>' : '') + '</div></div></details>';
+    '<div class="chips">' + (cast ? '<button class="btn sm" data-act="cast" data-arg="' + esc(s.lvl) + '" data-label="' + esc(s.name) + '">Wirken (Platz verbrauchen)</button>' : '') + (dice ? '<button class="btn sm ghost" data-act="dmg" data-expr="' + esc(dice.replace(/\s/g, '')) + '" data-label="' + esc(s.name) + '">' + esc(dice) + ' würfeln</button>' : '') + '</div></div></details>';
 }
 
 /* ---------- Zauber-Nachschlagewerk ---------- */
@@ -1068,8 +1136,8 @@ function subEigenEdit(m, pre, clsId, hb) {
   if (m.sub !== 'eigen') return '';
   const have = m.subSpells || []; const list = spellList(clsId, hb).filter((s) => s.lvl > 0 && !have.includes(s.id)).sort((a, b) => a.lvl - b.lvl || cmpDe(a.name, b.name));
   return '<div class="box" id="a-subeigen"><div class="row">' + field('Name der Unterklasse', txt(pre + 'subName', m.subName || '', 'z. B. Schwur der Rache')) + '</div>' +
-    '<h4>Immer vorbereitete Zauber</h4>' + (have.length ? '<div class="chips">' + have.map((id) => { const sp = getSpell(id, hb); return sp ? chip(true, sp.name, 'data-act="toggle" data-path="' + pre + 'subSpells" data-val="' + id + '" title="Antippen entfernt"') : ''; }).join('') + '</div>' : '') +
-    '<select id="subSpAdd" data-pre="' + pre + '" aria-label="Zauber hinzufügen"><option value="">+ Zauber hinzufügen …</option>' + list.map((s) => '<option value="' + s.id + '">' + esc(s.name) + ' (Grad ' + s.lvl + ')</option>').join('') + '</select>' +
+    '<h4>Immer vorbereitete Zauber</h4>' + (have.length ? '<div class="chips">' + have.map((id) => { const sp = getSpell(id, hb); return sp ? chip(true, sp.name, 'data-act="toggle" data-path="' + pre + 'subSpells" data-val="' + esc(id) + '" title="Antippen entfernt"') : ''; }).join('') + '</div>' : '') +
+    '<select id="subSpAdd" data-pre="' + esc(pre) + '" aria-label="Zauber hinzufügen"><option value="">+ Zauber hinzufügen …</option>' + list.map((s) => '<option value="' + s.id + '">' + esc(s.name) + ' (Grad ' + s.lvl + ')</option>').join('') + '</select>' +
     '<p class="hint">Merkmale der Unterklasse unter <b>Hausregeln</b> als «Merkmal / Fähigkeit» eintragen und dem Helden zuweisen.</p></div>';
 }
 
@@ -1079,16 +1147,16 @@ function renderHB() {
   const e = S.hbEdit;
   let h = '<div class="hbwrap"><section class="panel"><h2>Hausregeln</h2><p class="hint">Hier trägst du eigene Inhalte ein – z. B. die Äthermaschine deines Paladins, ein Reittier-Merkmal oder Talente aus deinen Büchern in eigenen Worten. Zahlen wie RK oder TP pro Stufe rechnet die App automatisch mit ein, sobald du den Eintrag unter Erstellen → Ausrüstung anhakst. Zauber erscheinen direkt in den Zauberlisten der gewählten Klassen.</p>';
   const list = Object.values(S.hb).sort((a, b) => cmpDe(a.name, b.name));
-  h += list.length ? '<div class="hblist">' + list.map((x) => '<div class="hbi"><div><b>' + esc(x.name) + '</b><small>' + HB_KIND[x.kind] + (x.kind === 'spell' ? ' · Grad ' + (x.lvl || 0) : bonusText(x)) + '</small></div><button class="btn sm ghost" data-act="hbEdit" data-arg="' + x.id + '">Bearbeiten</button></div>').join('') + '</div>' : '<p class="empty">Noch keine Einträge.</p>';
-  h += '<div class="chips">' + Object.entries(HB_KIND).map(([k, l]) => '<button class="btn sm" data-act="hbNew" data-arg="' + k + '">+ ' + l + '</button>').join('') + '</div></section>';
+  h += list.length ? '<div class="hblist">' + list.map((x) => '<div class="hbi"><div><b>' + esc(x.name) + '</b><small>' + HB_KIND[x.kind] + (x.kind === 'spell' ? ' · Grad ' + (x.lvl || 0) : bonusText(x)) + '</small></div><button class="btn sm ghost" data-act="hbEdit" data-arg="' + esc(x.id) + '">Bearbeiten</button></div>').join('') + '</div>' : '<p class="empty">Noch keine Einträge.</p>';
+  h += '<div class="chips">' + Object.entries(HB_KIND).map(([k, l]) => '<button class="btn sm" data-act="hbNew" data-arg="' + esc(k) + '">+ ' + l + '</button>').join('') + '</div></section>';
   if (e) {
     const b = 'hbe.';
     h += '<section class="panel"><h2>' + (S.hb[e.id] ? 'Bearbeiten' : 'Neu') + ': ' + HB_KIND[e.kind] + '</h2><div class="row">' + field('Name', txt(b + 'name', e.name, 'z. B. Äthermaschine')) + '</div>' + field('Beschreibung', area(b + 'text', e.text, 'Was macht es? In eigenen Worten.', 4).replace('data-norender', 'data-norender data-hb'));
     if (e.kind === 'spell') {
       h += '<div class="row">' + field('Grad', sel(b + 'lvl', e.lvl || 0, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((v) => [v, v ? 'Grad ' + v : 'Zaubertrick']), 'data-type="num"')) + field('Schule', sel(b + 'school', e.school || 'evo', Object.entries(SCHOOL))) + field('Zeitaufwand', txt(b + 'time', e.time || 'Aktion')) + field('Reichweite', txt(b + 'range', e.range || '18 m')) + field('Komponenten', txt(b + 'comp', e.comp || 'V, G')) + field('Dauer', txt(b + 'dur', e.dur || 'Sofort')) + '</div>';
-      h += '<h4>Klassen</h4><div class="chips">' + Object.entries(CLASSES).filter(([, C]) => C.caster).map(([k, C]) => chip((e.classes || []).includes(k), C.name, 'data-act="hbToggle" data-path="classes" data-val="' + k + '"')).join('') + '</div><div class="chips">' + chip(e.conc, 'Konzentration', 'data-act="hbFlip" data-path="conc"') + chip(e.ritual, 'Ritual', 'data-act="hbFlip" data-path="ritual"') + '</div>';
+      h += '<h4>Klassen</h4><div class="chips">' + Object.entries(CLASSES).filter(([, C]) => C.caster).map(([k, C]) => chip((e.classes || []).includes(k), C.name, 'data-act="hbToggle" data-path="classes" data-val="' + esc(k) + '"')).join('') + '</div><div class="chips">' + chip(e.conc, 'Konzentration', 'data-act="hbFlip" data-path="conc"') + chip(e.ritual, 'Ritual', 'data-act="hbFlip" data-path="ritual"') + '</div>';
     } else {
-      if (e.kind === 'feat') h += '<div class="row">' + field('Art', sel(b + 'cat', e.cat || 'general', [['origin', 'Herkunftstalent'], ['general', 'Allgemeines Talent']])) + '</div><h4>+1 auf eines dieser Attribute (optional)</h4><div class="chips">' + AB.map((a) => chip((e.plus || []).includes(a), AB_DE[a], 'data-act="hbToggle" data-path="plus" data-val="' + a + '"')).join('') + '</div>';
+      if (e.kind === 'feat') h += '<div class="row">' + field('Art', sel(b + 'cat', e.cat || 'general', [['origin', 'Herkunftstalent'], ['general', 'Allgemeines Talent']])) + '</div><h4>+1 auf eines dieser Attribute (optional)</h4><div class="chips">' + AB.map((a) => chip((e.plus || []).includes(a), AB_DE[a], 'data-act="hbToggle" data-path="plus" data-val="' + esc(a) + '"')).join('') + '</div>';
       h += '<h4>Automatische Boni</h4><div class="row misc">' + [['ac', 'RK'], ['save', 'Rettungswürfe'], ['atk', 'Zauberangriff'], ['dc', 'Zauber-SG'], ['init', 'Initiative'], ['hpPerLevel', 'TP pro Stufe'], ['speed', 'Bewegung (m)']].filter(([k]) => e.kind !== 'feat' || !['save', 'atk', 'dc'].includes(k)).map(([k, l]) => field(l, num(b + k, e[k] || 0))).join('') + '</div>';
       if (e.kind !== 'feat') h += '<div class="row">' + field('Nutzungen (0 = unbegrenzt)', num(b + 'uses', e.uses || 0, 'min="0"')) + field('Zurück bei', sel(b + 'reset', e.reset || 'long', [['long', 'langer Rast'], ['short', 'kurzer Rast']])) + '</div>';
     }
@@ -1100,6 +1168,8 @@ function renderHB() {
 /* ---------- Kampagne: gemeinsamer Würfeltisch ---------- */
 let campUnsub = null, meTimer = null, meBusy = false, meDirty = false, campJoinedAt = 0; const seen = new Set();
 const campSlug = (v) => String(v).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+/* Ehrlich bleiben: «nur bei der SL» blendet aus, ist aber kein Schutz vor Mitspielern mit eigener Technik */
+const SECRET_NOTE = () => (S.share && S.secret ? '<p class="hint secnote">Die Apps der Mitspieler zeigen diese Würfe nicht an. Wer den Raumcode kennt, kann sie mit eigener Technik trotzdem lesen. Für echte Geheimnisse: verdeckt würfeln und das Ergebnis der Spielleitung sagen.</p>' : '');
 function saveCampPref() { try { localStorage.setItem('heldenbuch_camp', JSON.stringify({ code: S.camp, share: S.share, secret: !!S.secret })); } catch (e) {} }
 function myRolls() { return S.log.filter((e) => (e.sides || e.share) && !e.preview).slice(0, 30).map((e) => ({ label: e.label, total: e.total, detail: e.detail, crit: !!e.crit, fumble: !!e.fumble, t: e.t, secret: !!e.secret, sides: e.sides || 0, nat: e.nat || 0, dset: e.dset || '' })); }
 function meDoc() {
@@ -1117,6 +1187,17 @@ async function writeMe() {
   meBusy = false; if (meDirty) { meDirty = false; writeMe(); }
 }
 function shareRoll() { queueMe(); }
+/* Spielerdokument vom Tisch: Typen und Mengen prüfen, Unlesbares verwerfen statt die ganze Aktualisierung abzubrechen */
+function playerDoc(v) {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
+  const p = Object.assign({}, v); const str = (x, n) => (typeof x === 'string' ? x.slice(0, n) : '');
+  p.char = str(v.char, 60) || '?'; p.pl = str(v.pl, 40); p.cls = str(v.cls, 20); p.clsName = str(v.clsName, 80); p.portrait = str(v.portrait, 40); p.pimg = safeImg(v.pimg);
+  p.rolls = (Array.isArray(v.rolls) ? v.rolls : []).filter((r) => r && typeof r === 'object' && Number.isFinite(r.t)).slice(-40).map((r) => Object.assign({}, r, { label: str(r.label, 200), detail: str(r.detail, 400), total: typeof r.total === 'number' ? r.total : typeof r.total === 'string' ? r.total.slice(0, 20) : '?' }));
+  for (const k of ['hp', 'hpMax', 'temp', 'ac', 'dex', 'level']) if (v[k] != null && !Number.isFinite(+v[k])) delete p[k];
+  if (v.cond != null && !Array.isArray(v.cond)) delete p.cond; else if (Array.isArray(v.cond)) p.cond = v.cond.filter((x) => typeof x === 'string').slice(0, 30);
+  if (v.init != null && (typeof v.init !== 'object' || Array.isArray(v.init))) delete p.init;
+  return p;
+}
 function joinCamp(v, silent) {
   const code = campSlug(v); if (!code) return;
   if (isApp() && typeof HB_NOCRYPTO !== 'undefined' && HB_NOCRYPTO) { bannerToast('Online-Tisch nicht verfügbar', 'Ohne sichere Verschlüsselung (WebCrypto) verbindet sich das Heldenbuch nicht. Öffne die App über https oder installiert.'); return; }
@@ -1125,9 +1206,9 @@ function joinCamp(v, silent) {
   if (!DB) { S.campErr = 'nodb'; if (!silent) render(); return; }
   campUnsub = DB.collection('camp/' + code + '/players').onSnapshot((snap) => {
     const table = {};
-    snap.docs.forEach((d) => { const v = d.data(); if (v) table[d.id] = v; });
+    snap.docs.forEach((d) => { try { const v = playerDoc(d.data()); if (v && /^[A-Za-z0-9_.:@-]{1,80}$/.test(d.id)) table[d.id] = v; } catch (e) {} });
     setTimeout(() => { if (typeof d3conflict === 'function') try { d3conflict(); } catch (e) {} }, 0);
-    for (const [uid, p] of Object.entries(table)) for (const r of p.rolls || []) { const k = uid + ':' + r.t; if (!seen.has(k)) { seen.add(k); if (uid !== UID && r.t > campJoinedAt && (!r.secret || isDM())) { miniToast(p, r); if (typeof histAdd === 'function') histAdd(r, p.char, true); } } }
+    for (const [uid, p] of Object.entries(table)) for (const r of p.rolls) { try { const k = uid + ':' + r.t; if (!seen.has(k)) { seen.add(k); if (uid !== UID && r.t > campJoinedAt && (!r.secret || isDM())) { miniToast(p, r); if (typeof histAdd === 'function') histAdd(r, p.char, true); } } } catch (e) {} }
     S.table = table; paintCamp();
   }, (e) => { S.campErr = 'fail'; paintCamp(); });
   writeMe(); subCombat(); subMeta();
@@ -1159,7 +1240,7 @@ function campStatus() {
   if (S.campErr === 'nodb') return '<p class="cstat bad">Der gemeinsame Tisch braucht eine Anmeldung bei Claude. In dieser Ansicht ist das nicht verfügbar – deine Würfe bleiben lokal.</p>';
   if (S.campErr === 'noaccess') return '<p class="cstat bad">Du kannst mitlesen, aber deine Würfe werden nicht geteilt: Dein Zugang erlaubt kein Schreiben. Die Person, der das Heldenbuch gehört, muss dich als <b>Bearbeiter</b> einladen.</p>';
   if (S.campErr === 'fail') return '<p class="cstat bad">Verbindung zum Tisch unterbrochen. Lade die Seite neu, wenn es so bleibt.</p>';
-  return '<p class="cstat ok">● Verbunden' + (!S.share ? ' – du würfelst verdeckt' : S.secret ? ' – nur die Spielleitung sieht deine Würfe' : ' – deine Würfe werden geteilt') + '</p>';
+  return '<p class="cstat ok">● Verbunden' + (!S.share ? ' – du würfelst verdeckt' : S.secret ? ' – deine Würfe erscheinen nur bei der Spielleitung' : ' – deine Würfe werden geteilt') + '</p>' + SECRET_NOTE();
 }
 function partyHtml() {
   const ps = players().sort((a, b) => cmpDe(a[1].char || '', b[1].char || '')); const dmP = S.meta.dm && S.table[S.meta.dm];
@@ -1170,7 +1251,7 @@ function partyHtml() {
       (p.pas && (isDM() || !S.meta.dm) ? '<small class="pmpas" title="Passive Werte">Wahrn. <b>' + esc(p.pas[0]) + '</b> · Motiv <b>' + esc(p.pas[1]) + '</b> · Nachf. <b>' + esc(p.pas[2]) + '</b></small>' : '') + '<div class="pmhp"><span>TP ' + esc(p.hp) + '/' + esc(p.hpMax) + (p.temp ? ' +' + esc(p.temp) : '') + '</span><span>RK ' + esc(p.ac) + '</span></div><div class="hpbar"><i style="width:' + pct + '%"></i></div>' +
       (p.cond && p.cond.length ? '<div class="pmc">' + p.cond.map((c) => '<span>' + esc(c) + '</span>').join('') + '</div>' : '') +
       (uid === S.meta.dm ? '<div class="pmc dm"><span>Spielleitung</span></div>' : '') +
-      (p.dead ? '<div class="pmdead"><b>Gefallen' + (p.deathFinal ? ' – Tod bestätigt' : ' – wartet auf Gnade') + '</b>' + (isDM() ? '<div class="chips"><button class="btn sm" data-act="mercy" data-arg="' + uid + '">Gnade zeigen</button>' + (p.deathFinal ? '' : '<button class="btn sm ghost" data-act="doom" data-arg="' + uid + '">Tod bestätigen</button>') + '</div>' : '') + '</div>' : '') + '</div></div>'; }).join('') + '</div>';
+      (p.dead ? '<div class="pmdead"><b>Gefallen' + (p.deathFinal ? ' – Tod bestätigt' : ' – wartet auf Gnade') + '</b>' + (isDM() ? '<div class="chips"><button class="btn sm" data-act="mercy" data-arg="' + esc(uid) + '">Gnade zeigen</button>' + (p.deathFinal ? '' : '<button class="btn sm ghost" data-act="doom" data-arg="' + esc(uid) + '">Tod bestätigen</button>') + '</div>' : '') + '</div>' : '') + '</div></div>'; }).join('') + '</div>';
 }
 function renderCamp() {
   if (!S.camp && isApp()) return appJoinHtml();
@@ -1179,7 +1260,7 @@ function renderCamp() {
       '<section class="panel"><h2>Kampagne beitreten</h2><p class="hint">Gib einen Namen ein, den alle in deiner Gruppe gleich schreiben, z. B. <b>schatten-von-valdris</b>. Wer zuerst beitritt, eröffnet den Tisch.</p><p class="hint">Datenschutz: Die Tischdaten liegen im Speicher dieser geteilten Seite. Wer den Link zur Seite und den Kampagnennamen kennt, kann mitlesen – wähle einen schwer erratbaren Namen (z. B. mit angehängten Zufallszeichen) und schreib nichts Vertrauliches in den Tisch.</p><div class="row"><label class="fld"><span>Kampagnenname</span><input type="text" id="campCode" placeholder="z. B. schatten-von-valdris" autocomplete="off"></label></div><div class="chips"><button class="btn big" data-act="campJoin">Beitreten</button></div>' +
       '<h3>So holst du deine Mitspieler dazu</h3><ol class="steps2"><li>Öffne oben rechts im Heldenbuch das Menü <b>Teilen</b>.</li><li>Lade jeden Mitspieler per E-Mail als <b>Bearbeiter</b> ein. Nur dann dürfen ihre Würfe am Tisch erscheinen.</li><li>Alle öffnen das Heldenbuch, legen ihren Helden an und treten mit demselben Namen bei.</li></ol><p class="hint">Den Link und den Kampagnennamen kannst du danach per WhatsApp verschicken.</p><p class="hint">Jeder sieht nur seine eigenen Helden. Am Tisch geteilt werden nur Name, Klasse, TP, RK, Zustände und die Würfe.</p></section></div>';
   }
-  return '<div class="camp"><header class="shead"><div><h1>' + esc(S.camp) + '</h1><div id="campStat">' + campStatus() + '</div>' + myNameLine() + '<div id="dmBox" class="dmbox">' + dmHtml() + '</div></div><div class="sctl">' + chip(S.share, !S.share ? 'Verdeckt würfeln' : S.secret ? 'Nur Spielleitung sieht Würfe' : 'Würfe teilen: an', 'data-act="campShare" title="Antippen zum Wechseln: alle sehen – nur die Spielleitung sieht – niemand sieht"') + '<button class="btn ghost" data-act="view" data-arg="sheet">Zum Bogen</button><button class="btn ghost" data-act="campLeave">Verlassen</button></div></header>' +
+  return '<div class="camp"><header class="shead"><div><h1>' + esc(S.camp) + '</h1><div id="campStat">' + campStatus() + '</div>' + myNameLine() + '<div id="dmBox" class="dmbox">' + dmHtml() + '</div></div><div class="sctl">' + chip(S.share, !S.share ? 'Verdeckt würfeln' : S.secret ? 'Würfe nur bei der SL' : 'Würfe teilen: an', 'data-act="campShare" title="Antippen zum Wechseln: alle sehen – nur bei der Spielleitung angezeigt – niemand sieht. Hinweis: Im Raum sind die Würfe verschlüsselt, aber nicht vor Mitspielern mit eigener Technik geschützt. Für echte Geheimnisse verdeckt würfeln."') + '<button class="btn ghost" data-act="view" data-arg="sheet">Zum Bogen</button><button class="btn ghost" data-act="campLeave">Verlassen</button></div></header>' +
     (players().length ? '<details class="invbar small"><summary>Mitspieler einladen</summary>' + inviteHtml() + '</details>' : '<div class="invbar"><span class="hint" style="margin:0">Mitspieler einladen:</span>' + inviteHtml() + '</div>') +
     '<section class="blk fight" id="fightBox">' + fightHtml() + '</section>' + '<div id="dmTools">' + dmTools() + '</div>' +
     '<div class="cols"><section class="blk"><h2>Die Gruppe</h2><div id="partyBox">' + partyHtml() + '</div></section><section class="blk"><h2>Würfe am Tisch</h2><div id="tableBox">' + tableBox(12) + '</div></section></div></div>';
@@ -1189,7 +1270,7 @@ function tableBox(n) {
   const list = S.logFilter === 'all' ? all : all.filter((r) => r.uid === S.logFilter);
   const shown = S.logOpen ? list : list.slice(0, n);
   let h = '';
-  if (S.logOpen && plist.length > 1) h += '<div class="chips lf">' + chip(S.logFilter === 'all', 'Alle', 'data-act="logFilter" data-arg="all"') + plist.map(([uid, name]) => chip(S.logFilter === uid, esc(name), 'data-act="logFilter" data-arg="' + uid + '"')).join('') + '</div>';
+  if (S.logOpen && plist.length > 1) h += '<div class="chips lf">' + chip(S.logFilter === 'all', 'Alle', 'data-act="logFilter" data-arg="all"') + plist.map(([uid, name]) => chip(S.logFilter === uid, esc(name), 'data-act="logFilter" data-arg="' + esc(uid) + '"')).join('') + '</div>';
   h += '<ul id="tablelog" class="log tlog' + (S.logOpen ? ' open' : '') + '">' + rollItems(shown) + '</ul>';
   if (list.length > n || S.logOpen) h += '<button class="link more" data-act="logOpen">' + (S.logOpen ? 'Weniger anzeigen' : 'Alle ' + list.length + ' Würfe anzeigen') + '</button>';
   return h;
@@ -1248,7 +1329,7 @@ function checkMercy() {
   const m = $('#modal');
   if (q.length && (m.hidden || S.modal === 'mercy')) {
     const uid = q[0], p = S.table[uid]; S.modal = 'mercy';
-    m.innerHTML = '<div class="dlg mercy" role="alertdialog" aria-modal="true" aria-labelledby="mercyT">' + psig(p) + '<h2 id="mercyT">Show mercy?</h2><p><b>' + esc(p.char) + '</b> (' + esc(p.clsName) + ' ' + esc(p.level) + ') hat den dritten Todesrettungswurf verfehlt und ist gefallen.</p><p class="hint">Zeigst du Gnade, kehrt der Held mit 1 TP zurück. Sonst bleibt sein Bogen gesperrt – du kannst ihn später in der Gruppenübersicht trotzdem noch zurückholen.</p><div class="chips"><button class="btn ghost" data-act="doom" data-arg="' + uid + '">Der Tod ist endgültig</button><button class="btn big" data-act="mercy" data-arg="' + uid + '">Gnade zeigen</button></div></div>';
+    m.innerHTML = '<div class="dlg mercy" role="alertdialog" aria-modal="true" aria-labelledby="mercyT">' + psig(p) + '<h2 id="mercyT">Show mercy?</h2><p><b>' + esc(p.char) + '</b> (' + esc(p.clsName) + ' ' + esc(p.level) + ') hat den dritten Todesrettungswurf verfehlt und ist gefallen.</p><p class="hint">Zeigst du Gnade, kehrt der Held mit 1 TP zurück. Sonst bleibt sein Bogen gesperrt – du kannst ihn später in der Gruppenübersicht trotzdem noch zurückholen.</p><div class="chips"><button class="btn ghost" data-act="doom" data-arg="' + esc(uid) + '">Der Tod ist endgültig</button><button class="btn big" data-act="mercy" data-arg="' + esc(uid) + '">Gnade zeigen</button></div></div>';
     m.hidden = false;
   } else if (!q.length && S.modal === 'mercy') { m.hidden = true; S.modal = null; }
 }
@@ -1335,10 +1416,10 @@ function fightHtml() {
   h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + x.v + '</span>' + (x.npc ? ((typeof mobPic === 'function' && mobPic(x.mid, 'sigil npc pic')) || '<span class="sigil npc" aria-hidden="true">⚔</span>') : sigil({ name: x.name, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : pcBits(x)) + (typeof effBadges === 'function' ? effBadges(x.key, lead) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
   if (c.log && c.log.length) h += '<details class="clog"><summary>Verlauf <small>' + c.log.length + '</small></summary><ul>' + c.log.slice().reverse().slice(0, 12).map((e) => '<li><span>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</span>' + esc(e.x) + '</li>').join('') + '</ul></details>';
   if (w.length) h += '<p class="hint">Würfelt noch: ' + w.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + '</p>';
-  if (lead && !c.turn && players().length) h += '<div class="fgrp"><b>Überrascht? <small>Nachteil auf den Initiativewurf</small></b><div class="chips">' + players().map(([u, p]) => chip((c.surp || []).includes(u), esc(p.char || '?'), 'data-act="surpTog" data-arg="' + u + '"')).join('') + '</div><p class="hint">Gegner überrascht: beim Hinzufügen „überrascht“ ankreuzen.</p></div>';
+  if (lead && !c.turn && players().length) h += '<div class="fgrp"><b>Überrascht? <small>Nachteil auf den Initiativewurf</small></b><div class="chips">' + players().map(([u, p]) => chip((c.surp || []).includes(u), esc(p.char || '?'), 'data-act="surpTog" data-arg="' + esc(u) + '"')).join('') + '</div><p class="hint">Gegner überrascht: beim Hinzufügen „überrascht“ ankreuzen.</p></div>';
   const aw = awayList(); if (aw.length) h += '<p class="hint">Noch nicht im Kampf (zu weit weg): ' + aw.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + ' – sie würfeln Initiative, sobald sie eingreifen, und werden einsortiert.</p>';
   if (lead && typeof saveReqForm === 'function') h += saveReqForm();
-  const rs = (c.npcs || []).filter((x) => x.reserve); if (rs.length && lead) { const gs = {}; rs.forEach((x) => { const k = x.grp || x.id; (gs[k] = gs[k] || []).push(x); }); h += '<div class="fgrp reserve"><b>Verstärkung (wartet)</b><div class="chips">' + Object.values(gs).map((g) => '<button class="btn sm ghost" data-act="npcJoin" data-arg="' + g[0].id + '"' + (g[0].grp && g.length > 1 ? ' data-grp="' + g[0].grp + '"' : '') + '>' + esc(g.length > 1 ? g.length + '× ' + (BESTIARY[g[0].mid] || [g[0].name])[0] : g[0].name) + ' greift ein</button>').join('') + '</div></div>'; }
+  const rs = (c.npcs || []).filter((x) => x.reserve); if (rs.length && lead) { const gs = {}; rs.forEach((x) => { const k = x.grp || x.id; (gs[k] = gs[k] || []).push(x); }); h += '<div class="fgrp reserve"><b>Verstärkung (wartet)</b><div class="chips">' + Object.values(gs).map((g) => '<button class="btn sm ghost" data-act="npcJoin" data-arg="' + esc(g[0].id) + '"' + (g[0].grp && g.length > 1 ? ' data-grp="' + esc(g[0].grp) + '"' : '') + '>' + esc(g.length > 1 ? g.length + '× ' + (BESTIARY[g[0].mid] || [g[0].name])[0] : g[0].name) + ' greift ein</button>').join('') + '</div></div>'; }
   const meIn = !w.some((x) => x.me);
   if (typeof npcBulkBar === 'function') h += npcBulkBar();
   if (o.length) h += '<div class="chips" style="margin:4px 0 10px"><button class="btn ghost sm" data-act="effNew">+ Effekt / Zustand mit Dauer</button>' + (lead ? '<button class="btn ghost sm" data-act="encOpen">+ Gegner</button>' : '') + '</div>';
@@ -1477,8 +1558,8 @@ document.addEventListener('click', (ev) => {
     noDel: () => { S.confirm = null; render(); },
     delChar: () => { delete S.chars[arg]; persist('c', arg); if (S.cur === arg) S.cur = Object.keys(S.chars)[0] || null; S.confirm = null; try { localStorage.setItem('hb_sample_done', '1'); } catch (e) {} if (!S.cur && (S.view === 'sheet' || S.view === 'build')) S.view = 'heroes'; render(); },
     loadSample: () => { const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; persist('c', s.id); S.view = 'sheet'; render(); },
-    play: () => { S.cur = arg; S.view = 'sheet'; S.confirm = null; lsSet(); render(); window.scrollTo(0, 0); },
-    edit: () => { S.cur = arg; S.view = 'build'; S.step = 0; S.confirm = null; lsSet(); render(); window.scrollTo(0, 0); },
+    play: () => { S.cur = arg; S.view = 'sheet'; S.confirm = null; lsSet([]); render(); window.scrollTo(0, 0); },
+    edit: () => { S.cur = arg; S.view = 'build'; S.step = 0; S.confirm = null; lsSet([]); render(); window.scrollTo(0, 0); },
     exportOne: () => { const c = S.chars[arg] || ch; doExport([c], fileName(c)); },
     exportAll: () => doExport(Object.values(S.chars), 'Heldenbuch_Sicherung.json', true),
     importText: () => openModal('import'),

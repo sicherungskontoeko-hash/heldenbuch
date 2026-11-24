@@ -48,7 +48,7 @@ const THEMES = {
     css += 'html[data-theme=\"' + k + '\"]{' + v.join(';') + '}';
   }
   css += 'html[data-theme="lustig"] h1,html[data-theme="lustig"] h2{letter-spacing:.01em}html[data-theme="romantisch"] h1,html[data-theme="romantisch"] h2,html[data-theme="romantisch"] h3{font-weight:700;letter-spacing:.02em}html[data-theme="blutig"] h1,html[data-theme="blutig"] h2{letter-spacing:.04em}';
-  css += Object.keys(THEME_SCENES).map((k) => '.tsw[data-arg="' + k + '"]{--simg:var(--scene-' + k + ')}').join('');
+  css += Object.keys(THEME_SCENES).map((k) => '.tsw[data-arg="' + esc(k) + '"]{--simg:var(--scene-' + k + ')}').join('');
   const st = document.createElement('style'); st.id = 'themeCss'; st.textContent = css; document.head.appendChild(st);
 })();
 /* Die Hintergrundbilder (zusammen 1,7 MB) kommen erst ins CSS, wenn sie gebraucht werden: das aktive Thema sofort,
@@ -157,7 +157,7 @@ function themeSwatches() {
 function themeBlock() {
   const dm = S.camp && S.meta && S.meta.theme && THEMES[S.meta.theme];
   return '<section class="panel themep"><div class="tph"><h2>Stimmung</h2><span class="hint" style="margin:0">Ändert nur das Aussehen – alle Funktionen bleiben gleich.</span></div>' + themeSwatches() +
-    '<div class="fxlv"><span>Effekte:</span>' + [['stark', 'Stark'], ['dezent', 'Dezent'], ['aus', 'Aus']].map(([k, l]) => chip(fxLevel() === k, l, 'data-act="fxLevel" data-arg="' + k + '"')).join('') + '</div>' +
+    '<div class="fxlv"><span>Effekte:</span>' + [['stark', 'Stark'], ['dezent', 'Dezent'], ['aus', 'Aus']].map(([k, l]) => chip(fxLevel() === k, l, 'data-act="fxLevel" data-arg="' + esc(k) + '"')).join('') + '</div>' +
     (typeof isDM === 'function' && isDM() ? '<label class="chk tfollow"><input type="checkbox" id="themeAll"' + (S.dmThemeAll !== false ? ' checked' : '') + '> Für die ganze Runde (du leitest)</label>' : dm ? '<label class="chk tfollow"><input type="checkbox" id="themeFollow"' + (themeFollow() ? ' checked' : '') + '> Stimmung der Spielleitung folgen (' + THEMES[S.meta.theme].name + ')</label>' : '') + '</section>';
 }
 function openThemeModal() {

@@ -71,6 +71,7 @@ run "Daten: Sichern, Laden, Neustart, alte und kaputte Dateien, 5600 Kombination
 run "Daten in der App (daten.test.js app)" node tests/daten.test.js app/Heldenbuch.html
 run "Jeden Zauber wirken (zauber.test.js)" node tests/zauber.test.js
 run "Lange Zufallssitzung (affe.test.js)" node tests/affe.test.js --schritte=500
+run "Befunde B-01–B-20 des Grosstests v1.9.40 (befunde.test.js)" node tests/befunde.test.js
 run "Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js)" node tests/initcall.test.js
 run "Tischhilfen: passive Werte, Rast für alle, EP nach dem Kampf (tablehelp.test.js)" node tests/tablehelp.test.js
 run "Gegenstände: SRD-Liste, Flüche, Ausrüstung (items.test.js)" node tests/items.test.js

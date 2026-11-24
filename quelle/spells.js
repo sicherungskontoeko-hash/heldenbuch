@@ -62,7 +62,7 @@ const SPELL_RAW = {
  'sanctuary':['Heiligtum','Sanctuary',1,'abj','cle','Bonusaktion','9 m','V, G, M','1 Minute','Wer das Ziel angreifen will, muss einen WEI-Rettungswurf schaffen. Endet, wenn das Ziel angreift.'],
  'shield':['Schild','Shield',1,'abj','sor wiz','Reaktion','Selbst','V, G','1 Runde','+5 RK bis zu deinem nächsten Zug, auch gegen den auslösenden Angriff; immun gegen Magisches Geschoss.'],
  'shield-of-faith':['Schild des Glaubens','Shield of Faith',1,'abj','cle pal','Bonusaktion','18 m','V, G, M','10 Minuten','+2 RK für eine Kreatur.','K'],
- 'sleep':['Schlaf','Sleep',1,'enc','brd sor wiz','Aktion','18 m','V, G, M','1 Minute','1,5-m-Kugel: WEI-Rettungswurf oder kampfunfähig, am Ende des nächsten Zuges erneut oder bewusstlos.','K'],
+ 'sleep':['Schlaf','Sleep',1,'enc','brd sor wiz','Aktion','18 m','V, G, M','1 Minute','1,5-m-Kugel: WEI-Rettungswurf oder kampfunfähig, am Ende des nächsten Zuges erneut oder bewusstlos. Endet für ein Ziel, wenn es Schaden erleidet oder jemand in 1,5 m es mit einer Aktion wachrüttelt. Wer nicht schläft (etwa Elfen) oder gegen Erschöpfung immun ist, besteht automatisch.','K'],
  'speak-with-animals':['Mit Tieren sprechen','Speak with Animals',1,'div','brd dru ran wlk','Aktion','Selbst','V, G','10 Minuten','Du kannst mit Tieren sprechen und sie verstehen.','R'],
  'thunderwave':['Donnerwoge','Thunderwave',1,'evo','brd dru sor wiz','Aktion','Selbst (4,5-m-Würfel)','V, G','Sofort','KON-Rettungswurf: 2W8 Schallschaden und 3 m weggestossen; bei Erfolg halber Schaden ohne Stoss. +1W8 pro höherem Grad.'],
  'unseen-servant':['Unsichtbarer Diener','Unseen Servant',1,'con','brd wlk wiz','Aktion','18 m','V, G, M','1 Stunde','Eine unsichtbare Kraft erledigt einfache Aufgaben.','R'],

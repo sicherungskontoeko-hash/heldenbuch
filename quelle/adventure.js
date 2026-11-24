@@ -15,18 +15,66 @@ function advDb() {
 let ADV_ON_C = null;
 function advSave(d) { ADV_ON_C = null; try { localStorage.setItem(ADV_KEY, JSON.stringify(d)); return true; } catch (e) { bannerToast('Nicht gespeichert', 'Der Speicher dieses Browsers ist voll oder nicht verfügbar.'); return false; } }
 const advNewer = (a, b) => (+a.ver || 0) >= (+b.ver || 0);
-function advAll() { const own = advDb().list; return ADV_BUILTIN.filter((b) => !own.some((o) => o.id === b.id && advNewer(o, b))).concat(own); }
+function advAll() { const own = advDb().list.filter(advValid); return ADV_BUILTIN.filter((b) => !own.some((o) => o.id === b.id && advNewer(o, b))).concat(own); }
 function advGet(id) { return advAll().find((a) => a.id === id) || null; }
 const advIsOwn = (id) => advDb().list.some((a) => a.id === id);
-function advValid(a) {
-  return !!(a && typeof a.id === 'string' && /^[a-z0-9-]{1,40}$/.test(a.id) && typeof a.title === 'string' && a.title.trim() && Array.isArray(a.chapters) && a.chapters.length &&
-    a.chapters.every((c) => c && typeof c.id === 'string' && Array.isArray(c.scenes) && c.scenes.length && c.scenes.every((s) => s && typeof s.id === 'string' && Array.isArray(s.blocks))));
+/* Prüfung eines Abenteuers aus einer Datei: Kennungen, Kapitel, Szenen und jeder Block nach seiner Art.
+   Rückgabe: leer = in Ordnung, sonst der erste Fehler mit Kapitel und Szene. */
+const ADV_ID_RE = /^[A-Za-z0-9_-]{1,40}$/;
+const advS = (v) => typeof v === 'string' && v.length <= 20000;
+const advSo = (v) => v == null || advS(v);
+const advNo = (v) => v == null || (typeof v === 'number' && Number.isFinite(v));
+const advLs = (v, f, opt) => (v == null ? !!opt : Array.isArray(v) && v.length <= 500 && v.every(f));
+const advTone = (v) => v == null || (typeof v === 'string' && /^[a-z -]{0,30}$/.test(v));
+const advObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
+const ADV_BLOCK = {
+  p: (b) => advS(b.x), sub: (b) => advS(b.x), label: (b) => advS(b.x) && advTone(b.tone),
+  ol: (b) => advLs(b.items, advS),
+  vorlese: (b) => advSo(b.title) && advLs(b.ps, advS),
+  dm: (b) => advSo(b.title) && advLs(b.items, advS), rp: (b) => advSo(b.title) && advLs(b.items, advS),
+  merke: (b) => advSo(b.title) && advLs(b.items, advS) && advLs(b.flags, advS, true),
+  loot: (b) => advSo(b.title) && advLs(b.items, advS) && advNo(b.gm) && advNo(b.gmHero) && advLs(b.flags, advS, true),
+  probe: (b) => advSo(b.title) && advLs(b.rows, (r) => advLs(r, advS) && r.length >= 2),
+  table: (b) => advTone(b.tone) && advLs(b.head, advS) && advLs(b.rows, (r) => advLs(r, advS)),
+  items: (b) => advLs(b.rows, (r) => advObj(r) && advS(r.name) && advSo(r.rule) && advSo(r.from) && advSo(r.item)),
+  choice: (b) => advS(b.key) && ADV_ID_RE.test(b.key) && advSo(b.title) && advLs(b.head, advS, true) && advLs(b.rows, (r) => advObj(r) && advSo(r.a) && advSo(r.b) && (r.sets == null || (advObj(r.sets) && Object.values(r.sets).every(advS)))),
+  flags: (b) => advSo(b.title) && advLs(b.ids, advS),
+  roll: (b) => advSo(b.title) && Number.isInteger(b.die) && b.die > 0 && b.die <= 1000 && advSo(b.note) && advLs(b.rows, (r) => Array.isArray(r) && r.length >= 2 && (advS(r[0]) || Number.isFinite(r[0])) && advS(r[1])),
+  counter: (b) => advS(b.id) && ADV_ID_RE.test(b.id) && advSo(b.title) && advNo(b.start) && advNo(b.min) && advNo(b.max) && advTone(b.tone) && advSo(b.icon) && advSo(b.hint) && advLs(b.steps, (x) => Array.isArray(x) && Number.isFinite(x[0]) && advS(x[1]), true),
+  kampf: (b) => advSo(b.title) && advSo(b.enc) && ['gegner', 'gelaende', 'taktik', 'ende'].every((k) => advSo(b[k])) && advLs(b.allies, (x) => advObj(x) && advS(x.name) && advSo(x.when) && advSo(x.mid) && advNo(x.hp), true)
+};
+function advCheck(a) {
+  if (!advObj(a) || typeof a.id !== 'string' || !/^[a-z0-9-]{1,40}$/.test(a.id)) return 'Kennung fehlt oder ist ungültig';
+  if (!advS(a.title) || !a.title.trim()) return 'Titel fehlt';
+  if (!Array.isArray(a.chapters) || !a.chapters.length) return 'keine Kapitel';
+  if (a.flags != null && !advLs(a.flags, (f) => advObj(f) && advS(f.id) && ADV_ID_RE.test(f.id) && advSo(f.label) && advObj(f.opts) && Object.values(f.opts).every(advSo))) return 'Merkpunkte (flags) ungültig';
+  for (const k of ['mobs', 'enc', 'figures']) if (a[k] != null && !advLs(a[k], advObj)) return 'Liste „' + k + '“ ungültig';
+  for (const k of ['lore', 'items', 'overview']) if (a[k] != null && typeof a[k] !== 'object') return 'Teil „' + k + '“ ungültig';
+  const blockErr = (b) => { if (!advObj(b) || typeof b.t !== 'string') return 'Block ohne Art'; const f = ADV_BLOCK[b.t]; return !f || f(b) ? '' : 'Block „' + b.t + '“ unvollständig'; };
+  for (let ci = 0; ci < a.chapters.length; ci++) {
+    const c = a.chapters[ci], cn = 'Kapitel ' + (ci + 1);
+    if (!advObj(c) || !advS(c.id) || !ADV_ID_RE.test(c.id)) return cn + ': Kennung fehlt oder ist ungültig';
+    const where = cn + (advS(c.title) && c.title ? ' „' + c.title.slice(0, 40) + '“' : '');
+    for (const k of ['kicker', 'title', 'sub', 'level']) if (!advSo(c[k])) return where + ': Feld „' + k + '“ ist kein Text';
+    if (c.intro != null) { if (!Array.isArray(c.intro)) return where + ': Einleitung ungültig'; for (const b of c.intro) { const e = blockErr(b); if (e) return where + ', Einleitung: ' + e; } }
+    if (!Array.isArray(c.scenes) || !c.scenes.length) return where + ': keine Szenen';
+    for (let si = 0; si < c.scenes.length; si++) {
+      const sc = c.scenes[si]; const sn = where + ', Szene ' + (si + 1);
+      if (!advObj(sc) || !advS(sc.id) || !ADV_ID_RE.test(sc.id)) return sn + ': Kennung fehlt oder ist ungültig';
+      if (!advSo(sc.title)) return sn + ': Titel ist kein Text';
+      if (!Array.isArray(sc.blocks)) return sn + ': keine Blöcke';
+      for (const b of sc.blocks) { const e = blockErr(b); if (e) return sn + (sc.title ? ' „' + sc.title.slice(0, 40) + '“' : '') + ': ' + e; }
+    }
+  }
+  return '';
 }
+const ADV_OK = new WeakMap();
+function advValid(a) { if (!a || typeof a !== 'object') return false; let v = ADV_OK.get(a); if (v === undefined) { v = !advCheck(a); ADV_OK.set(a, v); } return v; }
 /* Aus einer Datei: gültige Abenteuer übernehmen. Ist dieselbe oder eine neuere Fassung schon eingebaut, wird nichts gespeichert. */
 function advImport(list) {
-  const d = advDb(); let n = 0;
+  const d = advDb(); let n = 0; advImport.errs = [];
   (Array.isArray(list) ? list : []).forEach((a) => {
-    if (!advValid(a)) return; n++;
+    const e = advCheck(a); if (e) { advImport.errs.push((a && typeof a.title === 'string' && a.title.trim() ? '„' + a.title.trim().slice(0, 40) + '“' : 'Abenteuer') + ': ' + e); return; } n++;
     if (ADV_BUILTIN.some((b) => b.id === a.id && advNewer(b, a))) { d.list = d.list.filter((x) => x.id !== a.id); return; }
     const i = d.list.findIndex((x) => x.id === a.id); if (i >= 0) d.list[i] = a; else d.list.push(a);
   });
@@ -81,7 +129,7 @@ function advItems(list) {
   (list || []).forEach((x) => { const li = /^-\s+/.test(x); if (li && !ul) { h += '<ul>'; ul = true; } if (!li && ul) { h += '</ul>'; ul = false; } h += li ? '<li>' + advMd(x.replace(/^-\s+/, '')) + '</li>' : '<p>' + advMd(x) + '</p>'; });
   return h + (ul ? '</ul>' : '');
 }
-const advBox = (kind, icon, title, body, foot) => '<div class="advb ' + kind + '"><div class="advbt"><span aria-hidden="true">' + icon + '</span>' + advMd(title) + '</div><div class="advbb">' + body + '</div>' + (foot ? '<div class="advbf chips">' + foot + '</div>' : '') + '</div>';
+const advBox = (kind, icon, title, body, foot) => '<div class="advb ' + esc(kind) + '"><div class="advbt"><span aria-hidden="true">' + icon + '</span>' + advMd(title) + '</div><div class="advbb">' + body + '</div>' + (foot ? '<div class="advbf chips">' + foot + '</div>' : '') + '</div>';
 const advCtx = () => ({ camp: !!S.camp, dm: typeof isDM === 'function' && isDM(), fight: !!(S.combat && S.combat.active) });
 const advCh = (A, id) => A.chapters.find((c) => c.id === id) || A.chapters[0];
 const advSc = (C, id) => C.scenes.find((s) => s.id === id) || C.scenes[0];
@@ -118,7 +166,7 @@ const advLevel = (C) => +((String(C.level || '').match(/\d+/g) || []).pop() || 0
 function advFlagVal(A, st, id) { const f = (A.flags || []).find((x) => x.id === id); return f ? st.flags[id] || '' : ''; }
 function advFlagChips(A, st, ids) {
   return '<div class="advfl">' + ids.map((id) => { const f = (A.flags || []).find((x) => x.id === id); if (!f) return ''; const v = st.flags[id] || '';
-    return '<div class="advflr"><span>' + esc(f.label) + '</span><div class="chips">' + Object.keys(f.opts).map((o) => chip(v === o, esc(o), 'data-act="advFlag" data-arg="' + id + '" data-v="' + esc(o) + '"')).join('') + '</div></div>'; }).join('') + '</div>';
+    return '<div class="advflr"><span>' + esc(f.label) + '</span><div class="chips">' + Object.keys(f.opts).map((o) => chip(v === o, esc(o), 'data-act="advFlag" data-arg="' + esc(id) + '" data-v="' + esc(o) + '"')).join('') + '</div></div>'; }).join('') + '</div>';
 }
 function advFlagList(A, st, ids) {
   return '<ul class="advfx">' + ids.map((id) => { const f = (A.flags || []).find((x) => x.id === id); if (!f) return ''; const v = st.flags[id];
@@ -127,7 +175,7 @@ function advFlagList(A, st, ids) {
 
 /* ---------- Blöcke ---------- */
 function advBlock(A, b, path, st, X, C) {
-  const dmBtn = (act, label, extra) => (X.dm ? '<button class="btn sm' + (extra || '') + '" data-act="' + act + '" data-arg="' + path + '">' + label + '</button>' : '');
+  const dmBtn = (act, label, extra) => (X.dm ? '<button class="btn sm' + (extra || '') + '" data-act="' + esc(act) + '" data-arg="' + esc(path) + '">' + label + '</button>' : '');
   switch (b.t) {
     case 'p': return '<p class="advp">' + advMd(b.x) + '</p>';
     case 'sub': return '<h4 class="advsub">' + advMd(b.x) + '</h4>';
@@ -147,9 +195,9 @@ function advBlock(A, b, path, st, X, C) {
     case 'table': return '<div class="advtw"><table class="advt ' + esc(b.tone || '') + '"><thead><tr>' + b.head.map((h) => '<th>' + advMd(h) + '</th>').join('') + '</tr></thead><tbody>' +
       b.rows.map((r) => '<tr>' + r.map((x, i) => (i === 0 && b.bf ? '<th>' : '<td>') + advMd(x) + (i === 0 && b.bf ? '</th>' : '</td>')).join('') + '</tr>').join('') + '</tbody></table></div>';
     case 'items': return '<div class="advtw"><table class="advt loot"><thead><tr><th>Name</th><th>Regel</th><th>Herkunft</th>' + (X.dm ? '<th></th>' : '') + '</tr></thead><tbody>' +
-      b.rows.map((r, i) => '<tr><th>' + esc(r.name) + '</th><td>' + advMd(r.rule) + '</td><td>' + advMd(r.from) + '</td>' + (X.dm ? '<td><button class="btn sm ghost" data-act="advGive" data-arg="' + path + '" data-i="' + i + '">Geben</button></td>' : '') + '</tr>').join('') + '</tbody></table></div>';
+      b.rows.map((r, i) => '<tr><th>' + esc(r.name) + '</th><td>' + advMd(r.rule) + '</td><td>' + advMd(r.from) + '</td>' + (X.dm ? '<td><button class="btn sm ghost" data-act="advGive" data-arg="' + esc(path) + '" data-i="' + esc(i) + '">Geben</button></td>' : '') + '</tr>').join('') + '</tbody></table></div>';
     case 'choice': { const on = st.choice[b.key];
-      return advBox('wahl', '!', 'Entscheidung · ' + b.title, '<div class="advchs">' + b.rows.map((r, i) => '<button class="advcho' + (on === i ? ' on' : '') + '" data-act="advChoice" data-arg="' + path + '" data-i="' + i + '" aria-pressed="' + (on === i) + '"><b>' + advMd(r.a) + '</b><span>' + advMd(r.b) + '</span></button>').join('') + '</div><p class="hint">Antippen hält die Entscheidung fest' + (Object.keys((b.rows[0] || {}).sets || {}).length ? ' und trägt sie bei „Merke dir“ ein' : '') + '.</p>'); }
+      return advBox('wahl', '!', 'Entscheidung · ' + b.title, '<div class="advchs">' + b.rows.map((r, i) => '<button class="advcho' + (on === i ? ' on' : '') + '" data-act="advChoice" data-arg="' + esc(path) + '" data-i="' + esc(i) + '" aria-pressed="' + (on === i) + '"><b>' + advMd(r.a) + '</b><span>' + advMd(r.b) + '</span></button>').join('') + '</div><p class="hint">Antippen hält die Entscheidung fest' + (Object.keys((b.rows[0] || {}).sets || {}).length ? ' und trägt sie bei „Merke dir“ ein' : '') + '.</p>'); }
     case 'flags': return advBox('wahl', '⚑', b.title || 'Eure Entscheidungen', advFlagList(A, st, b.ids) + '<p class="hint">Ändern kannst du sie in den Kästen „Merke dir“ der früheren Kapitel oder unter Übersicht.</p>');
     case 'kampf': return advKampf(A, b, path, X, C);
     default: return '';
@@ -160,7 +208,7 @@ function advCntVal(b, st) { const v = st.cnt[b.id]; return Number.isFinite(+v) &
 function advCounter(b, path, st) {
   const v = advCntVal(b, st); const min = b.min != null ? +b.min : -99, max = b.max != null ? +b.max : 99;
   const steps = (b.steps || []).slice().sort((x, y) => x[0] - y[0]); const reached = steps.filter((x) => (+b.max > 0 && x[0] < 0 ? v <= x[0] : v >= x[0])).pop();
-  const body = '<div class="advcnt"><button class="btn ghost" data-act="advCnt" data-arg="' + path + '" data-d="-1" aria-label="eins weniger"' + (v <= min ? ' disabled' : '') + '>−</button><output aria-live="polite"><b>' + (b.icon ? '<span aria-hidden="true">' + esc(b.icon) + '</span> ' : '') + v + '</b>' + (b.max != null ? '<small>von ' + max + '</small>' : '') + '</output><button class="btn ghost" data-act="advCnt" data-arg="' + path + '" data-d="1" aria-label="eins mehr"' + (v >= max ? ' disabled' : '') + '>+</button></div>' +
+  const body = '<div class="advcnt"><button class="btn ghost" data-act="advCnt" data-arg="' + esc(path) + '" data-d="-1" aria-label="eins weniger"' + (v <= min ? ' disabled' : '') + '>−</button><output aria-live="polite"><b>' + (b.icon ? '<span aria-hidden="true">' + esc(b.icon) + '</span> ' : '') + v + '</b>' + (b.max != null ? '<small>von ' + max + '</small>' : '') + '</output><button class="btn ghost" data-act="advCnt" data-arg="' + esc(path) + '" data-d="1" aria-label="eins mehr"' + (v >= max ? ' disabled' : '') + '>+</button></div>' +
     (reached ? '<p class="advcnow">' + advMd(reached[1]) + '</p>' : '') +
     (steps.length || b.hint ? '<details class="advcdet"><summary>Alle Stufen' + (b.hint ? ' und Regel' : '') + '</summary>' + (steps.length ? '<ul class="advcst">' + steps.map((x) => '<li class="' + (x === reached ? 'on' : '') + '"><b>' + (x[0] > 0 && b.min < 0 ? '+' : '') + x[0] + '</b><span>' + advMd(x[1]) + '</span></li>').join('') + '</ul>' : '') + (b.hint ? '<p class="hint">' + advMd(b.hint) + '</p>' : '') + '</details>' : '');
   return advBox((b.tone || 'wahl') + ' cnt', '#', b.title, body);
@@ -170,7 +218,7 @@ const advRange = (r) => { const m = /^(\d+)(?:\s*[–-]\s*(\d+))?$/.exec(String(
 function advRollBox(b, path) {
   const got = (S.advRoll || {})[path];
   const body = '<table class="advt roll">' + b.rows.map((r) => { const [a, z] = advRange(r[0]); const on = got >= a && got <= z; return '<tr class="' + (on ? 'on' : '') + '"><th>' + esc(r[0]) + '</th><td>' + advMd(r[1]) + '</td></tr>'; }).join('') + '</table>' + (b.note ? '<p class="hint">' + advMd(b.note) + '</p>' : '');
-  return advBox('probe roll', '⚄', b.title + ' · W' + b.die, body, '<button class="btn sm" data-act="advRoll" data-arg="' + path + '">W' + b.die + ' würfeln</button>' + (got ? '<span class="advgot">Gewürfelt: <b>' + got + '</b></span>' : ''));
+  return advBox('probe roll', '⚄', b.title + ' · W' + b.die, body, '<button class="btn sm" data-act="advRoll" data-arg="' + esc(path) + '">W' + b.die + ' würfeln</button>' + (got ? '<span class="advgot">Gewürfelt: <b>' + got + '</b></span>' : ''));
 }
 function advKampf(A, b, path, X, C) {
   const e = advEnc(A, b.enc); const lv = advLevel(C);
@@ -183,9 +231,9 @@ function advKampf(A, b, path, X, C) {
     if (e.reserve && e.reserve.length) body += '<p class="hint">Startest du den Kampf hier, warten ' + e.reserve.map((m) => esc(advMobName(A, m.mid))).join(' und ') + ' am Tisch als Verstärkung. Tippe dort auf „Einsetzen“, sobald Phase 2 beginnt.</p>';
     if (!X.camp) foot = '<span class="hint">Kämpfe startest du am Tisch, wenn du dort die Spielleitung hast.</span><button class="btn sm ghost" data-act="view" data-arg="camp">Zum Tisch</button>';
     else if (!X.dm) foot = '<span class="hint">Nur die Spielleitung startet Kämpfe.</span>';
-    else foot = '<button class="btn sm" data-act="advFight" data-arg="' + path + '">' + (X.fight ? 'In den laufenden Kampf einsetzen' : '⚔ Kampf beginnen') + '</button>' +
+    else foot = '<button class="btn sm" data-act="advFight" data-arg="' + esc(path) + '">' + (X.fight ? 'In den laufenden Kampf einsetzen' : '⚔ Kampf beginnen') + '</button>' +
       (X.fight ? '<button class="btn sm ghost" data-act="view" data-arg="camp">Zum Kampf</button>' : '') +
-      (b.allies || []).map((x, i) => X.fight ? '<button class="btn sm ghost" data-act="advAlly" data-arg="' + path + '" data-i="' + i + '" title="' + esc(x.when || '') + '">+ ' + esc(x.name) + ' als Verbündeter</button>' : '').join('');
+      (b.allies || []).map((x, i) => X.fight ? '<button class="btn sm ghost" data-act="advAlly" data-arg="' + esc(path) + '" data-i="' + esc(i) + '" title="' + esc(x.when || '') + '">+ ' + esc(x.name) + ' als Verbündeter</button>' : '').join('');
   }
   return advBox('kampf', '⚔', 'Kampf · ' + b.title, body, foot);
 }
@@ -197,7 +245,7 @@ function renderAdv() {
   const tabs = [['ov', 'Übersicht']].concat(A.chapters.map((c) => ['ch:' + c.id, c.kicker === 'Zwischenspiel' ? 'Zwischenspiel' + (c.level ? ' ' + c.level.replace(/\s/g, '') : '') : c.kicker])).concat([['fig', 'Figuren'], ['mob', 'Kreaturen']]).concat(advItemCount(A) ? [['it', 'Gegenstände']] : []);
   const cur = st.tab === 'ch' ? 'ch:' + advCh(A, st.ch).id : st.tab;
   let h = '<div class="camp adv"><div class="advhead"><button class="link" data-act="advLib">‹ Alle Abenteuer</button><h1>' + esc(A.title) + '</h1>' + (A.meta ? '<p class="hint">' + esc(A.meta) + '</p>' : '') + '</div>' +
-    '<nav class="advnav chips" aria-label="Kapitel">' + tabs.map(([k, l]) => chip(cur === k, esc(l), 'data-act="advTab" data-arg="' + k + '"')).join('') + '</nav>';
+    '<nav class="advnav chips" aria-label="Kapitel">' + tabs.map(([k, l]) => chip(cur === k, esc(l), 'data-act="advTab" data-arg="' + esc(k) + '"')).join('') + '</nav>';
   if (st.tab === 'fig') h += advFigures(A);
   else if (st.tab === 'mob') h += advCreatures(A, X);
   else if (st.tab === 'it' && advItemCount(A)) h += advItemsTab(A, st, X);
@@ -260,7 +308,7 @@ function advCreatures(A, X) {
   const order = A.chapters.map((c) => c.id).concat(['']); const ents = Object.entries(groups).sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]));
   const chName = (id) => { const c = A.chapters.find((x) => x.id === id); return c ? c.kicker + ' · ' + c.title : 'Weitere'; };
   return '<section class="blk advch"><div class="advkick">Anhang</div><h2>Kreaturen</h2><p class="hint">Antippen zeigt Aussehen, Geschichte, Kampfweise und Schwächen. Die vollen Werte stehen im Bestiarium unter „✎ Eigene“.</p>' +
-    ents.map(([ch, list]) => '<h3 class="advsc">' + esc(chName(ch)) + '</h3><div class="advmobs big">' + list.map((o) => '<button class="advmob" data-act="advMob" data-arg="' + esc(o.mid) + '"><b>' + esc(o.name) + '</b><small>HG ' + esc(o.cr) + ' · RK ' + o.ac + ' · TP ' + o.hp + '</small></button>').join('') + '</div>').join('') +
+    ents.map(([ch, list]) => '<h3 class="advsc">' + esc(chName(ch)) + '</h3><div class="advmobs big">' + list.map((o) => '<button class="advmob" data-act="advMob" data-arg="' + esc(o.mid) + '"><b>' + esc(o.name) + '</b><small>HG ' + esc(o.cr) + ' · RK ' + esc(o.ac) + ' · TP ' + esc(o.hp) + '</small></button>').join('') + '</div>').join('') +
     '<div class="chips"><button class="btn sm ghost" data-act="advPrep">Monster und Begegnungen ins Bestiarium</button></div>' + (A.srd ? '<p class="hint advsrd">' + esc(A.srd) + '</p>' : '') + '</section>';
 }
 function advItemsTab(A, st, X) {

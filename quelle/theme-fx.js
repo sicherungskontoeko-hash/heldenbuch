@@ -1,7 +1,7 @@
 /* ==== Stimmungen: kräftige Verzierungen, Licht-Ebenen und Reaktionen auf kritische Würfe ==== */
 const CARDS = '.panel,.blk,.hero,.comp,.mob,.dlg,.summary,.themep';
 (function themeFxCss() {
-  const T = (k) => 'html[data-theme="' + k + '"]:not([data-fx="dezent"])';
+  const T = (k) => 'html[data-theme="' + esc(k) + '"]:not([data-fx="dezent"])';
   const all = (k, sel) => sel.split(',').map((x) => T(k) + ' ' + x.trim()).join(',');
   let c = '';
   c += '#scene::before{transition:filter .45s ease,opacity .45s ease}';

@@ -374,13 +374,13 @@ function d3conflict() { /* gleichzeitig gewählt: früher gewählt gewinnt */
 function diceModal() {
   const ch = cur(); if (!ch) return; const taken = d3taken(); const fx = d3fx(); const mine = ch.dice || 'klassik';
   const card = (id) => { const s = D3_SETS[id]; const tk = taken[id]; const on = mine === id;
-    return '<button class="d3card' + (on ? ' on' : '') + (tk ? ' taken' : '') + '"' + (tk ? ' disabled' : '') + ' data-act="diceSet" data-arg="' + id + '"><span class="d3pv" style="--dg:' + s.glow + '">' + d3svg(20, 20, id, { tilt: 0.42 }) + '</span><b>' + esc(s.name) + '</b><small>' + (tk ? 'Vergeben an ' + esc(tk.name) : esc(s.desc)) + '</small></button>'; };
+    return '<button class="d3card' + (on ? ' on' : '') + (tk ? ' taken' : '') + '"' + (tk ? ' disabled' : '') + ' data-act="diceSet" data-arg="' + esc(id) + '"><span class="d3pv" style="--dg:' + s.glow + '">' + d3svg(20, 20, id, { tilt: 0.42 }) + '</span><b>' + esc(s.name) + '</b><small>' + (tk ? 'Vergeben an ' + esc(tk.name) : esc(s.desc)) + '</small></button>'; };
   const m = $('#modal'); S.modal = 'dice';
   m.innerHTML = '<div class="dlg d3dlg" role="dialog" aria-modal="true" aria-label="Würfel-Set"><div class="dph"><b>Würfel-Set für ' + esc(ch.name) + '</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
     '<p class="hint">' + (S.camp ? 'Im Raum <b>' + esc(S.camp) + '</b> gehört jedes Set nur einem Helden. Am Tisch würfeln deine Würfel bei allen in deinem Design.' : 'Allein frei wählbar. Am Online-Tisch gehört jedes Set nur einem Helden.') + '</p>' +
     '<div class="d3grid">' + ['klassik'].concat(D3_PLAYER).map(card).join('') + '</div>' +
     (typeof isDM === 'function' && isDM() ? '<p class="hint">Als Spielleitung würfelst du am Tisch für Monster automatisch mit <b>Schatten der Spielleitung</b>.</p>' : '') +
-    '<div class="d3opts"><div class="fld"><span>Effekte</span><div class="seg">' + [['voll', 'Voll'], ['ruhig', 'Ruhig'], ['aus', 'Aus']].map(([k, l]) => '<button class="' + (fx === k ? 'on' : '') + '" data-act="diceFx" data-arg="' + k + '">' + l + '</button>').join('') + '</div></div>' +
+    '<div class="d3opts"><div class="fld"><span>Effekte</span><div class="seg">' + [['voll', 'Voll'], ['ruhig', 'Ruhig'], ['aus', 'Aus']].map(([k, l]) => '<button class="' + (fx === k ? 'on' : '') + '" data-act="diceFx" data-arg="' + esc(k) + '">' + l + '</button>').join('') + '</div></div>' +
     '<div class="fld"><span>Geräusche</span><div class="seg"><button class="' + (d3sound() ? '' : 'on') + '" data-act="diceSnd" data-arg="0">Aus</button><button class="' + (d3sound() ? 'on' : '') + '" data-act="diceSnd" data-arg="1">An</button></div>' + (d3sound() ? '<input type="range" min="0" max="1" step="0.05" value="' + d3vol() + '" id="d3vol" aria-label="Lautstärke">' : '') + '</div>' +
     '<div class="d3try"><button class="btn ghost" data-act="diceTry" data-arg="20">Probewurf W20</button><button class="btn ghost" data-act="diceTry" data-arg="n20">Natürliche 20 zeigen</button><button class="btn ghost" data-act="diceTry" data-arg="n1">Natürliche 1 zeigen</button></div></div></div>';
   m.hidden = false;

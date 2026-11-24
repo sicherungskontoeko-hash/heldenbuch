@@ -60,7 +60,7 @@ function erLevels() {
 function encRandBox() {
   const h = S.erHab || (S.mhab && HABITATS[S.mhab] ? S.mhab : 'wald'); const d = S.erDiff != null ? S.erDiff : 1; const g = erLevels(); const E = S.enc || {};
   return '<div class="encrand"><b>🎲 Zufallsbegegnung</b><div class="chips"><select id="erHab" aria-label="Fundort">' + Object.entries(HABITATS).map(([k, l]) => '<option value="' + k + '"' + (k === h ? ' selected' : '') + '>' + esc(l) + '</option>').join('') + '</select>' +
-    ER_DIFF.map((l, i) => chip(i === d, l, 'data-act="erDiff" data-arg="' + i + '"')).join('') + '<button class="btn sm" data-act="encRand">' + (E.rand ? 'Neu würfeln' : 'Würfeln') + '</button></div>' +
+    ER_DIFF.map((l, i) => chip(i === d, l, 'data-act="erDiff" data-arg="' + esc(i) + '"')).join('') + '<button class="btn sm" data-act="encRand">' + (E.rand ? 'Neu würfeln' : 'Würfeln') + '</button></div>' +
     (g.guess ? '<p class="hint">Gerechnet für 4 Helden auf Stufe ' + g.levels[0] + ' – unten anpassbar.</p>' : '') +
     (E.rand && E.scene ? '<p class="erscene">✦ ' + esc(E.scene) + '</p>' : '') + '</div>';
 }
