@@ -87,16 +87,17 @@ const CARDS = '.panel,.blk,.hero,.comp,.mob,.dlg,.summary,.themep';
   const cv = document.getElementById('embers'); if (cv && cv.parentNode) cv.parentNode.insertBefore(v, cv.nextSibling); else document.body.prepend(v);
   document.body.appendChild(b);
 })();
-function fxLevel() { try { return localStorage.getItem('hb_fx') || 'stark'; } catch (e) { return 'stark'; } }
+/* Hintergrund-Stufe in der alten Schreibweise (CSS data-fx): aus vfx.js */
+function fxLevel() { return typeof vfxLevel === 'function' ? { aus: 'aus', dezent: 'dezent', intensiv: 'stark' }[vfxLevel('background')] : 'stark'; }
 function applyFxLevel() { document.documentElement.setAttribute('data-fx', fxLevel()); }
 applyFxLevel();
 
 /* Blitze bei „Gruselig“ */
-setInterval(() => { if (document.documentElement.getAttribute('data-theme') !== 'gruselig' || fxLevel() !== 'stark' || document.hidden) return; if (Math.random() < 0.35) { const v = document.getElementById('vfx'); if (!v) return; v.classList.remove('flash'); void v.offsetWidth; v.classList.add('flash'); } }, 7000);
+setInterval(() => { if (document.documentElement.getAttribute('data-theme') !== 'gruselig' || fxLevel() !== 'stark' || document.hidden) return; if (vrand() < 0.35) { const v = document.getElementById('vfx'); if (!v) return; v.classList.remove('flash'); void v.offsetWidth; v.classList.add('flash'); } }, 7000);
 
 /* Reaktion auf natürliche 20 und 1 */
 function themeBurst(kind) {
-  if (fxLevel() === 'aus') return;
+  const lvl = typeof vfxLevel === 'function' ? vfxLevel('critical') : 'dezent'; if (lvl === 'aus') return;
   const t = themeNow(); const b = document.getElementById('burst'); if (!b) return;
   const add = (cls, style) => { const el = document.createElement('div'); el.className = 'bfx ' + cls; if (style) el.style.cssText = style; b.appendChild(el); setTimeout(() => el.remove(), 2400); };
   const parts = (colors, n, shape) => { if (FX && FX.burst) FX.burst(colors, n, shape); };
@@ -106,11 +107,11 @@ function themeBurst(kind) {
     else if (t === 'lustig') parts(['120,120,140', '90,90,110'], 18, 'confetti');
     else add('flash', 'background:radial-gradient(ellipse,transparent 30%,rgba(0,0,0,.7))');
     return; }
-  const strong = fxLevel() === 'stark' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const strong = lvl === 'intensiv';
   if (strong) {
     const PAL = { warm: ['255,214,140', '255,160,70', '255,240,200'], episch: ['255,231,150', '255,200,90', '255,255,230'], gruselig: ['170,255,160', '120,220,110', '220,255,210'], romantisch: ['255,190,210', '244,140,170', '255,240,245'], lustig: ['255,210,63', '255,107,154', '79,209,197', '123,224,123'], kalt: ['255,255,255', '180,230,255', '120,200,255'], blutig: ['255,90,60', '255,40,40', '255,190,120'], mystisch: ['236,223,255', '127,216,234', '243,168,232'], wueste: ['255,230,160', '255,190,90', '255,250,220'] };
     const pal = PAL[t] || PAL.warm;
-    try { if (navigator.vibrate) navigator.vibrate([40, 60, 120]); } catch (e) {}
+    if (typeof vfxVibrate === 'function') vfxVibrate('n20');
     const v = document.getElementById('view'); if (v) { v.classList.remove('punch', 'shake'); void v.offsetWidth; v.classList.add('punch'); }
     add('core'); add('rays'); add('edge');
     add('ring2', 'border:4px solid rgba(var(--gold-rgb),.95);box-shadow:0 0 50px rgba(var(--gold-rgb),.9),inset 0 0 30px rgba(var(--gold-rgb),.6)');
@@ -129,4 +130,5 @@ function themeBurst(kind) {
   else if (t === 'wueste') { add('flash', 'background:radial-gradient(circle at 85% 0%,rgba(255,245,200,.9),rgba(255,190,90,.35) 30%,transparent 60%)'); parts(['235,200,140', '255,220,160'], 60, 'spark'); }
   else { add('flash', 'background:radial-gradient(circle at 50% 50%,rgba(255,170,80,.45),transparent 60%)'); parts(['255,214,140', '226,130,60'], 60, 'spark'); }
 }
-XA.fxLevel = (t, a) => { try { localStorage.setItem('hb_fx', a); localStorage.setItem('hb_dice_fx', { stark: 'voll', dezent: 'ruhig', aus: 'aus' }[a] || 'voll'); } catch (e) {} applyFxLevel(); startFx(); if (S.modal === 'theme') openThemeModal(); else render(); };
+/* alte Aktion (Stark/Dezent/Aus): betrifft nur noch den Hintergrund, nicht mehr die Würfel */
+XA.fxLevel = (t, a) => { if (VFX_BF[a]) vfxSet('background', VFX_BF[a]); if (S.modal === 'theme') openThemeModal(); else render(); };

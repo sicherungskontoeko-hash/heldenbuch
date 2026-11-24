@@ -34,11 +34,11 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
   T('Spieltisch: Hilfe-Knöpfe bleiben nach Aktualisierung', await p.evaluate(() => { S.table.u2.hp = 4; paintCamp(); return document.querySelectorAll('#view .hlp').length > 0; }));
   /* Hintergrund-Effekte */
   const fx = await p.evaluate(async () => { const cv = $('#embers'); const r = {}; S.camp = null; S.view = 'sheet'; render();
-    localStorage.setItem('hb_fx', 'stark'); setTheme('warm'); startFx(); r.warm = cv.width === cv.clientWidth; setTheme('kalt'); startFx(); r.kalt = cv.width === cv.clientWidth * 2;
+    localStorage.setItem('hb_fx', 'stark'); setTheme('warm'); startFx(); r.warm = cv.width === cv.clientWidth; setTheme('kalt'); startFx(); r.kalt = cv.width === cv.clientWidth; /* Themes v2: am Handy (≤ 820 px) auch Schnee mit einfacher Pixeldichte, spart Rechenzeit */
     setTheme('warm'); startFx(); await new Promise((res) => setTimeout(res, 300)); const px = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let lit = 0; for (let i = 3; i < px.length; i += 4) if (px[i] > 0) lit++; r.drawn = lit > 50;
     themeBurst('crit'); await new Promise((res) => setTimeout(res, 200)); r.burst = true;
     localStorage.setItem('hb_fx', 'aus'); startFx(); r.aus = cv.width === 0; localStorage.setItem('hb_fx', 'stark'); startFx(); r.wieder = cv.width > 0; return r; });
-  T('Glut (weich) mit einfacher Pixeldichte, Schnee scharf mit doppelter', fx.warm && fx.kalt, fx);
+  T('Handy: Glut und Schnee mit einfacher Pixeldichte (Themes v2)', fx.warm && fx.kalt, fx);
   T('Glut wird gezeichnet, Freudenfeuer bei 20 läuft ohne Fehler', fx.drawn && fx.burst, fx);
   T('Effekte aus → Zeichenfläche freigegeben; wieder an → zeichnet', fx.aus && fx.wieder, fx);
   T('Themenauswahl lädt alle Vorschaubilder', await p.evaluate(() => { openThemeModal(); return Object.keys(THEMES).every((k) => SCENE_ON[k]) && /url\(/.test(getComputedStyle(document.querySelector('.tsw[data-arg="kalt"]'), '::before').backgroundImage); }));
