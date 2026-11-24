@@ -43,8 +43,11 @@ const SETUP = () => { Object.keys(S.chars).forEach((k) => delete S.chars[k]); co
   await clear(); await ev(() => { render(); render(); commit(); }); await W(60);
   T('Neuzeichnen ohne Änderung: kein Effekt', await ev(() => document.querySelectorAll('#vfxl > *').length === 0 && !document.querySelector('#view .vfx-hurt, #view .vfx-heal')));
   /* Rast */
-  await clear(); await ev(() => { hpChange(cur(), 'dmg', 6); }); await clear(); await ev(() => doRest(cur(), 'long', true, true)); await W(60);
-  T('Lange Rast: goldene Welle, kein zusätzlicher Heil-Effekt', await ev(() => !!document.querySelector('#vfxl .vrest.long') && !document.querySelector('#vfxl .vdmg')));
+  await clear(); await ev(() => { hpChange(cur(), 'dmg', 6); }); await clear();
+  /* Welle dauert 640 ms: per Beobachter festhalten (langsame Läufer in WebKit) */
+  await ev(() => { window.__rw = { wave: false, dmg: false }; const mo = new MutationObserver(() => { if (document.querySelector('#vfxl .vrest.long')) window.__rw.wave = true; if (document.querySelector('#vfxl .vdmg')) window.__rw.dmg = true; }); mo.observe(document.querySelector('#vfxl') || document.body, { childList: true, subtree: true }); window.__rwmo = mo; });
+  await ev(() => doRest(cur(), 'long', true, true)); await p.waitForFunction(() => window.__rw.wave, null, { timeout: 1500, polling: 20 }).catch(() => {}); await W(60);
+  T('Lange Rast: goldene Welle, kein zusätzlicher Heil-Effekt', await ev(() => { window.__rwmo.disconnect(); return window.__rw.wave && !window.__rw.dmg; }));
   await clear(); await ev(() => doRest(cur(), 'short', true, true)); await W(60);
   T('Kurze Rast: Bernsteinlicht', await ev(() => !!document.querySelector('#vfxl .vrest.short')));
   /* Zustand, Inspiration, Zauberplatz, Konzentration */
@@ -93,9 +96,12 @@ const SETUP = () => { Object.keys(S.chars).forEach((k) => delete S.chars[k]); co
   T('Natürliche 20 dezent: wenige Teilchen, kein zweiter Ring', r.parts > 0 && r.parts <= 6 && !r.r2, r); await W(950);
   await ev(() => vfxSet('critical', 'intensiv'));
   for (const [set, cls, part] of [['frostherz', 'n1-shards', 'n1shard'], ['drachenfeuer', 'n1-smoke', 'n1puff'], ['weltenhain', 'n1-wilt', 'n1leaf']]) {
-    await clear(); await crit({ label: 'Patzer', total: 1, detail: 'W20 [1]', nat: 1, crit: false, fumble: true, dset: set }); await W(150);
-    const q = await ev(([cls, part]) => ({ st: !!document.querySelector('.d3stage.n1stage.local.' + cls), parts: document.querySelectorAll('.n1stage .d3p.' + part).length, toast: document.querySelector('#toast').classList.contains('d3quake'), body: document.body.classList.contains('d3quake') }), [cls, part]);
-    T('Natürliche 1 «' + set + '»: eigene Spur (' + part + '), nur das Würfelfeld bebt', q.st && q.parts > 0 && q.toast && !q.body, q); await W(1150);
+    await clear();
+    /* Beben dauert nur 620 ms: per Beobachter festhalten statt einmal abtasten (langsame Läufer in Firefox und WebKit) */
+    await ev(() => { window.__qk = { beben: false, body: false }; const mo = new MutationObserver(() => { if (document.documentElement.classList.contains('n1beben')) window.__qk.beben = true; if (document.body.classList.contains('d3quake') || document.body.style.transform) window.__qk.body = true; }); mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] }); mo.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] }); window.__qkmo = mo; });
+    await crit({ label: 'Patzer', total: 1, detail: 'W20 [1]', nat: 1, crit: false, fumble: true, dset: set }); await W(150);
+    const q = await ev(([cls, part]) => { window.__qkmo.disconnect(); return { st: !!document.querySelector('.d3stage.n1stage.full.' + cls), parts: document.querySelectorAll('.n1stage .d3p.' + part).length, beben: window.__qk.beben, body: window.__qk.body }; }, [cls, part]);
+    T('Natürliche 1 «' + set + '»: eigene Spur (' + part + '), Risse über den Bildschirm, Inhalt bebt (nicht der body)', q.st && q.parts > 0 && q.beben && !q.body, q); await W(2000);
   }
   await ctx.close();
   /* reduzierte Bewegung */
