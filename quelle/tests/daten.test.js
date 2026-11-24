@@ -41,7 +41,7 @@ const WERTE = () => { const r = {}; Object.values(S.chars).forEach((ch) => { con
   await p.evaluate(() => { localStorage.clear(); });
   await p.reload(); await p.waitForTimeout(600);
   T('Nach dem Löschen leer (nur Beispielheld möglich)', await p.evaluate(() => Object.values(S.chars).filter((c) => /^D/.test(c.name)).length === 0));
-  await p.evaluate((d) => { localStorage.setItem('hb_dice_fx', 'aus'); Object.keys(S.chars).forEach((k) => delete S.chars[k]); importJson(d); }, datei);
+  await p.evaluate((d) => { localStorage.setItem('hb_dice_fx', 'aus'); Object.keys(S.chars).forEach((k) => { delete S.chars[k]; persist('c', k); }); importJson(d); }, datei);
   const nachher = await p.evaluate(WERTE);
   const diff = Object.keys(vorher).filter((k) => vorher[k] !== nachher[k]);
   T('Nach dem Laden: alle 49 Helden mit identischen Werten und Spielständen', Object.keys(nachher).length === 49 && !diff.length, diff.slice(0, 3).map((k) => [k, vorher[k], nachher[k]]));

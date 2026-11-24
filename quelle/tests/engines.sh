@@ -27,7 +27,7 @@ SUITES=(
   "daten.test.js app/Heldenbuch.html|Daten in der App"
   "befunde.test.js|Befunde B-01–B-20"
   "undo.test.js|Rückgängig"
-  "dice.test.js|Würfel"
+  "dice.test.js|Würfel|1"
   "verlauf.test.js|Würfelverlauf"
   "hilfe.test.js|Hilfe-Stufen"
   "adventure.test.js|Abenteuer Machtader"

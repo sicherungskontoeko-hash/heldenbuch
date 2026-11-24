@@ -158,6 +158,8 @@ td{font-family:var(--f-display);color:var(--gold-hi)}
 .abn{font-family:var(--f-display);font-weight:600;color:var(--ink)}
 .abres{display:flex;align-items:baseline;gap:8px}.abres b{font-size:1.7rem;font-family:var(--f-display);color:var(--gold-hi)}.abres span{color:var(--gold-t,var(--gold));font-weight:700}
 .abbox small{color:var(--faint);font-size:.78rem;min-height:1em}
+/* Lange Attributnamen («Geschicklichkeit») passen auch auf 320 px: Spalte darf schrumpfen, Wort wird getrennt (Firefox und Safari verbreiterten sonst die Seite) */
+.abbox{min-width:0;grid-template-columns:minmax(0,1fr)}.abbox select{min-width:0;max-width:100%}.abn{overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto;line-height:1.15}
 .skillgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:4px 16px;margin-block:12px}
 .sk{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dotted var(--line);color:var(--faint)}
 .sk.p1,.sk.p2{color:var(--ink);font-weight:500}.sk.p2 b{color:var(--gold-hi)}
