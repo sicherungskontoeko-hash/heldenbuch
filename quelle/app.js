@@ -878,8 +878,8 @@ function renderSheet(c) {
   if (c.spell.has || c.extraSpells.length) h += spellBlock(c);
   if (c.res.length) h += '<section class="blk" data-grp="kampf faehig"><h2>Ressourcen' + (c.classDC && c.classDC.length ? ' <small>' + c.classDC.map(([l, v]) => l + ' ' + v).join(' · ') + '</small>' : '') + '</h2>' + hlTip('Fähigkeiten mit begrenzten Nutzungen. Gefüllt = noch verfügbar; antippen verbraucht eine. Rasten füllen sie wieder auf.', 'p') + slotsRows(c) + '<div class="res">' + c.res.map((r) => {
     const used = +P.res[r.k] || 0;
-    if (r.pool) return '<div class="rs"><div><b>' + esc(r.n) + '</b><small>' + (r.max - used) + ' von ' + r.max + ' · ' + RESET_DE[r.reset] + '</small></div><div class="pool"><input type="number" id="pool_' + r.k + '" min="1" placeholder="TP" aria-label="Punkte"><button class="btn sm" data-act="pool" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '">Ausgeben</button></div>' + resWhy(c, r) + '</div>';
-    return '<div class="rs"><div><b>' + esc(r.n) + '</b><small>' + RESET_DE[r.reset] + (r.note ? ' · ' + r.note : '') + '</small></div>' + (r.max > 8 ? '<div class="stepper sm"><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="1" aria-label="verbrauchen">−</button><b>' + (r.max - used) + '/' + r.max + '</b><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="-1" aria-label="zurück">+</button></div>' : pips('res.' + r.k, r.max, used)) + resWhy(c, r) + '</div>';
+    if (r.pool) return '<div class="rs"><div><b>' + resName(c, r) + '</b><small>' + (r.max - used) + ' von ' + r.max + ' · ' + RESET_DE[r.reset] + '</small></div><div class="pool"><input type="number" id="pool_' + r.k + '" min="1" placeholder="TP" aria-label="Punkte"><button class="btn sm" data-act="pool" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '">Ausgeben</button></div>' + resWhy(c, r) + '</div>';
+    return '<div class="rs"><div><b>' + resName(c, r) + '</b><small>' + RESET_DE[r.reset] + (r.note ? ' · ' + r.note : '') + '</small></div>' + (r.max > 8 ? '<div class="stepper sm"><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="1" aria-label="verbrauchen">−</button><b>' + (r.max - used) + '/' + r.max + '</b><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="-1" aria-label="zurück">+</button></div>' : pips('res.' + r.k, r.max, used)) + resWhy(c, r) + '</div>';
   }).join('') + '</div></section>';
   h += optBlock(c);
   h += compBlock(c);
@@ -916,10 +916,10 @@ function condBlock(P) {
 }
 function slotsRows(c) {
   const sc = c.spell, P = c.char.play; if (!sc.has || (!sc.slots.length && !sc.pact)) return '';
-  return '<div class="rs slotrs"><div><b>Zauberplätze</b><small>' + (sc.pact && !sc.slots.length ? 'kurze Rast' : 'lange Rast') + '</small></div><div class="slrow">' +
+  return '<div class="rs slotrs"><div><b>Zauberplätze' + infoBtn('slots', 'Zauberplätze') + '</b><small>' + (sc.pact && !sc.slots.length ? 'kurze Rast' : 'lange Rast') + '</small></div><div class="slrow">' +
     sc.slots.map((n, i) => '<div class="sl"><small>Grad ' + (i + 1) + '</small>' + pips('slots.' + (i + 1), n, +P.slots[i + 1] || 0) + '</div>').join('') +
     (sc.pact ? '<div class="sl"><small>Pakt (Grad ' + sc.pact.lvl + ')</small>' + pips('pact', sc.pact.n, +P.pact || 0) + '</div>' : '') + '</div>' +
-    resDet('Zauberplätze', 'Zauberplätze sind deine Zauberkraft. Ein Zauber ab Grad 1 verbraucht beim Wirken einen Platz seines Grades oder höher; ein höherer Platz verstärkt viele Zauber. Zaubertricks und Rituale brauchen keinen Platz. Pro Zug darfst du nur einen Zauberplatz verbrauchen, egal ob mit Aktion, Bonusaktion oder Reaktion – auch Göttliches Niederstrecken zählt dazu. Zauber ohne Platz (z. B. von deinem Volk oder einem Talent) gehen zusätzlich, solange du Aktionen hast. Eine lange Rast füllt alle Plätze wieder auf.' + (sc.pact ? ' Paktplätze (Hexenmeister) haben immer den höchsten Paktgrad und kehren schon nach einer kurzen Rast zurück.' : ''), 'Regel (D&D 2024)') + '</div>';
+    resDet('slots', 'Zauberplätze sind deine Zauberkraft. Ein Zauber ab Grad 1 verbraucht beim Wirken einen Platz seines Grades oder höher; ein höherer Platz verstärkt viele Zauber. Zaubertricks und Rituale brauchen keinen Platz. Pro Zug darfst du nur einen Zauberplatz verbrauchen, egal ob mit Aktion, Bonusaktion oder Reaktion – auch Göttliches Niederstrecken zählt dazu. Zauber ohne Platz (z. B. von deinem Volk oder einem Talent) gehen zusätzlich, solange du Aktionen hast. Eine lange Rast füllt alle Plätze wieder auf.' + (sc.pact ? ' Paktplätze (Hexenmeister) haben immer den höchsten Paktgrad und kehren schon nach einer kurzen Rast zurück.' : ''), 'Regel (D&D 2024)') + '</div>';
 }
 /* ---------- Ressourcen: aufklappbare Erklärung (Merkmal, Talent, Zauber oder Hausregel) ---------- */
 const RES_ALIAS = { smite: 'Niederstrecken des Paladins', fe: 'Bevorzugter Feind', sp: 'Quelle der Magie', nrs: 'Natürliche Erholung', focus: 'Mönchsfokus', steed: 'Treues Reittier', rune: 'Runenprägung', cells: 'Gerätemodule', swa: 'Gnomische Abstammung', takt: 'Taktgefühl', tide17: 'Herr der Gezeiten', arkan: 'Klingenzeichen', gift: 'Giftkunde', trug: 'Täuschungsbild', faden: 'Fadenlesen', drohnen: 'Drohnenschwarm' };
@@ -933,8 +933,14 @@ function resInfo(c, r) {
   /* Zauber ohne Platz, der nur als Name in der Ressource steht (z. B. «Federfall (gratis)») */
   const sp = allSpells(S.hb).find((x) => resNorm(x.name) === want); return sp ? { t: sp.text, src: 'Zauber, ' + sp.time + ' · ohne Zauberplatz, wieder nach einer ' + (r.reset === 'short' ? 'kurzen' : 'langen') + ' Rast' } : null;
 }
-const resDet = (name, text, src) => '<details class="rinf"><summary aria-label="Erklärung: ' + esc(name) + '">ⓘ Was ist das?</summary><p>' + esc(text) + '</p>' + (src ? '<small>' + esc(src) + '</small>' : '') + '</details>';
-const resWhy = (c, r) => { const i = resInfo(c, r); return i ? resDet(r.n, i.t, i.src) : ''; };
+/* ⓘ neben dem Namen klappt die Erklärung unter der Zeile auf; offen bleibt sie auch nach dem Neuzeichnen (S.rinf) */
+const rinfOpen = (k) => !!(S.rinf && S.rinf[k]);
+const infoBtn = (k, name) => '<button type="button" class="rii" data-act="resInfo" data-arg="' + esc(k) + '" aria-expanded="' + rinfOpen(k) + '" aria-label="Erklärung: ' + esc(name) + '" title="Was ist das?">ⓘ</button>';
+const resDet = (k, text, src) => '<div class="rinf"' + (rinfOpen(k) ? '' : ' hidden') + ' data-k="' + esc(k) + '"><p>' + esc(text) + '</p>' + (src ? '<small>' + esc(src) + '</small>' : '') + '</div>';
+/* Name mit ⓘ: das letzte Wort bleibt mit dem Symbol zusammen (kein ⓘ allein auf einer Zeile) */
+const resName = (c, r) => { if (!resInfo(c, r)) return esc(r.n); const i = r.n.lastIndexOf(' '); return esc(r.n.slice(0, i + 1)) + '<span class="nw">' + esc(r.n.slice(i + 1)) + infoBtn(r.k, r.n) + '</span>'; };
+const resWhy = (c, r) => { const i = resInfo(c, r); return i ? resDet(r.k, i.t, i.src) : ''; };
+XA.resInfo = (t, a) => { S.rinf = S.rinf || {}; S.rinf[a] = !S.rinf[a]; const row = t.closest('.rs'); const d = row && row.querySelector('.rinf'); if (d) d.hidden = !S.rinf[a]; t.setAttribute('aria-expanded', String(!!S.rinf[a])); };
 function slotsMini(c) {
   const sc = c.spell, P = c.char.play; if (!sc.has || (!sc.slots.length && !sc.pact)) return '';
   return '<section class="blk slotmini" data-grp="kampf"><h2>Zauberplätze</h2>' + hlTip('Zauber ab Grad 1 verbrauchen einen Platz, Zaubertricks sind gratis. Wirken über die Zugleiste oder die Seite «Zauber». Nach einer langen Rast ist alles wieder voll.', 'p') + '<div class="slrow">' +
