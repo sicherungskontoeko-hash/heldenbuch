@@ -639,7 +639,12 @@ function renderBuild(c) {
     const bg = c.bg;
     body += '<h3 id="a-bgplus">Attributsboni aus „' + esc(bg.name) + '“</h3><div class="chips">' + chip(ch.bgMode === '21', '+2 und +1', 'data-act="bgMode" data-arg="21"') + chip(ch.bgMode === '111', '+1 / +1 / +1', 'data-act="bgMode" data-arg="111"') + '</div>';
     body += '<div class="bgplus">' + (bg.abil || []).map((a) => '<div class="bp"><span>' + AB_DE[a] + '</span><div class="chips">' + (ch.bgMode === '21' ? [0, 1, 2] : [0, 1]).map((v) => chip((+ch.bgPlus[a] || 0) === v, v ? '+' + v : '0', 'data-act="bgPlus" data-path="' + esc(a) + '" data-val="' + esc(v) + '"')).join('') + '</div></div>').join('') + '</div>';
-    if (ch.bg !== 'custom' && featById(bg.feat, hb)) body += '<div class="row">' + field('Herkunftstalent', sel('bgFeat', ch.bgFeat || bg.feat, featOptions('origin', hb))) + '</div><p class="hint">' + esc(featById(ch.bgFeat || bg.feat, hb).text) + ' <em>(Laut Regeln gehört „' + esc(FEATS[BACKGROUNDS[ch.bg].feat].name) + '“ zu ' + esc(bg.name) + ' – ein anderes Talent zu wählen ist eine Hausregel.)</em></p>';
+    /* Herkunftstalent: laut Regeln fest an den Hintergrund gebunden; frei wählbar nur als Hausregel (Regeloptionen) */
+    if (ch.bg !== 'custom' && featById(bg.feat, hb)) {
+      const own = BACKGROUNDS[ch.bg] ? FEATS[BACKGROUNDS[ch.bg].feat] : null; const swapped = ch.bgFeat && BACKGROUNDS[ch.bg] && ch.bgFeat !== BACKGROUNDS[ch.bg].feat;
+      if (rule('bgfeat') && !swapped) body += '<div class="row"><div class="fld"><span>Herkunftstalent</span><b class="fixed">' + esc(featById(bg.feat, hb).name) + '</b></div></div><p class="hint">' + esc(featById(bg.feat, hb).text) + ' <em>(Gehört fest zu ' + esc(bg.name) + '. Ein anderes Talent: «Eigener Hintergrund» oder unter Mehr › Hausregeln › Regeloptionen freischalten.)</em></p>';
+      else body += '<div class="row">' + field('Herkunftstalent', sel('bgFeat', ch.bgFeat || bg.feat, featOptions('origin', hb))) + '</div><p class="hint">' + esc(featById(ch.bgFeat || bg.feat, hb).text) + (own ? ' <em>(Laut Regeln gehört „' + esc(own.name) + '“ zu ' + esc(bg.name) + ' – ein anderes Talent zu wählen ist eine Hausregel.)</em>' : '') + '</p>' + (swapped && rule('bgfeat') ? '<p class="hint warnc">Dieser Held hat ein anderes Herkunftstalent als sein Hintergrund vorsieht. <button type="button" class="link" data-act="bgFeatReset">Auf „' + esc(own ? own.name : '') + '“ zurücksetzen</button></p>' : '');
+    }
     body += '<p class="hint">Fertigkeiten: ' + (bg.skills || []).map((s) => SKILLS[s][0]).join(', ') + (bg.tool ? ' · Werkzeug: ' + bg.tool : '') + (bg.equip ? '<br>Ausrüstung: ' + bg.equip : '') + '</p>';
     body += miPicker(c, 'bg');
   }
@@ -1589,6 +1594,7 @@ document.addEventListener('click', (ev) => {
     doImport: () => { try { importJson($('#imText').value); $('#modal').hidden = true; } catch (e) { const er = $('#imErr'); er.hidden = false; er.textContent = 'Das sieht nicht nach einem exportierten Helden aus. Bitte den ganzen Text einfügen.'; } },
     setCls: () => { if (ch.cls !== arg) { ch.multi = (ch.multi || []).filter((m) => m.cls !== arg); ch.sub = ''; ch.opts = []; ch.cls = arg; ch.classSkills = []; ch.expertise = []; ch.order = ''; ch.cantrips = []; ch.spells = []; ch.styles = []; ch.invocations = []; } commit(); },
     setSpecies: () => { if (ch.species !== arg) { ch.species = arg; ch.speciesChoice = SPECIES[arg].choice ? Object.keys(SPECIES[arg].choice.opts)[0] : ''; ch.speciesSkill = ''; } commit(); },
+    bgFeatReset: () => { ch.bgFeat = ''; commit(); },
     setBg: () => { ch.bg = arg; ch.bgFeat = ''; const b = bgOf(ch); ch.bgPlus = {}; if (ch.bgMode === '21' && b.abil) { ch.bgPlus[b.abil[0]] = 2; ch.bgPlus[b.abil[2]] = 1; } else (b.abil || []).forEach((a) => (ch.bgPlus[a] = 1)); commit(); },
     bgMode: () => { ch.bgMode = arg; const b = bgOf(ch); ch.bgPlus = {}; if (arg === '111') (b.abil || []).forEach((a) => (ch.bgPlus[a] = 1)); commit(); },
     bgPlus: () => { const v = +t.dataset.val; if (ch.bgMode === '21' && v) for (const k of Object.keys(ch.bgPlus)) if (+ch.bgPlus[k] === v) ch.bgPlus[k] = 0; ch.bgPlus[path] = v; commit(); },

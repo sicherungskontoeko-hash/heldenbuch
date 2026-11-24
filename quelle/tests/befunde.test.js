@@ -135,6 +135,16 @@ const KILL = () => { for (const k of Object.keys(LATER)) { clearTimeout(timers[k
   T('B-14: Chromatische Kugel – natürliche 1 sperrt «Treffer»', o1.dis, o1);
   const o20 = await orb(0.99);
   T('B-14: Chromatische Kugel – kritisch würfelt 6W8 (6 × 5 = 30)', !o20.dis && o20.total === 30 && /kritisch/.test(o20.label), o20);
+  /* Herkunftstalent fest am Hintergrund (D&D 2024), frei nur als Hausregel */
+  const hk = await p.evaluate(() => { localStorage.removeItem('hb_rules'); S.rules = null; const ch = normChar(newChar({ name: 'Herkunft', cls: 'fig', bg: 'soldier' })); S.chars[ch.id] = ch; S.cur = ch.id; S.view = 'build'; S.step = 1; render();
+    const a = { fest: !document.querySelector('#view select[data-bind="bgFeat"]') && /Wilder Angreifer|Grausamer|Angreifer/.test((document.querySelector('#view .fld .fixed') || {}).textContent || '') };
+    ch.bgFeat = 'alert'; render(); a.tausch = !!document.querySelector('#view [data-act="bgFeatReset"]') && derive(ch, S.hb).warn.some((w) => /Herkunftstalent weicht/.test(w));
+    document.querySelector('#view [data-act="bgFeatReset"]').click(); a.zurueck = !ch.bgFeat && derive(ch, S.hb).feats.some((f) => f.id === BACKGROUNDS.soldier.feat);
+    XA.ruleT(null, 'bgfeat'); S.view = 'build'; S.step = 1; render(); a.frei = !!document.querySelector('#view select[data-bind="bgFeat"]'); ch.bgFeat = 'alert'; a.ohneWarnung = !derive(ch, S.hb).warn.some((w) => /Herkunftstalent weicht/.test(w));
+    XA.ruleT(null, 'bgfeat'); return a; });
+  T('Herkunftstalent: fest zum Hintergrund, ohne Auswahl', hk.fest, hk);
+  T('… abweichendes Talent: Hinweis und «Zurücksetzen»', hk.tausch && hk.zurueck, hk);
+  T('… als Hausregel frei wählbar, dann ohne Warnung', hk.frei && hk.ohneWarnung, hk);
   /* B-16, B-17 */
   T('B-16: Bebende Handfläche kostet 4 Fokuspunkte, waffenloser Treffer', await p.evaluate(() => { const f = (CLASSES.mon.subFeats || []).find((x) => x[1] === 'Bebende Handfläche'); return f && /4 Fokuspunkte/.test(f[2]) && /waffenlosen Schlag/.test(f[2]); }));
   T('B-17: Schlaf nennt Aufwecken und automatische Rettung', await p.evaluate(() => { const s = getSpell('sleep'); const t = JSON.stringify(s); return /wachrüttelt/.test(t) && /Erschöpfung immun/.test(t); }));
