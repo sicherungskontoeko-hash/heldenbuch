@@ -353,6 +353,7 @@ function showMulti(e, flat) {
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
   const has3 = typeof d3ok === 'function'; const set = has3 ? (e.dset || d3setOf(cur())) : ''; const rollMs = typeof vfxRollMs === 'function' ? vfxRollMs() : 850; if (!rollMs) reduce = true;
   const live3 = has3 && n <= ({ eco: 2, balanced: 4, max: 6 }[typeof vfxTier === 'function' ? vfxTier() : 'balanced'] || 4); /* so viele Würfel drehen sich echt, sonst einfache Darstellung */
+  const art = has3 && n <= 12 && typeof W3D !== 'undefined' && typeof vfxLoad === 'function' && vfxLoad().dice3d === 'artifact'; /* Artefaktwürfel (WebGL) bis 12 Würfel, sonst bisherige Darstellung */
   const d3h = (d, v, cls) => '<span class="die d3 ' + cls + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(d.sides, v, set, { gold: / crit/.test(cls) && d.sides === 20, dead: / fum/.test(cls) && d.sides === 20, cracks: / fum/.test(cls) && d.sides === 20, thin: n > 6 }) + '</span>';
   const W = window.innerWidth, H = window.innerHeight;
   const areaW = W * 0.86, areaH = H * 0.52, top0 = H * 0.2;
@@ -370,7 +371,7 @@ function showMulti(e, flat) {
     const fx = side === 0 ? -W * 0.6 : side === 1 ? W * 0.6 : (vrand() - 0.5) * W;
     const fy = side === 2 ? -H * 0.6 : side === 3 ? H * 0.6 : (vrand() - 0.5) * H;
     el.style.cssText = 'left:' + (x0 + col * cell + (cell - size) / 2 + jx) + 'px;top:' + (y0 + r * cell + (cell - size) / 2 + jy) + 'px;width:' + size + 'px;height:' + size + 'px;--fx:' + fx + 'px;--fy:' + fy + 'px;--rot:' + ((vrand() < 0.5 ? -1 : 1) * (360 + vrand() * 540)) + 'deg;--fr:' + ((vrand() - 0.5) * 30) + 'deg;animation-delay:' + (i * 28) + 'ms;animation-duration:' + Math.max(0.25, rollMs / 1000).toFixed(2) + 's';
-    if (has3 && d3ok(d.sides)) { el.dataset.d3 = '1'; if (live3 && !reduce) { el.innerHTML = '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>'; el._h = d3roll(el.firstChild, d.sides, d.v, set, { dur: Math.round(rollMs * 0.82) + i * 60 }); } else el.innerHTML = d3h(d, reduce ? d.v : 1 + Math.floor(vrand() * d.sides), 'rolling-x'); }
+    if (has3 && d3ok(d.sides)) { el.dataset.d3 = '1'; if (live3 && !reduce) { el.innerHTML = '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>'; const o = { dur: Math.round(rollMs * 0.82) + i * 60 }; el._h = (art && W3D.supports(d.sides, set) && W3D.roll(el.firstChild, d.sides, d.v, set, o)) || d3roll(el.firstChild, d.sides, d.v, set, o); } else el.innerHTML = d3h(d, reduce ? d.v : 1 + Math.floor(vrand() * d.sides), 'rolling-x'); }
     else el.innerHTML = dieSvg(d.sides, reduce ? d.v : 1 + Math.floor(vrand() * d.sides), 'rolling-x');
     tray.appendChild(el); return el;
   });
@@ -381,9 +382,9 @@ function showMulti(e, flat) {
     clearInterval(showMulti.iv); t.onclick = () => { t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
     /* Höchst- und Tiefstwert nur leise markieren: kein Krit, keine natürliche 20/1 */
     els.forEach((el, i) => { const d = list[i]; const pair = (e.pairVals || []).includes(d.v); const cls = pair ? ' pair' : d.v === d.sides ? ' max' : d.v === 1 ? ' min' : '';
-      if (el.dataset.d3) { if (el._h) el._h.skip(); el.innerHTML = d3h(d, d.v, 'land' + cls + (d.neg ? ' neg' : '')); return; }
+      if (el.dataset.d3) { if (el._h) el._h.skip(); el.innerHTML = d3h(d, d.v, 'land' + cls + (d.neg ? ' neg' : '')); if (art && W3D.supports(d.sides, set)) { const dv = el.firstChild, svg = dv.innerHTML; if (!W3D.still(dv, d.sides, d.v, set, {})) dv.innerHTML = svg; } return; }
       const tx = el.querySelector('text'); if (tx) tx.textContent = d.v; el.firstChild.className = 'die land' + cls + (d.neg ? ' neg' : ''); });
-    if (has3) d3snd('land');
+    if (has3) d3snd('land', n, set); if (typeof vfxVibrate === 'function') vfxVibrate('land');
     if ((e.pairVals || []).length) { const pb = document.createElement('div'); pb.className = 'tpair'; pb.textContent = 'Pasch!'; tray.appendChild(pb); }
     const sum = list.reduce((a, d) => a + (d.neg ? -d.v : d.v), 0);
     t.innerHTML = '<div class="tt">' + head + '<div class="tv">' + esc(e.total) + '</div><div class="td">' + esc(e.detail) + (extra ? ' · ' + extra + ' weitere Würfel nicht gezeigt' : '') + '</div></div>';
@@ -393,7 +394,7 @@ function showMulti(e, flat) {
     showToast.tm = setTimeout(() => { t.hidden = true; }, 7000);
   };
   if (reduce) return land();
-  if (has3) { d3snd('roll', n); t.onclick = () => { clearTimeout(showMulti.st); t.onclick = null; land(); }; }
+  if (has3) { d3snd('roll', n, set); t.onclick = () => { clearTimeout(showMulti.st); t.onclick = null; land(); }; }
   showMulti.iv = setInterval(() => els.forEach((el, i) => { if (el.dataset.d3) return; const tx = el.querySelector('text'); if (tx) tx.textContent = 1 + Math.floor(vrand() * list[i].sides); }), 80);
   showMulti.st = setTimeout(land, rollMs + n * 28);
 }
@@ -420,7 +421,7 @@ function dieSvg(sides, n, cls) {
 }
 function showToast(e) {
   const t = $('#toast'); clearTimeout(showToast.tm); clearInterval(showToast.iv); clearTimeout(showToast.st);
-  document.querySelectorAll('.d3stage').forEach((x) => x.remove()); document.body.classList.remove('d3quake'); /* neuer Wurf: alte grosse Effekte weg */
+  document.querySelectorAll('.d3stage').forEach((x) => x.remove()); document.querySelectorAll('.d3quake').forEach((x) => x.classList.remove('d3quake')); /* neuer Wurf: alte grosse Effekte weg */
   const flat = (e.groups || []).flatMap((g) => g.rolls.map((v) => ({ v, sides: g.sides, neg: g.sign < 0 })));
   if (flat.length > 1) return showMulti(e, flat);
   const sides = e.sides || 0;
@@ -434,22 +435,26 @@ function showToast(e) {
   const hl = (e.crit ? ' crit' : e.fumble ? ' fum' : '');
   const use3 = typeof d3ok === 'function' && d3ok(sides); const set = use3 ? (e.dset || d3setOf(cur())) : ''; const rollMs = typeof vfxRollMs === 'function' ? vfxRollMs() : 850; const crl = use3 && typeof d3critLv === 'function' ? d3critLv() : 'aus';
   const nat = sides === 20 ? +vals[keep] : 0; /* natürliche 20/1 aus dem behaltenen W20, unabhängig vom Regel-Krit */
-  const dieH = (v, cls) => use3 ? '<span class="die d3 ' + cls + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(sides, v, set, { gold: / crit/.test(cls) && sides === 20, dead: / fum/.test(cls) && sides === 20, cracks: / fum/.test(cls) && sides === 20 }) + '</span>' : dieSvg(sides, v, cls);
+  /* Artefaktwürfel v5 (Vorschau, Schalter im Würfel-Fenster): nur wo vorhanden, sonst bisherige Darstellung */
+  const art = use3 && typeof W3D !== 'undefined' && typeof vfxLoad === 'function' && vfxLoad().dice3d === 'artifact' && W3D.supports(sides, set);
+  const wide = art && sides === 100 ? ' w100' : ''; /* W100 als Artefakt: Zehner- und Einerwürfel nebeneinander */
+  const dieH = (v, cls) => use3 ? '<span class="die d3 ' + cls + wide + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(sides, v, set, { gold: / crit/.test(cls) && sides === 20, dead: / fum/.test(cls) && sides === 20, cracks: / fum/.test(cls) && sides === 20 }) + '</span>' : dieSvg(sides, v, cls);
   const final = () => {
     clearInterval(showToast.iv); t.onclick = (ev) => { if (ev.target.closest('[data-act]')) return; t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
     const dice = vals.map((v, i) => dieH(v, 'land' + (i === keep ? hl : ' drop'))).join('');
     const tip = typeof rollTip === 'function' ? rollTip(e) : '';
-    t.innerHTML = '<div class="trow"><div class="dice">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer' + (nat && nat < 20 ? ' (erweiterter Bereich)' : '') + '!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
-    if (use3) { d3snd('land'); if (nat === 20 || nat === 1) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, nat === 20 ? 'n20' : 'n1', crl); d3snd(nat === 20 ? 'n20' : 'n1'); if (typeof vfxVibrate === 'function') vfxVibrate(nat === 20 ? 'n20' : 'n1'); } }
+    t.innerHTML = '<div class="trow"><div class="dice' + wide + '">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer' + (nat && nat < 20 ? ' (erweiterter Bereich)' : '') + '!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
+    if (art) t.querySelectorAll('.die.d3').forEach((el, i) => { const svg = el.innerHTML; if (!W3D.still(el, sides, vals[i], set, { gold: i === keep && nat === 20, dim: i !== keep || nat === 1 })) el.innerHTML = svg; });
+    if (use3) { d3snd('land', 1, set); if (nat !== 20 && nat !== 1 && typeof vfxVibrate === 'function') vfxVibrate('land'); if (nat === 20 || nat === 1) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, nat === 20 ? 'n20' : 'n1', crl); d3snd(nat === 20 ? 'n20' : 'n1'); if (typeof vfxVibrate === 'function') vfxVibrate(nat === 20 ? 'n20' : 'n1'); } }
     showToast.tm = setTimeout(() => { t.hidden = true; }, tip ? 9000 : 6500);
   };
   t.hidden = false; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
   if (use3) {
     if (!rollMs) return final();
-    t.innerHTML = '<div class="trow"><div class="dice">' + vals.map(() => '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>').join('') + '</div><div class="tt">' + head + '<div class="tv dim">…</div></div></div>';
-    d3snd('roll', vals.length); let left = vals.length; const hs = [];
-    t.querySelectorAll('.die').forEach((el, i) => hs.push(d3roll(el, sides, vals[i], set, { dur: Math.round(rollMs * 0.9) + i * (rollMs > 400 ? 140 : 50), onDone: () => { if (--left === 0) final(); } })));
+    t.innerHTML = '<div class="trow"><div class="dice' + wide + '">' + vals.map(() => '<span class="die d3 rolling3' + wide + '" style="--dg:' + D3_SETS[set].glow + '"></span>').join('') + '</div><div class="tt">' + head + '<div class="tv dim">…</div></div></div>';
+    d3snd('roll', vals.length, set); let left = vals.length; const hs = [];
+    t.querySelectorAll('.die').forEach((el, i) => { const o = { dur: Math.round(rollMs * 0.9) + i * (rollMs > 400 ? 140 : 50), onDone: () => { if (--left === 0) final(); } }; hs.push((art && W3D.roll(el, sides, vals[i], set, o)) || d3roll(el, sides, vals[i], set, o)); });
     t.onclick = () => { hs.forEach((h) => h.skip()); };
     return;
   }
@@ -873,8 +878,8 @@ function renderSheet(c) {
   if (c.spell.has || c.extraSpells.length) h += spellBlock(c);
   if (c.res.length) h += '<section class="blk" data-grp="kampf faehig"><h2>Ressourcen' + (c.classDC && c.classDC.length ? ' <small>' + c.classDC.map(([l, v]) => l + ' ' + v).join(' · ') + '</small>' : '') + '</h2>' + hlTip('Fähigkeiten mit begrenzten Nutzungen. Gefüllt = noch verfügbar; antippen verbraucht eine. Rasten füllen sie wieder auf.', 'p') + slotsRows(c) + '<div class="res">' + c.res.map((r) => {
     const used = +P.res[r.k] || 0;
-    if (r.pool) return '<div class="rs"><div><b>' + esc(r.n) + '</b><small>' + (r.max - used) + ' von ' + r.max + ' · ' + RESET_DE[r.reset] + '</small></div><div class="pool"><input type="number" id="pool_' + r.k + '" min="1" placeholder="TP" aria-label="Punkte"><button class="btn sm" data-act="pool" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '">Ausgeben</button></div></div>';
-    return '<div class="rs"><div><b>' + esc(r.n) + '</b><small>' + RESET_DE[r.reset] + (r.note ? ' · ' + r.note : '') + '</small></div>' + (r.max > 8 ? '<div class="stepper sm"><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="1" aria-label="verbrauchen">−</button><b>' + (r.max - used) + '/' + r.max + '</b><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="-1" aria-label="zurück">+</button></div>' : pips('res.' + r.k, r.max, used)) + '</div>';
+    if (r.pool) return '<div class="rs"><div><b>' + resName(c, r) + '</b><small>' + (r.max - used) + ' von ' + r.max + ' · ' + RESET_DE[r.reset] + '</small></div><div class="pool"><input type="number" id="pool_' + r.k + '" min="1" placeholder="TP" aria-label="Punkte"><button class="btn sm" data-act="pool" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '">Ausgeben</button></div>' + resWhy(c, r) + '</div>';
+    return '<div class="rs"><div><b>' + resName(c, r) + '</b><small>' + RESET_DE[r.reset] + (r.note ? ' · ' + r.note : '') + '</small></div>' + (r.max > 8 ? '<div class="stepper sm"><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="1" aria-label="verbrauchen">−</button><b>' + (r.max - used) + '/' + r.max + '</b><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="-1" aria-label="zurück">+</button></div>' : pips('res.' + r.k, r.max, used)) + resWhy(c, r) + '</div>';
   }).join('') + '</div></section>';
   h += optBlock(c);
   h += compBlock(c);
@@ -911,10 +916,31 @@ function condBlock(P) {
 }
 function slotsRows(c) {
   const sc = c.spell, P = c.char.play; if (!sc.has || (!sc.slots.length && !sc.pact)) return '';
-  return '<div class="rs slotrs"><div><b>Zauberplätze</b><small>' + (sc.pact && !sc.slots.length ? 'kurze Rast' : 'lange Rast') + '</small></div><div class="slrow">' +
+  return '<div class="rs slotrs"><div><b>Zauberplätze' + infoBtn('slots', 'Zauberplätze') + '</b><small>' + (sc.pact && !sc.slots.length ? 'kurze Rast' : 'lange Rast') + '</small></div><div class="slrow">' +
     sc.slots.map((n, i) => '<div class="sl"><small>Grad ' + (i + 1) + '</small>' + pips('slots.' + (i + 1), n, +P.slots[i + 1] || 0) + '</div>').join('') +
-    (sc.pact ? '<div class="sl"><small>Pakt (Grad ' + sc.pact.lvl + ')</small>' + pips('pact', sc.pact.n, +P.pact || 0) + '</div>' : '') + '</div></div>';
+    (sc.pact ? '<div class="sl"><small>Pakt (Grad ' + sc.pact.lvl + ')</small>' + pips('pact', sc.pact.n, +P.pact || 0) + '</div>' : '') + '</div>' +
+    resDet('slots', 'Zauberplätze sind deine Zauberkraft. Ein Zauber ab Grad 1 verbraucht beim Wirken einen Platz seines Grades oder höher; ein höherer Platz verstärkt viele Zauber. Zaubertricks und Rituale brauchen keinen Platz. Pro Zug darfst du nur einen Zauberplatz verbrauchen, egal ob mit Aktion, Bonusaktion oder Reaktion – auch Göttliches Niederstrecken zählt dazu. Zauber ohne Platz (z. B. von deinem Volk oder einem Talent) gehen zusätzlich, solange du Aktionen hast. Eine lange Rast füllt alle Plätze wieder auf.' + (sc.pact ? ' Paktplätze (Hexenmeister) haben immer den höchsten Paktgrad und kehren schon nach einer kurzen Rast zurück.' : ''), 'Regel (D&D 2024)') + '</div>';
 }
+/* ---------- Ressourcen: aufklappbare Erklärung (Merkmal, Talent, Zauber oder Hausregel) ---------- */
+const RES_ALIAS = { smite: 'Niederstrecken des Paladins', fe: 'Bevorzugter Feind', sp: 'Quelle der Magie', nrs: 'Natürliche Erholung', focus: 'Mönchsfokus', steed: 'Treues Reittier', rune: 'Runenprägung', cells: 'Gerätemodule', swa: 'Gnomische Abstammung', takt: 'Taktgefühl', tide17: 'Herr der Gezeiten', arkan: 'Klingenzeichen', gift: 'Giftkunde', trug: 'Täuschungsbild', faden: 'Fadenlesen', drohnen: 'Drohnenschwarm' };
+const resNorm = (s) => String(s || '').toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/[^a-z0-9äöüß]+/g, ' ').trim();
+function resInfo(c, r) {
+  if (/^sp_/.test(r.k)) { const s = getSpell(r.k.slice(3), S.hb); if (s) return { t: s.text, src: 'Zauber, ' + s.time + ' · einmal ohne Zauberplatz, wieder nach einer ' + (r.reset === 'short' ? 'kurzen' : 'langen') + ' Rast' }; }
+  if (/^hb_/.test(r.k)) { const h = (S.hb || {})[r.k.slice(3)]; if (h && h.text) return { t: h.text, src: 'Hausregel' }; }
+  const want = resNorm(RES_ALIAS[r.k] || r.n); const fl = c.features || []; if (!want) return null;
+  const f = fl.find((x) => resNorm(x.n) === want) || fl.find((x) => { const n = resNorm(x.n); return n.length > 3 && (n.startsWith(want + ' ') || want.startsWith(n + ' ')); });
+  if (f && f.t) return { t: f.t, src: (f.src || '') + (f.lv ? ' · Stufe ' + f.lv : '') };
+  /* Zauber ohne Platz, der nur als Name in der Ressource steht (z. B. «Federfall (gratis)») */
+  const sp = allSpells(S.hb).find((x) => resNorm(x.name) === want); return sp ? { t: sp.text, src: 'Zauber, ' + sp.time + ' · ohne Zauberplatz, wieder nach einer ' + (r.reset === 'short' ? 'kurzen' : 'langen') + ' Rast' } : null;
+}
+/* ⓘ neben dem Namen klappt die Erklärung unter der Zeile auf; offen bleibt sie auch nach dem Neuzeichnen (S.rinf) */
+const rinfOpen = (k) => !!(S.rinf && S.rinf[k]);
+const infoBtn = (k, name) => '<button type="button" class="rii" data-act="resInfo" data-arg="' + esc(k) + '" aria-expanded="' + rinfOpen(k) + '" aria-label="Erklärung: ' + esc(name) + '" title="Was ist das?">ⓘ</button>';
+const resDet = (k, text, src) => '<div class="rinf"' + (rinfOpen(k) ? '' : ' hidden') + ' data-k="' + esc(k) + '"><p>' + esc(text) + '</p>' + (src ? '<small>' + esc(src) + '</small>' : '') + '</div>';
+/* Name mit ⓘ: das letzte Wort bleibt mit dem Symbol zusammen (kein ⓘ allein auf einer Zeile) */
+const resName = (c, r) => { if (!resInfo(c, r)) return esc(r.n); const i = r.n.lastIndexOf(' '); return esc(r.n.slice(0, i + 1)) + '<span class="nw">' + esc(r.n.slice(i + 1)) + infoBtn(r.k, r.n) + '</span>'; };
+const resWhy = (c, r) => { const i = resInfo(c, r); return i ? resDet(r.k, i.t, i.src) : ''; };
+XA.resInfo = (t, a) => { S.rinf = S.rinf || {}; S.rinf[a] = !S.rinf[a]; const row = t.closest('.rs'); const d = row && row.querySelector('.rinf'); if (d) d.hidden = !S.rinf[a]; t.setAttribute('aria-expanded', String(!!S.rinf[a])); };
 function slotsMini(c) {
   const sc = c.spell, P = c.char.play; if (!sc.has || (!sc.slots.length && !sc.pact)) return '';
   return '<section class="blk slotmini" data-grp="kampf"><h2>Zauberplätze</h2>' + hlTip('Zauber ab Grad 1 verbrauchen einen Platz, Zaubertricks sind gratis. Wirken über die Zugleiste oder die Seite «Zauber». Nach einer langen Rast ist alles wieder voll.', 'p') + '<div class="slrow">' +
@@ -1466,13 +1492,28 @@ function paintTurn() {
   let next = null; if (cur) { const i = o.findIndex((x) => x.key === cur.key); next = o[(i + 1) % o.length]; }
   const meWaiting = waiting().some((x) => x.me); const meAway = (S.myInit && S.myInit.away && S.myInit.cid === c.id) || (notIn(UID, S.table[UID]) && !(S.myInit && S.myInit.cid === c.id && !S.myInit.away));
   el.innerHTML = '<div class="wrap tb' + (mine ? ' mine' : '') + '"><span class="tbr">Runde ' + (c.round || 1) + '</span>' +
-    (mine ? '<b class="tbme">Du bist am Zug!</b>' : cur ? '<span>Am Zug: <b>' + esc(cur.name) + '</b>' + (next ? ' · danach ' + esc(next.name) : '') + '</span>' : '<span>Kampf beginnt – Initiative würfeln</span>') +
+    (mine ? '<b class="tbme">Du bist am Zug!</b>' : cur ? '<span>Am Zug: <b>' + esc(cur.name) + '</b>' + (next ? (next.key === 'p:' + UID ? ' · <b class="tbnext">danach du</b>' : ' · danach ' + esc(next.name)) : '') + '</span>' : '<span>Kampf beginnt – Initiative würfeln</span>') +
     '<span class="tbsp"></span>' + (meAway ? '<span class="tbaway">Du bist noch nicht im Kampf</span><button class="btn sm" data-act="initRoll">Eingreifen</button>' : meWaiting ? '<button class="btn sm" data-act="initRoll">Initiative würfeln</button><button class="btn sm ghost" data-act="initAway">Noch nicht dabei</button>' : '') + (mine ? '<button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>' : cur && (!S.meta.dm || isDM()) ? '<button class="btn sm ghost" data-act="turnEnd" title="Gegner oder abwesende Spieler: weiter zum Nächsten">Weiter ▸</button>' : '') + (S.view !== 'camp' ? '<button class="link" data-act="view" data-arg="camp">Reihenfolge</button>' : '') + '</div>';
   document.body.classList.toggle('myturn', !!mine);
   if (mine && !wasMyTurn && S.chars[S.cur] && typeof turnReset === 'function') { const me = S.chars[S.cur]; setTimeout(() => { turnReset(me); if (S.chars[S.cur] === me) commit(); }, 0); }
-  if (mine && !wasMyTurn && typeof vfxVibrate === 'function') vfxVibrate('turn'); /* nur mit Einwilligung (Einstellungen › Vibration) */
+  if (mine && !wasMyTurn && typeof vfxTurn === 'function') setTimeout(vfxTurn, 0); /* goldener Impuls; Vibration nur mit Einwilligung */
+  if (mine && !wasMyTurn) turnCall(c.round || 1);
+  turnPill(!!mine);
   wasMyTurn = !!mine;
 }
+/* Eigener Zug gut sichtbar: grosse Ansage zu Zugbeginn (wird auch vorgelesen) und ein schwebender Knopf «Zug beenden»,
+   solange die Zugleiste oben weggescrollt ist. Über dem Würfelfenster nie: dort steht das Ergebnis. */
+function turnCall(round) {
+  document.querySelectorAll('.turncall').forEach((x) => x.remove()); const ch = S.chars[S.cur]; const el = document.createElement('div'); el.className = 'turncall'; el.setAttribute('role', 'status');
+  el.innerHTML = '<small>Runde ' + round + '</small><b>Du bist am Zug!</b>' + (ch ? '<span>' + esc(ch.name) + '</span>' : ''); document.body.appendChild(el); setTimeout(() => el.remove(), 1900);
+}
+function turnPill(mine) {
+  let p = $('#turnpill'); if (!mine) { if (p) p.remove(); return; }
+  if (!p) { p = document.createElement('div'); p.id = 'turnpill'; p.innerHTML = '<b>⚔ Du bist am Zug</b><button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>'; document.body.appendChild(p); }
+  turnPillVis();
+}
+function turnPillVis() { const p = $('#turnpill'); if (!p) return; const tb = $('#turnbar'); const r = tb && tb.getBoundingClientRect(); p.classList.toggle('on', !r || !r.height || r.bottom < 70 || r.top > innerHeight); }
+addEventListener('scroll', () => { if ($('#turnpill')) turnPillVis(); }, { passive: true });
 function bannerToast(title, text) { const m = $('#mini'); if (!m) return; const el = document.createElement('div'); el.className = 'mt big'; el.innerHTML = '<div><b>' + esc(title) + '</b><small>' + esc(text) + '</small></div>'; m.prepend(el); setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 5000); }
 setInterval(() => { if (S.camp) paintCamp(); }, 30000);
 
@@ -1557,7 +1598,7 @@ function render0() {
 /* TP nie über dem Maximum speichern: Stufe senken oder Klasse/Spezies wechseln im Erschaffen kann das Maximum verkleinern.
    Sonst sähen andere am Tisch z. B. «44/38», bis der Bogen einmal geöffnet wird. */
 function hpClamp(ch) { try { const P = ch.play; if (!P || P.hp == null) return; const m = derive(ch, S.hb).hpMax; if (P.hp > m) P.hp = m; } catch (e) {} }
-function commit(rerender = true) { const ch = cur(); if (ch) { ch.updated = Date.now(); hpClamp(ch); persist('c', ch.id); } queueMe(); if (rerender) render(); }
+function commit(rerender = true) { const ch = cur(); if (ch) { ch.updated = Date.now(); hpClamp(ch); if (typeof vfxObserve === 'function') vfxObserve(ch); persist('c', ch.id); } queueMe(); if (rerender) render(); }
 function noHeroView() { return '<div class="camp"><div class="hero-intro banner" style="' + bannerStyle('paladin') + '"><h1>Noch kein Held</h1><p>Du hast im Moment keinen Helden. Erschaffe einen neuen oder lade einen gesicherten Helden.</p><div class="chips"><button class="btn big" data-act="newChar">Neuen Helden erschaffen</button><button class="btn ghost" data-act="loadSample">Beispielheld ansehen</button><button class="btn ghost" data-act="view" data-arg="heroes">Zu den Helden</button></div></div></div>'; }
 
 /* TP ändern (Schaden mit Temp-TP, 0 TP, Todesrettung, Massiver Schaden, Konzentration; Heilung; Temp-TP) */
