@@ -73,6 +73,7 @@ run "Jeden Zauber wirken (zauber.test.js)" node tests/zauber.test.js
 run "Lange Zufallssitzung (affe.test.js)" node tests/affe.test.js --schritte=500
 run "Befunde B-01–B-20 des Grosstests v1.9.40 (befunde.test.js)" node tests/befunde.test.js
 run "Lesbarkeit: Kontrast in allen Stimmungen (kontrast.test.js)" node tests/kontrast.test.js
+run "Stimmungen: Wechsel, Zeichenrate, Aus und reduzierte Bewegung (stimmung.test.js)" node tests/stimmung.test.js
 run "Langsames Handy: CPU 4× gedrosselt (handy.test.js app)" node tests/handy.test.js app/Heldenbuch.html --drossel=4
 run "Abgleich mit dem SRD 5.2: Zauber und Monster (srd.test.js)" node tests/srd.test.js
 run "Online-Tisch mit drei Geräten, lokal (echt.test.js --lokal)" node tests/echt.test.js --lokal
