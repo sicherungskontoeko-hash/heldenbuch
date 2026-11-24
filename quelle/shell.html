@@ -31,6 +31,22 @@ html[data-fx="dezent"] #scene::before{animation-duration:54s;filter:saturate(1.0
 html[data-fx="aus"] #scene::before{animation:none}
 @keyframes hbSceneDrift{0%{transform:scale(1.035) translate3d(0,0,0)}25%{transform:scale(1.055) translate3d(0,-.55%,0)}50%{transform:scale(1.045) translate3d(-.4%,.15%,0)}75%{transform:scale(1.06) translate3d(.45%,-.2%,0)}100%{transform:scale(1.035) translate3d(0,0,0)}}
 
+
+/* HB Themes v2 – ruhige Lichtmodulation, keine zusätzlichen Bilddateien */
+#scene .hb-ambient-light{position:absolute;inset:0;pointer-events:none;display:block;opacity:.12;background:radial-gradient(ellipse at 89% 43%,rgba(var(--glow1-rgb),.38),transparent 29%),radial-gradient(ellipse at 8% 44%,rgba(var(--glow3-rgb),.26),transparent 22%);animation:hbAmbientBreath 8s ease-in-out infinite alternate}
+html[data-theme="episch"] #scene .hb-ambient-light{background:radial-gradient(ellipse at 70% 23%,rgba(255,196,110,.35),transparent 38%);animation-duration:14s}
+html[data-theme="gruselig"] #scene .hb-ambient-light{background:radial-gradient(ellipse at 20% 25%,rgba(126,190,154,.26),transparent 37%);animation-duration:17s}
+html[data-theme="romantisch"] #scene .hb-ambient-light{background:radial-gradient(ellipse at 70% 15%,rgba(224,150,210,.32),transparent 40%);animation-duration:12s}
+html[data-theme="lustig"] #scene .hb-ambient-light{animation-duration:6s}
+html[data-theme="kalt"] #scene .hb-ambient-light{background:radial-gradient(ellipse at 24% 20%,rgba(167,220,255,.28),transparent 44%);animation-duration:18s}
+html[data-theme="blutig"] #scene .hb-ambient-light{background:radial-gradient(ellipse at 20% 21%,rgba(255,45,30,.35),transparent 35%),radial-gradient(ellipse at 92% 60%,rgba(255,65,25,.30),transparent 24%);animation-duration:7s}
+html[data-theme="mystisch"] #scene .hb-ambient-light{background:radial-gradient(ellipse at 70% 22%,rgba(158,108,255,.36),transparent 36%);animation-duration:13s}
+html[data-theme="wueste"] #scene .hb-ambient-light{background:radial-gradient(ellipse at 20% 27%,rgba(255,185,100,.35),transparent 42%);animation-duration:15s}
+@keyframes hbAmbientBreath{from{opacity:.12}to{opacity:.38}}
+html[data-fx="dezent"] #scene .hb-ambient-light{animation:none;opacity:.14}
+html[data-fx="aus"] #scene .hb-ambient-light{display:none}
+@media(prefers-reduced-motion:reduce){#scene .hb-ambient-light{animation:none!important;display:none!important}}
+
 #embers{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
 #top,#view,.foot,#toast,#modal{position:relative;z-index:1}
 button,input,select,textarea{font:inherit;color:inherit}
