@@ -1492,13 +1492,28 @@ function paintTurn() {
   let next = null; if (cur) { const i = o.findIndex((x) => x.key === cur.key); next = o[(i + 1) % o.length]; }
   const meWaiting = waiting().some((x) => x.me); const meAway = (S.myInit && S.myInit.away && S.myInit.cid === c.id) || (notIn(UID, S.table[UID]) && !(S.myInit && S.myInit.cid === c.id && !S.myInit.away));
   el.innerHTML = '<div class="wrap tb' + (mine ? ' mine' : '') + '"><span class="tbr">Runde ' + (c.round || 1) + '</span>' +
-    (mine ? '<b class="tbme">Du bist am Zug!</b>' : cur ? '<span>Am Zug: <b>' + esc(cur.name) + '</b>' + (next ? ' · danach ' + esc(next.name) : '') + '</span>' : '<span>Kampf beginnt – Initiative würfeln</span>') +
+    (mine ? '<b class="tbme">Du bist am Zug!</b>' : cur ? '<span>Am Zug: <b>' + esc(cur.name) + '</b>' + (next ? (next.key === 'p:' + UID ? ' · <b class="tbnext">danach du</b>' : ' · danach ' + esc(next.name)) : '') + '</span>' : '<span>Kampf beginnt – Initiative würfeln</span>') +
     '<span class="tbsp"></span>' + (meAway ? '<span class="tbaway">Du bist noch nicht im Kampf</span><button class="btn sm" data-act="initRoll">Eingreifen</button>' : meWaiting ? '<button class="btn sm" data-act="initRoll">Initiative würfeln</button><button class="btn sm ghost" data-act="initAway">Noch nicht dabei</button>' : '') + (mine ? '<button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>' : cur && (!S.meta.dm || isDM()) ? '<button class="btn sm ghost" data-act="turnEnd" title="Gegner oder abwesende Spieler: weiter zum Nächsten">Weiter ▸</button>' : '') + (S.view !== 'camp' ? '<button class="link" data-act="view" data-arg="camp">Reihenfolge</button>' : '') + '</div>';
   document.body.classList.toggle('myturn', !!mine);
   if (mine && !wasMyTurn && S.chars[S.cur] && typeof turnReset === 'function') { const me = S.chars[S.cur]; setTimeout(() => { turnReset(me); if (S.chars[S.cur] === me) commit(); }, 0); }
   if (mine && !wasMyTurn && typeof vfxTurn === 'function') setTimeout(vfxTurn, 0); /* goldener Impuls; Vibration nur mit Einwilligung */
+  if (mine && !wasMyTurn) turnCall(c.round || 1);
+  turnPill(!!mine);
   wasMyTurn = !!mine;
 }
+/* Eigener Zug gut sichtbar: grosse Ansage zu Zugbeginn (wird auch vorgelesen) und ein schwebender Knopf «Zug beenden»,
+   solange die Zugleiste oben weggescrollt ist. Über dem Würfelfenster nie: dort steht das Ergebnis. */
+function turnCall(round) {
+  document.querySelectorAll('.turncall').forEach((x) => x.remove()); const ch = S.chars[S.cur]; const el = document.createElement('div'); el.className = 'turncall'; el.setAttribute('role', 'status');
+  el.innerHTML = '<small>Runde ' + round + '</small><b>Du bist am Zug!</b>' + (ch ? '<span>' + esc(ch.name) + '</span>' : ''); document.body.appendChild(el); setTimeout(() => el.remove(), 1900);
+}
+function turnPill(mine) {
+  let p = $('#turnpill'); if (!mine) { if (p) p.remove(); return; }
+  if (!p) { p = document.createElement('div'); p.id = 'turnpill'; p.innerHTML = '<b>⚔ Du bist am Zug</b><button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>'; document.body.appendChild(p); }
+  turnPillVis();
+}
+function turnPillVis() { const p = $('#turnpill'); if (!p) return; const tb = $('#turnbar'); const r = tb && tb.getBoundingClientRect(); p.classList.toggle('on', !r || !r.height || r.bottom < 70 || r.top > innerHeight); }
+addEventListener('scroll', () => { if ($('#turnpill')) turnPillVis(); }, { passive: true });
 function bannerToast(title, text) { const m = $('#mini'); if (!m) return; const el = document.createElement('div'); el.className = 'mt big'; el.innerHTML = '<div><b>' + esc(title) + '</b><small>' + esc(text) + '</small></div>'; m.prepend(el); setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 5000); }
 setInterval(() => { if (S.camp) paintCamp(); }, 30000);
 
