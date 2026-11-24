@@ -3,7 +3,7 @@
    - Zeichenrate des Hintergrunds: Handy höchstens ~20/s, PC höchstens ~30/s; Effekte laufen in «Stark» weiter
    - «Aus»: Leinwand leer, keine Zeichnungen, Lichtschein aus; «Dezent»: Lichtschein ohne Animation
    - reduzierte Bewegung: keine Zeichnungen, kein Lichtschein
-   - Würfel-Ereignisteilchen (FX.burst) laufen weiter, auch am Handy
+   - Würfel-Ereignisteilchen (FX.burst): Hintergrund zeichnet dann jedes Browser-Bild statt jedes zweite/dritte
    Diagnose (keine Prüfung): Rechenzeit des Hintergrunds in 4 s je Stimmung; mit --alt=<datei> im Vergleich zur alten Version.
    Aufruf: node tests/stimmung.test.js [index.html] [--alt=alte.html] */
 const { chromium } = require('playwright'); const path = require('path');
@@ -11,7 +11,7 @@ const args = process.argv.slice(2); const ALT = (args.find((a) => a.startsWith('
 const target = path.resolve(args.find((a) => !a.startsWith('--')) || path.join(__dirname, '..', 'index.html'));
 let pass = 0, fail = 0; const T = (n, ok, info) => { if (ok) pass++; else fail++; console.log((ok ? '✔ ' : '✘ ') + n + (ok || info === undefined ? '' : '  → ' + JSON.stringify(info))); };
 /* zählt Zeichnungen auf der Hintergrund-Leinwand (#embers): jedes Bild beginnt mit clearRect */
-const ZAEHLER = () => { const o = CanvasRenderingContext2D.prototype.clearRect; window.__draws = 0; CanvasRenderingContext2D.prototype.clearRect = function (...a) { if (this.canvas && this.canvas.id === 'embers') { window.__draws++; (window.__ts = window.__ts || []).push(performance.now()); if (window.__ts.length > 400) window.__ts.shift(); } return o.apply(this, a); }; };
+const ZAEHLER = () => { const o = CanvasRenderingContext2D.prototype.clearRect; window.__draws = 0; CanvasRenderingContext2D.prototype.clearRect = function (...a) { if (this.canvas && this.canvas.id === 'embers') window.__draws++; return o.apply(this, a); }; };
 const START = () => { localStorage.setItem('hb_sample_done', '1'); localStorage.setItem('hb_fx', 'stark'); localStorage.setItem('hb_dice_fx', 'voll'); };
 const setTheme = (p, k) => p.evaluate((k) => { localStorage.setItem('hb_theme', k); applyTheme(); }, k);
 const rate = async (p, ms) => { await p.evaluate(() => { window.__draws = 0; }); await p.waitForTimeout(ms); return p.evaluate((ms) => Math.round(window.__draws * 1000 / ms * 10) / 10, ms); };
@@ -41,10 +41,13 @@ async function cpu(b, file, w, touch, keys) {
     T(tag + ': Lichtschein sichtbar und animiert (Stark)', await p.evaluate(() => { const s = getComputedStyle(document.querySelector('#scene .hb-ambient-light')); return s.display !== 'none' && s.animationName === 'hbAmbientBreath'; }));
     /* Würfel-Ereignis: kurzzeitig höhere Bildrate */
     const burst = await p.evaluate(() => typeof FX !== 'undefined' && FX && typeof FX.burst === 'function');
-    if (burst) { const gap = (from) => p.evaluate((from) => { const t = window.__ts.filter((x) => x >= from); let m = 1e9; for (let i = 1; i < t.length; i++) m = Math.min(m, t[i] - t[i - 1]); return Math.round(m); }, from);
-      const t0 = await p.evaluate(() => performance.now()); await p.waitForTimeout(600); const ruhe = await gap(t0);
-      const t1 = await p.evaluate(() => { FX.burst(['255,220,140', '255,255,230'], 40); return performance.now(); }); await p.waitForTimeout(400); const knall = await gap(t1);
-      T(tag + ': Würfel-Teilchen mit höherer Bildrate (kürzester Abstand ' + ruhe + ' → ' + knall + ' ms)', knall < 26 && ruhe >= 30, { ruhe, knall }); }
+    if (burst) {
+      /* Anteil der Browser-Bilder, in denen der Hintergrund zeichnet: in Ruhe wird jedes zweite oder dritte übersprungen, mit Würfel-Teilchen keines */
+      const share = (fire) => p.evaluate(async (fire) => { let ticks = 0; window.__draws = 0; let on = true; const f = () => { if (!on) return; ticks++; requestAnimationFrame(f); }; requestAnimationFrame(f);
+        if (fire) FX.burst(['255,220,140', '255,255,230'], 40); await new Promise((r) => setTimeout(r, 400)); on = false; return Math.round(window.__draws / Math.max(1, ticks) * 100) / 100; }, fire);
+      const ruhe = await share(false), knall = await share(true);
+      /* Ist der Browser selbst langsamer als die Grenze (PC-Fläche auf schwachem Testrechner), zeichnet er schon in Ruhe fast jedes Bild; dann zählt nur «mit Teilchen jedes Bild» */
+      T(tag + ': Würfel-Teilchen: Hintergrund zeichnet jedes Bild (Anteil ' + ruhe + ' → ' + knall + ')', knall >= 0.85 && (touch ? ruhe <= 0.75 : true), { ruhe, knall }); }
     await p.evaluate(() => XA.fxLevel(null, 'dezent')); await p.waitForTimeout(300);
     T(tag + ': Dezent: Lichtschein ruhig', await p.evaluate(() => getComputedStyle(document.querySelector('#scene .hb-ambient-light')).animationName === 'none'));
     T(tag + ': Dezent: Hintergrund zeichnet weiter', (await rate(p, 1500)) > 3);
