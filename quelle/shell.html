@@ -962,8 +962,10 @@ i.kb{background:var(--arcane)}i.kr{background:var(--ember)}i.kf{background:var(-
 /* ---- Natürliche 1: Beben + Risse im Bild ---- */
 .n1-vig{inset:0;background:radial-gradient(ellipse at var(--x) var(--y),rgba(120,0,10,.0) 10%,rgba(60,0,6,.55) 100%);opacity:0;animation:n1vig 2s ease-out forwards}
 @keyframes n1vig{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
-.n1-cracks{left:0;top:0;opacity:1;animation:n1fade 2.2s ease-in forwards}
-.n1-cracks path{stroke-dasharray:1400;stroke-dashoffset:1400;animation:n1draw .38s cubic-bezier(.2,.9,.3,1) forwards}
+.n1-cracks{position:absolute;left:0;top:0;opacity:1;animation:n1fade 2.2s ease-in forwards}
+.n1-cracks path{stroke-dasharray:3000;stroke-dashoffset:3000;animation:n1draw .26s var(--dl,0ms) cubic-bezier(.2,.9,.3,1) forwards}
+.n1stage.full{transition:opacity .35s ease-out}.n1stage.full .n1-vig{background:radial-gradient(circle at var(--x) var(--y),transparent 14%,var(--tc) 125%);animation:n1vig 2s ease-out forwards}
+.n1stage.full.soft .n1-vig{animation-name:n1vigs}@keyframes n1vigs{0%{opacity:0}12%{opacity:.55}100%{opacity:0}}
 @keyframes n1draw{to{stroke-dashoffset:0}}
 @keyframes n1fade{0%,60%{opacity:1}100%{opacity:0}}
 body.d3quake{animation:d3quake .6s cubic-bezier(.36,.07,.19,.97)}
