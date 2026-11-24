@@ -43,8 +43,11 @@ const SETUP = () => { Object.keys(S.chars).forEach((k) => delete S.chars[k]); co
   await clear(); await ev(() => { render(); render(); commit(); }); await W(60);
   T('Neuzeichnen ohne Änderung: kein Effekt', await ev(() => document.querySelectorAll('#vfxl > *').length === 0 && !document.querySelector('#view .vfx-hurt, #view .vfx-heal')));
   /* Rast */
-  await clear(); await ev(() => { hpChange(cur(), 'dmg', 6); }); await clear(); await ev(() => doRest(cur(), 'long', true, true)); await W(60);
-  T('Lange Rast: goldene Welle, kein zusätzlicher Heil-Effekt', await ev(() => !!document.querySelector('#vfxl .vrest.long') && !document.querySelector('#vfxl .vdmg')));
+  await clear(); await ev(() => { hpChange(cur(), 'dmg', 6); }); await clear();
+  /* Welle dauert 640 ms: per Beobachter festhalten (langsame Läufer in WebKit) */
+  await ev(() => { window.__rw = { wave: false, dmg: false }; const mo = new MutationObserver(() => { if (document.querySelector('#vfxl .vrest.long')) window.__rw.wave = true; if (document.querySelector('#vfxl .vdmg')) window.__rw.dmg = true; }); mo.observe(document.querySelector('#vfxl') || document.body, { childList: true, subtree: true }); window.__rwmo = mo; });
+  await ev(() => doRest(cur(), 'long', true, true)); await p.waitForFunction(() => window.__rw.wave, null, { timeout: 1500, polling: 20 }).catch(() => {}); await W(60);
+  T('Lange Rast: goldene Welle, kein zusätzlicher Heil-Effekt', await ev(() => { window.__rwmo.disconnect(); return window.__rw.wave && !window.__rw.dmg; }));
   await clear(); await ev(() => doRest(cur(), 'short', true, true)); await W(60);
   T('Kurze Rast: Bernsteinlicht', await ev(() => !!document.querySelector('#vfxl .vrest.short')));
   /* Zustand, Inspiration, Zauberplatz, Konzentration */
