@@ -29,7 +29,7 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
   T('⋯-Dialog zeigt „0 von 3 diesen Zug“', await p.evaluate(() => /0 von 3 diesen Zug/.test($('#modal').textContent)));
   await p.evaluate(() => { $('#modal').hidden = true; S.modal = null; S.meta.dm = 'u2'; render(); });
   T('Spieler sehen den Kasten nicht', await p.evaluate(() => !$('#fightBox .nturn')));
-  T('Handy: kein Querscrollen', await p.evaluate(() => document.documentElement.scrollWidth <= 391));
+  T('Handy: kein Querscrollen', await p.evaluate(() => document.documentElement.scrollWidth <= 391), await p.evaluate(() => { const W = innerWidth; return { sw: document.documentElement.scrollWidth, zu_breit: [...document.querySelectorAll('body *')].filter((e) => { const r = e.getBoundingClientRect(); return r.width && r.right > W + 1; }).slice(0, 8).map((e) => e.tagName + '.' + String(e.className).slice(0, 40) + ' ' + Math.round(e.getBoundingClientRect().right) + ' «' + (e.textContent || '').trim().slice(0, 30) + '»') }; }));
   T('Keine Skriptfehler', errs.length === 0, errs);
   out.forEach((r) => console.log((r.ok ? '✔ ' : '✘ ') + r.n + (r.ok ? '' : '  → ' + JSON.stringify(r.got))));
   const f = out.filter((r) => !r.ok).length; console.log((out.length - f) + ' / ' + out.length + ' bestanden'); await b.close(); process.exit(f ? 1 : 0);

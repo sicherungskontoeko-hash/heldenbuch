@@ -41,12 +41,14 @@ SUITES=(
 SUM="${GITHUB_STEP_SUMMARY:-/dev/null}"
 echo "### Engine: $ENG" >> "$SUM"; echo "" >> "$SUM"; echo "| Suite | Ergebnis | Zeit |" >> "$SUM"; echo "|---|---|---|" >> "$SUM"
 FAIL=0; mkdir -p tests/engine-log
+# macOS hat kein «timeout»: gtimeout nehmen, sonst ohne Zeitlimit
+TO=$(command -v timeout || command -v gtimeout || true); [ -n "$TO" ] && TO="$TO 1500"
 for s in "${SUITES[@]}"; do
   cmd="${s%%|*}"; name="${s##*|}"; f="${cmd%% *}"; args="${cmd#"$f"}"
   t0=$(date +%s)
-  HB_ENGINE="$ENG" timeout 1500 node -r ./tests/_engine.js tests/$f $args > "tests/engine-log/${f%.test.js}.log" 2>&1; rc=$?
+  HB_ENGINE="$ENG" $TO node -r ./tests/_engine.js tests/$f $args > "tests/engine-log/${f%.test.js}.log" 2>&1; rc=$?
   dt=$(( $(date +%s) - t0 ))
-  if [ $rc -eq 0 ]; then r="✔"; else r="✘ (Exit $rc)"; FAIL=$((FAIL+1)); echo "---- $name ($f) ----"; grep -E "✘|FAIL|Error|rror:" "tests/engine-log/${f%.test.js}.log" | head -25; fi
+  if [ $rc -eq 0 ]; then r="✔"; else r="✘ (Exit $rc)"; FAIL=$((FAIL+1)); echo "---- $name ($f) ----"; grep -E -A25 "✘|FAIL|Error|rror:" "tests/engine-log/${f%.test.js}.log" | head -80; fi
   echo "== $name ($f$args): $r in ${dt}s"
   echo "| $name | $r | ${dt}s |" >> "$SUM"
 done

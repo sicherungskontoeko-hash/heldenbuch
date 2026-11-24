@@ -72,6 +72,9 @@ run "Daten in der App (daten.test.js app)" node tests/daten.test.js app/Heldenbu
 run "Jeden Zauber wirken (zauber.test.js)" node tests/zauber.test.js
 run "Lange Zufallssitzung (affe.test.js)" node tests/affe.test.js --schritte=500
 run "Befunde B-01–B-20 des Grosstests v1.9.40 (befunde.test.js)" node tests/befunde.test.js
+run "Lesbarkeit: Kontrast in allen Stimmungen (kontrast.test.js)" node tests/kontrast.test.js
+run "Langsames Handy: CPU 4× gedrosselt (handy.test.js app)" node tests/handy.test.js app/Heldenbuch.html --drossel=4
+run "Abgleich mit dem SRD 5.2: Zauber und Monster (srd.test.js)" node tests/srd.test.js
 run "Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js)" node tests/initcall.test.js
 run "Tischhilfen: passive Werte, Rast für alle, EP nach dem Kampf (tablehelp.test.js)" node tests/tablehelp.test.js
 run "Gegenstände: SRD-Liste, Flüche, Ausrüstung (items.test.js)" node tests/items.test.js

@@ -25,7 +25,7 @@ const THEMES = {
   rgb:{ gold:'166,220,242', 'gold-hi':'228,247,255', wine:'212,106,124', arcane:'185,198,255', ember:'115,185,226', bg:'9,18,26', line:'166,220,242', deep:'3,8,12', glow1:'115,185,226', glow2:'185,198,255', glow3:'228,247,255' },
   fx:{ mode:'snow', colors:['255,255,255','220,240,255'], n:170, big:1.4, gust:true } },
  blutig: { name:'Blutig', desc:'Tiefrot, Schatten, Gefahr', font:'"Pirata One","Cinzel"',
-  c:{ bg:'#0D0505', bg2:'#140808', surface:'#1C0B0B', raised:'#260F0F', sunk:'#080303', ink:'#F3E5E5', muted:'#BC9C9C', faint:'#846464', gold:'#E0303F', 'gold-hi':'#FF7B7B', 'gold-ink':'#FFF2F2', ember:'#B5161C', wine:'#FF4D4F', moss:'#9AB57F', arcane:'#C58FB0', 'card-a':'#260F0F', 'card-b':'#170808', 'gold-lo':'#7A0F18' },
+  c:{ bg:'#0D0505', bg2:'#140808', surface:'#1C0B0B', raised:'#260F0F', sunk:'#080303', ink:'#F3E5E5', muted:'#BC9C9C', faint:'#846464', gold:'#D42A39', 'gold-hi':'#FF7B7B', 'gold-ink':'#FFF2F2', ember:'#B5161C', wine:'#FF4D4F', moss:'#9AB57F', arcane:'#C58FB0', 'card-a':'#260F0F', 'card-b':'#170808', 'gold-lo':'#7A0F18' },
   rgb:{ gold:'224,48,63', 'gold-hi':'255,123,123', wine:'255,77,79', arcane:'197,143,176', ember:'181,22,28', bg:'13,5,5', line:'224,48,63', deep:'5,1,1', glow1:'181,22,28', glow2:'90,10,20', glow3:'224,48,63' },
   fx:{ mode:'spark', colors:['255,80,50','220,40,40','255,150,80','140,20,20'], n:120, big:1.4 } },
  mystisch: { name:'Mystisch', desc:'Violett, Sternenstaub, Geheimnis', font:'"Cinzel Decorative","Cinzel"',
@@ -38,11 +38,22 @@ const THEMES = {
   fx:{ mode:'sand', colors:['235,200,140','210,170,110','255,225,170'], n:200, big:1.5 } }
 };
 
+function hexLum(h) { h = String(h).replace('#', ''); if (h.length === 3) h = h.split('').map((x) => x + x).join(''); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4)).reduce((a, x, i) => a + x * [0.2126, 0.7152, 0.0722][i], 0); }
+function contrast(a, b) { const x = hexLum(a), y = hexLum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+function textTone(hex, grounds) {
+  const rgb = [0, 2, 4].map((i) => parseInt(String(hex).replace('#', '').slice(i, i + 2), 16)); const dark = grounds.every((g) => hexLum(g) < 0.2);
+  for (let k = 0; k <= 20; k++) { const m = rgb.map((x) => Math.round(dark ? x + (255 - x) * k / 20 : x * (1 - k / 20))); const h = '#' + m.map((x) => x.toString(16).padStart(2, '0')).join('');
+    if (grounds.every((g) => contrast(h, g) >= 4.6)) return h; }
+  return dark ? '#ffffff' : '#000000';
+}
 (function themeCss() {
   let css = '';
   for (const [k, t] of Object.entries(THEMES)) {
     const s = THEME_SCENES[k] || {};
     const v = Object.entries(t.c).map(([n, x]) => '--' + n + ':' + x).concat(Object.entries(t.rgb).map(([n, x]) => '--' + n + '-rgb:' + x));
+    /* Textfassungen der Akzentfarben: so weit aufgehellt, dass sie auf allen Flächen 4,5:1 erreichen (WCAG AA).
+       Flächen (Knöpfe, Rahmen) behalten die Originalfarbe. */
+    for (const f of ['gold', 'wine']) if (t.c[f]) v.push('--' + f + '-t:' + textTone(t.c[f], [t.c.bg, t.c.surface, t.c.raised].filter(Boolean)));
     v.push('--line:rgba(' + t.rgb.line + ',.16)', '--line2:rgba(' + t.rgb.line + ',.32)', '--f-display:' + t.font + ',\"Trajan Pro\",\"Palatino Linotype\",Georgia,serif');
     if (s.img) v.push('--scene-image:var(--scene-' + k + ')', '--scene-pos:' + (s.pos || 'center center'), '--scene-opacity:' + (s.op || '.42'));
     css += 'html[data-theme=\"' + k + '\"]{' + v.join(';') + '}';
