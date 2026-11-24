@@ -46,7 +46,7 @@ function alignKey(s) {
 function alignPicker(ch) {
   const k = alignKey(ch.alignment); const old = ch.alignment && !k ? ch.alignment : '';
   const A = k ? ALIGN[k] : null;
-  return '<div class="fld alfld"><span>Gesinnung</span><div class="algrid" role="group" aria-label="Gesinnung">' + Object.entries(ALIGN).map(([key, a]) => '<button type="button" class="chip' + (key === k ? ' on' : '') + '" data-act="setAlign" data-arg="' + key + '" aria-pressed="' + (key === k) + '">' + a.name.replace('Rechtschaffen', 'Recht&shy;schaffen') + '</button>').join('') + '</div>' +
+  return '<div class="fld alfld"><span>Gesinnung</span><div class="algrid" role="group" aria-label="Gesinnung">' + Object.entries(ALIGN).map(([key, a]) => '<button type="button" class="chip' + (key === k ? ' on' : '') + '" data-act="setAlign" data-arg="' + esc(key) + '" aria-pressed="' + (key === k) + '">' + a.name.replace('Rechtschaffen', 'Recht&shy;schaffen') + '</button>').join('') + '</div>' +
     (A ? '<div class="aldesc"><p><b>' + A.name + ':</b> ' + A.d + '</p><p><b>Zum Beispiel</b> ' + A.ex + '.</p><p><b>Typisch für:</b> ' + A.cr + '.</p></div>'
       : '<p class="hint">' + (old ? 'Bisher eingetragen: «' + esc(old) + '». Wähle eine der neun Gesinnungen – ' : 'Tippe eine Gesinnung an – ') + 'hier steht dann, was sie bedeutet.</p>') +
     '<p class="hint">Böse Helden nur nach Absprache mit der Spielleitung. Tiere und Wesen ohne Verstand haben keine Gesinnung.</p></div>';
@@ -188,7 +188,7 @@ function paintWarn() {
   warnLastN = n;
   el.className = S.warnOpen ? 'open' : '';
   el.innerHTML = (S.warnOpen ? '<div class="wpan" role="dialog" aria-label="Noch offen"><div class="wph"><b>Noch offen</b><small>antippen zum Hinspringen</small><button class="x" data-act="warnClose" aria-label="Schliessen">×</button></div><ul>' +
-      c.warn.map((w, i) => '<li><button data-act="gowarn" data-arg="' + i + '">' + esc(w) + '<span aria-hidden="true">→</span></button></li>').join('') + '</ul></div>' : '') +
+      c.warn.map((w, i) => '<li><button data-act="gowarn" data-arg="' + esc(i) + '">' + esc(w) + '<span aria-hidden="true">→</span></button></li>').join('') + '</ul></div>' : '') +
     '<button type="button" class="wfb" data-act="' + (S.warnOpen ? 'warnClose' : 'warnOpen') + '" aria-expanded="' + !!S.warnOpen + '" aria-label="' + n + ' Auswahl(en) noch offen" title="Noch offen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg><b>' + n + '</b></button>';
 }
 XA.warnOpen = () => { S.warnOpen = true; paintWarn(); const f = document.querySelector('#warnfab .wpan button'); if (f) f.focus({ preventScroll: true }); };

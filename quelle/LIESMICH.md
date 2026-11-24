@@ -34,6 +34,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/daten.test.js | «Alles sichern» → löschen → laden mit 49 Helden: identische Werte und Spielstände, Extras zurück; Neustart; alte Sicherung ohne neue Felder; kaputte Dateien abgewiesen; 5600 Kombinationen Spezies × Hintergrund × Klasse × Stufe plausibel |
 | tests/zauber.test.js | Jeden Zauber jeder zauberkundigen Klasse auf Stufe 20 einmal wirken (über 900), Folgefenster beantworten; keine Fehler, kein «undefined»/«NaN», keine negativen Zauberplätze |
 | tests/affe.test.js | Lange Zufallssitzung ohne Zurücksetzen (Startwert fest): Klicks, Ansichtswechsel, Zahlen, Escape; nach jedem Schritt Fehler, Text, TP-Grenzen, Zauberplätze und Ressourcen geprüft. `--schritte=N` |
+| tests/befunde.test.js | Befunde B-01–B-20 des unabhängigen Grosstests v1.9.40: Neustart vor dem verzögerten Schreiben (Änderung und Löschung), voller Speicher, zwei Tabs, Import erst prüfen, SL-Notiz beim richtigen Raum, Maskierung (Unterklassenname, Porträt, Kennungen), Abenteuer-Blockprüfung, Spielerdokumente vom Tisch, sieben Regelfälle mit fixierten Würfeln |
 | tests/layout.test.js | Layout: ⚠ offene Punkte (Anzahl, Liste, Sprung, ✓), Mehr-Menü, ⋯-Menü, kompakte Übersicht am Handy |
 | tests/dice.test.js | Würfel-Designs: Körper/Zahlen, alle Sets, Auswahl pro Raum, Konflikt, SL-Set, Effekte voll/ruhig/aus, Überspringen, Teilen, Geräusche |
 | tests/levelup.test.js | Stufenaufstieg-Assistent: drei Schritte, neue Merkmale, Veränderungen, TP, Multiclass, offene Entscheidungen mit Sprung |
@@ -122,6 +123,15 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 ## Datenformat
 Helden tragen ein Feld `v` (Schemaversion, aktuell 2). `migrateChar()` in rules.js hebt ältere Stände an;
 vor der ersten Migration legt die App eine Sicherung unter `localStorage['heldenbuch_backup_v1']` an.
+
+## Speicherung
+- `heldenbuch` im localStorage: Gesamtstand. `lsSet(keys)` schreibt nur die genannten Datensätze in den gespeicherten Stand (zweiter Tab überschreibt nichts); ein `storage`-Ereignis übernimmt Änderungen anderer Tabs.
+- Einzelkopien je Datensatz in der Datenbank (claude.ai-Konto bzw. `hbdb:` in der App), 700 ms verzögert; beim Verlassen der Seite sofort (`flushLater`).
+- `hb_pend:<c|h>_<id>`: noch nicht bestätigte Einzelkopie. Beim Start gewinnt dafür der lokale Stand (auch Löschungen); sonst bei Helden der neuere `updated`, bei Hausregeln die Kopie.
+- Schlägt ein Schreibvorgang fehl, bleibt «Nicht gespeichert – bitte exportieren» stehen, bis wieder gespeichert ist.
+
+## Daten von aussen
+Importe, Abenteuer-Dateien und Dokumente vom Online-Tisch gelten als fremd: `validHb` und `importJson` prüfen alles vor der ersten Änderung, `advCheck` jeden Abenteuer-Block nach seiner Art, `playerDoc` jedes Spielerdokument. Alle `data-*`-Werte gehen durch `esc()`, Porträts nur als `data:image/(png|jpeg|webp|gif);base64` (`safeImg`).
 
 ## App-Dateien bauen
 

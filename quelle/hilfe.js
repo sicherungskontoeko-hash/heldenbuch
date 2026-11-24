@@ -33,9 +33,9 @@ const hlTip = (t, tag) => (hlOn('tipps') ? '<' + (tag || 'small') + ' class="nb"
 /* Auswahl: drei Stufen als Karten, darunter die Schalter einzeln */
 function hlPanel(where) {
   const s = hlState(); const cust = hlCustom();
-  return '<div class="hllv" role="radiogroup" aria-label="Hilfe-Stufe">' + Object.entries(HL_LEVELS).map(([k, L]) => '<button type="button" role="radio" aria-checked="' + (s.lvl === k && !cust) + '" class="hlc' + (s.lvl === k ? (cust ? ' part' : ' on') : '') + '" data-act="hlLvl" data-arg="' + k + '" data-where="' + where + '"><b>' + L.n + (s.lvl === k && cust ? ' <em>angepasst</em>' : '') + '</b><small>' + esc(L.t) + '</small></button>').join('') + '</div>' +
+  return '<div class="hllv" role="radiogroup" aria-label="Hilfe-Stufe">' + Object.entries(HL_LEVELS).map(([k, L]) => '<button type="button" role="radio" aria-checked="' + (s.lvl === k && !cust) + '" class="hlc' + (s.lvl === k ? (cust ? ' part' : ' on') : '') + '" data-act="hlLvl" data-arg="' + esc(k) + '" data-where="' + esc(where) + '"><b>' + L.n + (s.lvl === k && cust ? ' <em>angepasst</em>' : '') + '</b><small>' + esc(L.t) + '</small></button>').join('') + '</div>' +
     '<details class="hlfine"' + (cust || S.hlFine ? ' open' : '') + '><summary>Einzeln anpassen</summary><div class="rulelist">' +
-    Object.entries(HL_OPTS).map(([k, o]) => '<label class="rulerow"><input type="checkbox" data-act="hlT" data-arg="' + k + '" data-where="' + where + '"' + (hlOn(k) ? ' checked' : '') + '><span><b>' + esc(o[0]) + '</b><small>' + esc(o[1]) + '</small></span></label>').join('') + '</div></details>';
+    Object.entries(HL_OPTS).map(([k, o]) => '<label class="rulerow"><input type="checkbox" data-act="hlT" data-arg="' + esc(k) + '" data-where="' + esc(where) + '"' + (hlOn(k) ? ' checked' : '') + '><span><b>' + esc(o[0]) + '</b><small>' + esc(o[1]) + '</small></span></label>').join('') + '</div></details>';
 }
 function hlOpen() {
   const m = $('#modal'); S.modal = 'hilfe'; S.more = false; document.querySelectorAll('details.mnu[open]').forEach((d) => { d.open = false; });
@@ -66,6 +66,6 @@ function rollTip(e) {
 /* Willkommen: beim ersten Start die Stufe wählen (ohne Neuzeichnen, damit der eingegebene Name bleibt) */
 function hlWelcomeHtml() {
   const cur = S.wLvl || hlState().lvl;
-  return '<div class="fld wlvl"><span>Wie viel Hilfe möchtest du?</span><div class="seg" role="radiogroup" aria-label="Hilfe-Stufe">' + Object.entries(HL_LEVELS).map(([k, L]) => '<button type="button" role="radio" aria-checked="' + (k === cur) + '" class="' + (k === cur ? 'on' : '') + '" data-act="wLvl" data-arg="' + k + '">' + L.n + '</button>').join('') + '</div><em id="wLvlT">' + esc(HL_LEVELS[cur].t) + '</em></div>';
+  return '<div class="fld wlvl"><span>Wie viel Hilfe möchtest du?</span><div class="seg" role="radiogroup" aria-label="Hilfe-Stufe">' + Object.entries(HL_LEVELS).map(([k, L]) => '<button type="button" role="radio" aria-checked="' + (k === cur) + '" class="' + (k === cur ? 'on' : '') + '" data-act="wLvl" data-arg="' + esc(k) + '">' + L.n + '</button>').join('') + '</div><em id="wLvlT">' + esc(HL_LEVELS[cur].t) + '</em></div>';
 }
 XA.wLvl = (t, a) => { if (!HL_LEVELS[a]) return; S.wLvl = a; document.querySelectorAll('.wlvl .seg button').forEach((b) => { const on = b.dataset.arg === a; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); }); const e = $('#wLvlT'); if (e) e.textContent = HL_LEVELS[a].t; };

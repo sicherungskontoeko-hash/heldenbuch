@@ -35,7 +35,7 @@ function kbTabs() {
   const bk = kbBooks();
   return '<div class="kbbar">' + (bk.length > 1 ? '<label class="kbbook">Buch <select id="kbBook" aria-label="Buch wählen">' + bk.map(([k, nm]) => '<option value="' + esc(k) + '"' + (k === key ? ' selected' : '') + '>' + esc(nm) + '</option>').join('') + '</select></label>' : '') +
     '<div class="chips kbtabs" role="tablist">' + chip(t === 'chr', 'Chronik', 'role="tab" data-act="kbTab" data-arg="chr"') +
-    ['p', 'o', 'a'].map((k) => chip(t === k, KB_TYP[k][0] + (n(k) ? ' <small>' + n(k) + '</small>' : ''), 'role="tab" data-act="kbTab" data-arg="' + k + '"')).join('') + (typeof standRender === 'function' ? chip(t === 's', 'Spielstand', 'role="tab" data-act="kbTab" data-arg="s"') : '') + '</div></div>';
+    ['p', 'o', 'a'].map((k) => chip(t === k, KB_TYP[k][0] + (n(k) ? ' <small>' + n(k) + '</small>' : ''), 'role="tab" data-act="kbTab" data-arg="' + esc(k) + '"')).join('') + (typeof standRender === 'function' ? chip(t === 's', 'Spielstand', 'role="tab" data-act="kbTab" data-arg="s"') : '') + '</div></div>';
 }
 function kbSort(L, typ) {
   const rank = (x) => (typ === 'a' ? { offen: 0, erledigt: 1, gescheitert: 2 }[x.st] || 0 : x.st === 'tot' ? 1 : 0);
@@ -43,13 +43,13 @@ function kbSort(L, typ) {
 }
 function kbItem(x) {
   const open = S.kbOpenId === x.id; const dm = !S.camp || (typeof isDM === 'function' && isDM());
-  return '<li class="kbi' + (x.st === 'tot' || x.st === 'gescheitert' || x.st === 'erledigt' ? ' dim' : '') + '"><details data-kbid="' + x.id + '"' + (open ? ' open' : '') + '><summary><span class="kbn"><b>' + esc(x.n) + '</b>' + (x.d ? '<small>' + esc(x.d) + '</small>' : '') + '</span>' +
+  return '<li class="kbi' + (x.st === 'tot' || x.st === 'gescheitert' || x.st === 'erledigt' ? ' dim' : '') + '"><details data-kbid="' + esc(x.id) + '"' + (open ? ' open' : '') + '><summary><span class="kbn"><b>' + esc(x.n) + '</b>' + (x.d ? '<small>' + esc(x.d) + '</small>' : '') + '</span>' +
     '<span class="kbst st-' + esc(x.st) + '">' + esc(kbStName(x)) + '</span>' + (x.frei ? '<span class="kbeye" title="Die Spieler wissen davon" aria-label="Spieler wissen davon">👁</span>' : '') + '</summary>' +
-    '<div class="kbed"><label>Kurz <small>' + (dm && S.camp ? '(sehen die Spieler, wenn freigegeben)' : '') + '</small><input type="text" maxlength="160" data-kb="d" data-id="' + x.id + '" value="' + esc(x.d || '') + '" placeholder="Wer, was, wo – ein Satz"></label>' +
-    '<label>Geheime Notiz <small>(nur auf diesem Gerät)</small><textarea rows="2" maxlength="600" data-kb="g" data-id="' + x.id + '" placeholder="Was die Helden noch nicht wissen">' + esc(x.g || '') + '</textarea></label>' +
+    '<div class="kbed"><label>Kurz <small>' + (dm && S.camp ? '(sehen die Spieler, wenn freigegeben)' : '') + '</small><input type="text" maxlength="160" data-kb="d" data-id="' + esc(x.id) + '" value="' + esc(x.d || '') + '" placeholder="Wer, was, wo – ein Satz"></label>' +
+    '<label>Geheime Notiz <small>(nur auf diesem Gerät)</small><textarea rows="2" maxlength="600" data-kb="g" data-id="' + esc(x.id) + '" placeholder="Was die Helden noch nicht wissen">' + esc(x.g || '') + '</textarea></label>' +
     '<div class="chips">' + (KB_ST[x.typ] || []).map(([k, l]) => chip(x.st === k, l, 'data-act="kbSt" data-arg="' + x.id + ':' + k + '"')).join('') + '</div>' +
-    '<label class="kbfrei"><input type="checkbox" data-kb="frei" data-id="' + x.id + '"' + (x.frei ? ' checked' : '') + '> Die Spieler wissen davon' + (S.camp && dm ? ' <small>(am Tisch sichtbar)</small>' : '') + '</label>' +
-    '<div class="chips end"><button class="btn ghost sm" data-act="kbDel" data-arg="' + x.id + '" data-confirm="«' + esc(x.n) + '» löschen?">Löschen</button></div></div></details></li>';
+    '<label class="kbfrei"><input type="checkbox" data-kb="frei" data-id="' + esc(x.id) + '"' + (x.frei ? ' checked' : '') + '> Die Spieler wissen davon' + (S.camp && dm ? ' <small>(am Tisch sichtbar)</small>' : '') + '</label>' +
+    '<div class="chips end"><button class="btn ghost sm" data-act="kbDel" data-arg="' + esc(x.id) + '" data-confirm="«' + esc(x.n) + '» löschen?">Löschen</button></div></div></details></li>';
 }
 function kbRender(keep) {
   const t = S.kbTab; const key = kbKey(); const L = kbSort(kbList(key).filter((x) => x.typ === t), t); const m = $('#modal');
@@ -90,7 +90,7 @@ Object.assign(XA, {
     const key = kbKey(); const L = kbList(key); const now = Date.now(); const typ = S.kbTab || 'p';
     const x = { id: uidX(), typ, n: v.slice(0, 80), d: '', g: '', st: KB_ST[typ][0][0], frei: false, t: now, u: now };
     L.push(x); kbSave(key, L); S.kbOpenId = x.id; kbChr(x, 'neu'); kbRender(true);
-    const d = document.querySelector('[data-kb="d"][data-id="' + x.id + '"]'); if (d) d.focus();
+    const d = document.querySelector('[data-kb="d"][data-id="' + esc(x.id) + '"]'); if (d) d.focus();
   },
   kbSt: (t, a) => { const [id, st] = String(a).split(':'); const f = kbFind(id); if (!f.x || f.x.st === st) return; f.x.st = st; f.x.u = Date.now(); kbSave(f.key, f.L); S.kbOpenId = id; kbChr(f.x, 'st'); if (f.x.frei) kbShare(); kbRender(true); },
   kbDel: (t, a) => { const f = kbFind(a); if (!f.x) return; kbSave(f.key, f.L.filter((y) => y.id !== a)); if (f.x.frei) kbShare(); S.kbOpenId = null; kbRender(true); }

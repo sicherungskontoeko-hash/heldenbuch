@@ -34,8 +34,8 @@ function showBoost(c, roll) {
   let el = document.getElementById('boostBar'); if (!el) { el = document.createElement('div'); el.id = 'boostBar'; document.body.appendChild(el); }
   const o = boostOpts(c, roll.type); const own = o.filter((x) => !x.ext); const ext = o.filter((x) => x.ext);
   el.innerHTML = '<div class="bbh"><b>' + esc(roll.label) + ': ' + roll.total + '</b><span>Noch etwas draufpacken?</span><button class="x" data-act="boostX" aria-label="Schliessen">×</button></div>' +
-    (own.length ? '<div class="chips">' + own.map((x) => '<button class="chip" data-act="boost" data-arg="' + x.k + '">' + esc(x.label) + '</button>').join('') + '</div>' : '') +
-    '<div class="chips bext"><span>Von Verbündeten (z. B. Segnen, Inspiration):</span>' + ext.map((x) => '<button class="chip" data-act="boost" data-arg="' + x.k + '">' + x.label + '</button>').join('') + '</div>';
+    (own.length ? '<div class="chips">' + own.map((x) => '<button class="chip" data-act="boost" data-arg="' + esc(x.k) + '">' + esc(x.label) + '</button>').join('') + '</div>' : '') +
+    '<div class="chips bext"><span>Von Verbündeten (z. B. Segnen, Inspiration):</span>' + ext.map((x) => '<button class="chip" data-act="boost" data-arg="' + esc(x.k) + '">' + x.label + '</button>').join('') + '</div>';
   el.hidden = false; el.classList.remove('out'); clearTimeout(showBoost.tm); if (typeof addHelp === 'function') addHelp();
   showBoost.tm = setTimeout(() => { el.classList.add('out'); setTimeout(() => { el.hidden = true; }, 350); }, own.length ? 12000 : 7000);
 }

@@ -65,9 +65,9 @@ function effSyncMine() {
 function effBadges(key, lead) {
   const eff = effList().filter((e) => e.tgt === key || (!e.tgt && e.src === key));
   const rem = remList().filter((r) => r.tgt === key);
-  let h = eff.map((e) => '<button class="effb' + (e.left != null && e.left <= 1 ? ' soon' : '') + (e.tgt ? '' : ' self') + '" data-act="effOpen" data-arg="' + e.id + '" title="' + esc(e.name + (e.src ? ' · von ' + partName(e.src) : '') + (e.tgt ? ' · auf ' + partName(e.tgt) : ' · ohne Ziel')) + '">' + (e.conc ? '<i>K</i>' : '') + esc(e.name) + (e.cond && COND[e.cond] && e.cond !== e.name ? ' · ' + COND[e.cond].name : '') + (e.left != null ? ' <b>' + e.left + '</b>' : '') + '</button>').join('');
+  let h = eff.map((e) => '<button class="effb' + (e.left != null && e.left <= 1 ? ' soon' : '') + (e.tgt ? '' : ' self') + '" data-act="effOpen" data-arg="' + esc(e.id) + '" title="' + esc(e.name + (e.src ? ' · von ' + partName(e.src) : '') + (e.tgt ? ' · auf ' + partName(e.tgt) : ' · ohne Ziel')) + '">' + (e.conc ? '<i>K</i>' : '') + esc(e.name) + (e.cond && COND[e.cond] && e.cond !== e.name ? ' · ' + COND[e.cond].name : '') + (e.left != null ? ' <b>' + e.left + '</b>' : '') + '</button>').join('');
   const canRoll = (r) => r.tgt === 'p:' + UID || (lead && r.tgt.startsWith('n:'));
-  h += rem.map((r) => '<span class="remb">RW ' + AB_K[r.ab] + ' SG ' + r.dc + ' · ' + esc(r.name) + (canRoll(r) ? (r.tgt.startsWith('p:') ? '<button class="btn sm" data-act="remRoll" data-arg="' + r.id + '">Würfeln</button>' : '<button class="btn sm" data-act="remRes" data-arg="' + r.id + '" data-ok="1">Geschafft</button><button class="btn sm ghost" data-act="remRes" data-arg="' + r.id + '" data-ok="0">Misslungen</button>') : '') + '</span>').join('');
+  h += rem.map((r) => '<span class="remb">RW ' + AB_K[r.ab] + ' SG ' + r.dc + ' · ' + esc(r.name) + (canRoll(r) ? (r.tgt.startsWith('p:') ? '<button class="btn sm" data-act="remRoll" data-arg="' + esc(r.id) + '">Würfeln</button>' : '<button class="btn sm" data-act="remRes" data-arg="' + esc(r.id) + '" data-ok="1">Geschafft</button><button class="btn sm ghost" data-act="remRes" data-arg="' + esc(r.id) + '" data-ok="0">Misslungen</button>') : '') + '</span>').join('');
   return h ? '<span class="effs">' + h + '</span>' : '';
 }
 function effMineHtml() {
@@ -86,7 +86,7 @@ function effForm(editId) {
       (e.cond && COND[e.cond] ? '<p class="hint">Zustand: ' + COND[e.cond].name + ' – wird beim Ziel automatisch gesetzt und wieder entfernt.</p>' : '') +
       (e.save && e.save.ab ? '<p class="hint">Rettungswurf ' + AB_K[e.save.ab] + ' SG ' + e.save.dc + ' am ' + (e.save.when === 'start' ? 'Beginn' : 'Ende') + ' jedes Zuges des Ziels.</p>' : '') +
       '<div class="row">' + field('Ziel', '<select id="effTgtE">' + opts(e.tgt, '— ohne Ziel —') + '</select>') + field('Runden übrig', '<input type="number" id="effLeftE" min="0" value="' + (e.left ?? '') + '" placeholder="unbegrenzt">') + '</div>' +
-      '<div class="chips end"><button class="btn ghost" data-act="effDel" data-arg="' + e.id + '">Effekt beenden</button><button class="btn" data-act="effUpd" data-arg="' + e.id + '">Speichern</button></div></div>';
+      '<div class="chips end"><button class="btn ghost" data-act="effDel" data-arg="' + esc(e.id) + '">Effekt beenden</button><button class="btn" data-act="effUpd" data-arg="' + esc(e.id) + '">Speichern</button></div></div>';
   } else {
     const me = 'p:' + UID;
     m.innerHTML = '<div class="dlg effdlg" role="dialog" aria-modal="true" aria-label="Effekt hinzufügen"><div class="dph"><h3>Effekt hinzufügen</h3><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +

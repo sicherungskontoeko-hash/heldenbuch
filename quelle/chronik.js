@@ -24,7 +24,7 @@ function chrAdd(k, x, force) {
 function chrText(n, key) { const L = chrList(key).slice(-(n || 999)); return L.map((e) => (e.k === 'abend' ? '\n' + e.x : '- ' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + ' ' + e.x)).join('\n').trim(); }
 function chrOpen(keep) {
   const w = chrWhere(); const L = chrList(w.key); const m = $('#modal'); S.modal = 'chronik'; S.more = false; document.querySelectorAll('details.mnu[open]').forEach((d) => { d.open = false; });
-  const rows = L.map((e) => e.k === 'abend' ? '<li class="cabend">' + esc(e.x) + '</li>' : '<li class="ce"><time>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</time><span class="ci" aria-hidden="true">' + (CHR_ICON[e.k] || '•') + '</span><span class="cx">' + esc(e.x) + '</span><button class="x" data-act="chrDel" data-arg="' + e.id + '" aria-label="Eintrag löschen">×</button></li>').join('');
+  const rows = L.map((e) => e.k === 'abend' ? '<li class="cabend">' + esc(e.x) + '</li>' : '<li class="ce"><time>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</time><span class="ci" aria-hidden="true">' + (CHR_ICON[e.k] || '•') + '</span><span class="cx">' + esc(e.x) + '</span><button class="x" data-act="chrDel" data-arg="' + esc(e.id) + '" aria-label="Eintrag löschen">×</button></li>').join('');
   m.innerHTML = '<div class="dlg chrdlg" role="dialog" aria-modal="true" aria-label="Chronik"><div class="dph"><b>Chronik · ' + esc(w.name) + '</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' + (typeof kbTabs === 'function' ? kbTabs() : '') +
     (L.length ? '<ul class="chr" id="chrList">' + rows + '</ul>' : '<p class="hint">Noch nichts aufgeschrieben. Die Chronik füllt sich von selbst: Szenen, Handouts, Kämpfe, Beute, Entscheidungen, Rasten, Stufenaufstiege und erledigte Ansagen. Eigene Notizen kannst du unten ergänzen.</p>') +
     '<div class="chradd"><input id="chrN" type="text" placeholder="Notiz, z. B. «Die Helden haben Prunella die Wahrheit gesagt»" enterkeyhint="done">' + micBtn('chrN') + '<button class="btn sm" data-act="chrNote">Eintragen</button></div>' +
@@ -51,7 +51,7 @@ function ansBox(where) {
 }
 function ansDmHtml(compact) {
   const L = ansOpenList(); if (!L.length) return compact ? '' : '<p class="hint">Keine offenen Ansagen.</p>';
-  return '<div class="ansdm"><b>Ansagen <span class="cnt">' + L.length + '</span></b><ul>' + L.map((a) => '<li><span><b>' + esc(a.who) + '</b> <small>' + ago(a.t) + '</small><br>' + esc(a.x) + '</span><button class="chip" data-act="ansOk" data-arg="' + a.id + '" title="Erledigt – kommt in die Chronik">✓</button></li>').join('') + '</ul><div class="chips"><button class="btn sm" data-act="ansClaude">✦ An Claude</button>' + (L.length > 1 ? '<button class="btn sm ghost" data-act="ansAll">Alle ✓</button>' : '') + '</div></div>';
+  return '<div class="ansdm"><b>Ansagen <span class="cnt">' + L.length + '</span></b><ul>' + L.map((a) => '<li><span><b>' + esc(a.who) + '</b> <small>' + ago(a.t) + '</small><br>' + esc(a.x) + '</span><button class="chip" data-act="ansOk" data-arg="' + esc(a.id) + '" title="Erledigt – kommt in die Chronik">✓</button></li>').join('') + '</ul><div class="chips"><button class="btn sm" data-act="ansClaude">✦ An Claude</button>' + (L.length > 1 ? '<button class="btn sm ghost" data-act="ansAll">Alle ✓</button>' : '') + '</div></div>';
 }
 function ansMark(ids) {
   const L = ansOpenList().filter((a) => ids.includes(a.id)); if (!L.length) return;
@@ -64,7 +64,7 @@ function ansModal() { const m = $('#modal'); S.modal = 'ansagen'; m.innerHTML = 
 
 /* ---------- Mikrofon (nur in claude.ai mit der Fähigkeit „dictation“; sonst das Mikrofon der Tastatur) ---------- */
 let HB_DICT = null;
-const micBtn = (id) => '<button type="button" class="micbtn" data-act="mic" data-arg="' + id + '"' + (HB_DICT ? '' : ' hidden') + ' aria-label="Sprechen" title="Sprechen">🎤</button>';
+const micBtn = (id) => '<button type="button" class="micbtn" data-act="mic" data-arg="' + esc(id) + '"' + (HB_DICT ? '' : ' hidden') + ' aria-label="Sprechen" title="Sprechen">🎤</button>';
 setTimeout(() => { try { if (typeof isApp === 'function' && isApp()) return; if (window.claude && window.claude.use) window.claude.use('dictation').then((d) => { if (!d) return; HB_DICT = d; let base = '';
   d.onPartial(({ text }) => { const el = S.micEl && document.getElementById(S.micEl); if (el) el.value = base + text; });
   d.onFinal(({ text }) => { const el = S.micEl && document.getElementById(S.micEl); if (el) { base = base + text + ' '; el.value = base; } });

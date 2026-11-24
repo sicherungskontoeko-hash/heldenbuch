@@ -12,7 +12,7 @@ function rule(k) { if (!S.rules) { try { S.rules = JSON.parse(localStorage.getIt
 XA.ruleT = (t, a) => { rule(a); S.rules[a] = !rule(a); try { localStorage.setItem('hb_rules', JSON.stringify(S.rules)); } catch (e) {} render(); };
 function rulesBlock() {
   return '<section class="panel rulesp"><h2>Regeloptionen</h2><p class="hint">Standard ist D&D 2024 (SRD 5.2.1). Abweichungen schaltest du hier als Hausregel. Die Einstellung gilt auf diesem Gerät.</p><div class="rulelist">' +
-    Object.entries(RULE_OPTS).map(([k, o]) => '<label class="rulerow"><input type="checkbox" data-act="ruleT" data-arg="' + k + '"' + (rule(k) ? ' checked' : '') + '><span><b>' + esc(o.n) + (rule(k) === o.d ? '' : ' <em>Hausregel</em>') + '</b><small>' + esc(o.t) + '</small></span></label>').join('') + '</div></section>';
+    Object.entries(RULE_OPTS).map(([k, o]) => '<label class="rulerow"><input type="checkbox" data-act="ruleT" data-arg="' + esc(k) + '"' + (rule(k) ? ' checked' : '') + '><span><b>' + esc(o.n) + (rule(k) === o.d ? '' : ' <em>Hausregel</em>') + '</b><small>' + esc(o.t) + '</small></span></label>').join('') + '</div></section>';
 }
 
 /* Kennzeichnung: Diese Entscheidung trifft die Spielleitung (nicht die App) */
@@ -164,6 +164,16 @@ function spellGate(ch, c, s, lvl, mode) {
 
 /* ---------- Charakterdaten: Prüfung beim Import und Migration ---------- */
 const SCHEMA = 2;
+/* Hausregel aus einer Sicherung prüfen; leerer Text = in Ordnung */
+function validHb(h) {
+  if (!h || typeof h !== 'object' || Array.isArray(h)) return 'leerer oder ungültiger Eintrag';
+  if (typeof h.id !== 'string' || !/^[A-Za-z0-9_-]{1,60}$/.test(h.id)) return 'Kennung fehlt oder ist ungültig';
+  if (typeof HB_KIND === 'object' && !HB_KIND[h.kind]) return 'unbekannte Art';
+  if (typeof h.name !== 'string' || !h.name.trim() || h.name.length > 200) return 'Name fehlt';
+  if (h.text != null && typeof h.text !== 'string') return 'Text ist ungültig';
+  for (const f of ['classes', 'plus']) if (h[f] != null && !Array.isArray(h[f])) return 'Feld „' + f + '“ ist ungültig';
+  return '';
+}
 function validateChar(o) {
   const e = [];
   if (!o || typeof o !== 'object' || Array.isArray(o)) return ['Kein Heldenobjekt.'];
@@ -267,7 +277,7 @@ const crNum = (cr) => { const s = String(cr); return s.includes('/') ? +s.split(
 function wsAllowed(c) { const L = c.lv('dru'); const maxCr = L >= 8 ? 1 : L >= 4 ? 0.5 : 0.25; return WS_FORMS.filter(([id, minL]) => BESTIARY[id] && L >= minL && crNum(BESTIARY[id][1]) <= maxCr && (L >= 8 || !/Fliegen/.test(BESTIARY[id][5]))); }
 function wsPrompt(ch, c) {
   const list = wsAllowed(c);
-  orbPrompt('<div class="pr"><b>Tiergestalt wählen</b><p>Erlaubt bis HG ' + (c.lv('dru') >= 8 ? '1' : c.lv('dru') >= 4 ? '1/2' : '1/4') + (c.lv('dru') >= 8 ? '' : ', ohne Flugbewegung') + '. Du erhältst ' + c.lv('dru') + ' temporäre TP.</p><div class="chips">' + list.map(([id]) => { const M = BESTIARY[id]; return '<button class="btn sm" data-act="wsGo" data-arg="' + id + '">' + esc(M[0]) + ' <small>HG ' + M[1] + ' · RK ' + M[2] + ' · ' + esc(M[5]) + '</small></button>'; }).join('') + '<button class="btn sm ghost" data-act="wsGo" data-arg="custom">Andere Form (nur temporäre TP)</button><button class="btn sm ghost" data-act="mastNo">Abbrechen</button></div></div>');
+  orbPrompt('<div class="pr"><b>Tiergestalt wählen</b><p>Erlaubt bis HG ' + (c.lv('dru') >= 8 ? '1' : c.lv('dru') >= 4 ? '1/2' : '1/4') + (c.lv('dru') >= 8 ? '' : ', ohne Flugbewegung') + '. Du erhältst ' + c.lv('dru') + ' temporäre TP.</p><div class="chips">' + list.map(([id]) => { const M = BESTIARY[id]; return '<button class="btn sm" data-act="wsGo" data-arg="' + esc(id) + '">' + esc(M[0]) + ' <small>HG ' + M[1] + ' · RK ' + M[2] + ' · ' + esc(M[5]) + '</small></button>'; }).join('') + '<button class="btn sm ghost" data-act="wsGo" data-arg="custom">Andere Form (nur temporäre TP)</button><button class="btn sm ghost" data-act="mastNo">Abbrechen</button></div></div>');
 }
 XA.wsGo = (t, a, p, ch) => {
   const c = derive(ch, S.hb); const P = ch.play; orbPrompt('');
@@ -308,7 +318,7 @@ function shortRestOpen(ch) {
   const hpNow = P.hp == null ? c.hpMax : P.hp;
   const m = $('#modal'); S.modal = 'srest';
   m.innerHTML = '<div class="dlg" role="dialog" aria-modal="true" aria-label="Kurze Rast"><div class="dph"><b>Kurze Rast (1 Stunde)</b><button class="x" data-act="srCancel" aria-label="Abbrechen">×</button></div><p>TP ' + hpNow + ' / ' + c.hpMax + '. Wähle, wie viele Trefferwürfel du ausgibst. Gewürfelt und verbucht wird erst beim Abschliessen der Rast; pro Würfel heilst du Ergebnis ' + sgn(c.mod.con) + ' (KON).</p>' +
-    pools.map((p) => { const n = w[p.d] || 0; const left = p.n - p.used; return '<div class="srrow"><span>W' + p.d + ' <small>' + left + ' von ' + p.n + ' übrig</small></span><div class="stepper"><button data-act="srHd" data-arg="' + p.d + '" data-d="-1" aria-label="weniger"' + (n <= 0 ? ' disabled' : '') + '>−</button><b>' + n + '</b><button data-act="srHd" data-arg="' + p.d + '" data-d="1" aria-label="mehr"' + (n >= left ? ' disabled' : '') + '>+</button></div></div>'; }).join('') +
+    pools.map((p) => { const n = w[p.d] || 0; const left = p.n - p.used; return '<div class="srrow"><span>W' + p.d + ' <small>' + left + ' von ' + p.n + ' übrig</small></span><div class="stepper"><button data-act="srHd" data-arg="' + esc(p.d) + '" data-d="-1" aria-label="weniger"' + (n <= 0 ? ' disabled' : '') + '>−</button><b>' + n + '</b><button data-act="srHd" data-arg="' + esc(p.d) + '" data-d="1" aria-label="mehr"' + (n >= left ? ' disabled' : '') + '>+</button></div></div>'; }).join('') +
     '<p class="hint">' + (avg ? 'Erwartete Heilung ≈ ' + Math.round(avg) + ' TP.' : 'Ohne Trefferwürfel erhältst du nur die Kurzrast-Ressourcen zurück.') + ' Bricht die Rast ab, verfallen nur die Würfel-Auswahl – nichts wird verbraucht.</p>' +
     '<div class="chips end"><button class="btn ghost" data-act="srCancel">Rast abbrechen</button><button class="btn" data-act="srDone">Rast abschliessen</button></div></div>';
   m.hidden = false; return true;
@@ -339,12 +349,12 @@ function mastEff(ch, name, tgt) {
 function masteryHit(ch, c, a, d) {
   const m = a.mastery; if (!m || !MASTERY[m] || a.ws) return {};
   const P = ch.play; const abm = c.mod[a.ab] || 0; const dc = 8 + abm + c.pb; const tg = d.tgt;
-  if (m === 'topple') return { note: 'Umwerfen: KON-Rettungswurf SG ' + dc + ', sonst liegt das Ziel', prompt: tg ? '<div class="pr"><b>Umwerfen (SG ' + dc + ')</b><p>Misslingt dem Ziel der KON-Rettungswurf? ' + slTag() + '</p><div class="chips end"><button class="btn ghost" data-act="mastNo">Geschafft</button><button class="btn" data-act="mastProne" data-arg="' + tg + '">Misslungen – Ziel liegt</button></div></div>' : '' };
+  if (m === 'topple') return { note: 'Umwerfen: KON-Rettungswurf SG ' + dc + ', sonst liegt das Ziel', prompt: tg ? '<div class="pr"><b>Umwerfen (SG ' + dc + ')</b><p>Misslingt dem Ziel der KON-Rettungswurf? ' + slTag() + '</p><div class="chips end"><button class="btn ghost" data-act="mastNo">Geschafft</button><button class="btn" data-act="mastProne" data-arg="' + esc(tg) + '">Misslungen – Ziel liegt</button></div></div>' : '' };
   if (m === 'push') return { note: 'Stoss: Ziel (gross oder kleiner) bis 3 m wegstossen – Position und Grösse prüft die Spielleitung' };
   if (m === 'sap') return { note: 'Schwächen: Ziel hat Nachteil auf seinen nächsten Angriff vor deinem nächsten Zug' + (mastEff(ch, 'Geschwächt (Nachteil auf nächsten Angriff)', tg) ? ' (als Effekt eingetragen)' : '') };
   if (m === 'slow') return { note: 'Verlangsamen: Bewegung des Ziels −3 m bis zu deinem nächsten Zug' + (mastEff(ch, 'Verlangsamt (−3 m Bewegung)', tg) ? ' (als Effekt eingetragen)' : '') };
   if (m === 'vex') { if (tg) fxSet(P, 'vex', tg); return { note: 'Bedrängen: Vorteil auf deinen nächsten Angriff gegen dieses Ziel' + (tg ? ' (wird automatisch angewendet)' : '') }; }
-  if (m === 'cleave' && a.melee && !d.cleave && !onceUsed(ch, 'cleave')) return { note: 'Durchspalten möglich', prompt: '<div class="pr"><b>Durchspalten</b><p>Greife eine zweite Kreatur in 1,5 m vom ersten Ziel an (1× pro Zug, Schaden ohne Attributsmodifikator).</p><div class="chips end"><button class="btn ghost" data-act="mastNo">Nein</button><button class="btn" data-act="cleave" data-arg="' + d.i + '">Zweites Ziel angreifen</button></div></div>' };
+  if (m === 'cleave' && a.melee && !d.cleave && !onceUsed(ch, 'cleave')) return { note: 'Durchspalten möglich', prompt: '<div class="pr"><b>Durchspalten</b><p>Greife eine zweite Kreatur in 1,5 m vom ersten Ziel an (1× pro Zug, Schaden ohne Attributsmodifikator).</p><div class="chips end"><button class="btn ghost" data-act="mastNo">Nein</button><button class="btn" data-act="cleave" data-arg="' + esc(d.i) + '">Zweites Ziel angreifen</button></div></div>' };
   return {};
 }
 XA.mastNo = () => orbPrompt('');
@@ -365,7 +375,7 @@ function healPrompt(ch, amount, name, multi) {
   const tg = onlineFight() ? order().filter((x) => x.key !== 'p:' + UID && x.npc) : [];
   const pl = S.camp ? players().filter(([u]) => u !== UID) : [];
   orbPrompt('<div class="pr"><b>' + esc(name) + ': ' + amount + ' TP Heilung</b><p>Auf wen' + (multi ? ' (mehrere möglich)' : '') + '? Trefferpunkte steigen höchstens bis zum Maximum.</p><div class="chips"><button class="btn sm" data-act="healGo" data-arg="me">Auf mich</button>' +
-    tg.map((x) => '<button class="btn sm ghost" data-act="healGo" data-arg="' + x.key + '">' + esc(x.name) + (x.hpMax ? ' (' + x.hp + '/' + x.hpMax + ')' : '') + '</button>').join('') +
+    tg.map((x) => '<button class="btn sm ghost" data-act="healGo" data-arg="' + esc(x.key) + '">' + esc(x.name) + (x.hpMax ? ' (' + x.hp + '/' + x.hpMax + ')' : '') + '</button>').join('') +
     pl.map(([u, p]) => '<button class="btn sm ghost" data-act="healGo" data-arg="u:' + u + '">' + esc(p.char) + ' (meldet die Heilung)</button>').join('') +
     '<button class="btn sm ghost" data-act="healGo" data-arg="x">' + (multi ? 'Fertig' : 'Nur gewürfelt') + '</button></div></div>');
 }

@@ -29,9 +29,11 @@ function hbRoomKey(code) {
 }
 async function hbTopic(path) { const r = hbRoomOf(path); const k = await hbRoomKey(r.code); return { topic: HB_PREFIX + r.kind + '/' + k.tb + r.rest, key: k.key }; }
 async function hbSeal(key, obj) { const s = JSON.stringify(obj); if (!key) throw new Error('nocrypto'); const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(s)); return JSON.stringify({ e: 1, iv: hbB64(iv), ct: hbB64(new Uint8Array(ct)) }); }
+/* Obergrenzen für Empfangenes: ein Dokument (mit Porträt) bleibt weit darunter */
+const HB_MAX_MSG = 3e6, HB_MAX_PKT = 4e6, HB_DOC_ID = /^[A-Za-z0-9_.:@-]{1,80}$/;
 async function hbOpen(key, msg) {
-  if (!msg) return null; let o; try { o = JSON.parse(msg); } catch (e) { return null; }
-  if (o && o.e === 1 && o.iv && o.ct) { if (!key) return null; try { const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: hbUb64(o.iv) }, key, hbUb64(o.ct)); return JSON.parse(new TextDecoder().decode(pt)); } catch (e) { return null; } }
+  if (!msg || typeof msg !== 'string' || msg.length > HB_MAX_MSG) return null; let o; try { o = JSON.parse(msg); } catch (e) { return null; }
+  if (o && o.e === 1 && typeof o.iv === 'string' && typeof o.ct === 'string') { if (!key) return null; try { const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: hbUb64(o.iv) }, key, hbUb64(o.ct)); const v = JSON.parse(new TextDecoder().decode(pt)); return v && typeof v === 'object' && !Array.isArray(v) ? v : null; } catch (e) { return null; } }
   return null; /* unverschlüsselte Nachrichten werden nie angenommen */
 }
 const hbLs = { get: (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
@@ -65,6 +67,7 @@ class HbMqtt {
       const b = this.buf; if (b.length < 2) return;
       let mult = 1, val = 0, i = 1, byte;
       do { if (i >= b.length) return; byte = b[i++]; val += (byte & 127) * mult; mult *= 128; } while (byte & 128);
+      if (val > HB_MAX_PKT) { this.buf = new Uint8Array(0); try { this.ws.close(); } catch (e) {} return; }
       if (b.length < i + val) return;
       const type = b[0], body = b.slice(i, i + val); this.buf = b.slice(i + val);
       this.handle(type, body);
@@ -93,8 +96,8 @@ function hbDoc(path) {
   const remote = path.startsWith('camp/') || path.startsWith('transfer/');
   if (!remote) return {
     id: path.split('/').pop(), path,
-    set: async (d) => { hbLs.set('hbdb:' + path, JSON.stringify(d)); },
-    delete: async () => { try { localStorage.removeItem('hbdb:' + path); } catch (e) {} },
+    set: async (d) => { const v = JSON.stringify(d); localStorage.setItem('hbdb:' + path, v); if (localStorage.getItem('hbdb:' + path) !== v) throw new Error('verify'); },
+    delete: async () => { localStorage.removeItem('hbdb:' + path); },
     get: async () => { const v = hbLs.get('hbdb:' + path, null); return hbSnapDoc(path, v ? JSON.parse(v) : null); },
     onSnapshot: (fn) => { const v = hbLs.get('hbdb:' + path, null); setTimeout(() => fn(hbSnapDoc(path, v ? JSON.parse(v) : null)), 0); return () => {}; }
   };
@@ -106,7 +109,7 @@ function hbDoc(path) {
     onSnapshot: (fn) => {
       let first = true, off = null, dead = false, q = Promise.resolve();
       const t0 = setTimeout(() => { if (first) { first = false; fn(hbSnapDoc(path, HB_CACHE.get(path))); } }, 1500);
-      hbTopic(path).then((t) => { if (dead) return; off = HBNET.subscribe(t.topic, (tp, msg) => { q = q.then(async () => { const v = await hbOpen(t.key, msg); if (msg && v == null) return; if (v == null) HB_CACHE.delete(path); else HB_CACHE.set(path, v); first = false; clearTimeout(t0); fn(hbSnapDoc(path, v)); }); }); });
+      hbTopic(path).then((t) => { if (dead) return; off = HBNET.subscribe(t.topic, (tp, msg) => { q = q.then(async () => { const v = await hbOpen(t.key, msg); if (msg && v == null) return; if (v == null) HB_CACHE.delete(path); else HB_CACHE.set(path, v); first = false; clearTimeout(t0); fn(hbSnapDoc(path, v)); }).catch(() => {}); }); });
       return () => { dead = true; clearTimeout(t0); if (off) off(); };
     }
   };
@@ -123,7 +126,7 @@ function hbCollection(path) {
       const map = new Map(); let tm = null; const emit = () => { clearTimeout(tm); tm = setTimeout(() => fn({ docs: [...map.entries()].map(([k, v]) => hbSnapDoc(k, v)), empty: !map.size }), 60); };
       const t0 = setTimeout(emit, 1200);
       let off = null, dead = false, q = Promise.resolve();
-      hbTopic(path).then((t) => { if (dead) return; off = HBNET.subscribe(t.topic + '/+', (tp, msg) => { q = q.then(async () => { const k = path + '/' + tp.split('/').pop(); const v = await hbOpen(t.key, msg); if (msg && v == null) return; if (v == null) { map.delete(k); HB_CACHE.delete(k); } else { map.set(k, v); HB_CACHE.set(k, v); } emit(); }); }); });
+      hbTopic(path).then((t) => { if (dead) return; off = HBNET.subscribe(t.topic + '/+', (tp, msg) => { q = q.then(async () => { const id = tp.split('/').pop(); if (!HB_DOC_ID.test(id)) return; const k = path + '/' + id; const v = await hbOpen(t.key, msg); if (msg && v == null) return; if (v == null) { map.delete(k); HB_CACHE.delete(k); } else { if (!map.has(k) && map.size >= 64) return; map.set(k, v); HB_CACHE.set(k, v); } emit(); }).catch(() => {}); }); });
       return () => { dead = true; clearTimeout(t0); clearTimeout(tm); if (off) off(); };
     }
   };

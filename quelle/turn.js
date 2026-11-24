@@ -272,7 +272,7 @@ function turnBlock(c) {
   const ch = c.char; const t = turnSt(ch); const favs = (ch.favs || []);
   const opts = turnOpts(c); const byId = Object.fromEntries(opts.map((o) => [o.id, o]));
   const mvMax = c.speed + (t.mvMax || 0); const mvLeft = Math.max(0, mvMax - (t.mv || 0));
-  const pill = (k, label, left, max) => '<button class="tpill' + (left <= 0 ? ' used' : '') + '" data-act="tPick" data-arg="' + k + '" aria-label="' + label + ' wählen"><i>' + COST_K[k] + '</i><span>' + label + '</span><b>' + (max > 1 ? left + '/' + max : left > 0 ? 'frei' : 'weg') + '</b></button>';
+  const pill = (k, label, left, max) => '<button class="tpill' + (left <= 0 ? ' used' : '') + '" data-act="tPick" data-arg="' + esc(k) + '" aria-label="' + label + ' wählen"><i>' + COST_K[k] + '</i><span>' + label + '</span><b>' + (max > 1 ? left + '/' + max : left > 0 ? 'frei' : 'weg') + '</b></button>';
   let h = '<section class="blk turnblk" data-grp="kampf"><div class="tbar">' + pill('a', 'Aktion', t.aMax - t.a, t.aMax) + pill('b', 'Bonusaktion', 1 - t.b, 1) + pill('r', 'Reaktion', 1 - t.r, 1) +
     '<div class="tmove"><span>Bewegung</span><button class="tm" data-act="tMove" data-arg="1.5" aria-label="1,5 m bewegen">−</button><b>' + fmtM(mvLeft) + '</b><button class="tm" data-act="tMove" data-arg="-1.5" aria-label="1,5 m zurück">+</button></div>' +
     (typeof onlineFight === 'function' && onlineFight() ? '' : '<button class="btn sm ghost tnew" data-act="tNew" title="Zugbeginn: Aktion, Bonusaktion, Reaktion und Bewegung zurücksetzen, Dauer herunterzählen">Neuer Zug</button>') + (typeof turnSince === 'function' && turnSince(ch).length ? '<button class="btn sm ghost tback" data-act="turnBack" title="Alles seit Beginn deines Zuges zurücknehmen">⟲ Zug</button>' : '') + '</div>' +
@@ -282,7 +282,7 @@ function turnBlock(c) {
   if (extra.length) h += '<div class="tnow">' + extra.join('') + '</div>';
   if (typeof effMineHtml === 'function') h += effMineHtml();
   const fv = favs.map((id) => byId[id]).filter(Boolean);
-  if (fv.length) h += '<div class="tfav">' + fv.map((o) => '<button class="tq' + (o.empty || tLeft(ch, o.cost) <= 0 ? ' dim' : '') + '" data-act="tUse" data-arg="' + o.id + '"><i class="k' + o.cost + '">' + COST_K[o.cost] + '</i>' + esc(o.n) + (o.left !== null && o.left !== undefined ? '<small>' + o.left + '</small>' : '') + '</button>').join('') + '</div>';
+  if (fv.length) h += '<div class="tfav">' + fv.map((o) => '<button class="tq' + (o.empty || tLeft(ch, o.cost) <= 0 ? ' dim' : '') + '" data-act="tUse" data-arg="' + esc(o.id) + '"><i class="k' + o.cost + '">' + COST_K[o.cost] + '</i>' + esc(o.n) + (o.left !== null && o.left !== undefined ? '<small>' + o.left + '</small>' : '') + '</button>').join('') + '</div>';
   else if (typeof hlOn === 'function' && hlOn('tipps')) h += '<p class="nb tfavtip">Mit ☆ im Auswahlfenster legst du Favoriten an. Sie stehen dann hier und sind mit einem Tipp gewürfelt.</p>';
   h += '</section>';
   return h;
@@ -302,8 +302,8 @@ function turnExtras(c, slim) {
   if (ch.play.raging) act.push(['rage', 'Kampfrausch' + (ch.play.rageKeep ? '' : ' – endet nach diesem Zug, wenn du nicht angreifst')]);
   if (ch.play.ws) act.push(['ws', 'Tiergestalt' + (BESTIARY[ch.play.ws] ? ': ' + BESTIARY[ch.play.ws][0] : '')]);
   if (ch.play.ws && typeof WS_STATS !== 'undefined' && WS_STATS[ch.play.ws]) extra.push('<span class="tinfo">' + esc(BESTIARY[ch.play.ws][0]) + ': ' + esc(BESTIARY[ch.play.ws][5]) + ' · ' + esc(WS_STATS[ch.play.ws].senses) + ' ' + slTag('Sinne und Merkmale wie Rudeltaktik wendet ihr am Tisch an – die App rechnet sie nicht automatisch') + '</span>');
-  if (act.length) extra.push('<span class="tinfo">Aktiv:</span>' + act.map(([k, n]) => '<button class="chip" data-act="tFxOff" data-arg="' + k + '" title="Beenden">' + esc(n) + ' ×</button>').join(''));
-  if (act.length && !inFight(ch) && Object.keys(dur).length) extra.push('<span class="tinfo">Zeit vergeht:</span>' + [[10, '+1 Min.'], [100, '+10 Min.'], [600, '+1 Std.']].map(([r, l]) => '<button class="chip" data-act="tTime" data-arg="' + r + '">' + l + '</button>').join(''));
+  if (act.length) extra.push('<span class="tinfo">Aktiv:</span>' + act.map(([k, n]) => '<button class="chip" data-act="tFxOff" data-arg="' + esc(k) + '" title="Beenden">' + esc(n) + ' ×</button>').join(''));
+  if (act.length && !inFight(ch) && Object.keys(dur).length) extra.push('<span class="tinfo">Zeit vergeht:</span>' + [[10, '+1 Min.'], [100, '+10 Min.'], [600, '+1 Std.']].map(([r, l]) => '<button class="chip" data-act="tTime" data-arg="' + esc(r) + '">' + l + '</button>').join(''));
   return extra;
 }
 /* Zugleiste aus (Hilfe-Stufe „Erfahren“): keine Zählung, nur was gerade läuft – Wirkungen, Ziel am Tisch, Kampfmodus zum Ausschalten */
@@ -344,8 +344,8 @@ function openTurnPicker(k) {
   const m = $('#modal'); S.modal = 'turn';
   m.innerHTML = '<div class="dlg turndlg" role="dialog" aria-modal="true" aria-label="' + COST_DE[k] + ' wählen"><div class="dph"><h3>' + COST_DE[k] + (k === 'a' && t.aMax > 1 ? ' (' + left + ' von ' + t.aMax + ' frei)' : left > 0 ? ' – frei' : ' – schon verbraucht') + '</h3><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +
     
-    keys.map((g) => '<h4>' + esc(g) + '</h4><div class="tlist">' + groups[g].map((o) => '<div class="trow' + (o.empty ? ' empty' : '') + '"><button class="tgo" data-act="tUse" data-arg="' + o.id + '"' + (o.empty ? ' disabled' : '') + '><i class="k' + o.cost + '">' + COST_K[o.cost] + '</i><b>' + esc(o.n) + '</b><small>' + esc([o.sub, o.left !== null && o.left !== undefined ? 'noch ' + o.left : ''].filter(Boolean).join(' · ')) + '</small></button><button class="tstar' + (favs.includes(o.id) ? ' on' : '') + '" data-act="tFav" data-arg="' + o.id + '" aria-label="Favorit">' + (favs.includes(o.id) ? '★' : '☆') + '</button></div>').join('') + '</div>').join('') +
-    '<div class="chips end"><button class="btn ghost" data-act="tToggle" data-arg="' + k + '">' + (left > 0 ? 'Als verbraucht markieren' : 'Wieder freigeben') + '</button><button class="btn" data-act="closeModal">Fertig</button></div></div>';
+    keys.map((g) => '<h4>' + esc(g) + '</h4><div class="tlist">' + groups[g].map((o) => '<div class="trow' + (o.empty ? ' empty' : '') + '"><button class="tgo" data-act="tUse" data-arg="' + esc(o.id) + '"' + (o.empty ? ' disabled' : '') + '><i class="k' + o.cost + '">' + COST_K[o.cost] + '</i><b>' + esc(o.n) + '</b><small>' + esc([o.sub, o.left !== null && o.left !== undefined ? 'noch ' + o.left : ''].filter(Boolean).join(' · ')) + '</small></button><button class="tstar' + (favs.includes(o.id) ? ' on' : '') + '" data-act="tFav" data-arg="' + esc(o.id) + '" aria-label="Favorit">' + (favs.includes(o.id) ? '★' : '☆') + '</button></div>').join('') + '</div>').join('') +
+    '<div class="chips end"><button class="btn ghost" data-act="tToggle" data-arg="' + esc(k) + '">' + (left > 0 ? 'Als verbraucht markieren' : 'Wieder freigeben') + '</button><button class="btn" data-act="closeModal">Fertig</button></div></div>';
   m.hidden = false;
 }
 Object.assign(XA, {

@@ -39,7 +39,7 @@ function lvlUpOpen() {
     const opts = [[ch.cls, CLASSES[ch.cls].name + ' ' + c.lv(ch.cls) + ' → ' + (c.lv(ch.cls) + 1)]].concat((ch.multi || []).map((mm) => [mm.cls, CLASSES[mm.cls].name + ' ' + mm.level + ' → ' + (+mm.level + 1)]));
     const avg = C.hd / 2 + 1, con = c.mod.con;
     body = '<div class="luhero">' + (typeof picOf === 'function' ? picOf('cls', id).replace('cpic', 'lupic') : '') + '<div><small>' + esc(ch.name) + '</small><b>Stufe ' + c.level + ' → <em>' + (c.level + 1) + '</em></b><span>' + esc(C.name) + ' ' + nl + '</span></div></div>' +
-      (opts.length > 1 ? '<h4>In welcher Klasse steigst du auf?</h4><div class="chips">' + opts.map(([k, l]) => chip(k === id, l, 'data-act="luCls" data-arg="' + k + '"')).join('') + '</div>' : '') +
+      (opts.length > 1 ? '<h4>In welcher Klasse steigst du auf?</h4><div class="chips">' + opts.map(([k, l]) => chip(k === id, l, 'data-act="luCls" data-arg="' + esc(k) + '"')).join('') + '</div>' : '') +
       '<p class="hint">Neue Klasse dazunehmen? <button class="link" data-act="luMulti">Multiclassing im Erschaffen-Bereich</button></p>' +
       '<h4>Trefferpunkte</h4><div class="luhp">' + (ch.hpMode === 'roll' ? (S.lu.roll ? '<div class="luhpv"><span>W' + C.hd + ' = ' + S.lu.roll + ' ' + sgn(con) + ' KON</span><b>+' + Math.max(1, S.lu.roll + con) + ' TP</b></div>' : '<button class="btn big" data-act="luRoll">W' + C.hd + ' würfeln</button><p class="hint">Du hast „selbst gewürfelt“ eingestellt.</p>')
         : '<div class="luhpv"><span>Durchschnitt ' + avg + ' ' + sgn(con) + ' KON</span><b>+' + Math.max(1, avg + con) + ' TP</b></div>') + '</div>';
@@ -53,7 +53,7 @@ function lvlUpOpen() {
   } else {
     const w = c.warn;
     body = '<div class="luhero done"><div><small>' + esc(ch.name) + '</small><b>Stufe <em>' + c.level + '</em> erreicht!</b></div></div>' +
-      (w.length ? '<h4>Jetzt entscheiden</h4><p class="hint">Diese Auswahlen sind durch den Aufstieg neu dazugekommen oder noch offen. Tippe darauf, um direkt hinzuspringen.</p><div class="luwarn">' + w.map((x, i) => '<button data-act="luWarn" data-arg="' + i + '"><span>' + esc(x) + '</span><i aria-hidden="true">→</i></button>').join('') + '</div>'
+      (w.length ? '<h4>Jetzt entscheiden</h4><p class="hint">Diese Auswahlen sind durch den Aufstieg neu dazugekommen oder noch offen. Tippe darauf, um direkt hinzuspringen.</p><div class="luwarn">' + w.map((x, i) => '<button data-act="luWarn" data-arg="' + esc(i) + '"><span>' + esc(x) + '</span><i aria-hidden="true">→</i></button>').join('') + '</div>'
         : '<p class="ok">✓ Nichts mehr zu entscheiden – viel Spass mit deinem stärkeren Helden!</p>');
     foot = '<button class="btn" data-act="luDone">Fertig</button>';
   }

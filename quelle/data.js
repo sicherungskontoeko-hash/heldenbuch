@@ -1,3 +1,6 @@
+/* HTML-Maskierung: ganz vorne, weil auch Dateien vor app.js beim Laden Markup bauen */
+const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }; const ESC_RE = /[&<>"]/g;
+const esc = (s) => { s = String(s ?? ''); return ESC_RE.test(s) ? (ESC_RE.lastIndex = 0, s.replace(ESC_RE, (m) => ESC_MAP[m])) : s; };
 /* ==== Regeldaten: basiert auf dem SRD 5.2.1 (CC-BY-4.0), deutsch in eigenen Worten zusammengefasst ==== */
 /* Würfelzufall: kryptografischer Zufall des Geräts (fairer als Math.random) */
 const NATIVE_RANDOM = Math.random;
@@ -201,7 +204,7 @@ const CLASSES = {
    [3,'Technik der offenen Hand','Triffst du mit Schlaghagel, wähle: Das Ziel kann bis zum Beginn seines nächsten Zuges keine Gelegenheitsangriffe machen, oder es wird bei misslungenem STÄ-Rettungswurf 4,5 m weggestossen, oder es fällt bei misslungenem GES-Rettungswurf hin.'],
    [6,'Ganzheit des Körpers','Bonusaktion: Heile Kampfkunstwürfel + WEI-Mod TP. Nutzungen = WEI-Mod pro langer Rast.'],
    [11,'Flinker Schritt','Nutzt du eine andere Bonusaktion, darfst du zusätzlich Schritt des Windes einsetzen.'],
-   [17,'Bebende Handfläche','Für 3 Fokuspunkte bei einem Treffer setzt du tödliche Schwingungen frei. Später kannst du sie auslösen: KON-Rettungswurf, 10W12 Energieschaden, bei Erfolg die Hälfte.']
+   [17,'Bebende Handfläche','Triffst du mit einem waffenlosen Schlag, kannst du 4 Fokuspunkte ausgeben und im Körper des Ziels tödliche Schwingungen in Gang setzen. Später kannst du sie auslösen: KON-Rettungswurf, 10W12 Energieschaden, bei Erfolg die Hälfte.']
   ]},
  pal:{ name:'Paladin', hd:10, prim:['str','cha'], saves:['wis','cha'], skillN:2, skills:['ath','ins','itm','med','per','rel'], armor:['light','medium','heavy','shield'], weapons:'martial',
   caster:'half', ability:'cha', cantrips:()=>0, prepared:PREP_HALF, mastery:()=>2, fightingStyle:2, asi:[4,8,12,16],
