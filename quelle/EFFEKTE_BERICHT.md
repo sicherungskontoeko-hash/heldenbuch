@@ -22,7 +22,7 @@ Zusätzlicher Code: `vfx.js` 12 KB, `vfxspiel.js` 10 KB, `vfxton.js` 6 KB, `vfxu
 
 | Nr. | Thema | Stand | Wo | Bemerkung |
 |---|---|---|---|---|
-| 1–2 | Würfelmaterial und Form | **teilweise** | `wuerfel3d.js` (#36) | ersetzt durch das Briefing Artefaktwürfel v5: Prototyp W20 für drei Sets, hinter Schalter (Grundwert Klassisch). Übrige neun Sets, W4 mit Eckzahlen, W6–W12 und W100 als zwei W10 erst nach Freigabe. Der alte SVG-Materialpatch wurde, wie verlangt, nicht angewendet. |
+| 1–2 | Würfelmaterial und Form | **umgesetzt** | `wuerfel3d.js` (#36, #39) | Artefaktwürfel v5: alle 12 Sets, W4 bis W100, aus Code erzeugt (keine Modelldateien). Seit dem Aufräumen der Standard; die SVG-Würfel bleiben nur als Rückfall (ohne WebGL, Kontextverlust, zu langsames Gerät). Der alte SVG-Materialpatch wurde, wie verlangt, nicht angewendet. |
 | 3 | Würfelbewegung | **teilweise** | `vfx.js`, `app.js`, `wuerfel3d.js` | Normal 850 ms, Kurz 300 ms und Aus umgesetzt. Antippen zeigt sofort das Ergebnis. Kein Regel-Zufall in der Animation (`vrand`). Höchstens 2/4/6 Würfel drehen sich echt, je nach Profil. Abweichend: Die bisherigen SVG-Würfel haben weiter je Würfel eine eigene Schleife; eine gemeinsame Schleife gibt es nur für die Artefaktwürfel. Zusammenstösse mehrerer Würfel fehlen noch und gehören zum Würfelpaket. |
 | 4 | Kritische Würfe | **umgesetzt** | `dice3d.js`, `app.js` (#34, #35) | Effekte lokal am Würfel, Dezent und Intensiv, ohne Flackern. Natürliche 1 je Set (Rauch, Dampf, Staub, Splitter, welke Blätter, Glanz erlischt, verblasst). Natürliche 20/1 wird aus dem behaltenen W20 bestimmt und vom Regel-Krit getrennt (natürliche 19 im erweiterten Bereich: eigener Hinweis). Kein Krit bei Höchstwerten anderer Würfel. |
 | 5 | Schaden und Heilung | **umgesetzt** | `vfxspiel.js` (#35) | Lokal am TP-Feld: Zahl, gleitender Balken, Form je Schadensart aus den Daten. Gemischte oder unbekannte Schadensart bleibt neutral. Höchstens ein Effekt gleichzeitig, Dezent ≤ 8 und Intensiv ≤ 15 Teilchen, 420–520 ms. |
@@ -42,7 +42,7 @@ Zusätzlicher Code: `vfx.js` 12 KB, `vfxspiel.js` 10 KB, `vfxton.js` 6 KB, `vfxu
 | Alte Effekte nach neuem Wurf | behoben: Ein neuer Wurf räumt grosse Effekte weg (#34) |
 | `themeBurst` vibriert ohne Einwilligung | behoben (#34) |
 | `showMulti`: Höchst-/Tiefstwert als Krit | behoben: leise Markierung (#34) |
-| W100 auf einem W10 | offen, gehört zum Würfelpaket (W100 als zwei W10) |
+| W100 auf einem W10 | behoben: W100 sind zwei W10 (Zehner 00–90, Einer 0–9) nebeneinander (#39) |
 
 ## Artefaktwürfel v5 (Briefing)
 
@@ -50,14 +50,14 @@ Zusätzlicher Code: `vfx.js` 12 KB, `vfxspiel.js` 10 KB, `vfxton.js` 6 KB, `vfxu
 |---|---|
 | Eigene Branch, Tests gesichert | umgesetzt (Branch `wuerfel-v5`) |
 | Nur Optik, Regeln und Ergebnisse unverändert | umgesetzt, geprüft in `wuerfel3d.test.js` |
-| Zuerst Weltenhain W20, dann Eisenwerk und Arkanum | umgesetzt als Prototyp, **wartet auf Freigabe** |
+| Zuerst Weltenhain W20, dann Eisenwerk und Arkanum | umgesetzt, freigegeben, danach alle Sets (#39) |
 | Eigene Geometriebausteine je Set | umgesetzt für die drei Sets: Wurzelstränge, Ranken, Blätter; Stahlbänder, Muttern, Nieten, Zahnradkränze; Goldfassung, Armillarringe, Runenband, Kugeln |
 | Zahlen frei, echte Glyphen | umgesetzt. Die Ornamente liegen auf Kanten und Ecken, Arkanums Ringe stehen in Raumlage neben der Zahl. |
-| Schalter Classic / Enhanced / Artifact | teilweise: Classic und Artifact gibt es. Enhanced ist offen. |
+| Schalter Classic / Enhanced / Artifact | abweichend (Entscheid): kein Schalter. Artefakt ist Standard, Classic nur Rückfall, Enhanced gestrichen. |
 | Rückfall WebGL → bisheriger SVG-Renderer → Ergebnis | umgesetzt, auch bei Kontextverlust mitten im Wurf. Abweichend: Die Zwischenstufe «Canvas vereinfacht» fehlt, es geht direkt auf SVG. |
-| Eine Schleife, nur bei sichtbarem Wurf, Zwischenspeicher begrenzt | umgesetzt (höchstens 13 Modelle) |
+| Eine Schleife, nur bei sichtbarem Wurf, Zwischenspeicher begrenzt | umgesetzt (höchstens 16 Formen); zu langsames Gerät (zwei Würfe unter 20 Bildern pro Sekunde) fällt für die Sitzung auf SVG zurück |
 | Bildtafel mit echten Renderings, Graustufen | umgesetzt für W20 bei 36/64/84/120/260 px |
-| Übrige Sets und Formen, W4, W100, 84 Kombinationen | offen, nach Freigabe |
+| Übrige Sets und Formen, W4, W100, 84 Kombinationen | umgesetzt (#39): W4 mit Eckzahlen, W10 1–10, W100 als zwei W10 |
 | Messung auf echten Geräten | offen |
 
 ## Gemessen

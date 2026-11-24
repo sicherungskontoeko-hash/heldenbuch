@@ -30,6 +30,18 @@ const SETUP = (turnMine) => { Object.keys(S.chars).forEach((k) => delete S.chars
     await p.evaluate(() => { S.combat.turn = 'p:u2'; paintTurn(); });
     T(n + ': Zug vorbei: Knopf weg', await p.evaluate(() => !document.querySelector('#turnpill')));
     await ctx.close(); }
+  /* Ohne Online-Tisch: Initiative würfeln schaltet den Kampfmodus ein */
+  { const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(e.message));
+    await p.addInitScript(() => { localStorage.setItem('hb_sample_done', '1'); localStorage.setItem('hb_dice_fx', 'aus'); }); await p.goto('file://' + target); await p.waitForTimeout(500);
+    await p.evaluate(() => { Object.keys(S.chars).forEach((k) => delete S.chars[k]); const c = sampleChar(); S.chars[c.id] = c; S.cur = c.id; S.view = 'sheet'; S.mg = 'kampf'; S.camp = ''; S.combat = null; hlSetLevel('std'); render(); });
+    await p.click('[data-act="d20"][data-kind="init"]'); await p.waitForTimeout(300);
+    const r = await p.evaluate(() => ({ lf: cur().play.localFight, chip: (document.querySelector('[data-act="tFight"]') || {}).textContent || '', banner: /Kampfmodus an/.test(document.querySelector('#mini').textContent) }));
+    T('Allein: Initiative würfeln schaltet den Kampfmodus ein (mit Meldung)', r.lf === true && /Kampfmodus an/.test(r.chip) && r.banner, r);
+    const slot = await p.evaluate(() => { const ch = cur(); turnSt(ch).slotSpell = true; return spellCheck(ch, derive(ch, S.hb), getSpell('bless', S.hb), 1).turn.join(' '); });
+    T('Danach gilt «ein Zauberplatz pro Zug»', /nur einen Zauberplatz/.test(slot), slot);
+    await p.evaluate(() => { cur().play.localFight = false; hlSetLevel('pro'); render(); }); await p.click('[data-act="d20"][data-kind="init"]'); await p.waitForTimeout(300);
+    T('Stufe «Erfahren» (ohne Zugleiste): bleibt aus', await p.evaluate(() => cur().play.localFight === false));
+    await ctx.close(); }
   T('Keine Skriptfehler', errs.length === 0, errs.slice(0, 3));
   await b.close(); console.log(pass + ' / ' + (pass + fail) + ' bestanden'); process.exit(fail ? 1 : 0);
 })();

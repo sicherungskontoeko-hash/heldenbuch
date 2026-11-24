@@ -18,7 +18,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   /* A: Grundwerte und Übernahme */
   { const { p, ctx } = await page();
     const s = await p.evaluate(() => ({ v: vfxLoad(), raw: !!localStorage.getItem('hb_vfx'), fx: localStorage.getItem('hb_fx'), df: localStorage.getItem('hb_dice_fx') }));
-    T('Neu: Auto, Würfel normal, Effekte dezent, Ton und Vibration aus', JSON.stringify(s.v) === JSON.stringify({ profile: 'auto', roll: 'normal', critical: 'dezent', damage: 'dezent', status: 'dezent', background: 'dezent', dice3d: 'classic', menu: true, diceSound: false, eventSound: false, ambience: false, haptics: false }), s);
+    T('Neu: Auto, Würfel normal, Effekte dezent, Ton und Vibration aus', JSON.stringify(s.v) === JSON.stringify({ profile: 'auto', roll: 'normal', critical: 'dezent', damage: 'dezent', status: 'dezent', background: 'dezent', menu: true, diceSound: false, eventSound: false, ambience: false, haptics: false }), s);
     T('Neu: gespeichert, alte Schalter mitgeschrieben (hb_fx dezent, hb_dice_fx eigen)', s.raw && s.fx === 'dezent' && s.df === 'eigen', s);
     await p.evaluate(() => { vfxSet('roll', 'kurz'); vfxSet('critical', 'intensiv'); }); await p.waitForTimeout(400);
     /* Neustart nachgestellt: Zwischenspeicher leeren und alles aus localStorage neu lesen.

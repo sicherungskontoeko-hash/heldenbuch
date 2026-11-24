@@ -5,6 +5,7 @@
    W4 zeigt Eckzahlen (oben steht das Ergebnis), W10 zeigt 1–10, W100 sind zwei W10 (Zehner 00–90, Einer 0–9).
    Ein gemeinsamer WebGL-Kontext zeichnet nacheinander in kleine 2D-Leinwände; eine Schleife für alle rollenden Würfel,
    keine Leerlauf-Animation. Fehlt WebGL, geht der Kontext verloren oder tritt ein Fehler auf, übernimmt der SVG-Renderer. */
+let W3D_FORCE_SLOW = false;
 const W3D = (() => {
   /* Körper: kind 0 Kristall, 1 gebürsteter Stahl, 2 Holz, 3 Marmor, 4 Opal, 5 Eis, 6 Stein.
      fx: [Risse, Funkeln, Adern]; rim: Einlage am Flächenrand; ring: Kreis um die Zahl; out: Zahlenkontur; gs: Zahlengrösse */
@@ -25,7 +26,11 @@ const W3D = (() => {
   const SIDES = [4, 6, 8, 10, 12, 20, 100];
   let cv = null, gl = null, prog = null, sprog = null, dead = false, tex = null, sbuf = null; const U = {}; const A = {};
   const meshes = new Map(); const act = []; let raf = 0;
-  const supports = (sides, set) => !dead && SIDES.includes(sides) && !!SETS[set] && typeof d3geo === 'function';
+  /* Abschalten zum Testen: localStorage «hb_w3d» = «0». Zu langsames Gerät (zwei Würfe hintereinander unter 20 Bildern
+     pro Sekunde): für diese Sitzung die bisherige Darstellung. */
+  let slow = 0, off = null;
+  const isOff = () => { if (off === null) { try { off = localStorage.getItem('hb_w3d') === '0'; } catch (e) { off = false; } } return off; };
+  const supports = (sides, set) => !dead && slow < 2 && !isOff() && SIDES.includes(sides) && !!SETS[set] && typeof d3geo === 'function';
   /* ---- Zahlen-Atlas: 8 × 8 Zellen ---- */
   const CELLS = 8; const C_TENS = 20, C_ZERO = 30, C_W4 = 31, C_RUNE = 35;
   /* Zahlengrösse je Würfelform: s = KS / Inkreisradius (Zellenbruchteil pro Längeneinheit) */
@@ -373,9 +378,9 @@ const W3D = (() => {
   function tick(now) {
     raf = 0; if (dead) return;
     for (let i = act.length - 1; i >= 0; i--) { const it = act[i]; if (!it.holder.isConnected) { act.splice(i, 1); continue; }
-      const f = frame0(it, now);
+      const f = frame0(it, now); if (it.last) (it.gaps || (it.gaps = [])).push(now - it.last); it.last = now;
       try { drawOne(it, f.parts); } catch (x) { dead = true; act.splice(0).forEach((y) => y.fail()); return; }
-      if (f.t >= 1) { act.splice(i, 1); it.done(); } }
+      if (f.t >= 1) { act.splice(i, 1); it.done(); const g = (it.gaps || []).slice().sort((a, b) => a - b); if (g.length >= 6 && !document.hidden && !(navigator.webdriver && !W3D_FORCE_SLOW)) { /* in automatischen Tests nur auf Wunsch */ const med = g[g.length >> 1]; slow = med > 50 ? slow + 1 : 0; } } }
     if (act.length) raf = requestAnimationFrame(tick);
   }
   /* rollender Würfel; liefert { skip } oder null (dann übernimmt der bisherige Renderer) */
@@ -390,6 +395,6 @@ const W3D = (() => {
     const endParts = () => item.parts.map((p) => ({ geom: p.geom, q: p.end, lift: 0 }));
     return { skip: () => { const i = act.indexOf(item); if (i >= 0) act.splice(i, 1); if (!item.finished) { try { if (!dead) drawOne(item, endParts()); else if (opt.fallback) opt.fallback(); } catch (e) { if (opt.fallback) opt.fallback(); } item.done(); } } };
   }
-  return { supports, still, roll, ok: () => init(), sets: () => Object.keys(SETS), _build: build, _pose: pose, _split: split, _dead: () => dead, _gl: () => gl, _active: () => act.length, _cache: () => meshes.size,
+  return { supports, still, roll, ok: () => init(), sets: () => Object.keys(SETS), _build: build, _pose: pose, _split: split, _dead: () => dead, _gl: () => gl, _active: () => act.length, _cache: () => meshes.size, _slow: (v) => { if (v !== undefined) slow = v; return slow; },
     _tris: (sides, set, low) => plan(sides, sides === 100 ? 55 : 1, set, low).reduce((s, p) => s + p.geom.tris, 0) };
 })();

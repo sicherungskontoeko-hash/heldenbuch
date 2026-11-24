@@ -189,6 +189,11 @@ function d20(mod, label, opts = {}) {
   if (k.type === 'attack' && ch && st.adv.includes('Bedrängen')) fxSet(ch.play, 'vex', false);
   if (k.type === 'attack') S.lastAttack = { crit, fumble, total, nat: use, mode: st.mode };
   if (k.type === 'init' && S.combat && S.combat.active) setMyInit(total);
+  /* Ohne Online-Tisch: Initiative würfeln heisst «der Kampf beginnt» – Kampfmodus an, damit die Zugregeln gelten */
+  if (k.type === 'init' && ch && !onlineFight() && !ch.play.localFight && typeof turnTrack === 'function' && turnTrack() && !opts.preview) {
+    ch.play.localFight = true; if (typeof turnReset === 'function') turnReset(ch); setTimeout(() => commit(), 0);
+    bannerToast('Kampfmodus an', 'Die App zählt jetzt deinen Zug: Aktion, Bonusaktion, Reaktion und nur ein Zauberplatz pro Zug. Ausschalten über «⚔ Kampfmodus».');
+  }
   const prts = opts.parts || (c && typeof partsFor === 'function' ? partsFor(c, opts.kind) : null);
   S.lastRoll = { label, mod: mod + bonus - ex, total, type: k.type, nat: use };
   let boost = 0;
@@ -353,7 +358,7 @@ function showMulti(e, flat) {
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
   const has3 = typeof d3ok === 'function'; const set = has3 ? (e.dset || d3setOf(cur())) : ''; const rollMs = typeof vfxRollMs === 'function' ? vfxRollMs() : 850; if (!rollMs) reduce = true;
   const live3 = has3 && n <= ({ eco: 2, balanced: 4, max: 6 }[typeof vfxTier === 'function' ? vfxTier() : 'balanced'] || 4); /* so viele Würfel drehen sich echt, sonst einfache Darstellung */
-  const art = has3 && n <= 12 && typeof W3D !== 'undefined' && typeof vfxLoad === 'function' && vfxLoad().dice3d === 'artifact'; /* Artefaktwürfel (WebGL) bis 12 Würfel, sonst bisherige Darstellung */
+  const art = has3 && n <= 12 && typeof W3D !== 'undefined'; /* Artefaktwürfel (WebGL) bis 12 Würfel, sonst bisherige Darstellung */
   const d3h = (d, v, cls) => '<span class="die d3 ' + cls + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(d.sides, v, set, { gold: / crit/.test(cls) && d.sides === 20, dead: / fum/.test(cls) && d.sides === 20, cracks: / fum/.test(cls) && d.sides === 20, thin: n > 6 }) + '</span>';
   const W = window.innerWidth, H = window.innerHeight;
   const areaW = W * 0.86, areaH = H * 0.52, top0 = H * 0.2;
@@ -435,16 +440,17 @@ function showToast(e) {
   const hl = (e.crit ? ' crit' : e.fumble ? ' fum' : '');
   const use3 = typeof d3ok === 'function' && d3ok(sides); const set = use3 ? (e.dset || d3setOf(cur())) : ''; const rollMs = typeof vfxRollMs === 'function' ? vfxRollMs() : 850; const crl = use3 && typeof d3critLv === 'function' ? d3critLv() : 'aus';
   const nat = sides === 20 ? +vals[keep] : 0; /* natürliche 20/1 aus dem behaltenen W20, unabhängig vom Regel-Krit */
-  /* Artefaktwürfel v5 (Vorschau, Schalter im Würfel-Fenster): nur wo vorhanden, sonst bisherige Darstellung */
-  const art = use3 && typeof W3D !== 'undefined' && typeof vfxLoad === 'function' && vfxLoad().dice3d === 'artifact' && W3D.supports(sides, set);
-  const wide = art && sides === 100 ? ' w100' : ''; /* W100 als Artefakt: Zehner- und Einerwürfel nebeneinander */
+  /* Artefaktwürfel (Standard): räumliche WebGL-Würfel; ohne WebGL, bei Kontextverlust oder auf zu langsamen Geräten die bisherige Darstellung */
+  const art = use3 && typeof W3D !== 'undefined' && W3D.supports(sides, set);
+  const wide = art && sides === 100 ? ' w100' : art && sides === 4 ? ' w4' : ''; /* W100 als Artefakt: Zehner- und Einerwürfel nebeneinander; W4 (Eckzahlen) und W100 auf dem Handy grösser */
   const dieH = (v, cls) => use3 ? '<span class="die d3 ' + cls + wide + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(sides, v, set, { gold: / crit/.test(cls) && sides === 20, dead: / fum/.test(cls) && sides === 20, cracks: / fum/.test(cls) && sides === 20 }) + '</span>' : dieSvg(sides, v, cls);
   const final = () => {
     clearInterval(showToast.iv); t.onclick = (ev) => { if (ev.target.closest('[data-act]')) return; t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
     const dice = vals.map((v, i) => dieH(v, 'land' + (i === keep ? hl : ' drop'))).join('');
     const tip = typeof rollTip === 'function' ? rollTip(e) : '';
     t.innerHTML = '<div class="trow"><div class="dice' + wide + '">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer' + (nat && nat < 20 ? ' (erweiterter Bereich)' : '') + '!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
-    if (art) t.querySelectorAll('.die.d3').forEach((el, i) => { const svg = el.innerHTML; if (!W3D.still(el, sides, vals[i], set, { gold: i === keep && nat === 20, dim: i !== keep || nat === 1 })) el.innerHTML = svg; });
+    if (art) t.querySelectorAll('.die.d3').forEach((el, i) => { const svg = el.innerHTML; if (!W3D.still(el, sides, vals[i], set, { gold: i === keep && nat === 20, dim: i !== keep || nat === 1 })) el.innerHTML = svg;
+      else if (i === keep && nat === 1 && typeof d3cracks === 'function') el.insertAdjacentHTML('beforeend', '<svg class="d3s d3crkov" viewBox="0 0 100 100" aria-hidden="true">' + d3cracks(D3_SETS[set]) + '</svg>'); /* Risse im Würfel wie bisher */ });
     if (use3) { d3snd('land', 1, set); if (nat !== 20 && nat !== 1 && typeof vfxVibrate === 'function') vfxVibrate('land'); if (nat === 20 || nat === 1) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, nat === 20 ? 'n20' : 'n1', crl); d3snd(nat === 20 ? 'n20' : 'n1'); if (typeof vfxVibrate === 'function') vfxVibrate(nat === 20 ? 'n20' : 'n1'); } }
     showToast.tm = setTimeout(() => { t.hidden = true; }, tip ? 9000 : 6500);
   };
@@ -878,7 +884,7 @@ function renderSheet(c) {
   if (c.spell.has || c.extraSpells.length) h += spellBlock(c);
   if (c.res.length) h += '<section class="blk" data-grp="kampf faehig"><h2>Ressourcen' + (c.classDC && c.classDC.length ? ' <small>' + c.classDC.map(([l, v]) => l + ' ' + v).join(' · ') + '</small>' : '') + '</h2>' + hlTip('Fähigkeiten mit begrenzten Nutzungen. Gefüllt = noch verfügbar; antippen verbraucht eine. Rasten füllen sie wieder auf.', 'p') + slotsRows(c) + '<div class="res">' + c.res.map((r) => {
     const used = +P.res[r.k] || 0;
-    if (r.pool) return '<div class="rs"><div><b>' + resName(c, r) + '</b><small>' + (r.max - used) + ' von ' + r.max + ' · ' + RESET_DE[r.reset] + '</small></div><div class="pool"><input type="number" id="pool_' + r.k + '" min="1" placeholder="TP" aria-label="Punkte"><button class="btn sm" data-act="pool" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '">Ausgeben</button></div>' + resWhy(c, r) + '</div>';
+    if (r.pool) return '<div class="rs rpool"><div><b>' + resName(c, r) + '</b><small>' + (r.max - used) + ' von ' + r.max + ' · ' + RESET_DE[r.reset] + '</small></div><div class="pool"><input type="number" id="pool_' + r.k + '" min="1" placeholder="TP" aria-label="Punkte"><button class="btn sm" data-act="pool" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '">Ausgeben</button></div>' + resWhy(c, r) + '</div>';
     return '<div class="rs"><div><b>' + resName(c, r) + '</b><small>' + RESET_DE[r.reset] + (r.note ? ' · ' + r.note : '') + '</small></div>' + (r.max > 8 ? '<div class="stepper sm"><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="1" aria-label="verbrauchen">−</button><b>' + (r.max - used) + '/' + r.max + '</b><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="-1" aria-label="zurück">+</button></div>' : pips('res.' + r.k, r.max, used)) + resWhy(c, r) + '</div>';
   }).join('') + '</div></section>';
   h += optBlock(c);
@@ -938,7 +944,9 @@ const rinfOpen = (k) => !!(S.rinf && S.rinf[k]);
 const infoBtn = (k, name) => '<button type="button" class="rii" data-act="resInfo" data-arg="' + esc(k) + '" aria-expanded="' + rinfOpen(k) + '" aria-label="Erklärung: ' + esc(name) + '" title="Was ist das?">ⓘ</button>';
 const resDet = (k, text, src) => '<div class="rinf"' + (rinfOpen(k) ? '' : ' hidden') + ' data-k="' + esc(k) + '"><p>' + esc(text) + '</p>' + (src ? '<small>' + esc(src) + '</small>' : '') + '</div>';
 /* Name mit ⓘ: das letzte Wort bleibt mit dem Symbol zusammen (kein ⓘ allein auf einer Zeile) */
-const resName = (c, r) => { if (!resInfo(c, r)) return esc(r.n); const i = r.n.lastIndexOf(' '); return esc(r.n.slice(0, i + 1)) + '<span class="nw">' + esc(r.n.slice(i + 1)) + infoBtn(r.k, r.n) + '</span>'; };
+/* Klassenzusatz wie «(Paladin)» nur bei mehreren Klassen; er unterscheidet dann gleichnamige Ressourcen */
+const resLabel = (c, r) => (c.multi ? r.n : r.n.replace(new RegExp('\\s*\\((' + Object.values(CLASSES).map((C) => C.name).join('|') + ')\\)$'), ''));
+const resName = (c, r) => { const n = resLabel(c, r); if (!resInfo(c, r)) return esc(n); const i = n.lastIndexOf(' '); return esc(n.slice(0, i + 1)) + '<span class="nw">' + esc(n.slice(i + 1)) + infoBtn(r.k, n) + '</span>'; };
 const resWhy = (c, r) => { const i = resInfo(c, r); return i ? resDet(r.k, i.t, i.src) : ''; };
 XA.resInfo = (t, a) => { S.rinf = S.rinf || {}; S.rinf[a] = !S.rinf[a]; const row = t.closest('.rs'); const d = row && row.querySelector('.rinf'); if (d) d.hidden = !S.rinf[a]; t.setAttribute('aria-expanded', String(!!S.rinf[a])); };
 function slotsMini(c) {

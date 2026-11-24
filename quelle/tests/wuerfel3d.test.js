@@ -1,5 +1,5 @@
-/* Artefaktwürfel v5: Schalter, Darstellung aller Sets und Würfel, Rückfall, Regeln unberührt.
-   Prüft: Grundwert Klassisch, alle 12 Sets × W4–W100 zeichnen mit Inhalt, W4 Eckzahl oben, W100 Zerlegung und zwei Würfel,
+/* Artefaktwürfel v5 (Standard): Darstellung aller Sets und Würfel, Rückfall, Regeln unberührt.
+   Prüft: kein Schalter mehr, zu langsames Gerät und hb_w3d=0 fallen auf SVG zurück, alle 12 Sets × W4–W100 zeichnen mit Inhalt, W4 Eckzahl oben, W100 Zerlegung und zwei Würfel,
    Dreiecksbudget, Würfelschale und Set-Vorschau, rollt und landet als WebGL-Bild mit Inhalt,
    Antippen zeigt sofort die Ziellage, kein Regel-Zufall, keine liegengebliebenen Schleifen, Kontextverlust und fehlendes
    WebGL fallen auf den bisherigen Renderer zurück, reduzierte Bewegung, Zwischenspeicher begrenzt.
@@ -17,10 +17,8 @@ const blank = () => { const c = document.querySelector('#toast .die canvas'); if
   const page = async (opts, pre) => { const ctx = await b.newContext(Object.assign({ viewport: { width: 390, height: 844 } }, opts || {})); const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(e.message));
     await p.addInitScript(BASE); await p.addInitScript(ROLLX_INIT); if (pre) await p.addInitScript(pre); await p.goto('file://' + target); await p.waitForTimeout(500); return { p, ctx }; };
   { const { p, ctx } = await page(); await p.evaluate(SETUP, 'weltenhain');
-    T('Grundwert: Klassisch', await p.evaluate(() => vfxLoad().dice3d === 'classic'));
-    await p.evaluate(ROLL); await p.waitForTimeout(1300);
-    T('Klassisch: kein WebGL-Bild', await p.evaluate(() => !document.querySelector('#toast canvas') && !!document.querySelector('#toast .die.d3 svg')));
-    await p.evaluate(() => vfxSet('dice3d', 'artifact'));
+    T('Kein Schalter «Darstellung» mehr (Artefakt ist Standard)', await p.evaluate(() => vfxLoad().dice3d === undefined && (diceModal(), !/Darstellung/.test(document.querySelector('#modal').textContent))));
+    await p.evaluate(() => { document.querySelector('#modal').hidden = true; S.modal = null; });
     const sup = await p.evaluate(() => [W3D.supports(20, 'weltenhain'), W3D.supports(20, 'klassik'), W3D.supports(6, 'weltenhain'), W3D.supports(100, 'arkanum'), W3D.supports(4, 'schatten'), W3D.supports(7, 'klassik'), W3D.supports(20, 'unbekannt'), W3D.sets().length]);
     T('Unterstützt: alle 12 Sets, W4 bis W100; anderes nicht', JSON.stringify(sup) === '[true,true,true,true,true,false,false,12]', sup);
     /* jedes Set, jeder Würfel: Standbild mit Inhalt, ohne Fehler */
@@ -59,6 +57,11 @@ const blank = () => { const c = document.querySelector('#toast .die canvas'); if
     await p.evaluate(() => { document.querySelector('#tray').hidden = true; diceModal(); }); await p.waitForTimeout(400);
     T('Set-Vorschau zeigt die Artefaktmodelle', await p.evaluate(() => document.querySelectorAll('#modal .d3card .d3pv canvas.w3dc').length === 11));
     await p.evaluate(() => { document.querySelector('#modal').hidden = true; S.modal = null; });
+    await p.evaluate(() => pushLog({ label: 'Patzer', total: 4, detail: 'W20 [1] + 3', sides: 20, nat: 1, fumble: true })); await p.waitForTimeout(1500);
+    T('Natürliche 1: Artefaktwürfel mit Rissen im Würfel', await p.evaluate(() => !!document.querySelector('#toast .die.d3.w3d canvas') && !!document.querySelector('#toast .die.d3.fum .d3crkov .d3crk')));
+    await p.evaluate(() => W3D._slow(2)); await p.evaluate(ROLL); await p.waitForTimeout(1300);
+    T('Zu langsames Gerät: bisherige Darstellung', await p.evaluate(() => !document.querySelector('#toast canvas') && !!document.querySelector('#toast .die.d3 svg')));
+    await p.evaluate(() => W3D._slow(0));
     await p.evaluate(() => { cur().dice = 'eisenwerk'; }); await p.evaluate(ROLL); await p.waitForTimeout(200);
     await p.evaluate(() => { const e = W3D._gl().getExtension('WEBGL_lose_context'); if (e) e.loseContext(); }); await p.waitForTimeout(1300);
     T('Kontextverlust mitten im Wurf: Ergebnis kommt trotzdem (bisheriger Renderer)', await p.evaluate(() => document.querySelector('#toast .tv').textContent === '17' && !!document.querySelector('#toast .die.d3 svg') && W3D._active() === 0));
@@ -66,9 +69,11 @@ const blank = () => { const c = document.querySelector('#toast .die canvas'); if
     T('Nach Kontextverlust: weiter mit dem bisherigen Renderer', await p.evaluate(() => !!document.querySelector('#toast .die.d3 svg') && !document.querySelector('#toast canvas')));
     await ctx.close(); }
   { const { p, ctx } = await page({}, () => { const g = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function (t, o) { return /webgl/.test(t) ? null : g.call(this, t, o); }; });
-    await p.evaluate(SETUP, 'arkanum'); await p.evaluate(() => vfxSet('dice3d', 'artifact')); await p.evaluate(ROLL); await p.waitForTimeout(1300);
+    await p.evaluate(SETUP, 'arkanum'); await p.evaluate(ROLL); await p.waitForTimeout(1300);
     T('Ohne WebGL: bisherige Darstellung, Ergebnis da', await p.evaluate(() => !!document.querySelector('#toast .die.d3 svg') && document.querySelector('#toast .tv').textContent === '17')); await ctx.close(); }
-  { const { p, ctx } = await page({ reducedMotion: 'reduce' }); await p.evaluate(SETUP, 'weltenhain'); await p.evaluate(() => vfxSet('dice3d', 'artifact')); await p.evaluate(ROLL); await p.waitForTimeout(80);
+  { const { p, ctx } = await page({}, () => localStorage.setItem('hb_w3d', '0')); await p.evaluate(SETUP, 'arkanum'); await p.evaluate(ROLL); await p.waitForTimeout(1300);
+    T('Abgeschaltet über hb_w3d=0 (für Tests): bisherige Darstellung', await p.evaluate(() => !!document.querySelector('#toast .die.d3 svg') && !document.querySelector('#toast canvas'))); await ctx.close(); }
+  { const { p, ctx } = await page({ reducedMotion: 'reduce' }); await p.evaluate(SETUP, 'weltenhain'); await p.evaluate(ROLL); await p.waitForTimeout(80);
     T('Reduzierte Bewegung: sofort Standbild, kein Rollen', await p.evaluate(() => !!document.querySelector('#toast .die.d3.w3d canvas') && W3D._active() === 0)); await ctx.close(); }
   T('Keine Skriptfehler', errs.length === 0, errs.slice(0, 3));
   await b.close(); console.log(pass + ' / ' + (pass + fail) + ' bestanden'); process.exit(fail ? 1 : 0);
