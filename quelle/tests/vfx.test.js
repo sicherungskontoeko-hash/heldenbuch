@@ -54,7 +54,9 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   await roll({ label: 'Angriff', total: 24, detail: 'W20 19 +5', nat: 19, crit: true }); await p.waitForTimeout(1250);
   const e19 = await p.evaluate(() => ({ stage: !!document.querySelector('.d3stage'), fx: !!document.querySelector('#toast .d3fx.n20'), gold: !!document.querySelector('#toast .die.crit'), txt: /erweiterter Bereich/.test(document.querySelector('#toast').textContent) }));
   T('Krit mit natürlicher 19 (erweiterter Bereich): golden, Hinweis, keine Bühne der natürlichen 20', !e19.stage && !e19.fx && e19.gold && e19.txt, e19);
-  await roll({ label: 'Wahrnehmung', total: 23, detail: 'W20 20 +3', nat: 20 }); await p.waitForTimeout(1250);
+  await roll({ label: 'Wahrnehmung', total: 23, detail: 'W20 20 +3', nat: 20 });
+  /* auf die Bühne warten statt festem Zeitpunkt (WebKit und Firefox landen etwas später) */
+  await p.waitForFunction(() => !!document.querySelector('.d3stage'), null, { timeout: 3500, polling: 30 }).catch(() => {});
   const e20 = await p.evaluate(() => ({ stage: !!document.querySelector('.d3stage'), krit: /Kritischer Treffer/.test(document.querySelector('#toast').textContent) }));
   T('Natürliche 20 bei einer Probe: Effekt ja, aber kein «Kritischer Treffer»', e20.stage && !e20.krit, e20);
   await roll({ label: 'Nächster', total: 7, detail: 'W20 7', nat: 7 }); await p.waitForTimeout(40);
