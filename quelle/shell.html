@@ -603,6 +603,21 @@ ul.help{margin:0;padding-left:1.1em;display:grid;gap:8px;color:var(--ink)}ul.hel
 #toast.d3quake,.tdie.d3quake{animation:d3quakeS .45s cubic-bezier(.36,.07,.19,.97)}
 @keyframes d3quakeS{15%{transform:translate(-3px,1px)}30%{transform:translate(3px,-2px)}45%{transform:translate(-2px,1px)}60%{transform:translate(2px,1px)}80%{transform:translate(-1px,0)}100%{transform:none}}
 @media (prefers-reduced-motion:reduce){#toast.d3quake,.tdie.d3quake{animation:none}}
+/* ==== Effekte 2.0: Bedien-Animationen (vfxui.js), nur bei html[data-anim=an] ==== */
+html[data-anim="an"] .btn,html[data-anim="an"] .chip,html[data-anim="an"] .seg button,html[data-anim="an"] .mnav button{transition:transform 80ms ease-out}
+html[data-anim="an"] .btn:active,html[data-anim="an"] .chip:active,html[data-anim="an"] .seg button:active,html[data-anim="an"] .mnav button:active{transform:scale(.97)}
+html[data-anim="an"] #modal.vfx-open{animation:vfxfade .18s ease-out}html[data-anim="an"] #modal.vfx-open>.dlg{animation:vfxdlg .18s ease-out}
+html[data-anim="an"] details.vfx-menu>:not(summary){animation:vfxmenu .15s ease-out}
+html[data-anim="an"] details.vfx-unfold>:not(summary){animation:vfxfade .15s ease-out}
+html[data-anim="an"] .vfx-sec{animation:vfxfade .12s ease-out}
+html[data-anim="an"] #view.vfx-hero{animation:vfxfade .2s ease-out}
+html[data-anim="an"] .mt.vfx-msg{animation:vfxmsg .2s ease-out}
+@keyframes vfxfade{from{opacity:.25}to{opacity:1}}
+@keyframes vfxdlg{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes vfxmenu{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@keyframes vfxmsg{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+.scenefade{position:absolute;inset:-4%;z-index:0;pointer-events:none;transition:opacity .4s ease-out}.scenefade.go{opacity:0!important}
+@media (prefers-reduced-motion:reduce){.scenefade{display:none}html[data-anim] .btn,html[data-anim] .chip{transition:none!important}}
 /* ==== Artefaktwürfel v5 (wuerfel3d.js) ==== */
 .die.d3.w3d canvas,.die.d3 canvas.w3dc{display:block;width:100%;height:100%}
 .die.d3.n20pop canvas{animation:d3pop .75s cubic-bezier(.2,1.4,.4,1)}

@@ -77,7 +77,8 @@ function ensureScene() { let el = document.getElementById('scene'); if (el) retu
 function applyTheme() {
   const t = themeNow(); const html = document.documentElement;
   sceneVars([t]); const scene = ensureScene(); if (!scene.querySelector('.hb-ambient-light')) { const light = document.createElement('i'); light.className = 'hb-ambient-light'; light.setAttribute('aria-hidden', 'true'); scene.appendChild(light); }
-  if (html.getAttribute('data-theme') === t) return;
+  const old = html.getAttribute('data-theme'); if (old === t) return;
+  if (typeof vfxThemeFade === 'function') vfxThemeFade(old, t);
   html.setAttribute('data-theme', t); if (typeof tonAmbSync === 'function') setTimeout(tonAmbSync, 0);
   const mc = document.querySelector('meta[name=\"theme-color\"]'); if (mc) mc.setAttribute('content', THEMES[t].c.bg);
   startFx();
