@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-24T12:58:03+01:00
-- Revision (SHA-256 von index.html, gekürzt): 1d49d0f5241e8666
+- Zeitpunkt: 2026-11-24T16:07:10+01:00
+- Revision (SHA-256 von index.html, gekürzt): 3371a2c8bbe07390
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v819
@@ -9,9 +9,9 @@
 | Suite | Exit-Code | Ergebnis |
 |---|---|---|
 | Regeltests (rules.test.js) | 0 | ✔ Import bereinigt unbekannte Zauber 48 / 48 Tests bestanden  |
-| Regressionen HB-01–HB-11 (hb.test.js) | 0 | ✔ HB-11 Bewusstlos ausserhalb des Kampfes: kein Zauber 27 / 27 bestanden · /home/claude/heldenbuch/quelle/index.html  |
+| Regressionen HB-01–HB-11 (hb.test.js) | 0 | ✔ HB-11 Bewusstlos ausserhalb des Kampfes: kein Zauber 27 / 27 bestanden · /home/claude/hb-themes/quelle/index.html  |
 | Robustheit & Sonderfälle (cases.test.js) | 0 | ✔ HB-26 Fluchklinge: zweite Bonusaktion blockiert, keine Ressource verbraucht 23 / 23 bestanden  |
-| Kritischer Audit A01–A06 (audit2.test.js) | 0 | ✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/heldenbuch/quelle/index.html  |
+| Kritischer Audit A01–A06 (audit2.test.js) | 0 | ✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/hb-themes/quelle/index.html  |
 | Erklärkarten ⓘ (info.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 53 / 53 bestanden  |
 | Layout: ⚠ offene Punkte, Menüs (layout.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 29 / 29 bestanden  |
 | Würfel-Designs (dice.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 50 / 50 bestanden  |
@@ -27,8 +27,8 @@
 | Willkommen: Name beim ersten Start (welcome.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Willkommen in der App (welcome.test.js app) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Spielabend sichern, Stolpersteine (pflege.test.js) | 0 | ✔ Keine Skriptfehler 32 / 32 bestanden  |
-| Import aus D&D Beyond (ddbimport.test.js) | 0 | ✔ Keine Skriptfehler 81 / 81 bestanden  |
-| Import aus D&D Beyond (ddbimport.test.js app) | 0 | ✔ Keine Skriptfehler 81 / 81 bestanden  |
+| Import aus D&D Beyond (ddbimport.test.js) | 0 | ✔ Keine Skriptfehler 73 / 73 bestanden  |
+| Import aus D&D Beyond (ddbimport.test.js app) | 0 | ✔ Keine Skriptfehler 73 / 73 bestanden  |
 | Spielabend sichern, Stolpersteine, Server (pflege.test.js app) | 0 | ✔ Keine Skriptfehler 35 / 35 bestanden  |
 | Kampagnenbuch: Personen, Orte, Aufträge (kbuch.test.js) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
 | Kampagnenbuch in der App (kbuch.test.js app) | 0 | ✔ Keine Skriptfehler 48 / 48 bestanden  |
@@ -55,9 +55,11 @@
 | Daten in der App (daten.test.js app) | 0 | ✔ Keine Skriptfehler 12 / 12 bestanden  |
 | Jeden Zauber wirken (zauber.test.js) | 0 | siehe Konsole |
 | Lange Zufallssitzung (affe.test.js) | 0 | siehe Konsole |
-| Befunde B-01–B-20 des Grosstests v1.9.40 (befunde.test.js) | 0 | ✔ Keine Skriptfehler 39 / 39 bestanden  |
+| Befunde B-01–B-20 des Grosstests v1.9.40 (befunde.test.js) | 0 | ✔ Keine Skriptfehler 42 / 42 bestanden  |
 | Lesbarkeit: Kontrast in allen Stimmungen (kontrast.test.js) | 0 | ✔ Stimmung wueste 9 / 9 bestanden  |
-| Langsames Handy: CPU 4× gedrosselt (handy.test.js app) | 0 | ✔ Keine Skriptfehler  ([]) 18 / 18 bestanden  |
+| Stimmungen: Wechsel, Zeichenrate, Aus und reduzierte Bewegung (stimmung.test.js) | 0 | ✔ Keine Skriptfehler 25 / 25 bestanden  |
+| Effekte: Einstellungen, alte Schalter, Leistung, Vibration (vfx.test.js) | 0 | ✔ Keine Skriptfehler 35 / 35 bestanden  |
+| Langsames Handy: CPU 4× gedrosselt (handy.test.js app) | 0 | ✔ Keine Skriptfehler  ([]) 17 / 17 bestanden  |
 | Abgleich mit dem SRD 5.2: Zauber und Monster (srd.test.js) | 0 | ✔ 339 Zauber und 164 Monster mit dem SRD 5.2 abgeglichen, 0 Abweichungen (8 begründete Ausnahmen)  |
 | Online-Tisch mit drei Geräten, lokal (echt.test.js --lokal) | 0 | ✔ Keine Skriptfehler auf den Geräten 12 / 12 bestanden (Server: lokal)  |
 | Online-Tisch, Server vergisst gespeicherte Nachrichten (echt.test.js --ohne-speicher) | 0 | ✔ Keine Skriptfehler auf den Geräten 12 / 12 bestanden (Server: lokal, ohne gespeicherte Nachrichten)  |
