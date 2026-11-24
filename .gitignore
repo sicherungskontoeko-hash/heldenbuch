@@ -9,3 +9,5 @@ android/capacitor-cordova-android-plugins/build/
 quelle/app/
 quelle/index.html
 shot-*.png
+quelle/tests/engine-log/
+quelle/tests/echt-bilder/
