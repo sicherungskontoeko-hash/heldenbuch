@@ -44,6 +44,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/ui.test.js | Bedien-Animationen (vfxui.js): Grundwert an, Knöpfe nur transform 80 ms, kein «transition: all», Reiter-, Helden-, Dialog-, Aufklapp- und Meldungsübergang nur bei echtem Ereignis (nicht bei Neuzeichnen), Stimmungswechsel mit Überblenden (höchstens zwei Bilder), Energiesparend direkt, Schalter aus, reduzierte Bewegung |
 | tests/ressourcen.test.js | Ressourcen: jede Ressource aller Klassen, Unterklassen und Spezies hat eine aufklappbare Erklärung («Was ist das?»), Zauberplätze erklären «ein Zauberplatz pro Zug», Stufe «Erfahren» blendet sie aus |
 | tests/zug.test.js | Kampf am Tisch: grosse Ansage «Du bist am Zug!» (Runde, Name, vorgelesen, verschwindet), schwebender Knopf «Zug beenden», sobald die Zugleiste weggescrollt ist, «danach du», reduzierte Bewegung |
+| tests/erweiterung.test.js | Erweiterung: Standard- und erweiterte Auswahl (Klassen, Völker, Mehrklassen, Suche), bestehende Helden bleiben sichtbar, alle 6 Klassen × 3 Unterklassen × Stufen 1–20 und 9 Völker ohne Fehler, Aktionsökonomie jeder neuen Fähigkeit, Wandelgestalt, Rasten, Mehrklassen-Zusatzangriff und Voraussetzungen, Ossari/Ferrali/Golem, Export/Import |
 | tests/handy.test.js | Langsames Handy: CPU gedrosselt (`--drossel=4`), Start, Reiter, Würfeln, Listen, Kampfstart, Speicher; mit `DDB_DIR` auch die grösste echte PDF |
 | tests/srd.test.js | Abgleich aller Zauber (339) und Monster (164), die es im SRD 5.2 gibt, mit `tests/srd2024-ref.json` (abgeleitet aus dem SRD 5.2, CC BY 4.0, über 5e-bits/5e-database); begründete Ausnahmen stehen im Test |
 | tests/echt.test.js | Echter Online-Tisch: SL (Chromium), iPhone (WebKit), Android (Firefox) über den öffentlichen Server; nur in GitHub Actions (hier gesperrt), lokal mit `--lokal`; `--ohne-speicher` simuliert einen Server, der gespeicherte Nachrichten verliert |
@@ -91,7 +92,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | spells.js, spells2.js | Zauber |
 | spelldata.js | strukturierte Zauberwerte (Würfel, Steigerung, Angriff/Rettungswurf, Schadensart) |
 | calc.js | `derive()`: berechnet alle Werte eines Helden |
-| hbclasses.js | ✦ Klassen Runenmeister, Blutweber, Fluchklinge, Maschinist und ✦ Spezies |
+| hbclasses.js | ✦ Klassen Runenmeister, Blutweber, Fluchklinge, Maschinist und ✦ Spezies; am Ende die Erweiterung v1.9.46 (IDs `hx…`): 6 Klassen (Formwandler, Geistwirker, Bollwerk, Fadenlenker, Vollstrecker, Seuchenträger) mit je 3 Unterklassen und 9 Völker. Alles mit `home: true`: nur sichtbar mit der Regel «Erweiterte Auswahl» (`homeview`) oder wenn ein Held es schon nutzt |
 | subs.js, subs2.js | ✦ Unterklassen |
 | flavor.js | Beschreibungstexte |
 | pics.js | Bilder für Klassen, Spezies und Hintergründe (CSS-Klassen pic-cls-*, pic-sp-*, pic-bg-*), Abenteuer-Cover (advcov-*), Platzhalter für eigene Unterklasse (pic-sub-eigen) |

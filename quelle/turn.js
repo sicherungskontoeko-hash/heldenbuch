@@ -9,6 +9,7 @@ function turnSt(ch) {
 }
 function turnReset(ch, keepReaction) {
   const t = turnSt(ch); const r = t.r;
+  if(!keepReaction)delete ch.play.hxForms;
   ch.play.turn = { a: 0, aMax: 1, b: 0, r: keepReaction ? r : 0, atk: 0, mv: 0, mvMax: 0, bonusAtk: 0, bSpell: false, slotSpell: false, lightIdx: null };
   const fx = ch.play.fx || {}; delete fx.reckless; delete fx.aim; if (!keepReaction) delete fx.dodge; ch.play.fx = fx;
   if (!keepReaction && typeof startOfTurn === 'function') { try { startOfTurn(ch); } catch (e) {} }
@@ -360,3 +361,61 @@ Object.assign(XA, {
   tFxOff: (t, a, p, ch) => { const P = ch.play; if (a === 'rage') rageEnd(P, 'freiwillig beendet'); else if (a === 'ws') wsEnd(ch, 'beendet'); else { if (P.conc && P.fxSrc && P.fxSrc[a] === P.conc.id) endConc(P); fxSet(P, a, false); } commit(); },
   tLoh: (t, a, p, ch) => { if (a === 'x') { orbPrompt(''); return; } const c = derive(ch, S.hb); const r = c.res.find((x) => x.k === 'loh'); const left = r.max - (+ch.play.res.loh || 0); const n = Math.max(0, Math.min(left, +($('#lohN') || {}).value || 0)); if (!n) return; if (!tSpend(ch, 'b', 'Handauflegen')) { orbPrompt(''); return; } ch.play.res.loh = (+ch.play.res.loh || 0) + n; if (a === 'me') { const P = ch.play; if (P.hp <= 0) { P.ds = [0, 0]; wakeUp(P); } P.hp = Math.min(c.hpMax, P.hp + n); } pushLog({ label: 'Handauflegen', total: n, detail: (a === 'me' ? 'auf dich · TP jetzt ' + ch.play.hp + '/' + c.hpMax : 'auf einen Verbündeten') + ' · Pool ' + (left - n) + '/' + r.max, share: true }); orbPrompt(''); commit(); }
 });
+
+/* HX actions: use existing turn tracking, rolls and resource counters. Target-specific conditions remain SL-confirmed. */
+/* Hinweis unter dem ersten Impuls: Zusatznutzen und Unterklasse mit den aktuellen Werten (am Tisch anwenden) */
+function hxPulseTail(c,cid){const l=c.lv(cid),sub=c.subOf(cid),dc=8+c.pb+c.mod.int,w=(a,b,d)=>'1W'+(l>=18?d:l>=(cid==='hxmind'?10:14)?b:a);
+ if(cid==='hxmind'){const st='Einmal pro Aktion statt Gedankenstoss (STÄ-RW SG '+dc+', '+(sub==='kinetic'&&l>=10?'3':'1,5')+' m '+(sub==='kinetic'?'stossen oder ziehen':'wegstossen')+')';
+  return sub==='dominion'?st.replace('statt Gedankenstoss','Gedankenstoss oder Ablenkung')+'; Ablenkung: WEI-RW SG '+dc+', keine Gelegenheitsangriffe'+(l>=18?', zwei Ziele':''):sub==='fracture'?'Einmal pro Zug: Geistesbruch +'+w(4,6,8)+' psychisch statt Gedankenstoss':st+'.';}
+ const net=l>=7?' Fadennetz: einmal pro Aktion '+(sub==='threads'&&l>=14?'3':'1,5')+' m zum Ursprung ziehen (STÄ-RW SG '+dc+').':'';
+ return 'Ursprung je Angriff: du oder dein Träger, Ziel in 9 m davon.'+net+(sub==='marionette'?' Marionettenhieb: einmal pro Aktion +'+w(4,6,8)+' Hieb, wenn das Ziel höchstens 1,5 m vom Träger steht.':sub==='swarm'?' Schwarmstich: einmal pro Aktion '+w(4,6,8)+' Stich an einen zweiten Feind in '+(l>=18?3:1.5)+' m um das Ziel.':'');}
+(function(){
+ const add=(o)=>{const old=o.check;o.check=(ch,c)=>!o.when(c)?'Merkmal aktuell nicht verfügbar.':old?old(ch,c):null;FEAT_ACTIONS.push(o);};
+ const note=(id,n,cost,when,detail,res)=>add({id,n,cost,when,res,sub:typeof detail==='function'?detail:()=>detail,run:(ch,c)=>tLog(n,typeof detail==='function'?detail(c):detail)});
+ const forms=['Klinge','Panzer','Greifer','Sehne'];
+ for(let mask=1;mask<16;mask++){
+  const chosen=forms.filter((f,i)=>mask&(1<<i)); if(chosen.length>3)continue;
+  for(const epic of [false,true]){
+   if(!epic&&chosen.length===3)continue;
+   add({id:'hx_form_'+mask+(epic?'e':''),n:'Wandel: '+chosen.join(' + '),cost:epic?'f':'b',when:c=>{let l=c.lv('hxform');return epic?l>=20&&chosen.length===3&&!onceUsed(c.char,'hx_form') :l>0&&l<20&&chosen.length===(l>=11?2:1)&&!onceUsed(c.char,'hx_form');},run:(ch,c)=>{ch.play.hxForms=chosen.slice();onceMark(ch,'hx_form');tLog('Wandelgestalt',chosen.join(' + ')+' bis Beginn deines nächsten Zuges. Greifer-Reichweite und bedingte Effekte: SL beachten.');}});
+  }
+ }
+ add({id:'hx_form_panzer',n:'Wandelpanzer – Schaden mindern',cost:'r',when:c=>c.lv('hxform')>0&&(c.char.play.hxForms||[]).includes('Panzer'),run:(ch,c)=>tRoll('1W'+HX_DIE(c.lv('hxform'))+(c.lv('hxform')>=18&&c.subOf('hxform')==='horror'?'+'+Math.max(1,c.mod.con):''),'Wandelpanzer (Schaden manuell reduzieren)')});
+ for(const [id,cid,n,dmg,range] of [['hx_mind','hxmind','Geistimpuls','Psychisch','18 m'],['hx_mind_force','hxmind','Geistimpuls (Energie)','Energie','18 m'],['hx_thread','hxthread','Fadenschlag','Hieb','9 m vom Ursprung'],['hx_thread_force','hxthread','Fadenschlag (Energie)','Energie','9 m vom Ursprung']]){
+  add({id,n,cost:'a',when:c=>c.lv(cid)>=(id==='hx_mind_force'?7:id==='hx_thread_force'?20:1),check:()=>S.sa||S.dp?'Schliesse zuerst den laufenden Angriffs-/Schadensdialog ab.':null,sub:c=>HX_PULSE(c.lv(cid))+' Angriffe · 1W8 '+sgn(c.mod.int)+' · '+dmg,run:(ch,c)=>{turnSt(ch).atk=0;spellAttack(ch,{name:n,id},HX_PULSE(c.lv(cid)),'1W8'+sgn(c.mod.int).replace('−','-'),hxPulseTail(c,cid),dmg,c.pb+c.mod.int+(+ch.misc.atk||0));}});
+ }
+ note('hx_hand','Geisteshand','a',c=>c.lv('hxmind')>=2,'Unbeaufsichtigtes Objekt bewegen; kein Angriff oder magischer Gegenstand.');
+ note('hx_thread_place','Fadenträger erzeugen / bewegen','b',c=>c.lv('hxthread')>0,c=>'SL: Träger innerhalb '+(c.lv('hxthread')>=9?18:12)+' m, Verschiebung bis '+(c.lv('hxthread')>=20?9:6)+' m; keine eigene Kreatur. Position am Tisch markieren.');
+ note('hx_thread_move','Fadenträger – freie Bewegung','f',c=>c.lv('hxthread')>=15&&!onceUsed(c.char,'hx_thread_move'),'SL: einmal pro eigenem Zug bis 3 m.');
+ // Enforce once-per-turn on free movement.
+ const mv=FEAT_ACTIONS.find(x=>x.id==='hx_thread_move');const old=mv.run;mv.run=(ch,c)=>{onceMark(ch,'hx_thread_move');old(ch,c);};
+ note('hx_challenge','Herausforderung','b',c=>c.lv('hxguard')>0,c=>'SL: '+(c.lv('hxguard')>=11?'bis zu zwei Kreaturen':'eine Kreatur')+' in '+(c.lv('hxguard')>=9?'9':'6')+' m: WEI-RW SG '+(8+c.pb+c.mod.con)+'. Bei Misserfolg: Erster Einzelziel-Angriff im eigenen Zug gegen dich, falls möglich; weitere Angriffe gegen andere mit Nachteil. Bis Beginn deines nächsten Zuges. Keine erzwungene Bewegung oder Angriffsaktion.');
+ add({id:'hx_intercept',n:'Abfangen',cost:'r',when:c=>c.lv('hxguard')>=2,sub:c=>'1W'+HX_DIE(c.lv('hxguard'))+' + KON; SL prüft Reichweite und Treffer',run:(ch,c)=>{const l=c.lv('hxguard');const die='1W'+HX_DIE(l)+sgn(c.mod.con).replace('−','-')+(l>=20?'+1W6':'');tRoll(die,'Abfangen: verhinderten Schaden ermitteln; tatsächliche Schadensübernahme manuell'+(l>=6&&c.subOf('hxguard')==='protector'?' (Hälfte, abgerundet)':''));}});
+ note('hx_roar','Herausforderungsruf','b',c=>c.lv('hxguard')>=14&&c.subOf('hxguard')==='defier',c=>'Bis zu drei Ziele in 9 m, WEI-RW SG '+(8+c.pb+c.mod.con)+'. SL verwaltet die Herausforderung.','hxg_roar');
+ add({id:'hx_fortify',n:'Feste Stellung',cost:'b',res:'hxg_bastion',when:c=>c.lv('hxguard')>=3&&c.subOf('hxguard')==='bastion',run:(ch,c)=>tHealSelf(ch,c,String(Math.max(1,c.lv('hxguard')+c.mod.con)),'Feste Stellung',true)});
+ note('hx_blight_spread','Befall – Übertragung','b',c=>c.lv('hxblight')>=2,c=>'SL: neues Ziel '+(c.lv('hxblight')>=6&&c.subOf('hxblight')==='spread'?6:c.lv('hxblight')>=9?4.5:3)+' m vom Befallsziel, maximal '+step(2,[[5,3],[11,4],[17,5]])(c.lv('hxblight'))+' eigene Befälle. Kein sofortiger Schaden.');
+ add({id:'hx_blight_tick',n:'Befall – periodischer Schaden (SL)',cost:'f',when:c=>c.lv('hxblight')>0,sub:'Nur am Beginn des betroffenen gegnerischen Zuges; kein zusätzlicher Angriff',run:(ch,c)=>tRoll('1W'+HX_DIE(c.lv('hxblight')),'Befall: periodischer nekrotischer Schaden, Ziel und Dauer durch SL')});
+ add({id:'hx_blight_burst',n:'Befall – sofortige Zersetzung',cost:'b',when:c=>c.lv('hxblight')>=2,run:(ch,c)=>{let l=c.lv('hxblight');tRoll((l>=20?'2':'1')+'W'+HX_DIE(l)+(l>=3&&c.subOf('hxblight')==='decay'?'+'+Math.max(1,c.mod.con):''),'Übertragung: sofortiger nekrotischer Schaden gegen bereits befallenes Ziel');}});
+ /* Waffenangriffe ausserhalb der Angriffsaktion: Kosten zahlt die Aktion (Bonusaktion bzw. Reaktion), der Angriff zählt nicht zur Angriffsaktion */
+ const hxMelee=(c)=>{const i=c.attacks.findIndex((a)=>a.melee&&a.idx!==undefined);return i>=0?i:Math.max(0,c.attacks.findIndex((a)=>a.melee));};
+ add({id:'hx_reap',n:'Nachsetzen',cost:'b',when:c=>c.lv('hxexec')>=3&&c.subOf('hxexec')==='reaper'&&!onceUsed(c.char,'hx_reap'),sub:c=>'Nur nachdem du in diesem Zug einen Feind auf 0 TP gebracht hast'+(c.lv('hxexec')>=6?'; vorher bis 3 m bewegen':''),run:(ch,c)=>{onceMark(ch,'hx_reap');tLog('Nachsetzen','Weiterer Waffenangriff gegen eine andere Kreatur in Reichweite. Löst kein weiteres Nachsetzen aus; Urteil weiterhin nur einmal pro Zug.');weaponAttack(ch,hxMelee(c),{bonusPaid:true});}});
+ add({id:'hx_counter',n:'Zorniger Gegenschlag',cost:'r',when:c=>c.lv('hxguard')>=10&&c.subOf('hxguard')==='defier',sub:'Wenn eine herausgeforderte Kreatur in Reichweite einen Verbündeten angreift',run:(ch,c)=>{tLog('Zorniger Gegenschlag','Nahkampfwaffenangriff nach ihrem Angriff, kein automatischer Treffer.');weaponAttack(ch,hxMelee(c),{bonusPaid:true});}});
+ note('hx_dust','Seidenstaub','b',c=>c.char.species==='hxsilk',c=>'Ziel 1,5 m: KON-RW SG '+(8+c.pb+c.mod.con)+', bei Misserfolg Nachteil auf den nächsten Angriff.','hxs_dust');
+ add({id:'hx_naht',n:'Goldene Naht',cost:'b',res:'hxsp_naht',when:c=>c.char.species==='hxgolem'&&c.char.speciesChoice==='ceramic',run:(ch,c)=>tHealSelf(ch,c,'1W6+'+c.pb,'Goldene Naht',false)});
+ note('hx_ton','Formbarer Ton','b',c=>c.char.species==='hxgolem'&&(!c.char.speciesChoice||c.char.speciesChoice==='clay'),'Bis Zugende durch Öffnung für eine kleinere Grössenkategorie; Ausrüstung muss hindurchpassen.','hxsp_ton');
+ add({id:'hx_gefu','n':'Stabiles Gefüge',cost:'r',res:'hxsp_gefu',when:c=>c.char.species==='hxgolem'&&c.char.speciesChoice==='forged',run:(ch,c)=>tRoll('1W6+'+c.pb,'Stabiles Gefüge – Schaden manuell reduzieren')});
+ note('hx_root','Wurzelhalt','r',c=>c.char.species==='hxleaf','Bei erzwungener Bewegung −3 m oder Liegend verhindern; fester Boden.','hxs_root');
+ note('hx_eyes','Drittes Auge','b',c=>c.char.species==='hxoculi','1 Minute: unsichtbare Kreaturen und Gegenstände in 3 m sehen; normale Sichtbehinderung gilt.','hxs_eye');
+ add({id:'hx_spikes',n:'Stachelwehr',cost:'r',res:'hxs_spike',when:c=>c.char.species==='hxbone',run:(ch,c)=>tRoll('1W6+'+c.pb,'Stachelwehr: Stichschaden, Ziel in 1,5 m')});
+ note('hx_invite','Einladung','b',c=>c.char.species==='hxfey','Mit bereitwilligem Ziel in 3 m Position tauschen; Ziel muss passen.','hxs_invite');
+ note('hx_tail','Dreipunktstand','r',c=>c.char.species==='hxtail','Auf festem Boden Liegend verhindern.','hxs_tail');
+
+ // Alle übrigen begrenzten Merkmale: vorhandenen Rastzähler und Aktionsökonomie verwenden,
+ // Ergebnis und zulässigen Auslöser am Tisch bestätigen. Keine automatische Fremd-TP-Veränderung.
+ const remaining={hxf_dread:'b',hxf_trug:'f',hxm_screen:'r',hxm_step:'b',hxm_guard:'r',hxm_field:'a',hxm_read:'a',hxm_interrupt:'r',hxm_focus:'f',hxg_hold:'f',hxg_hard:'r',hxg_save:'r',hxt_resist:'f',hxt_block:'r',hxt_swarm:'b',hxt_snare:'a',hxt_break:'r',hxe_precise:'f',hxe_swing:'f',hxe_pressure:'f',hxb_spread:'f',hxb_wave:'a',hxb_sticky:'f',hxb_heal:'f',hxs_guest:'f'};
+ for(const [key,cost] of Object.entries(remaining)){
+  const title={hxf_dread:'Schreckgestalt',hxf_trug:'Trugwechsel',hxm_screen:'Geistesschirm',hxm_step:'Lufttritt',hxm_guard:'Schutzimpuls',hxm_field:'Kraftfeld',hxm_read:'Gedankenlesen',hxm_interrupt:'Unterbrechung',hxm_focus:'Fokussierter Schlag',hxg_hold:'Letzter Halt',hxg_hard:'Zähigkeit',hxg_save:'Rettender Zug',hxt_resist:'Reissfester Faden',hxt_block:'Blockierpuppe',hxt_swarm:'Schwarmwolke',hxt_snare:'Fadenschlinge',hxt_break:'Fadenbruch',hxe_precise:'Präziser Schnitt',hxe_swing:'Schwung',hxe_pressure:'Kampfdruck',hxb_spread:'Wandernde Seuche',hxb_wave:'Ausbreitungswelle',hxb_sticky:'Zäher Befall',hxb_heal:'Versengte Erholung',hxs_guest:'Gastrecht'}[key];
+  add({id:'hx_use_'+key,n:title,cost,res:key,when:c=>c.res.some(x=>x.k===key),sub:'SL: Auslöser und Ziel prüfen',run:(ch,c)=>{const f=c.features.find(x=>x.n===title);tLog(title,(f?f.t:'Merkmaltext beachten.')+' · Effekt am Tisch anwenden.');}});
+ }
+})();
+

@@ -9,6 +9,8 @@ async function run(b, label, opt) {
   const ok = (name, cond) => { n++; if (!cond) fails.push(name); };
   const noScroll = async (where) => { const sw = await p.evaluate(() => document.documentElement.scrollWidth); ok('kein Querscrollen: ' + where, sw <= (opt.viewport.width + 1)); };
   await p.goto(URL); await p.waitForTimeout(400);
+  /* Erweiterte Auswahl an: der Test klickt sich durch alle Klassen und Völker, auch die eigenen */
+  await p.evaluate(() => { localStorage.setItem('hb_rules', JSON.stringify({ homeview: true })); S.rules = null; render(); });
   await p.locator('button[data-act=newChar]').first().click(); await p.waitForTimeout(150);
   const classes = await p.evaluate(() => Object.keys(CLASSES));
   for (const k of classes) {
