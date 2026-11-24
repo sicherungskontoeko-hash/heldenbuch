@@ -8,6 +8,8 @@ const http = require('http'); const fs = require('fs'); const path = require('pa
 const ROOT = path.resolve(__dirname, '..', 'app', 'www');
 const arg = (k, d) => { const a = process.argv.find((x) => x.startsWith('--' + k + '=')); return a ? a.split('=')[1] : d; };
 const LOKAL = process.argv.includes('--lokal'); const SERVER = arg('server', 'hivemq');
+/* --ohne-speicher: der lokale Server vergisst alle gespeicherten Nachrichten (wie ein überlasteter öffentlicher Server) */
+const OHNE = process.argv.includes('--ohne-speicher');
 const SHOTS = path.join(__dirname, 'echt-bilder'); fs.mkdirSync(SHOTS, { recursive: true });
 const out = []; const errs = []; const T = (n, ok, info) => { out.push({ n, ok: !!ok, info }); console.log((ok ? '✔ ' : '✘ ') + n + (info != null ? '  (' + (typeof info === 'string' ? info : JSON.stringify(info)) + ')' : '')); };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -17,7 +19,7 @@ async function until(p, fn, arg, ms) { const t0 = Date.now(); while (Date.now() 
   let broker = null, bsrv = null;
   if (LOKAL) {
     const { Aedes } = require('aedes'); const wsStream = require('websocket-stream');
-    broker = await Aedes.createBroker(); bsrv = http.createServer(); wsStream.createServer({ server: bsrv }, broker.handle); await new Promise((r) => bsrv.listen(8892, r));
+    broker = await Aedes.createBroker(OHNE ? { authorizePublish: (c, pk, cb) => { pk.retain = false; cb(null); } } : {}); bsrv = http.createServer(); wsStream.createServer({ server: bsrv }, broker.handle); await new Promise((r) => bsrv.listen(8892, r));
   }
   const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
   const web = http.createServer((q, r) => { let f = path.join(ROOT, decodeURIComponent(q.url.split('?')[0])); if (fs.existsSync(f) && fs.statSync(f).isDirectory()) f = path.join(f, 'index.html'); if (!fs.existsSync(f)) { r.writeHead(404); return r.end(); } r.writeHead(200, { 'Content-Type': types[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(r); });
@@ -92,12 +94,12 @@ async function until(p, fn, arg, ms) { const t0 = Date.now(); while (Date.now() 
   /* Neustart eines Handys mitten im Spiel */
   await P2.p.reload(); await P2.p.waitForFunction(() => typeof S === 'object' && document.querySelector('#view *'), null, { timeout: 20000 });
   const tRe = await until(P2.p, (n) => S.camp && Object.values(S.table).some((p) => p.char === n) && !!(S.combat && S.combat.active), 'Meisterin Vala', 30000);
-  T('Android nach Neustart: Raum, Mitspieler und laufender Kampf wieder da', tRe >= 0, tRe + ' ms');
+  T('Android nach Neustart: Raum, Mitspieler und laufender Kampf wieder da', tRe >= 0, tRe >= 0 ? tRe + ' ms' : await P2.p.evaluate(() => ({ raum: S.camp, tisch: Object.values(S.table).map((p) => p.char), kampf: !!(S.combat && S.combat.active), sl: S.meta && S.meta.dm, netz: typeof HBNET !== 'undefined' && HBNET.state })));
 
   for (const d of dev) await d.p.screenshot({ path: path.join(SHOTS, d.eng + '-ende.png') });
   T('Keine Skriptfehler auf den Geräten', errs.length === 0, errs.slice(0, 5).join(' | ') || null);
   for (const b of Object.values(browsers)) await b.close();
   web.close(); if (bsrv) { bsrv.close(); broker.close(); }
-  const bad = out.filter((r) => !r.ok).length; console.log('\n' + (out.length - bad) + ' / ' + out.length + ' bestanden (Server: ' + (LOKAL ? 'lokal' : SERVER) + ')');
+  const bad = out.filter((r) => !r.ok).length; console.log('\n' + (out.length - bad) + ' / ' + out.length + ' bestanden (Server: ' + (LOKAL ? 'lokal' + (OHNE ? ', ohne gespeicherte Nachrichten' : '') : SERVER) + ')');
   process.exit(bad ? 1 : 0);
 })().catch((e) => { console.error('Abbruch:', e.message); process.exit(2); });

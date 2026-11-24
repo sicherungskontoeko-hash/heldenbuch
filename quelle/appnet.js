@@ -104,6 +104,8 @@ function hbDoc(path) {
   return {
     id: path.split('/').pop(), path,
     set: async (d) => { HB_CACHE.set(path, d); const t = await hbTopic(path); HBNET.publish(t.topic, await hbSeal(t.key, d), true); },
+    /* Flüchtige Nachricht (nicht gespeichert): für den Abgleich beim Beitreten */
+    ping: async (d) => { const t = await hbTopic(path); HBNET.publish(t.topic, await hbSeal(t.key, d), false); },
     delete: async () => { HB_CACHE.delete(path); const t = await hbTopic(path); HBNET.publish(t.topic, '', true); },
     get: async () => hbSnapDoc(path, HB_CACHE.get(path)),
     onSnapshot: (fn) => {

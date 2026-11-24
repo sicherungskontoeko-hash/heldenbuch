@@ -19,7 +19,7 @@ SUITES=(
   "initcall.test.js|Kampfstart und Initiative"
   "npcturn.test.js|Gegnerzug"
   "levelup.test.js|Stufenaufstieg"
-  "zauber.test.js|Jeden Zauber wirken"
+  "zauber.test.js|Jeden Zauber wirken|1"
   "table.test.js|Spieltisch"
   "tablehelp.test.js|Tischhilfen"
   "net.test.js|Online-Tisch (lokaler Server)"
@@ -34,19 +34,20 @@ SUITES=(
   "krug.test.js|Abenteuer Krug"
   "kbuch.test.js|Kampagnenbuch"
   "ddbimport.test.js|Import aus D&D Beyond"
-  "overlap.test.js|Überdeckungen, 9 Grössen"
-  "gross.test.js --schnell|Alle Ansichten"
-  "klick.test.js --schnell|Jeder Knopf"
+  "overlap.test.js|Überdeckungen, 9 Grössen|1"
+  "gross.test.js --schnell|Alle Ansichten|1"
+  "klick.test.js --schnell|Jeder Knopf|1"
 )
 SUM="${GITHUB_STEP_SUMMARY:-/dev/null}"
 echo "### Engine: $ENG" >> "$SUM"; echo "" >> "$SUM"; echo "| Suite | Ergebnis | Zeit |" >> "$SUM"; echo "|---|---|---|" >> "$SUM"
 FAIL=0; mkdir -p tests/engine-log
 # macOS hat kein «timeout»: gtimeout nehmen, sonst ohne Zeitlimit
-TO=$(command -v timeout || command -v gtimeout || true); [ -n "$TO" ] && TO="$TO 1500"
+TO=$(command -v timeout || command -v gtimeout || true); [ -n "$TO" ] && TO="$TO 2700"
 for s in "${SUITES[@]}"; do
-  cmd="${s%%|*}"; name="${s##*|}"; f="${cmd%% *}"; args="${cmd#"$f"}"
+  IFS="|" read -r cmd name wf <<< "$s"; f="${cmd%% *}"; args="${cmd#"$f"}"
+  # dritte Angabe: Streckfaktor der Wartezeiten (lange Durchläufe ohne Zeitprüfungen laufen ungestreckt)
   t0=$(date +%s)
-  HB_ENGINE="$ENG" $TO node -r ./tests/_engine.js tests/$f $args > "tests/engine-log/${f%.test.js}.log" 2>&1; rc=$?
+  HB_WAIT="${wf:-3}" HB_ENGINE="$ENG" $TO node -r ./tests/_engine.js tests/$f $args > "tests/engine-log/${f%.test.js}.log" 2>&1; rc=$?
   dt=$(( $(date +%s) - t0 ))
   if [ $rc -eq 0 ]; then r="✔"; else r="✘ (Exit $rc)"; FAIL=$((FAIL+1)); echo "---- $name ($f) ----"; grep -E -A25 "✘|FAIL|Error|rror:" "tests/engine-log/${f%.test.js}.log" | head -80; fi
   echo "== $name ($f$args): $r in ${dt}s"

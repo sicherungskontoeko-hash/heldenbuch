@@ -1211,11 +1211,32 @@ function joinCamp(v, silent) {
     for (const [uid, p] of Object.entries(table)) for (const r of p.rolls) { try { const k = uid + ':' + r.t; if (!seen.has(k)) { seen.add(k); if (uid !== UID && r.t > campJoinedAt && (!r.secret || isDM())) { miniToast(p, r); if (typeof histAdd === 'function') histAdd(r, p.char, true); } } } catch (e) {} }
     S.table = table; paintCamp();
   }, (e) => { S.campErr = 'fail'; paintCamp(); });
-  writeMe(); subCombat(); subMeta();
+  writeMe(); subCombat(); subMeta(); subHello(); setTimeout(sendHello, 1500);
   if (!silent) render();
 }
+/* Abgleich beim Beitreten und nach einem Verbindungsabbruch: Das Gerät bittet alle, ihren Stand nochmals zu senden.
+   Öffentliche Server halten gespeicherte Nachrichten nicht immer zuverlässig (im Test bei EMQX beobachtet);
+   so kommt ein neu verbundenes Gerät trotzdem sofort zu Mitspielern, Spielleitung und laufendem Kampf. */
+let helloUnsub = null, helloLast = 0; const helloSeen = new Set();
+const helloRef = () => DB.doc('camp/' + S.camp + '/sync/hello');
+function sendHello(force) {
+  if (!DB || !S.camp || !UID) return; const r = helloRef(); if (typeof r.ping !== 'function') return;
+  const now = Date.now(); if (!force && now - helloLast < 8000) return; helloLast = now;
+  r.ping({ from: UID, id: uidX(), t: now }).catch(() => {});
+}
+function subHello() {
+  if (helloUnsub) { try { helloUnsub(); } catch (e) {} helloUnsub = null; }
+  if (!DB || !S.camp) return; const r = helloRef(); if (typeof r.ping !== 'function') return;
+  try { helloUnsub = r.onSnapshot((d) => { const v = d && d.exists ? d.data() : null;
+    if (!v || typeof v !== 'object' || v.from === UID || typeof v.id !== 'string' || helloSeen.has(v.id) || Math.abs(Date.now() - (+v.t || 0)) > 120000) return;
+    helloSeen.add(v.id); const camp = S.camp;
+    setTimeout(() => { if (S.camp !== camp) return; writeMe(); if (isDM()) { metaRef().set(S.meta).catch(() => {}); if (S.combat) combatRef().set(S.combat).catch(() => {}); } }, 150 + Math.random() * 900);
+  }, () => {}); } catch (e) { helloUnsub = null; }
+}
+if (typeof HBNET !== 'undefined' && HBNET.onState) HBNET.onState((st) => { if (st === 'online' && S.camp) setTimeout(() => { writeMe(); sendHello(true); }, 800); });
 function leaveCamp() {
   if (campUnsub) { try { campUnsub(); } catch (e) {} campUnsub = null; }
+  if (helloUnsub) { try { helloUnsub(); } catch (e) {} helloUnsub = null; }
   if (DB && S.camp && UID) DB.collection('camp/' + S.camp + '/players').doc(UID).delete().catch(() => {});
   if (combatUnsub) { try { combatUnsub(); } catch (e) {} combatUnsub = null; }
   if (metaUnsub) { try { metaUnsub(); } catch (e) {} metaUnsub = null; }
