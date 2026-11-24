@@ -296,7 +296,7 @@ function d3effect(dieEl, setId, kind, level) {
       h += '<span class="d3p ' + f.move + '" style="--dx:' + dx.toFixed(0) + 'px;--dy:' + dy.toFixed(0) + 'px;--c:' + col + ';--d:' + (vrand() * 160).toFixed(0) + 'ms;--r:' + ((vrand() - 0.5) * 540).toFixed(0) + 'deg">' + sh + '</span>'; } }
     box.innerHTML = h;
   } else {
-    d3stage1(dieEl, level); box.innerHTML = '<div class="d3dim" style="--tc:#3a0508"></div>'; dieEl.classList.add('n1-hit');
+    d3stage1(dieEl, level, set); box.innerHTML = '<div class="d3dim" style="--tc:' + ((set.fx1 && set.fx1.tint) || '#3a0508') + '"></div>'; dieEl.classList.add('n1-hit');
   }
   dieEl.appendChild(box); setTimeout(() => { box.remove(); }, 2600);
 }
@@ -304,8 +304,11 @@ function d3effect(dieEl, setId, kind, level) {
 /* Grosser Auftritt der natürlichen 20: Bühne über dem ganzen Bildschirm, nur transform/opacity-Animationen */
 function d3stage20(dieEl, set, id, level) {
   const r = dieEl.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; const f = set.fx20; const c = f.ray; const W = window.innerWidth, H = window.innerHeight;
-  const st = document.createElement('div'); st.className = 'd3stage big-' + f.big; st.setAttribute('aria-hidden', 'true'); st.style.cssText = '--x:' + x + 'px;--y:' + y + 'px;--c:' + c + ';--c2:' + f.col[0];
-  let h = '<div class="sg-vig"></div><div class="sg-aura"></div><div class="sg-ring"></div>';
+  /* lokal am Würfel (Effekte 2.0): Maske um den Würfel, Dezent kleiner und mit wenigen Teilchen, Intensiv mit Ring und Set-Motiv, ohne Flackern */
+  const R = level === 'voll' ? 170 : 115;
+  const st = document.createElement('div'); st.className = 'd3stage local big-' + f.big; st.setAttribute('aria-hidden', 'true'); st.style.cssText = '--x:' + x + 'px;--y:' + y + 'px;--c:' + c + ';--c2:' + f.col[0] + ';--rr:' + R + 'px';
+  let h = '<div class="sg-aura"></div><div class="sg-ring"></div>';
+  if (level !== 'voll') for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + vrand() * 0.5; const dist = 40 + vrand() * 45; h += '<span class="d3p sg burst" style="--dx:' + (Math.cos(a) * dist).toFixed(0) + 'px;--dy:' + (Math.sin(a) * dist).toFixed(0) + 'px;--c:' + f.col[i % f.col.length] + ';--d:' + (vrand() * 120).toFixed(0) + 'ms;--r:0deg;--sz:1"><i class="ps"></i></span>'; }
   if (level === 'voll') {
     h += '<div class="sg-ring r2"></div>';
     const B = f.big;
@@ -322,31 +325,41 @@ function d3stage20(dieEl, set, id, level) {
     if (B === 'runecircle') { let rc = '<div class="sg-rc">'; for (let k = 0; k < 10; k++) rc += '<span style="transform:rotate(' + k * 36 + 'deg) translateY(-118px)">' + D3_RUNES[(k * 3) % D3_RUNES.length] + '</span>'; h += rc + '</div>'; }
     if (B === 'prism') h += '<div class="sg-prism"></div><div class="sg-prism p2"></div><div class="d3flash nova"></div>';
     if (f.rings) for (let k = 3; k <= f.rings + 1; k++) h += '<div class="sg-ring r' + k + '"></div>';
-    const N = f.big === 'petals' ? 30 : 26;
-    for (let i = 0; i < N; i++) { const a = (i / N) * Math.PI * 2 + vrand() * 0.3; const dist = 90 + vrand() * 160; let dx = Math.cos(a) * dist, dy = Math.sin(a) * dist;
-      if (f.move === 'rise') { dx = (vrand() - 0.5) * 160; dy = -(120 + vrand() * 220); } if (f.move === 'fall') { dx = (vrand() - 0.5) * 260; dy = -(y * 0.9) * vrand(); }
+    const N = 16;
+    for (let i = 0; i < N; i++) { const a = (i / N) * Math.PI * 2 + vrand() * 0.3; const dist = 55 + vrand() * 95; let dx = Math.cos(a) * dist, dy = Math.sin(a) * dist;
+      if (f.move === 'rise') { dx = (vrand() - 0.5) * 140; dy = -(60 + vrand() * 90); } if (f.move === 'fall') { dx = (vrand() - 0.5) * 200; dy = -(60 + vrand() * 90); }
       let sh = D3_SHAPE[f.shape] || D3_SHAPE.spark; if (f.shape === 'rune') sh = '<i class="pru">' + D3_RUNES[Math.floor(vrand() * D3_RUNES.length)] + '</i>';
       h += '<span class="d3p sg ' + (f.move === 'fall' ? 'fallin' : f.move) + '" style="--dx:' + dx.toFixed(0) + 'px;--dy:' + dy.toFixed(0) + 'px;--c:' + f.col[i % f.col.length] + ';--d:' + (vrand() * 220).toFixed(0) + 'ms;--r:' + ((vrand() - 0.5) * 720).toFixed(0) + 'deg;--sz:' + (1 + vrand() * 1.2).toFixed(2) + '">' + sh + '</span>'; }
   }
   st.innerHTML = h; document.body.appendChild(st); dieEl.classList.add('n20pop');
-  setTimeout(() => st.remove(), level === 'voll' ? 2400 : 1500);
+  const D = level === 'voll' ? 1200 : 900; setTimeout(() => st.classList.add('out'), D - 220); setTimeout(() => st.remove(), D);
 }
 
 /* Natürliche 1 (bei allen gleich): Bildschirm bebt, Risse laufen vom Würfel über den Bildschirm */
-function d3stage1(dieEl, level) {
+/* Natürliche 1: Risse und Schatten lokal um den Würfel in den Farben des Sets; Intensiv schüttelt kurz das Würfelfeld, nicht den Bildschirm */
+function d3stage1(dieEl, level, set) {
   const r = dieEl.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; const W = window.innerWidth, H = window.innerHeight;
+  const f1 = (set && set.fx1) || { crack: '#ffebe1', tint: '#3a0508', extra: 'dim' }; const R = level === 'voll' ? 150 : 100;
   const paths = []; const n = 7;
-  for (let k = 0; k < n; k++) { let a = (k / n) * Math.PI * 2 + (vrand() - 0.5) * 0.6; let px = x, py = y; let d = 'M' + px.toFixed(0) + ' ' + py.toFixed(0); const len = Math.hypot(W, H) * (0.35 + vrand() * 0.35); let walked = 0;
-    while (walked < len) { const st = 25 + vrand() * 45; a += (vrand() - 0.5) * 0.7; px += Math.cos(a) * st; py += Math.sin(a) * st; walked += st; d += ' L' + px.toFixed(0) + ' ' + py.toFixed(0);
-      if (vrand() < 0.28) { let bx = px, by = py, ba = a + (vrand() < 0.5 ? 1 : -1) * (0.5 + vrand() * 0.6); let bd = 'M' + bx.toFixed(0) + ' ' + by.toFixed(0); for (let m = 0; m < 3; m++) { const bs = 15 + vrand() * 25; ba += (vrand() - 0.5) * 0.6; bx += Math.cos(ba) * bs; by += Math.sin(ba) * bs; bd += ' L' + bx.toFixed(0) + ' ' + by.toFixed(0); } paths.push([bd, 1]); } }
+  for (let k = 0; k < n; k++) { let a = (k / n) * Math.PI * 2 + (vrand() - 0.5) * 0.6; let px = x, py = y; let d = 'M' + px.toFixed(0) + ' ' + py.toFixed(0); const len = R * (0.6 + vrand() * 0.45); let walked = 0;
+    while (walked < len) { const st = 12 + vrand() * 22; a += (vrand() - 0.5) * 0.7; px += Math.cos(a) * st; py += Math.sin(a) * st; walked += st; d += ' L' + px.toFixed(0) + ' ' + py.toFixed(0);
+      if (vrand() < 0.28) { let bx = px, by = py, ba = a + (vrand() < 0.5 ? 1 : -1) * (0.5 + vrand() * 0.6); let bd = 'M' + bx.toFixed(0) + ' ' + by.toFixed(0); for (let m = 0; m < 3; m++) { const bs = 8 + vrand() * 14; ba += (vrand() - 0.5) * 0.6; bx += Math.cos(ba) * bs; by += Math.sin(ba) * bs; bd += ' L' + bx.toFixed(0) + ' ' + by.toFixed(0); } paths.push([bd, 1]); } }
     paths.push([d, 2]); }
-  const st = document.createElement('div'); st.className = 'd3stage n1stage'; st.setAttribute('aria-hidden', 'true'); st.style.cssText = '--x:' + x + 'px;--y:' + y + 'px';
+  const st = document.createElement('div'); st.className = 'd3stage local n1stage n1-' + f1.extra; st.setAttribute('aria-hidden', 'true'); st.style.cssText = '--x:' + x + 'px;--y:' + y + 'px;--rr:' + (R + 30) + 'px;--tc:' + f1.tint + ';--kc:' + f1.crack;
+  let extra = '';
+  const puff = (cls, k, col) => { let h = ''; for (let i = 0; i < k; i++) { const a = -Math.PI / 2 + (vrand() - 0.5) * 1.6; const dist = 30 + vrand() * 40; h += '<span class="d3p sg ' + cls + '" style="--dx:' + (Math.cos(a) * dist).toFixed(0) + 'px;--dy:' + (Math.sin(a) * dist + (cls === 'n1leaf' || cls === 'n1shard' ? 70 : 0)).toFixed(0) + 'px;--c:' + col + ';--d:' + (vrand() * 150).toFixed(0) + 'ms;--r:' + ((vrand() - 0.5) * 300).toFixed(0) + 'deg;--sz:' + (0.8 + vrand() * 0.6).toFixed(2) + '"><i></i></span>'; } return h; };
+  const k = level === 'voll' ? 6 : 3;
+  if (f1.extra === 'smoke' || f1.extra === 'steam' || f1.extra === 'dust') extra = puff('n1puff', k, f1.extra === 'steam' ? 'rgba(235,240,245,.7)' : f1.extra === 'dust' ? 'rgba(190,175,150,.7)' : 'rgba(70,60,60,.75)');
+  else if (f1.extra === 'shards') extra = puff('n1shard', k, f1.crack);
+  else if (f1.extra === 'wilt') extra = puff('n1leaf', k, '#8a6a2a');
   st.innerHTML = '<div class="n1-vig"></div><svg class="n1-cracks" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
-    paths.map(([d, w]) => '<path d="' + d + '" stroke="rgba(0,0,0,.55)" stroke-width="' + (w * 2.4 + 1) + '" fill="none" stroke-linejoin="bevel"/><path d="' + d + '" stroke="rgba(255,235,225,.9)" stroke-width="' + w * 0.9 + '" fill="none" stroke-linejoin="bevel"/>').join('') +
-    '<circle cx="' + x + '" cy="' + y + '" r="22" fill="none" stroke="rgba(255,235,225,.7)" stroke-width="1.2"/></svg>';
+    paths.map(([d, w]) => '<path d="' + d + '" stroke="rgba(0,0,0,.55)" stroke-width="' + (w * 2.4 + 1) + '" fill="none" stroke-linejoin="bevel"/><path d="' + d + '" stroke="' + f1.crack + '" stroke-width="' + w * 0.9 + '" fill="none" stroke-linejoin="bevel"/>').join('') +
+    '<circle cx="' + x + '" cy="' + y + '" r="22" fill="none" stroke="' + f1.crack + '" stroke-opacity=".7" stroke-width="1.2"/></svg>' + extra;
   document.body.appendChild(st);
-  if (level === 'voll') { document.body.classList.remove('d3quake'); void document.body.offsetWidth; document.body.classList.add('d3quake'); setTimeout(() => document.body.classList.remove('d3quake'), 650); }
-  setTimeout(() => st.remove(), 2300);
+  if (f1.extra === 'dim' || f1.extra === 'shrink' || f1.extra === 'flicker') dieEl.classList.add('n1x-' + f1.extra);
+  const field = dieEl.closest('#toast') || dieEl.closest('.tdie') || dieEl;
+  if (level === 'voll') { field.classList.remove('d3quake'); void field.offsetWidth; field.classList.add('d3quake'); setTimeout(() => field.classList.remove('d3quake'), 450); }
+  const D = level === 'voll' ? 1200 : 900; setTimeout(() => st.classList.add('out'), D - 220); setTimeout(() => st.remove(), D);
 }
 
 /* ---- Geräusche (WebAudio, ohne Dateien) ---- */

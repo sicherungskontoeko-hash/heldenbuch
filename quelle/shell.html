@@ -578,6 +578,79 @@ ul.help{margin:0;padding-left:1.1em;display:grid;gap:8px;color:var(--ink)}ul.hel
 /* Effekte-Einstellungen (vfx.js) */
 .vfxmore{margin-top:10px;border-top:1px solid var(--line2);padding-top:8px}.vfxmore>summary{cursor:pointer;color:var(--muted);font-size:.88rem;min-height:32px;display:flex;align-items:center;list-style:none}.vfxmore>summary::-webkit-details-marker{display:none}.vfxmore>summary::before{content:'▸';margin-right:8px;color:var(--gold-t,var(--gold))}.vfxmore[open]>summary::before{content:'▾'}.vfxmore>summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .vfxb .hint{margin:6px 0 0}.vfxb input[type=range]{flex:1 1 140px;max-width:220px}
+/* ==== Effekte 2.0: natürliche 20/1 lokal am Würfel ==== */
+.d3stage.local{-webkit-mask-image:radial-gradient(circle var(--rr) at var(--x) var(--y),#000 55%,transparent 100%);mask-image:radial-gradient(circle var(--rr) at var(--x) var(--y),#000 55%,transparent 100%);transition:opacity .2s ease-out}
+.d3stage.out{opacity:0}
+.d3stage.local .sg-aura{width:240px;height:240px;margin:-120px 0 0 -120px}
+.d3stage.local .sg-big{font-size:110px}.d3stage.local .sg-big.gear{font-size:80px}.d3stage.local .sg-big.gear.b{font-size:62px}
+.d3stage.local .sg-bolt{animation:sgbolt1 .5s ease-out forwards}
+@keyframes sgbolt1{0%{opacity:1}100%{opacity:0}}
+.d3fx .d3flash{position:absolute;inset:-40px;border-radius:50%;z-index:0}
+.lucel.out{opacity:0;transition:opacity .25s ease-out}
+.lurc span{font-size:20px;color:#fff3c4}
+.n1stage.local .n1-vig{background:radial-gradient(circle at var(--x) var(--y),transparent 12%,var(--tc) 100%)}
+.n1stage .d3p.n1puff i,.n1stage .d3p.n1shard i,.n1stage .d3p.n1leaf i{display:block;transform:translate(-50%,-50%) scale(var(--sz))}
+.d3p.n1puff i{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle,var(--c),transparent 70%);filter:blur(1px)}
+.d3p.n1shard i{width:3px;height:10px;background:var(--c);box-shadow:0 0 4px var(--c)}
+.d3p.n1leaf i{width:9px;height:5px;border-radius:50%;background:var(--c)}
+.d3p.n1puff{animation:n1puff 1s var(--d) ease-out forwards;opacity:0}
+.d3p.n1shard,.d3p.n1leaf{animation:n1fly .9s var(--d) ease-in forwards;opacity:0}
+@keyframes n1puff{0%{opacity:.9;transform:translate(0,0) scale(.5)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(2.2)}}
+@keyframes n1fly{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--r))}}
+.die.d3.n1-hit.n1x-dim svg{filter:grayscale(.85) brightness(.55)!important}
+.die.d3.n1x-shrink{transform:scale(.86);transition:transform .5s ease-out}
+.die.d3.n1-hit.n1x-flicker svg{filter:saturate(.12) brightness(.85)!important}
+#toast.d3quake,.tdie.d3quake{animation:d3quakeS .45s cubic-bezier(.36,.07,.19,.97)}
+@keyframes d3quakeS{15%{transform:translate(-3px,1px)}30%{transform:translate(3px,-2px)}45%{transform:translate(-2px,1px)}60%{transform:translate(2px,1px)}80%{transform:translate(-1px,0)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){#toast.d3quake,.tdie.d3quake{animation:none}}
+/* ==== Effekte 2.0: Spielereignisse (vfxspiel.js) ==== */
+#vfxl{position:fixed;inset:0;pointer-events:none;z-index:56;overflow:hidden}
+.vfxe{position:absolute;transform:translate(-50%,-50%)}
+.vdmg{width:0;height:0}
+.vdmg .vnum{position:absolute;left:0;top:0;transform:translate(-50%,-50%);font-family:var(--f-display);font-weight:700;font-size:1.35rem;color:#ffb4a8;text-shadow:0 1px 6px rgba(0,0,0,.9);white-space:nowrap;opacity:0;animation:vnum .5s ease-out forwards}
+.vdmg .vnum.heal{color:#a9f0bd}.vdmg .vnum small{font-size:.62em;font-weight:400}
+@keyframes vnum{0%{opacity:0;transform:translate(-50%,-30%) scale(.7)}25%{opacity:1;transform:translate(-50%,-85%) scale(1.08)}100%{opacity:0;transform:translate(-50%,-170%) scale(1)}}
+.vp{position:absolute;left:0;top:0;width:7px;height:7px;margin:-3.5px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c);opacity:0;animation:vp .45s var(--d) ease-out forwards}
+@keyframes vp{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.45) rotate(var(--r))}}
+.vp.flake{border-radius:0;width:10px;height:10px;margin:-5px;box-shadow:none;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%)}
+.vp.bolt{border-radius:0;width:8px;height:14px;margin:-7px -4px;box-shadow:none;clip-path:polygon(40% 0,100% 0,55% 42%,90% 42%,10% 100%,40% 55%,0 55%)}
+.vp.drop{border-radius:50% 50% 50% 50%/60% 60% 40% 40%;width:6px;height:9px;box-shadow:none}
+.vp.mist{width:18px;height:18px;margin:-9px;filter:blur(3px);box-shadow:none}
+.vp.dust{border-radius:1px;width:4px;height:4px;margin:-2px;box-shadow:none}
+.vp.spark{width:4px;height:4px;margin:-2px;background:#fff;box-shadow:0 0 8px var(--c)}
+.vp.slash,.vp.point,.vp.ring,.vp.wave{width:5px;height:5px;margin:-2.5px}
+.vring{position:absolute;left:0;top:0;width:60px;height:60px;margin:-30px;border-radius:50%;border:2px solid var(--c);opacity:0;animation:vring .45s ease-out forwards}
+.vring.wave{border-width:3px;box-shadow:0 0 12px var(--c)}
+.vring.slash{border:0;border-radius:2px;width:72px;height:3px;margin:-1.5px -36px;background:linear-gradient(90deg,transparent,var(--c),transparent);transform:rotate(-35deg);animation:vslash .38s ease-out forwards}
+.vring.point{width:14px;height:14px;margin:-7px;background:var(--c);border:0;animation:vpoint .32s ease-out forwards}
+@keyframes vring{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(1.6)}}
+@keyframes vslash{0%{opacity:0;clip-path:inset(0 100% 0 0)}40%{opacity:1;clip-path:inset(0 0 0 0)}100%{opacity:0;clip-path:inset(0 0 0 0)}}
+@keyframes vpoint{0%{opacity:1;transform:scale(.4)}100%{opacity:0;transform:scale(2.2)}}
+.vfx-hurt{animation:vhurt .42s ease-out}.vfx-heal{animation:vheal .42s ease-out}.vfx-shield{animation:vshield .32s ease-out}
+@keyframes vhurt{0%,100%{box-shadow:0 0 0 0 rgba(255,80,60,0)}30%{box-shadow:0 0 0 3px rgba(255,80,60,.55),0 0 18px rgba(255,80,60,.5)}}
+@keyframes vheal{0%,100%{box-shadow:0 0 0 0 rgba(120,220,150,0)}30%{box-shadow:0 0 0 3px rgba(141,216,160,.6),0 0 18px rgba(200,230,140,.5)}}
+@keyframes vshield{0%,100%{box-shadow:0 0 0 0 rgba(140,190,255,0)}35%{box-shadow:0 0 0 4px rgba(150,200,255,.55),inset 0 0 12px rgba(150,200,255,.45)}}
+.vfx-turn{animation:vturn .52s ease-out}
+@keyframes vturn{0%,100%{box-shadow:0 0 0 0 rgba(var(--gold-rgb),0)}35%{box-shadow:0 0 0 5px rgba(var(--gold-rgb),.55),0 0 26px rgba(var(--gold-rgb),.6)}}
+.vfx-ko{animation:vko .32s ease-out}
+@keyframes vko{0%{filter:none}100%{filter:grayscale(.9) brightness(.8)}}
+.sheet:has(.vb.hpb.down) .shead .sigil{filter:grayscale(.9) brightness(.8)}
+.vfx-out{animation:vout .24s ease-out}
+@keyframes vout{0%,100%{box-shadow:0 0 0 0 rgba(var(--gold-rgb),0);transform:none}40%{box-shadow:0 0 12px 3px rgba(var(--gold-rgb),.7);transform:scale(1.25)}}
+.vfx-in{animation:vin .32s ease-out}
+@keyframes vin{0%{transform:scale(.9);box-shadow:0 0 0 0 rgba(var(--gold-rgb),0)}45%{transform:scale(1.04);box-shadow:0 0 14px rgba(var(--gold-rgb),.55)}100%{transform:none;box-shadow:0 0 0 0 rgba(var(--gold-rgb),0)}}
+.vfx-glow{animation:vglow .4s ease-out}
+@keyframes vglow{0%,100%{box-shadow:0 0 0 0 rgba(var(--gold-rgb),0)}40%{box-shadow:0 0 0 3px rgba(var(--gold-rgb),.5),0 0 18px rgba(var(--gold-rgb),.55)}}
+.vstar{font-size:22px;color:var(--gold-hi,#ffe38f);text-shadow:0 0 10px rgba(var(--gold-rgb),.9);animation:vstar .36s ease-out forwards}
+@keyframes vstar{0%{opacity:0;transform:translate(-50%,-40%) scale(.5)}35%{opacity:1;transform:translate(-50%,-110%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-160%) scale(1)}}
+.vconc{border:1px dashed var(--muted);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted);animation:vconc .42s ease-in forwards}
+@keyframes vconc{0%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-50%) scale(.85)}}
+.vrest{border-radius:20px;opacity:0}
+.vrest.short{background:radial-gradient(ellipse at 30% 50%,rgba(255,190,90,.45),transparent 70%);animation:vrests .44s ease-out forwards}
+.vrest.long{background:linear-gradient(100deg,transparent 30%,rgba(255,220,130,.55) 50%,transparent 70%);background-size:260% 100%;animation:vrestl .64s ease-out forwards}
+@keyframes vrests{0%{opacity:0}35%{opacity:1}100%{opacity:0}}
+@keyframes vrestl{0%{opacity:0;background-position:120% 0}25%{opacity:1}100%{opacity:0;background-position:-40% 0}}
+@media (prefers-reduced-motion:reduce){#vfxl{display:none}.vfx-hurt,.vfx-heal,.vfx-shield,.vfx-turn,.vfx-ko,.vfx-out,.vfx-in,.vfx-glow{animation:none!important}}
 /* Würfelschale: höchster und tiefster Wert leise markiert (kein Krit) */
 .tdie .die.max svg{filter:drop-shadow(0 0 8px rgba(var(--gold-rgb),.6))}.tdie .die.min{opacity:.78}
 @media (prefers-reduced-motion: reduce){.pulse,.tdie,.tsum{animation:none!important}#scene::before,#toast.pop,.die svg,.hero,.glowbtn,body.myturn::after{animation:none!important;transition:none!important}.hpbar i{transition:none}.flash{animation:none;outline:3px solid var(--gold)}}

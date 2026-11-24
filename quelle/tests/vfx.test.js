@@ -18,14 +18,16 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   /* A: Grundwerte und Übernahme */
   { const { p, ctx } = await page();
     const s = await p.evaluate(() => ({ v: vfxLoad(), raw: !!localStorage.getItem('hb_vfx'), fx: localStorage.getItem('hb_fx'), df: localStorage.getItem('hb_dice_fx') }));
-    T('Neu: Auto, Würfel normal, Effekte dezent, Ton und Vibration aus', JSON.stringify(s.v) === JSON.stringify({ profile: 'auto', roll: 'normal', critical: 'dezent', background: 'dezent', diceSound: false, haptics: false }), s);
+    T('Neu: Auto, Würfel normal, Effekte dezent, Ton und Vibration aus', JSON.stringify(s.v) === JSON.stringify({ profile: 'auto', roll: 'normal', critical: 'dezent', damage: 'dezent', status: 'dezent', background: 'dezent', diceSound: false, haptics: false }), s);
     T('Neu: gespeichert, alte Schalter mitgeschrieben (hb_fx dezent, hb_dice_fx eigen)', s.raw && s.fx === 'dezent' && s.df === 'eigen', s);
-    await p.evaluate(() => { vfxSet('roll', 'kurz'); vfxSet('critical', 'intensiv'); }); await p.waitForTimeout(400); /* Chromium verliert bei sofortigem Neuladen einer file://-Seite manchmal jede eben geschriebene localStorage-Änderung */ await p.reload(); await p.waitForTimeout(400);
-    { const v = await p.evaluate(() => vfxLoad()); T('Einstellung bleibt nach Neustart', v.roll === 'kurz' && v.critical === 'intensiv', v); }
+    await p.evaluate(() => { vfxSet('roll', 'kurz'); vfxSet('critical', 'intensiv'); }); await p.waitForTimeout(400);
+    /* Neustart nachgestellt: Zwischenspeicher leeren und alles aus localStorage neu lesen.
+       (Echtes Neuladen ist hier unzuverlässig: Chromium verliert bei file://-Seiten gelegentlich localStorage-Änderungen zwischen Seiten, auch ohne die App.) */
+    { const v = await p.evaluate(() => { VFX_RT.cache = null; VFX_RT.key = ''; return vfxLoad(); }); T('Einstellung bleibt nach Neustart (aus dem Speicher gelesen)', v.roll === 'kurz' && v.critical === 'intensiv', v); }
     await p.evaluate(() => localStorage.setItem('hb_fx', 'aus'));
     T('Alter Schalter von anderer Stelle geändert: nur dieser Teil übernommen', await p.evaluate(() => vfxLoad().background === 'aus' && vfxLoad().roll === 'kurz' && vfxLoad().critical === 'intensiv'));
     await ctx.close(); }
-  for (const [df, bf, sn, want] of [['voll', 'stark', '1', { roll: 'normal', critical: 'intensiv', background: 'intensiv', diceSound: true }], ['ruhig', 'dezent', '0', { roll: 'aus', critical: 'dezent', background: 'dezent', diceSound: false }], ['aus', 'aus', null, { roll: 'aus', critical: 'aus', background: 'aus', diceSound: false }]]) {
+  for (const [df, bf, sn, want] of [['voll', 'stark', '1', { roll: 'normal', critical: 'intensiv', background: 'intensiv', diceSound: true }], ['ruhig', 'dezent', '0', { roll: 'aus', critical: 'dezent', background: 'dezent', diceSound: false }], ['aus', 'aus', null, { roll: 'aus', critical: 'aus', background: 'aus', damage: 'aus', status: 'aus', diceSound: false }]]) {
     const { p, ctx } = await page(([df, bf, sn]) => { if (!localStorage.getItem('hb_vfx')) { localStorage.setItem('hb_dice_fx', df); localStorage.setItem('hb_fx', bf); if (sn) localStorage.setItem('hb_dice_snd', sn); } }, undefined, [df, bf, sn]);
     await p.evaluate(() => 0); /* Seite geladen */
     const v = await p.evaluate(() => vfxLoad()); const ok = Object.entries(want).every(([k, x]) => v[k] === x);
@@ -105,7 +107,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   await p.evaluate(() => document.querySelector('#modal [data-arg="roll:kurz"]').click());
   T('Klick auf «Kurz» speichert und markiert', await p.evaluate(() => vfxLoad().roll === 'kurz' && document.querySelector('#modal [data-arg="roll:kurz"]').classList.contains('on')));
   await p.evaluate(() => document.querySelector('#modal [data-arg="level:aus"]').click());
-  T('«Effekte: Aus» schaltet natürliche 20/1 und Hintergrund aus, Würfel bleiben', await p.evaluate(() => vfxLoad().critical === 'aus' && vfxLoad().background === 'aus' && vfxLoad().roll === 'kurz' && document.documentElement.getAttribute('data-fx') === 'aus'));
+  T('«Effekte: Aus» schaltet natürliche 20/1, Schaden, Ereignisse und Hintergrund aus, Würfel bleiben', await p.evaluate(() => vfxLoad().critical === 'aus' && vfxLoad().damage === 'aus' && vfxLoad().status === 'aus' && vfxLoad().background === 'aus' && vfxLoad().roll === 'kurz' && document.documentElement.getAttribute('data-fx') === 'aus'));
   await p.evaluate(() => { $('#modal').hidden = true; S.modal = null; const c = sampleChar(); S.chars[c.id] = c; S.cur = c.id; diceModal(); });
   T('Würfel-Fenster: «Würfel rollen» und «Natürliche 20 und 1», kein gemeinsamer Schalter mehr', await p.evaluate(() => /Würfel rollen/.test($('#modal').textContent) && !!document.querySelector('#modal [data-arg="critical:intensiv"]') && !document.querySelector('#modal [data-act="diceFx"]')));
   await ctx.close();

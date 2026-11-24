@@ -47,7 +47,7 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     T(dev.n + ': ruhig: sofort fertig, Risse im Würfel und im Bild, kein Beben', await p.evaluate(() => !!document.querySelector('#toast .die.d3.fum .d3crk') && !document.querySelector('#toast .rolling3') && !!document.querySelector('.n1stage .n1-cracks path') && !document.body.classList.contains('d3quake')));
     await p.evaluate(() => { localStorage.setItem('hb_dice_fx', 'voll'); XA.diceTry(null, 'n1'); });
     /* Das Beben dauert nur 650 ms; je nach Engine beginnt es etwas früher oder später. Deshalb bis 2,5 s darauf warten statt einen festen Zeitpunkt abzufragen. */
-    T(dev.n + ': natürliche 1 (voll): Bildschirm bebt, Risse im Bild', await p.waitForFunction(() => document.body.classList.contains('d3quake') && document.querySelectorAll('.n1stage .n1-cracks path').length >= 14, null, { timeout: 2500, polling: 25 }).then(() => true, () => false));
+    T(dev.n + ': natürliche 1 (voll): Würfelfeld bebt (nicht der Bildschirm), Risse um den Würfel', await p.waitForFunction(() => document.querySelector('#toast').classList.contains('d3quake') && !document.body.classList.contains('d3quake') && document.querySelectorAll('.n1stage .n1-cracks path').length >= 14, null, { timeout: 2500, polling: 25 }).then(() => true, () => false));
     if (shots) await p.screenshot({ path: path.join(shots, 'dice-' + dev.n + '-n1.png') });
     await p.waitForTimeout(2400);
     await p.evaluate(() => { localStorage.setItem('hb_dice_fx', 'aus'); pushLog({ label: 'Aus', total: 20, detail: 'W20 [20]', sides: 20, nat: 20, crit: true }); }); await p.waitForTimeout(150);

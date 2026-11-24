@@ -38,6 +38,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/kontrast.test.js | Lesbarkeit: Text- und Akzentfarben aller Stimmungen erreichen 4,5:1 auf allen Flächen (Textfassungen `--gold-t`, `--wine-t` werden in theme.js berechnet) |
 | tests/stimmung.test.js | Stimmungen und Hintergrund-Effekte: 20 Wechsel ohne doppelte Ebenen oder Schleifen, Zeichenrate Handy ≤ ~20/s und PC ≤ ~30/s, Würfel-Teilchen schneller, «Dezent», «Aus» und reduzierte Bewegung; mit `--alt=<datei>` Vergleich der Rechenzeit (Diagnose) |
 | tests/vfx.test.js | Effekte-Einstellungen (vfx.js): neue Grundwerte, Übernahme der alten Schalter (auch ausdrückliches Aus), Würfel und Hintergrund getrennt, Würfel Normal/Kurz/Aus, reduzierte Bewegung, natürliche 20/1 getrennt vom Regel-Krit, Krit «Aus» ohne Ersatz-Effekt, Würfelschale ohne Krit-Markierung, Vibration nur mit Einwilligung, kein Regel-Zufall in Animationen, Hintergrund-Pause, Auto-Leistung, Lautstärke 0, Einstellungsfenster |
+| tests/ereignis.test.js | Spielereignisse (vfxspiel.js): Schaden/Heilung mit Zahl, Balken, Form je Schadensart, höchstens ein Effekt, Teilchen-Budget; temporäre TP; Rückgängig und Stufenaufstieg ohne TP-Effekt; Rast, Zustand, Inspiration, Zauberplatz, Konzentrationsende, Bewusstlos, eigener Zug; Vibration; Aus; Heldenwechsel; reduzierte Bewegung; natürliche 20/1 lokal und je Set |
 | tests/handy.test.js | Langsames Handy: CPU gedrosselt (`--drossel=4`), Start, Reiter, Würfeln, Listen, Kampfstart, Speicher; mit `DDB_DIR` auch die grösste echte PDF |
 | tests/srd.test.js | Abgleich aller Zauber (339) und Monster (164), die es im SRD 5.2 gibt, mit `tests/srd2024-ref.json` (abgeleitet aus dem SRD 5.2, CC BY 4.0, über 5e-bits/5e-database); begründete Ausnahmen stehen im Test |
 | tests/echt.test.js | Echter Online-Tisch: SL (Chromium), iPhone (WebKit), Android (Firefox) über den öffentlichen Server; nur in GitHub Actions (hier gesperrt), lokal mit `--lokal`; `--ohne-speicher` simuliert einen Server, der gespeicherte Nachrichten verliert |
@@ -95,6 +96,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | extra.js | Gegenstände, Begleiter, Bestiarium, Rasten, Navigation |
 | scenes.js | Hintergrundbilder (Base64) |
 | vfx.js | Effekte-Einstellungen und Leistung: Grundwerte, Übernahme alter Schalter, Auto-Leistung, Hintergrund-Pause bei rollenden Würfeln, Vibration nur mit Einwilligung, sichtbarer Zufall `vrand()` getrennt vom Regel-Zufall `rnd()` |
+| vfxspiel.js | Spielereignisse sichtbar machen: vergleicht in `commit()` den neuen Stand des aktiven Helden mit dem zuletzt gesehenen (`vfxObserve`) und zeigt lokale Effekte (Schaden/Heilung je Schadensart, Rast, Zug, Zustände …); `vfxQuiet` für Rückgängig/Stufenaufstieg, `vfxHint` für die Schadensart eines Treffers |
 | theme.js, theme-fx.js | Stimmungen und Effekte |
 | turn.js | Zugleiste: Aktion, Bonusaktion, Reaktion, Bewegung |
 | effects.js | Effekte mit Dauer im gemeinsamen Kampf |

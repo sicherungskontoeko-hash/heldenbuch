@@ -420,7 +420,7 @@ function dieSvg(sides, n, cls) {
 }
 function showToast(e) {
   const t = $('#toast'); clearTimeout(showToast.tm); clearInterval(showToast.iv); clearTimeout(showToast.st);
-  document.querySelectorAll('.d3stage').forEach((x) => x.remove()); document.body.classList.remove('d3quake'); /* neuer Wurf: alte grosse Effekte weg */
+  document.querySelectorAll('.d3stage').forEach((x) => x.remove()); document.querySelectorAll('.d3quake').forEach((x) => x.classList.remove('d3quake')); /* neuer Wurf: alte grosse Effekte weg */
   const flat = (e.groups || []).flatMap((g) => g.rolls.map((v) => ({ v, sides: g.sides, neg: g.sign < 0 })));
   if (flat.length > 1) return showMulti(e, flat);
   const sides = e.sides || 0;
@@ -1470,7 +1470,7 @@ function paintTurn() {
     '<span class="tbsp"></span>' + (meAway ? '<span class="tbaway">Du bist noch nicht im Kampf</span><button class="btn sm" data-act="initRoll">Eingreifen</button>' : meWaiting ? '<button class="btn sm" data-act="initRoll">Initiative würfeln</button><button class="btn sm ghost" data-act="initAway">Noch nicht dabei</button>' : '') + (mine ? '<button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>' : cur && (!S.meta.dm || isDM()) ? '<button class="btn sm ghost" data-act="turnEnd" title="Gegner oder abwesende Spieler: weiter zum Nächsten">Weiter ▸</button>' : '') + (S.view !== 'camp' ? '<button class="link" data-act="view" data-arg="camp">Reihenfolge</button>' : '') + '</div>';
   document.body.classList.toggle('myturn', !!mine);
   if (mine && !wasMyTurn && S.chars[S.cur] && typeof turnReset === 'function') { const me = S.chars[S.cur]; setTimeout(() => { turnReset(me); if (S.chars[S.cur] === me) commit(); }, 0); }
-  if (mine && !wasMyTurn && typeof vfxVibrate === 'function') vfxVibrate('turn'); /* nur mit Einwilligung (Einstellungen › Vibration) */
+  if (mine && !wasMyTurn && typeof vfxTurn === 'function') setTimeout(vfxTurn, 0); /* goldener Impuls; Vibration nur mit Einwilligung */
   wasMyTurn = !!mine;
 }
 function bannerToast(title, text) { const m = $('#mini'); if (!m) return; const el = document.createElement('div'); el.className = 'mt big'; el.innerHTML = '<div><b>' + esc(title) + '</b><small>' + esc(text) + '</small></div>'; m.prepend(el); setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 5000); }
@@ -1557,7 +1557,7 @@ function render0() {
 /* TP nie über dem Maximum speichern: Stufe senken oder Klasse/Spezies wechseln im Erschaffen kann das Maximum verkleinern.
    Sonst sähen andere am Tisch z. B. «44/38», bis der Bogen einmal geöffnet wird. */
 function hpClamp(ch) { try { const P = ch.play; if (!P || P.hp == null) return; const m = derive(ch, S.hb).hpMax; if (P.hp > m) P.hp = m; } catch (e) {} }
-function commit(rerender = true) { const ch = cur(); if (ch) { ch.updated = Date.now(); hpClamp(ch); persist('c', ch.id); } queueMe(); if (rerender) render(); }
+function commit(rerender = true) { const ch = cur(); if (ch) { ch.updated = Date.now(); hpClamp(ch); if (typeof vfxObserve === 'function') vfxObserve(ch); persist('c', ch.id); } queueMe(); if (rerender) render(); }
 function noHeroView() { return '<div class="camp"><div class="hero-intro banner" style="' + bannerStyle('paladin') + '"><h1>Noch kein Held</h1><p>Du hast im Moment keinen Helden. Erschaffe einen neuen oder lade einen gesicherten Helden.</p><div class="chips"><button class="btn big" data-act="newChar">Neuen Helden erschaffen</button><button class="btn ghost" data-act="loadSample">Beispielheld ansehen</button><button class="btn ghost" data-act="view" data-arg="heroes">Zu den Helden</button></div></div></div>'; }
 
 /* TP ändern (Schaden mit Temp-TP, 0 TP, Todesrettung, Massiver Schaden, Konzentration; Heilung; Temp-TP) */
