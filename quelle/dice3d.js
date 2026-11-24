@@ -335,43 +335,78 @@ function d3stage20(dieEl, set, id, level) {
   const D = level === 'voll' ? 1200 : 900; setTimeout(() => st.classList.add('out'), D - 220); setTimeout(() => st.remove(), D);
 }
 
-/* Natürliche 1 (bei allen gleich): Bildschirm bebt, Risse laufen vom Würfel über den Bildschirm */
-/* Natürliche 1: Risse und Schatten lokal um den Würfel in den Farben des Sets; Intensiv schüttelt kurz das Würfelfeld, nicht den Bildschirm */
+/* Natürliche 1: Risse laufen vom Würfel über den ganzen Bildschirm (in den Farben des Sets), der Inhalt bebt.
+   Intensiv: dichtere Risse, dunkler Rand, kräftiges Beben. Dezent: feinere Risse, leichtes, kurzes Beben.
+   Gebebt wird mit der Web-Animations-Schnittstelle (eigene Ebene, verträgt sich mit bestehenden Animationen);
+   der Hintergrund bleibt ruhig, bei reduzierter Bewegung gibt es kein Beben. */
+const N1_SHAKE = ['#top', '#view', '.foot', '#bnav', '#toast', '#tray', '#mini', '#diceFab', '#dicePanel', '#modal'];
+function d3beben(strong) {
+  let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  if (reduce) return; const k = strong ? 1 : 0.45, ms = strong ? 620 : 380; const html = document.documentElement;
+  const fr = [[0, 0, 0], [-7, 3, -0.4], [8, -4, 0.5], [-8, 2, 0], [6, 4, -0.3], [-4, -2, 0], [3, 1, 0], [-1, 0, 0], [0, 0, 0]].map(([x, y, r], i, all) => ({ offset: i / (all.length - 1), translate: (x * k).toFixed(1) + 'px ' + (y * k).toFixed(1) + 'px', rotate: (strong ? r : 0) + 'deg' }));
+  N1_SHAKE.forEach((q) => document.querySelectorAll(q).forEach((el) => { if (el.hidden || typeof el.animate !== 'function') return; try { el.animate(fr, { duration: ms, easing: 'cubic-bezier(.36,.07,.19,.97)' }); } catch (e) {} }));
+  html.classList.add('n1beben'); clearTimeout(d3beben.t); d3beben.t = setTimeout(() => html.classList.remove('n1beben'), ms);
+}
 function d3stage1(dieEl, level, set) {
-  const r = dieEl.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; const W = window.innerWidth, H = window.innerHeight;
-  const f1 = (set && set.fx1) || { crack: '#ffebe1', tint: '#3a0508', extra: 'dim' }; const R = level === 'voll' ? 150 : 100;
-  const paths = []; const n = 7;
-  for (let k = 0; k < n; k++) { let a = (k / n) * Math.PI * 2 + (vrand() - 0.5) * 0.6; let px = x, py = y; let d = 'M' + px.toFixed(0) + ' ' + py.toFixed(0); const len = R * (0.6 + vrand() * 0.45); let walked = 0;
-    while (walked < len) { const st = 12 + vrand() * 22; a += (vrand() - 0.5) * 0.7; px += Math.cos(a) * st; py += Math.sin(a) * st; walked += st; d += ' L' + px.toFixed(0) + ' ' + py.toFixed(0);
-      if (vrand() < 0.28) { let bx = px, by = py, ba = a + (vrand() < 0.5 ? 1 : -1) * (0.5 + vrand() * 0.6); let bd = 'M' + bx.toFixed(0) + ' ' + by.toFixed(0); for (let m = 0; m < 3; m++) { const bs = 8 + vrand() * 14; ba += (vrand() - 0.5) * 0.6; bx += Math.cos(ba) * bs; by += Math.sin(ba) * bs; bd += ' L' + bx.toFixed(0) + ' ' + by.toFixed(0); } paths.push([bd, 1]); } }
-    paths.push([d, 2]); }
-  const st = document.createElement('div'); st.className = 'd3stage local n1stage n1-' + f1.extra; st.setAttribute('aria-hidden', 'true'); st.style.cssText = '--x:' + x + 'px;--y:' + y + 'px;--rr:' + (R + 30) + 'px;--tc:' + f1.tint + ';--kc:' + f1.crack;
+  const r = dieEl.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; const W = window.innerWidth, H = window.innerHeight; const strong = level === 'voll';
+  const f1 = (set && set.fx1) || { crack: '#ffebe1', tint: '#3a0508', extra: 'dim' };
+  /* Weg bis zum Bildrand in Richtung a */
+  const toEdge = (a) => { const c = Math.cos(a), s = Math.sin(a); const tx = c > 0 ? (W - x) / c : c < 0 ? -x / c : 1e9; const ty = s > 0 ? (H - y) / s : s < 0 ? -y / s : 1e9; return Math.min(tx, ty); };
+  const segs = []; const n = strong ? 11 : 8; const P = (v) => v.toFixed(0);
+  for (let k = 0; k < n; k++) { let a = (k / n) * Math.PI * 2 + (vrand() - 0.5) * 0.5; let px = x, py = y; const len = toEdge(a) * (0.82 + vrand() * 0.3) + 20; let walked = 0; const pts = [[px, py]];
+    while (walked < len) { const st = 16 + vrand() * 30; a += (vrand() - 0.5) * 0.55; px += Math.cos(a) * st; py += Math.sin(a) * st; walked += st; pts.push([px, py]);
+      if (vrand() < (strong ? 0.32 : 0.22)) { let bx = px, by = py, ba = a + (vrand() < 0.5 ? 1 : -1) * (0.45 + vrand() * 0.7); let bd = 'M' + P(bx) + ' ' + P(by); const m0 = 2 + Math.floor(vrand() * (strong ? 5 : 3));
+        for (let m = 0; m < m0; m++) { const bs = 10 + vrand() * 22; ba += (vrand() - 0.5) * 0.6; bx += Math.cos(ba) * bs; by += Math.sin(ba) * bs; bd += ' L' + P(bx) + ' ' + P(by); }
+        segs.push([bd, 0.8, Math.round(90 + (walked / len) * 260)]); } }
+    /* Hauptriss in drei Stücken: innen breit, aussen fein; jedes Stück startet, wenn das vorige ankommt */
+    const t3 = Math.ceil(pts.length / 3); for (let j = 0; j < 3; j++) { const part = pts.slice(Math.max(0, j * t3), Math.min(pts.length, (j + 1) * t3 + 1)); if (part.length < 2) continue;
+      segs.push(['M' + part.map((p) => P(p[0]) + ' ' + P(p[1])).join(' L'), (strong ? 2.6 : 1.9) - j * (strong ? 0.75 : 0.55), j * 110]); } }
+  const st = document.createElement('div'); st.className = 'd3stage full n1stage n1-' + f1.extra + (strong ? '' : ' soft'); st.setAttribute('aria-hidden', 'true'); st.style.cssText = '--x:' + x + 'px;--y:' + y + 'px;--tc:' + f1.tint + ';--kc:' + f1.crack;
   let extra = '';
   const puff = (cls, k, col) => { let h = ''; for (let i = 0; i < k; i++) { const a = -Math.PI / 2 + (vrand() - 0.5) * 1.6; const dist = 30 + vrand() * 40; h += '<span class="d3p sg ' + cls + '" style="--dx:' + (Math.cos(a) * dist).toFixed(0) + 'px;--dy:' + (Math.sin(a) * dist + (cls === 'n1leaf' || cls === 'n1shard' ? 70 : 0)).toFixed(0) + 'px;--c:' + col + ';--d:' + (vrand() * 150).toFixed(0) + 'ms;--r:' + ((vrand() - 0.5) * 300).toFixed(0) + 'deg;--sz:' + (0.8 + vrand() * 0.6).toFixed(2) + '"><i></i></span>'; } return h; };
-  const k = level === 'voll' ? 6 : 3;
+  const k = strong ? 6 : 3;
   if (f1.extra === 'smoke' || f1.extra === 'steam' || f1.extra === 'dust') extra = puff('n1puff', k, f1.extra === 'steam' ? 'rgba(235,240,245,.7)' : f1.extra === 'dust' ? 'rgba(190,175,150,.7)' : 'rgba(70,60,60,.75)');
   else if (f1.extra === 'shards') extra = puff('n1shard', k, f1.crack);
   else if (f1.extra === 'wilt') extra = puff('n1leaf', k, '#8a6a2a');
   st.innerHTML = '<div class="n1-vig"></div><svg class="n1-cracks" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
-    paths.map(([d, w]) => '<path d="' + d + '" stroke="rgba(0,0,0,.55)" stroke-width="' + (w * 2.4 + 1) + '" fill="none" stroke-linejoin="bevel"/><path d="' + d + '" stroke="' + f1.crack + '" stroke-width="' + w * 0.9 + '" fill="none" stroke-linejoin="bevel"/>').join('') +
-    '<circle cx="' + x + '" cy="' + y + '" r="22" fill="none" stroke="' + f1.crack + '" stroke-opacity=".7" stroke-width="1.2"/></svg>' + extra;
+    segs.map(([d, w, dl]) => '<path d="' + d + '" style="--dl:' + dl + 'ms" stroke="rgba(0,0,0,.55)" stroke-width="' + (w * 2.2 + 1).toFixed(1) + '" fill="none" stroke-linejoin="bevel" stroke-linecap="round"/><path d="' + d + '" style="--dl:' + dl + 'ms" stroke="' + f1.crack + '" stroke-width="' + (w * 0.9).toFixed(2) + '" fill="none" stroke-linejoin="bevel" stroke-linecap="round"/>').join('') +
+    '<circle cx="' + x + '" cy="' + y + '" r="22" fill="none" stroke="' + f1.crack + '" stroke-opacity=".7" stroke-width="1.2"/><circle cx="' + x + '" cy="' + y + '" r="40" fill="none" stroke="' + f1.crack + '" stroke-opacity=".35" stroke-width="1"/></svg>' + extra;
   document.body.appendChild(st);
   if (f1.extra === 'dim' || f1.extra === 'shrink' || f1.extra === 'flicker') dieEl.classList.add('n1x-' + f1.extra);
-  const field = dieEl.closest('#toast') || dieEl.closest('.tdie') || dieEl;
-  if (level === 'voll') { field.classList.remove('d3quake'); void field.offsetWidth; field.classList.add('d3quake'); setTimeout(() => field.classList.remove('d3quake'), 450); }
-  const D = level === 'voll' ? 1200 : 900; setTimeout(() => st.classList.add('out'), D - 220); setTimeout(() => st.remove(), D);
+  d3beben(strong);
+  const D = strong ? 2100 : 1500; setTimeout(() => st.classList.add('out'), D - 350); setTimeout(() => st.remove(), D);
 }
 
 /* ---- Geräusche (WebAudio, ohne Dateien) ---- */
 let D3_AC = null;
-function d3ac() { if (!d3sound()) return null; try { if (!D3_AC) D3_AC = new (window.AudioContext || window.webkitAudioContext)(); if (D3_AC.state === 'suspended') D3_AC.resume(); return D3_AC; } catch (e) { return null; } }
-function d3noise(ac, t, dur, f, g) { const n = Math.floor(ac.sampleRate * dur); const b = ac.createBuffer(1, n, ac.sampleRate); const d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (vrand() * 2 - 1) * (1 - i / n); const s = ac.createBufferSource(); s.buffer = b; const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 1.2; const gn = ac.createGain(); gn.gain.value = g; s.connect(bp); bp.connect(gn); gn.connect(ac.destination); s.start(t); }
-function d3tone(ac, t, f1, f2, dur, g, type) { const o = ac.createOscillator(); o.type = type || 'sine'; o.frequency.setValueAtTime(f1, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur); const gn = ac.createGain(); gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(g, t + 0.01); gn.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(gn); gn.connect(ac.destination); o.start(t); o.stop(t + dur + 0.05); }
-function d3snd(kind, n) {
+/* Ton: ein AudioContext, Sammelschiene mit Begrenzer, höchstens 8 gleichzeitige Stimmen, beendete Knoten werden getrennt.
+   Erst nach einer Berührung oder Taste (kein Ton beim Laden); fehlt WebAudio, bleibt es still. */
+const TON = { bus: null, voices: 0, gesture: false, nbuf: new Map() };
+['pointerdown', 'keydown', 'touchstart'].forEach((ev) => document.addEventListener(ev, () => { TON.gesture = true; }, { capture: true, passive: true }));
+function tonAc() {
+  if (!TON.gesture || document.hidden) return null;
+  try { if (!D3_AC) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; D3_AC = new C(); const comp = D3_AC.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 6; comp.attack.value = 0.003; comp.release.value = 0.15; TON.bus = D3_AC.createGain(); TON.bus.connect(comp); comp.connect(D3_AC.destination); }
+    if (D3_AC.state === 'suspended') D3_AC.resume(); return D3_AC; } catch (e) { return null; }
+}
+function d3ac() { if (!d3sound()) return null; return tonAc(); }
+function tonVoice(nodes, src) { TON.voices++; src.onended = () => { TON.voices = Math.max(0, TON.voices - 1); nodes.forEach((x) => { try { x.disconnect(); } catch (e) {} }); }; }
+function d3noise(ac, t, dur, f, g) {
+  if (TON.voices >= 8 || !(g > 0)) return; const key = Math.round(dur * 1000); let b = TON.nbuf.get(key);
+  if (!b) { const n = Math.floor(ac.sampleRate * dur); b = ac.createBuffer(1, n, ac.sampleRate); const d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (vrand() * 2 - 1) * (1 - i / n); TON.nbuf.set(key, b); if (TON.nbuf.size > 24) TON.nbuf.delete(TON.nbuf.keys().next().value); }
+  const s = ac.createBufferSource(); s.buffer = b; const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 1.2; const gn = ac.createGain(); gn.gain.value = g; s.connect(bp); bp.connect(gn); gn.connect(TON.bus || ac.destination); tonVoice([s, bp, gn], s); s.start(t);
+}
+function d3tone(ac, t, f1, f2, dur, g, type) {
+  if (TON.voices >= 8 || !(g > 0)) return; const o = ac.createOscillator(); o.type = type || 'sine'; o.frequency.setValueAtTime(f1, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  const gn = ac.createGain(); gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(g, t + 0.01); gn.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(gn); gn.connect(TON.bus || ac.destination); tonVoice([o, gn], o); o.start(t); o.stop(t + dur + 0.05);
+}
+/* Klang je Material: Gewicht, Filterfrequenz, Resonanz (Holz dumpf, Metall hell und schwer, Kristall gläsern, Knochen trocken, Magie mit leisem Nachklang) */
+const TON_MAT = { klassik: [0.85, 850, 115], koenigsgold: [1.15, 1800, 220], drachenfeuer: [1.0, 2700, 560], frostherz: [0.85, 3400, 760], arkanum: [0.9, 2600, 520], totenbein: [0.8, 1150, 140], weltenhain: [1.0, 2300, 470], eisenwerk: [1.45, 3400, 180], blutmond: [1.1, 1750, 240], himmelslicht: [1.25, 1450, 160], chaosprisma: [0.95, 2900, 650], schatten: [0.95, 2100, 400] };
+const TON_MAGIC = { arkanum: 1, chaosprisma: 1, blutmond: 1, schatten: 1, frostherz: 1, drachenfeuer: 1 };
+function d3snd(kind, n, set) {
   if (d3vol() <= 0) return; /* Lautstärke 0: gar nichts abspielen (eine Rampe auf 0 ist bei WebAudio nicht erlaubt) */
-  const ac = d3ac(); if (!ac) return; const t = ac.currentTime + 0.01; const v = d3vol() * 0.5;
-  if (kind === 'roll') { const k = Math.min(3, n || 1); for (let j = 0; j < k; j++) [0, 0.09, 0.17, 0.24, 0.3, 0.35, 0.39].forEach((dt, i) => d3noise(ac, t + dt + j * 0.03, 0.03, 1800 + vrand() * 1600, v * (1 - i * 0.12))); }
-  if (kind === 'land') d3tone(ac, t, 150, 60, 0.14, v * 0.8);
+  const ac = d3ac(); if (!ac) return; const t = ac.currentTime + 0.01; const v = d3vol() * 0.5; const [w, ff, res] = TON_MAT[set] || TON_MAT.klassik;
+  if (kind === 'roll') { const k = Math.min(3, n || 1); for (let j = 0; j < k; j++) [0, 0.09, 0.17, 0.24, 0.3, 0.35, 0.39].forEach((dt, i) => d3noise(ac, t + dt * w + j * 0.03, 0.03, ff * (0.8 + vrand() * 0.6), v * (1 - i * 0.12) * Math.min(1.2, w))); }
+  if (kind === 'land') { d3tone(ac, t, res * 1.3, res * 0.5, 0.1 + 0.08 * w, v * 0.8 * Math.min(1.2, w)); d3noise(ac, t, 0.03, ff, v * 0.5); if (TON_MAGIC[set]) d3tone(ac, t + 0.04, res * 4, res * 3.6, 0.5, v * 0.12, 'sine'); }
   if (kind === 'n20') [880, 1175, 1568, 2093].forEach((f, i) => d3tone(ac, t + i * 0.07, f, 0, 0.7, v * 0.35, 'triangle'));
   if (kind === 'n1') { d3tone(ac, t, 110, 70, 0.6, v * 0.5, 'sawtooth'); d3tone(ac, t, 117, 74, 0.6, v * 0.4, 'sawtooth'); d3noise(ac, t + 0.02, 0.12, 600, v); }
 }
@@ -396,12 +431,14 @@ function diceModal() {
     '<div class="d3grid">' + ['klassik'].concat(D3_PLAYER).map(card).join('') + '</div>' +
     (typeof isDM === 'function' && isDM() ? '<p class="hint">Als Spielleitung würfelst du am Tisch für Monster automatisch mit <b>Schatten der Spielleitung</b>.</p>' : '') +
     '<div class="d3opts"><div class="fld"><span>Würfel rollen</span><div class="seg">' + [['normal', 'Normal'], ['kurz', 'Kurz'], ['aus', 'Aus']].map(([k, l]) => '<button class="' + (vs.roll === k ? 'on' : '') + '" data-act="vfx" data-arg="' + esc('roll:' + k) + '">' + l + '</button>').join('') + '</div></div>' +
-    (typeof W3D !== 'undefined' ? '<div class="fld"><span>Darstellung (Vorschau)</span><div class="seg">' + [['classic', 'Klassisch'], ['artifact', 'Artefakt']].map(([k, l]) => '<button class="' + (vs.dice3d === k ? 'on' : '') + '" data-act="vfx" data-arg="' + esc('dice3d:' + k) + '">' + l + '</button>').join('') + '</div><em>Artefakt: vorerst nur der W20 in Weltenhain, Eisenwerk und Arkanum.</em></div>' : '') +
+    (typeof W3D !== 'undefined' ? '<div class="fld"><span>Darstellung (Vorschau)</span><div class="seg">' + [['classic', 'Klassisch'], ['artifact', 'Artefakt']].map(([k, l]) => '<button class="' + (vs.dice3d === k ? 'on' : '') + '" data-act="vfx" data-arg="' + esc('dice3d:' + k) + '">' + l + '</button>').join('') + '</div><em>Artefakt: alle Sets und Würfel als räumliche Modelle mit Ornamenten. Braucht WebGL, sonst bleibt es klassisch.</em></div>' : '') +
     '<div class="fld"><span>Natürliche 20 und 1</span><div class="seg">' + [['aus', 'Aus'], ['dezent', 'Dezent'], ['intensiv', 'Intensiv']].map(([k, l]) => '<button class="' + (vs.critical === k ? 'on' : '') + '" data-act="vfx" data-arg="' + esc('critical:' + k) + '">' + l + '</button>').join('') + '</div></div>' +
     '<div class="fld"><span>Geräusche</span><div class="seg"><button class="' + (d3sound() ? '' : 'on') + '" data-act="diceSnd" data-arg="0">Aus</button><button class="' + (d3sound() ? 'on' : '') + '" data-act="diceSnd" data-arg="1">An</button></div>' + (d3sound() ? '<input type="range" min="0" max="1" step="0.05" value="' + d3vol() + '" id="d3vol" aria-label="Lautstärke">' : '') + '</div>' +
     '<div class="d3try"><button class="btn ghost" data-act="diceTry" data-arg="20">Probewurf W20</button><button class="btn ghost" data-act="diceTry" data-arg="n20">Natürliche 20 zeigen</button><button class="btn ghost" data-act="diceTry" data-arg="n1">Natürliche 1 zeigen</button></div>' +
     (vfxReduce() ? '<p class="hint">Dein Gerät wünscht weniger Bewegung: die Würfel rollen nicht.</p>' : '') + '<p class="hint"><button class="link" data-act="themeOpen">Weitere Effekte, Leistung und Vibration …</button></p></div></div>';
   m.hidden = false;
+  /* Artefakt gewählt: die Vorschau zeigt die echten Modelle (nach dem Öffnen, damit das Fenster sofort da ist) */
+  if (vs.dice3d === 'artifact' && typeof W3D !== 'undefined') requestAnimationFrame(() => m.querySelectorAll('.d3card').forEach((b) => { const el = b.querySelector('.d3pv'); if (!el || !W3D.supports(20, b.dataset.arg)) return; const svg = el.innerHTML; if (!W3D.still(el, 20, 20, b.dataset.arg, {})) el.innerHTML = svg; }));
 }
 XA.diceOpen = () => diceModal();
 XA.diceSet = (t, a) => { const ch = cur(); if (!ch || !D3_SETS[a] || D3_SETS[a].dm) return; if (d3taken()[a]) return; ch.dice = a === 'klassik' ? '' : a; ch.diceAt = Date.now(); persist('c', ch.id); if (typeof queueMe === 'function') queueMe(); diceModal(); };
