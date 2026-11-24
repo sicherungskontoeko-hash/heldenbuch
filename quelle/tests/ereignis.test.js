@@ -93,8 +93,11 @@ const SETUP = () => { Object.keys(S.chars).forEach((k) => delete S.chars[k]); co
   T('Natürliche 20 dezent: wenige Teilchen, kein zweiter Ring', r.parts > 0 && r.parts <= 6 && !r.r2, r); await W(950);
   await ev(() => vfxSet('critical', 'intensiv'));
   for (const [set, cls, part] of [['frostherz', 'n1-shards', 'n1shard'], ['drachenfeuer', 'n1-smoke', 'n1puff'], ['weltenhain', 'n1-wilt', 'n1leaf']]) {
-    await clear(); await crit({ label: 'Patzer', total: 1, detail: 'W20 [1]', nat: 1, crit: false, fumble: true, dset: set }); await W(150);
-    const q = await ev(([cls, part]) => ({ st: !!document.querySelector('.d3stage.n1stage.local.' + cls), parts: document.querySelectorAll('.n1stage .d3p.' + part).length, toast: document.querySelector('#toast').classList.contains('d3quake'), body: document.body.classList.contains('d3quake') }), [cls, part]);
+    await clear();
+    /* Beben dauert nur 450 ms: per Beobachter festhalten statt einmal abtasten (langsame Läufer in Firefox und WebKit) */
+    await ev(() => { window.__qk = { toast: false, body: false }; const mo = new MutationObserver(() => { if (document.querySelector('#toast').classList.contains('d3quake')) window.__qk.toast = true; if (document.body.classList.contains('d3quake')) window.__qk.body = true; }); mo.observe(document.querySelector('#toast'), { attributes: true, attributeFilter: ['class'] }); mo.observe(document.body, { attributes: true, attributeFilter: ['class'] }); window.__qkmo = mo; });
+    await crit({ label: 'Patzer', total: 1, detail: 'W20 [1]', nat: 1, crit: false, fumble: true, dset: set }); await W(150);
+    const q = await ev(([cls, part]) => { window.__qkmo.disconnect(); return { st: !!document.querySelector('.d3stage.n1stage.local.' + cls), parts: document.querySelectorAll('.n1stage .d3p.' + part).length, toast: window.__qk.toast, body: window.__qk.body }; }, [cls, part]);
     T('Natürliche 1 «' + set + '»: eigene Spur (' + part + '), nur das Würfelfeld bebt', q.st && q.parts > 0 && q.toast && !q.body, q); await W(1150);
   }
   await ctx.close();
