@@ -603,6 +603,12 @@ ul.help{margin:0;padding-left:1.1em;display:grid;gap:8px;color:var(--ink)}ul.hel
 #toast.d3quake,.tdie.d3quake{animation:d3quakeS .45s cubic-bezier(.36,.07,.19,.97)}
 @keyframes d3quakeS{15%{transform:translate(-3px,1px)}30%{transform:translate(3px,-2px)}45%{transform:translate(-2px,1px)}60%{transform:translate(2px,1px)}80%{transform:translate(-1px,0)}100%{transform:none}}
 @media (prefers-reduced-motion:reduce){#toast.d3quake,.tdie.d3quake{animation:none}}
+/* ==== Artefaktwürfel v5 (wuerfel3d.js) ==== */
+.die.d3.w3d canvas,.die.d3 canvas.w3dc{display:block;width:100%;height:100%}
+.die.d3.n20pop canvas{animation:d3pop .75s cubic-bezier(.2,1.4,.4,1)}
+.die.d3.n1-hit canvas{animation:d3shake .45s ease-in-out;filter:brightness(.7) saturate(.6)}
+.die.d3.n1-hit.n1x-dim canvas{filter:grayscale(.85) brightness(.55)}.die.d3.n1-hit.n1x-flicker canvas{filter:saturate(.12) brightness(.85)}
+@media (prefers-reduced-motion:reduce){.die.d3 canvas{animation:none!important}}
 /* ==== Effekte 2.0: Spielereignisse (vfxspiel.js) ==== */
 #vfxl{position:fixed;inset:0;pointer-events:none;z-index:56;overflow:hidden}
 .vfxe{position:absolute;transform:translate(-50%,-50%)}

@@ -6,9 +6,9 @@
      hb_dice_snd 1/0            → Würfelgeräusche an/aus
    Ändert jemand einen alten Schalter (alte Version, anderer Tab), wird nur dieser Teil übernommen.
    Präsentation ändert nie Würfelergebnisse: sichtbarer Zufall kommt aus vrand(), nicht aus rnd(). */
-const VFX_DEF = Object.freeze({ profile: 'auto', roll: 'normal', critical: 'dezent', damage: 'dezent', status: 'dezent', background: 'dezent', diceSound: false, haptics: false });
+const VFX_DEF = Object.freeze({ profile: 'auto', roll: 'normal', critical: 'dezent', damage: 'dezent', status: 'dezent', background: 'dezent', dice3d: 'classic', diceSound: false, haptics: false });
 const VFX_LV = ['aus', 'dezent', 'intensiv'];
-const VFX_OK = { profile: ['auto', 'eco', 'balanced', 'max'], roll: ['normal', 'kurz', 'aus'], critical: VFX_LV, damage: VFX_LV, status: VFX_LV, background: VFX_LV };
+const VFX_OK = { profile: ['auto', 'eco', 'balanced', 'max'], roll: ['normal', 'kurz', 'aus'], critical: VFX_LV, damage: VFX_LV, status: VFX_LV, background: VFX_LV, dice3d: ['classic', 'artifact'] };
 const VFX_DF = { voll: { roll: 'normal', critical: 'intensiv' }, ruhig: { roll: 'aus', critical: 'dezent' }, aus: { roll: 'aus', critical: 'aus' } };
 const VFX_BF = { stark: 'intensiv', dezent: 'dezent', aus: 'aus' };
 const vrand = () => (typeof NATIVE_RANDOM === 'function' ? NATIVE_RANDOM() : Math.random());
