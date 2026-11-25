@@ -82,6 +82,7 @@ run "Effekte: Bedien-Animationen (ui.test.js)" node tests/ui.test.js
 run "Ressourcen: Erklärungen zum Aufklappen (ressourcen.test.js)" node tests/ressourcen.test.js
 run "Kampf am Tisch: eigener Zug gut sichtbar (zug.test.js)" node tests/zug.test.js
 run "Erweiterung: 6 Klassen, 9 Völker, erweiterte Auswahl (erweiterung.test.js)" node tests/erweiterung.test.js
+run "Prüfberichte 25.11.: Würfelanzeige, Schild, Tisch-Anfragen, Audit HB-01–HB-15 (pruefbericht.test.js)" node tests/pruefbericht.test.js
 run "Langsames Handy: CPU 4× gedrosselt (handy.test.js app)" node tests/handy.test.js app/Heldenbuch.html --drossel=4
 run "Abgleich mit dem SRD 5.2: Zauber und Monster (srd.test.js)" node tests/srd.test.js
 run "Online-Tisch mit drei Geräten, lokal (echt.test.js --lokal)" node tests/echt.test.js --lokal

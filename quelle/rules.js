@@ -152,6 +152,7 @@ function spellCheck(ch, c, s, lvl, mode) {
   if (inFight(ch)) {
     const t = turnSt(ch);
     if (turnTrack() && cost && mode !== 'ritual' && tLeft(ch, cost) <= 0) turn.push(COST_DE[cost] + ' schon verbraucht.');
+    else if (turnTrack() && cost === 'a' && mode !== 'ritual' && typeof tMagicOk === 'function' && !tMagicOk(ch)) turn.push('Die Zusatzaktion aus Tatendrang darf keine Magieaktion sein (Zauber wirken).');
     if (turnTrack() && slot && !offTurn() && t.slotSpell) turn.push('Pro Zug darfst du nur einen Zauberplatz verbrauchen (D&D 2024). Zaubertricks und Gratiswirkungen gehen weiterhin.');
     if (mode === 'ritual') turn.push('Ein Ritual dauert 10 Minuten länger – im Kampf nicht möglich.');
   }
@@ -190,6 +191,8 @@ function validateChar(o) {
   (Array.isArray(o.multi) ? o.multi : []).forEach((m, i) => { if (!m || !CLASSES[m.cls]) e.push('Multiclass ' + (i + 1) + ': unbekannte Klasse.'); else if (!Number.isInteger(+m.level) || +m.level < 1) e.push('Multiclass ' + (i + 1) + ': Stufe ungültig.'); });
   (Array.isArray(o.weapons) ? o.weapons : []).forEach((w, i) => { if (!w || !WEAPONS[w.w]) e.push('Waffe ' + (i + 1) + ': unbekannt (' + (w && w.w) + ').'); });
   if (o.play !== undefined && (typeof o.play !== 'object' || !o.play)) e.push('Spielstand („play“) ist ungültig.');
+  if (o.play && typeof o.play === 'object' && o.play.hxForms !== undefined && (!Array.isArray(o.play.hxForms) || o.play.hxForms.some((f) => !['Klinge', 'Panzer', 'Greifer', 'Sehne'].includes(f)))) e.push('Wandelgestalt („play.hxForms“) ist ungültig.');
+  { const seen = new Set([o.cls]); (Array.isArray(o.multi) ? o.multi : []).forEach((m, i) => { if (m && CLASSES[m.cls]) { if (seen.has(m.cls)) e.push('Multiclass ' + (i + 1) + ': ' + CLASSES[m.cls].name + ' kommt doppelt vor.'); seen.add(m.cls); } }); }
   return e;
 }
 /* Bereinigt Verweise, die es nicht (mehr) gibt, statt den Helden abzulehnen */

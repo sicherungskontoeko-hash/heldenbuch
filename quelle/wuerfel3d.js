@@ -377,7 +377,7 @@ const W3D = (() => {
   }
   function tick(now) {
     raf = 0; if (dead) return;
-    for (let i = act.length - 1; i >= 0; i--) { const it = act[i]; if (!it.holder.isConnected) { act.splice(i, 1); continue; }
+    for (let i = act.length - 1; i >= 0; i--) { const it = act[i]; if (!it.holder.isConnected) { act.splice(i, 1); it.done(); continue; } /* Halter entfernt: Zähler freigeben */
       const f = frame0(it, now); if (it.last) (it.gaps || (it.gaps = [])).push(now - it.last); it.last = now;
       try { drawOne(it, f.parts); } catch (x) { dead = true; act.splice(0).forEach((y) => y.fail()); return; }
       if (f.t >= 1) { act.splice(i, 1); it.done(); const g = (it.gaps || []).slice().sort((a, b) => a - b); if (g.length >= 6 && !document.hidden && !(navigator.webdriver && !W3D_FORCE_SLOW)) { /* in automatischen Tests nur auf Wunsch */ const med = g[g.length >> 1]; slow = med > 50 ? slow + 1 : 0; } } }
