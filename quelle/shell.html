@@ -218,14 +218,14 @@ td{font-family:var(--f-display);color:var(--gold-hi)}
 .warn button{border:0;background:none;color:inherit;text-align:left;padding:2px 0;font:inherit;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
 .warn button:hover{text-decoration-style:solid;color:#FFC29E}
 .ok{color:var(--moss);font-weight:700}
-.feats{display:grid;gap:2px}
+.feats{display:grid;grid-template-columns:minmax(0,1fr);gap:2px}
 .feats details{border-bottom:1px solid var(--line);padding:7px 0}
 .feats summary{cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:baseline;list-style:none}
 .feats summary::-webkit-details-marker{display:none}
-.feats summary b{font-weight:500}
+.feats summary b{font-weight:500;min-width:0;overflow-wrap:anywhere}
 .feats summary b::before{content:"✦";color:var(--gold-t,var(--gold));font-size:.7rem;margin-right:8px;opacity:.7}
 .feats details[open] summary b{color:var(--gold-hi)}
-.feats summary small{color:var(--faint);font-size:.8rem;text-align:right}
+.feats summary small{color:var(--faint);font-size:.8rem;text-align:right;min-width:0;flex:0 1 auto}
 .feats p{margin:6px 0 4px 20px;font-size:.94rem;max-width:68ch;color:var(--muted)}
 /* Bogen */
 .shead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;align-items:center;margin-bottom:16px}
@@ -290,7 +290,7 @@ td{font-family:var(--f-display);color:var(--gold-hi)}
 .rs .rinf{flex-basis:100%;order:3;margin-top:-2px}.res .rs>div:first-child{flex:1 1 9rem;min-width:0;overflow-wrap:break-word}.res .rs>.pips,.res .rs>.stepper{flex:none;max-width:55%;justify-content:flex-end}.rs.rpool .pool input{width:64px}.rinf[hidden]{display:none}.rinf p{margin:0 0 2px;font-size:.88rem;line-height:1.45;color:var(--ink)}.rinf small{display:block}
 .rii{display:inline-grid;place-items:center;width:22px;height:22px;min-height:0;padding:0;margin-left:6px;border:0;background:transparent;color:var(--gold);font:600 16px/1 system-ui,sans-serif;cursor:pointer;vertical-align:-2px}.rii[aria-expanded=true]{color:var(--ink)}.rii:hover{color:var(--ink)}.nw{white-space:nowrap}
 .pool{display:flex;gap:6px}.pool input{width:84px}
-.splist{display:grid;gap:5px}
+.splist{display:grid;grid-template-columns:minmax(0,1fr);gap:5px}
 /* Gesinnung: 3×3-Raster (Zeilen gut/neutral/böse, Spalten rechtschaffen/neutral/chaotisch) mit Beschreibung */
 .alfld{margin-block:14px}.algrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-width:560px}
 .algrid .chip{border-radius:12px;padding:7px 5px;font-size:.84rem;line-height:1.2;text-align:center;white-space:normal;hyphens:manual;min-height:44px}
@@ -306,7 +306,7 @@ td{font-family:var(--f-display);color:var(--gold-hi)}
 .spell summary b{font-weight:500}
 .spell summary small{margin-left:auto;color:var(--faint);font-size:.8rem}
 .spell summary em{font-style:normal;font-size:.74rem;background:rgba(var(--arcane-rgb),.14);color:#E3D3F7;border-radius:999px;padding:0 9px}
-.castbtns{display:flex;gap:6px;align-items:center;margin-left:8px}
+.castbtns{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;align-items:center;margin-left:8px;min-width:0}
 .btn.cast{padding:4px 12px}
 .mat{font-size:.88rem;color:var(--muted);border-left:2px solid var(--line2);padding-left:10px}
 .mat b{color:var(--ink);font-weight:600}.mat small{color:var(--faint)}

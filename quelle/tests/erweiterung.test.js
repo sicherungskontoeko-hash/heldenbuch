@@ -136,6 +136,26 @@ const HXS = ['hxferrali', 'hxsilk', 'hxgolem', 'hxrift', 'hxleaf', 'hxoculi', 'h
     S.chars = {}; importJson(txt); const back = Object.values(S.chars)[0]; return back ? [back.cls, back.sub, back.species, back.speciesChoice, (back.multi || []).map((m) => m.cls + m.level).join()].join('|') : 'leer'; });
   T('Export/Import behält Klasse, Unterklasse, Volk, Bauart und Mehrklasse', io === 'hxexec|reaper|hxgolem|forged|hxblight2', io);
 
+  /* ---------- Grosstest-Befunde ---------- */
+  const gt = await p.evaluate(() => { const mk = (o) => { const ch = normChar(newChar(Object.assign({ name: 'G' }, o))); S.chars = { [ch.id]: ch }; S.cur = ch.id; return ch; };
+    let ch = mk({ cls: 'hxform', level: 13, sub: 'wild' }); S.view = 'sheet'; S.mg = 'kampf'; render(); const sgForm = /Wandel-SG \d+/.test(document.querySelector('#view').textContent);
+    ch = mk({ cls: 'hxblight', level: 6, sub: 'decay' }); render(); const sgBlight = /Seuchen-SG \d+/.test(document.querySelector('#view').textContent) && !/Seuchenträger-SG/.test(document.querySelector('#view').textContent);
+    ch = mk({ cls: 'hxform', level: 5 }); ch.play.localFight = true; turnReset(ch); turnRun(ch, 'f:hx_form_1'); const f1 = (ch.play.hxForms || []).join(); XA.tFight(null, null, null, ch); const offFight = !ch.play.hxForms;
+    ch.play.hxForms = ['Sehne']; doRest(ch, 'short', true); const offShort = !ch.play.hxForms;
+    ch = mk({ cls: 'hxguard', level: 10, sub: 'bastion' }); ch.play.localFight = true; turnReset(ch); turnRun(ch, 'f:hx_use_hxg_hard'); const rolled = S.log[0] && S.log[0].total !== '✦' && /Zähigkeit/.test(S.log[0].label || '');
+    const tab = CLASSES.hxform.table(20).find((r) => r[0] === 'Gleichzeitige Anpassungen')[1];
+    const golem = Object.values(SPECIES.hxgolem.choice.opts).join('|');
+    return { sgForm, sgBlight, f1, offFight, offShort, rolled, tab, golem, log: S.log[0] && [S.log[0].label, S.log[0].total] }; });
+  T('Klassen-SG immer sichtbar und wie im Regeltext benannt (Wandel-SG, Seuchen-SG)', gt.sgForm && gt.sgBlight, gt);
+  T('Wandelgestalt endet mit dem Kampfmodus und mit jeder Rast', gt.f1 === 'Klinge' && gt.offFight && gt.offShort, gt);
+  T('Zähigkeit und andere Fähigkeiten mit festen Würfeln würfeln direkt', gt.rolled, gt.log);
+  T('Formwandler-Tabelle: drei gleichzeitige Anpassungen auf Stufe 20', gt.tab === 3, gt.tab);
+  T('Golem-Bauarten nur mit deutschen Namen', !/\/|Clayborn|Forged/.test(gt.golem), gt.golem);
+  { const q = await b.newPage({ viewport: { width: 320, height: 700 } }); q.on('pageerror', (e) => errs.push(e.message));
+    await q.addInitScript(() => { localStorage.setItem('hb_sample_done', '1'); localStorage.setItem('hb_rules', JSON.stringify({ homeview: true })); });
+    await q.goto('file://' + target); await q.waitForTimeout(400);
+    const sw = await q.evaluate(() => [[{ cls: 'pal', level: 3 }, 'zauber'], [{ cls: 'ran', level: 3 }, 'zauber'], [{ cls: 'hxthread', level: 16, sub: 'marionette', species: 'hxgolem', speciesChoice: 'forged', multi: [{ cls: 'hxguard', level: 2 }] }, 'faehig']].map(([o, g]) => { const ch = normChar(newChar(Object.assign({ name: 'X' }, o))); S.chars = { [ch.id]: ch }; S.cur = ch.id; S.view = 'sheet'; S.mg = g; render(); return document.documentElement.scrollWidth; }));
+    T('320 px: Zauberkarten mit zwei Knöpfen und lange Merkmale ohne Querscrollen', sw.every((w) => w <= 320), sw); await q.close(); }
   T('Keine Skriptfehler', errs.length === 0, errs.slice(0, 3));
   await b.close(); console.log(pass + ' / ' + (pass + fail) + ' bestanden'); process.exit(fail ? 1 : 0);
 })();

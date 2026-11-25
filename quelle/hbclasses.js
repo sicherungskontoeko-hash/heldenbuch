@@ -271,11 +271,11 @@ const HX_SUB_LEVELS = [3,6,10,14,18];
 const HX_R = (k,n,max=1,reset='long') => ({k,n,max,reset});
 const HX_S = (id,name,en,desc,feats,res) => ({id,name,en,desc,feats,res});
 const HX_CLASSES = {
- hxform:{name:'Formwandler',en:'Shapeweaver',hd:10,prim:['str','dex','con'],saves:['str','con'],skillN:2,skills:['ath','acr','prc','sur','med','ste'],armor:['light','medium','shield'],weapons:'martial',home:true,mastery:step(2,[[11,3]]),asi:[4,8,12,16],hxExtra:5,hxDC:'con',
+ hxform:{name:'Formwandler',en:'Shapeweaver',hd:10,prim:['str','dex','con'],saves:['str','con'],skillN:2,skills:['ath','acr','prc','sur','med','ste'],armor:['light','medium','shield'],weapons:'martial',home:true,mastery:step(2,[[11,3]]),asi:[4,8,12,16],hxExtra:5,hxDCn:'Wandel-SG',hxDC:'con',
  flavor:'✦ Formwandler haben gelernt, ihre lebende Gestalt bewusst zu verändern. Sehnen, Haut und Knochen gehorchen ihrem Willen. Sie behalten ihre Persönlichkeit und ihre Ausrüstung und gelten als Meister der körperlichen Anpassung.',
- table:l=>[['Wandelwürfel','1W'+HX_DIE(l)],['Gleichzeitige Anpassungen',l>=11?2:1],['Angriffe',l>=5?2:1]],
+ table:l=>[['Wandelwürfel','1W'+HX_DIE(l)],['Gleichzeitige Anpassungen',l>=20?3:l>=11?2:1],['Angriffe',l>=5?2:1]],
  feats:[
- [1,'Wandelgestalt','Bonusaktion: Wähle eine Anpassung, die bis zum Beginn deines nächsten Zuges anhält. Keine Nutzungsgrenze. Klinge: Einmal in deinem Zug verursacht ein Nahkampfwaffen- oder waffenloser Treffer zusätzlich 1 Wandelwürfel des normalen Schadentyps. Panzer: Reaktion bei einem Treffer gegen dich; reduziere dessen Schaden um 1 Wandelwürfel (mindestens 0). Greifer: Deine Nahkampfreichweite im eigenen Zug steigt um 1,5 m. Sehne: Deine Gehgeschwindigkeit steigt um 3 m. Ausrüstung bleibt nutzbar. Wandel-SG = 8 + ÜB + KON-Mod.'],
+ [1,'Wandelgestalt','Bonusaktion: Wähle eine Anpassung, die bis zum Beginn deines nächsten Zuges anhält. Keine Nutzungsgrenze. Klinge: Einmal in deinem Zug verursacht ein Nahkampfwaffen- oder waffenloser Treffer zusätzlich 1 Wandelwürfel in der normalen Schadensart. Panzer: Reaktion bei einem Treffer gegen dich; reduziere dessen Schaden um 1 Wandelwürfel (mindestens 0). Greifer: Deine Nahkampfreichweite im eigenen Zug steigt um 1,5 m. Sehne: Deine Gehgeschwindigkeit steigt um 3 m. Ausrüstung bleibt nutzbar. Wandel-SG = 8 + ÜB + KON-Mod.'],
  [1,'Waffenmeisterschaft','Du nutzt die Meisterschaft von zwei Waffen deiner Wahl, ab Stufe 11 drei.'],
  [2,'Anpassungsfähigkeit','Nach einer langen Rast wähle Klettern oder Schwimmen. Bis zur nächsten langen Rast entspricht diese Bewegungsrate deiner normalen Gehgeschwindigkeit.'],
  [3,'Wandelpfad','Wähle eine Unterklasse.'],[5,'Zusätzlicher Angriff','Mit der Angriffsaktion greifst du zweimal an.'],
@@ -305,7 +305,7 @@ const HX_CLASSES = {
  [10,'Nachgiebige Form','Wenn Panzer aktiv ist, kannst du statt der Schadensreduktion als Reaktion Vorteil auf einen Rettungswurf gegen Gepackt oder Festgesetzt erhalten, bevor du würfelst.'],
  [14,'Trugwechsel','Wenn du als Bonusaktion Wandelgestalt aktivierst, kannst du dich zugleich optisch verwandeln. Einmal pro kurzer Rast darfst du bis zum Zugende die Aktion Rückzug ohne weitere Aktion nutzen.'],
  [18,'Unlesbare Gestalt','Du bist gegen magische Effekte geschützt, die allein dein Aussehen oder deine Gedanken offenbaren würden: Vorteil auf entsprechende Rettungswürfe. Wenn kein Rettungswurf vorgesehen ist, darfst du einen CHA-Rettungswurf gegen den Effekt-SG ablegen; bei Erfolg wird nur deine Information nicht offenbart.']],l=>l>=14?[HX_R('hxf_trug','Trugwechsel',1,'short')]:[])]},
- hxmind:{name:'Geistwirker',en:'Mindshaper',hd:8,prim:['int'],saves:['int','wis'],skillN:2,skills:['arc','his','inv','ins','prc','dec'],armor:['light'],weapons:'simple',home:true,asi:[4,8,12,16],hxDC:'int',
+ hxmind:{name:'Geistwirker',en:'Mindshaper',hd:8,prim:['int'],saves:['int','wis'],skillN:2,skills:['arc','his','inv','ins','prc','dec'],armor:['light'],weapons:'simple',home:true,asi:[4,8,12,16],hxDCn:'Geist-SG',hxDC:'int',
  flavor:'✦ Geistwirker verdichten Gedanken zu greifbaren Impulsen. Ihre Kunst stammt aus Schulen stiller Konzentration, nicht aus Zauberbüchern, Pakten oder fremden Wesen. Ihre stärkste Waffe ist ein disziplinierter Geist.',
  table:l=>[['Geistimpulse pro Magieaktion',HX_PULSE(l)],['Schaden pro Impuls','1W8 + INT-Mod'],['Reichweite',l>=9?'27 m':'18 m']],
  feats:[
@@ -340,7 +340,7 @@ const HX_CLASSES = {
  [10,'Vertiefter Bruch','Der Zusatzschaden von Geistesbruch steigt auf 1W6.'],
  [14,'Fokussierter Schlag','Wenn du mindestens zwei Impulse auf dasselbe Ziel richtest, kannst du einmal pro kurzer Rast vor einem dieser Angriffswürfe Vorteil wählen.'],
  [18,'Erschütterung','Geistesbruch verursacht 1W8 statt 1W6. Das getroffene Ziel hat bis zum Beginn deines nächsten Zuges Nachteil auf den ersten Konzentrationsrettungswurf, der durch diesen Treffer ausgelöst wird.']],l=>l>=14?[HX_R('hxm_focus','Fokussierter Schlag',1,'short')]:[])]},
- hxguard:{name:'Bollwerk',en:'Bulwark',hd:12,prim:['str','con'],saves:['str','con'],skillN:2,skills:['ath','itm','ins','prc','med','sur'],armor:['light','medium','heavy','shield'],weapons:'martial',home:true,mastery:()=>2,asi:[4,8,12,16],hxExtra:5,hxDC:'con',
+ hxguard:{name:'Bollwerk',en:'Bulwark',hd:12,prim:['str','con'],saves:['str','con'],skillN:2,skills:['ath','itm','ins','prc','med','sur'],armor:['light','medium','heavy','shield'],weapons:'martial',home:true,mastery:()=>2,asi:[4,8,12,16],hxExtra:5,hxDCn:'Wach-SG',hxDC:'con',
  flavor:'✦ Bollwerke erlernen eine alte Lehre der Verantwortung: Ein Kampf ist erst gewonnen, wenn die Gefährten ihn überleben. Ihre Autorität lenkt gegnerische Angriffe um, ihre Haltung hält Schlachtlinien zusammen.',
  table:l=>[['Gebundene Gegner',l>=11?2:1],['Herausforderungsreichweite',l>=9?'9 m':'6 m'],['Abfangwürfel','1W'+HX_DIE(l)]],
  feats:[
@@ -353,12 +353,12 @@ const HX_CLASSES = {
  [11,'Doppelwacht','Du darfst mit derselben Bonusaktion zwei verschiedene Kreaturen herausfordern; jede würfelt separat. Beide Bindungen enden zum Beginn deines nächsten Zuges.'],
  [13,'Wachablösung','Reaktion, wenn ein Verbündeter in 3 m von dir getroffen wird und du den Angreifer siehst: Abfangen darf nun auch auf 3 m eingesetzt werden.'],
  [15,'Letzter Halt','Wenn du durch Abfangen auf 0 TP fallen würdest, ohne sofort zu sterben, bleibst du stattdessen auf 1 TP. 1× pro langer Rast.'],
- [17,'Unerschütterliche Wacht','Abfangwürfel W10. '],
+ [17,'Unerschütterliche Wacht','Abfangwürfel W10.'],
  [20,'Unbeugsame Wacht','Einmal pro eigener Herausforderungs-Bonusaktion darfst du bei einer Kreatur, die ihren Rettungswurf besteht, einen neuen Rettungswurf verlangen. Sie verwendet das zweite Ergebnis. Abfangen reduziert beim Verbündeten zusätzlich 1W6 Schaden; der tatsächlich verhinderte Schaden trifft weiterhin dich.']],
  res:l=>l>=15?[HX_R('hxg_hold','Letzter Halt')]:[],
  subs:[
  HX_S('bastion','Bund der Bastion','Bastion','Du bist die Mauer, an der Angriffe zerschellen. Du verschanzt dich hinter frischer Härte, deine Rüstung sitzt fester als bei jedem anderen, und selbst schwere Treffer verpuffen an dir.',[
- [3,'Feste Stellung','Einmal pro kurzem oder langem Rastzyklus kannst du als Bonusaktion temporäre TP in Höhe deiner Bollwerk-Stufe + KON-Mod (mindestens 1) erhalten.'],
+ [3,'Feste Stellung','Einmal pro kurzer Rast kannst du als Bonusaktion temporäre TP in Höhe deiner Bollwerk-Stufe + KON-Mod (mindestens 1) erhalten.'],
  [6,'Gehärteter Stand','Trägst du einen Schild oder Rüstung, erhältst du +1 RK (in der App eingerechnet).'],
  [10,'Innere Festung','Vorteil auf Rettungswürfe gegen Verängstigt.'],
  [14,'Zähigkeit','Reaktion, 1× pro kurzer Rast: Bei einem Treffer gegen dich reduziere dessen Schaden um 2W8 + KON-Mod (mindestens 0). Gilt nicht für Abfangschaden.'],
@@ -375,7 +375,7 @@ const HX_CLASSES = {
  [10,'Wachsamer Blick','Vorteil auf Initiative.'],
  [14,'Rettender Zug','Reaktion, 1× pro langer Rast: Wenn ein Verbündeter in 3 m durch einen Angriff auf 0 TP fallen würde, ohne sofort zu sterben, bleibt er auf 1 TP. Du erleidest 2W10 unveränderlichen Schaden. Keine Umleitung dieses Schadens.'],
  [18,'Weite Wacht','Abfangen reicht 4,5 m. Deckender Schritt kann bis 3 m bewegen, falls du in Reichweite endest.']],l=>l>=14?[HX_R('hxg_save','Rettender Zug')]:[])]},
- hxthread:{name:'Fadenlenker',en:'Threadbinder',hd:8,prim:['int'],saves:['dex','int'],skillN:2,skills:['acr','arc','inv','slt','prc','dec'],armor:['light'],weapons:'simple',home:true,asi:[4,8,12,16],hxDC:'int',
+ hxthread:{name:'Fadenlenker',en:'Threadbinder',hd:8,prim:['int'],saves:['dex','int'],skillN:2,skills:['acr','arc','inv','slt','prc','dec'],armor:['light'],weapons:'simple',home:true,asi:[4,8,12,16],hxDCn:'Faden-SG',hxDC:'int',
  flavor:'✦ Fadenlenker sehen die Welt als Gewebe aus unsichtbaren Bindungen. Ein Faden kann eine Puppe führen, einen Schwarm lenken oder wie eine Klinge schneiden. Ihre Kunst benötigt weder eine bestimmte Waffe noch einen zusätzlichen Kämpfer.',
  table:l=>[['Fadenschläge pro Magieaktion',HX_PULSE(l)],['Fadenschaden','1W8 + INT-Mod'],['Fadenträger-Reichweite',l>=9?'18 m':'12 m']],
  feats:[
@@ -414,7 +414,7 @@ const HX_CLASSES = {
  flavor:'✦ Vollstrecker sind keine Diener des Todes, sondern Meister des entscheidenden Augenblicks. Sie lesen Haltung und Erschöpfung ihrer Gegner, warten auf die offene Deckung und beenden einen Kampf, bevor er sich erneut wenden kann.',
  table:l=>[['Urteilswürfel','W'+HX_DIE(l)],['Angriffe',l>=5?2:1],['Urteil',l>=11?'1 Würfel; angeschlagen +2 Würfel':'1 Würfel; angeschlagen +1 Würfel']],
  feats:[
- [1,'Urteil','Einmal in deinem eigenen Zug, wenn du eine feindliche, nicht bewusstlose Kreatur mit einem Waffenangriff triffst: zusätzlich 1 Urteilswürfel des Waffenschadentyps. Hat sie unmittelbar vor diesem Treffer höchstens die Hälfte ihrer maximalen TP (angeschlagen), würfle einen weiteren Urteilswürfel; ab Stufe 11 zwei weitere statt einem. Temporäre TP zählen nicht. Bei kritischem Treffer werden auch diese Würfel verdoppelt. Keine Marke, keine Ressource; kein Zusatz bei bewusstlosen Zielen.'],
+ [1,'Urteil','Einmal in deinem eigenen Zug, wenn du eine feindliche, nicht bewusstlose Kreatur mit einem Waffenangriff triffst: zusätzlich 1 Urteilswürfel in der Schadensart der Waffe. Hat sie unmittelbar vor diesem Treffer höchstens die Hälfte ihrer maximalen TP (angeschlagen), würfle einen weiteren Urteilswürfel; ab Stufe 11 zwei weitere statt einem. Temporäre TP zählen nicht. Bei kritischem Treffer werden auch diese Würfel verdoppelt. Keine Marke, keine Ressource; kein Zusatz bei bewusstlosen Zielen.'],
  [1,'Waffenmeisterschaft','Zwei Waffenmeisterschaften; ab Stufe 11 drei.'],[2,'Kampfstil','Du erhältst ein Kampfstil-Talent.'],
  [3,'Vollstreckerpfad','Wähle eine Unterklasse.'],[5,'Zusätzlicher Angriff','Mit der Angriffsaktion greifst du zweimal an.'],
  [7,'Kampfblick','Ohne Aktion erkennst du bei sichtbaren Kreaturen in 18 m, ob sie angeschlagen sind. Die SL nennt keine exakten TP.'],
@@ -443,11 +443,11 @@ const HX_CLASSES = {
  [10,'Unbequemer Treffer','Du darfst bei Druckpunkt statt Reaktionsverlust die Bewegungsrate des Ziels bis zum Beginn deines nächsten Zuges um 3 m senken (mindestens 0).'],
  [14,'Bedrängnis','Druckpunkt kostet weiterhin einen Würfel; bei einem misslungenen Rettungswurf gelten sowohl Reaktionsverlust als auch Bewegungssenkung und reduzierte Heilung.'],
  [18,'Kampfdruck','Einmal pro kurzer Rast darfst du Druckpunkt ohne Verzicht auf einen Urteilswürfel einsetzen.']],l=>l>=18?[HX_R('hxe_pressure','Kampfdruck',1,'short')]:[])]},
- hxblight:{name:'Seuchenträger',en:'Blightbearer',hd:10,prim:['str','dex','con'],saves:['con','cha'],skillN:2,skills:['ath','med','nat','arc','sur','itm'],armor:['light','medium','shield'],weapons:'martial',home:true,mastery:()=>2,asi:[4,8,12,16],hxExtra:5,hxDC:'con',
+ hxblight:{name:'Seuchenträger',en:'Blightbearer',hd:10,prim:['str','dex','con'],saves:['con','cha'],skillN:2,skills:['ath','med','nat','arc','sur','itm'],armor:['light','medium','shield'],weapons:'martial',home:true,mastery:()=>2,asi:[4,8,12,16],hxExtra:5,hxDCn:'Seuchen-SG',hxDC:'con',
  flavor:'✦ Seuchenträger tragen eine kontrollierte, übernatürliche Zersetzung in sich. Die Kunst entstand unter Heilern, die einen magischen Befall zu bändigen lernten. Sie sind keine wandelnde Gefahr für ihre Verbündeten; nur ihr bewusster Wille setzt die Verheerung frei.',
  table:l=>[['Seuchenwürfel','W'+HX_DIE(l)],['Befallene Ziele',step(2,[[5,3],[11,4],[17,5]])(l)],['Angriffe',l>=5?2:1]],
  feats:[
- [1,'Befall','Einmal in deinem eigenen Zug, wenn du eine feindliche Kreatur mit einer Waffe triffst, kannst du sie bis zum Beginn deines übernächsten Zuges befallen. Zu Beginn jedes ihrer Züge erleidet sie 1 Seuchenwürfel nekrotischen Schaden. Befall ist ein magischer Klasseneffekt, keine Krankheit, kein Gift und kein Zauber; Resistenz/Immunität gegen nekrotischen Schaden gilt. Kein Befall bei 0 TP. Mehrfacher Befall durch dich erneuert nur die Dauer. Maximal zwei deiner Befälle gleichzeitig (3 ab 5, 4 ab 11, 5 ab 17); wenn überschritten, beende einen alten. Befall mehrerer Seuchenträger verursacht nur den höchsten Würfel an einem Ziel, die jeweilige Dauer bleibt separat.'],
+ [1,'Befall','Dein Seuchen-SG ist 8 + ÜB + KON-Mod. Einmal in deinem eigenen Zug, wenn du eine feindliche Kreatur mit einer Waffe triffst, kannst du sie bis zum Beginn deines übernächsten Zuges befallen. Zu Beginn jedes ihrer Züge erleidet sie 1 Seuchenwürfel nekrotischen Schaden. Befall ist ein magischer Klasseneffekt, keine Krankheit, kein Gift und kein Zauber; Resistenz/Immunität gegen nekrotischen Schaden gilt. Kein Befall bei 0 TP. Mehrfacher Befall durch dich erneuert nur die Dauer. Maximal zwei deiner Befälle gleichzeitig (3 ab 5, 4 ab 11, 5 ab 17); wenn überschritten, beende einen alten. Befall mehrerer Seuchenträger verursacht nur den höchsten Würfel an einem Ziel, die jeweilige Dauer bleibt separat.'],
  [1,'Waffenmeisterschaft','Zwei Waffenmeisterschaften.'],
  [2,'Übertragung','Bonusaktion: Wähle einen von dir befallenen, lebenden Gegner, den du in 18 m siehst, und einen anderen sichtbaren feindlichen Gegner in 3 m von ihm. Der zweite erhält deinen Befall bis zum Beginn deines übernächsten Zuges, ohne sofortigen Schaden. Alternativ: Bei einem befallenen Ziel in 18 m verursachst du sofort 1 Seuchenwürfel nekrotischen Schaden, ohne die Dauer zu verlängern. Dieses Auslösen ist kein Treffer und löst keine Befälle aus.'],
  [3,'Seuchenpfad','Wähle eine Unterklasse.'],[5,'Zusätzlicher Angriff','Mit der Angriffsaktion greifst du zweimal an.'],
@@ -488,7 +488,7 @@ for (const [id,C] of Object.entries(HX_CLASSES)) {
  MC_PREREQ[id]=id==='hxmind'||id==='hxthread'?[['int']]:id==='hxguard'?[['str'],['con']]:id==='hxexec'?[['str','dex']]:[['str','dex'],['con']];
  if(C.weapons==='martial'&&!MC_MARTIAL.includes(id)) MC_MARTIAL.push(id);
 }
-const HX_GOLEM_VARIANTS={clay:'Lehmgeborene / Clayborn',ceramic:'Kintsari / Kintsari',forged:'Geschmiedete / Forged'};
+const HX_GOLEM_VARIANTS={clay:'Lehmgeborene',ceramic:'Kintsari (Keramik)',forged:'Geschmiedete'};
 const HX_SPECIES={
  hxferrali:{name:'Ferrali',en:'Ferrali',size:'Mittelgross',speed:9,dv:0,home:true,life:'ca. 130 Jahre',
  flavor:"✦ Ferrali sind ein vierarmiges humanoides Volk mit zwei Schulterpaaren, kräftigem Oberkörper und kupferfarbener bis dunkelgrauer Haut. Ihre Städte sind für fein gearbeitete Brücken, Bildhauerei und Handwerksgemeinschaften bekannt. Jede Generation entwickelt eigene Bauweisen; die vier Arme legen weder Beruf noch Klasse fest.",
