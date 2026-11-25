@@ -66,7 +66,7 @@ class HbMqtt {
     for (;;) {
       const b = this.buf; if (b.length < 2) return;
       let mult = 1, val = 0, i = 1, byte;
-      do { if (i >= b.length) return; byte = b[i++]; val += (byte & 127) * mult; mult *= 128; } while (byte & 128);
+      do { if (i > 4) { this.buf = new Uint8Array(0); try { this.ws.close(); } catch (e) {} return; } /* MQTT: Längenfeld höchstens 4 Byte */ if (i >= b.length) { if (b.length > HB_MAX_PKT + 8) { this.buf = new Uint8Array(0); try { this.ws.close(); } catch (e) {} } return; } byte = b[i++]; val += (byte & 127) * mult; mult *= 128; } while (byte & 128);
       if (val > HB_MAX_PKT) { this.buf = new Uint8Array(0); try { this.ws.close(); } catch (e) {} return; }
       if (b.length < i + val) return;
       const type = b[0], body = b.slice(i, i + val); this.buf = b.slice(i + val);

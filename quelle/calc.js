@@ -57,10 +57,11 @@ const MC_PREREQ = { bar: [['str']], brd: [['cha']], cle: [['wis']], dru: [['wis'
 function derive(ch, hb) {
   hb = hb || {};
   const cls = CLASSES[ch.cls] || CLASSES.fig;
-  const multi = (ch.multi || []).filter((m) => CLASSES[m.cls] && m.cls !== ch.cls && +m.level > 0);
+  const multi = (Array.isArray(ch.multi) ? ch.multi : []).filter((m, i, arr) => m && CLASSES[m.cls] && m.cls !== ch.cls && +m.level > 0 && arr.findIndex((x) => x && x.cls === m.cls) === i); /* jede Klasse nur einmal */
+  const multiDup = Array.isArray(ch.multi) && ch.multi.filter((m) => m && CLASSES[m.cls] && m.cls !== ch.cls && +m.level > 0).length > multi.length;
   const levels = {}; levels[ch.cls] = Math.max(1, +ch.level || 1);
   multi.forEach((m) => { levels[m.cls] = (levels[m.cls] || 0) + (+m.level); });
-  const warn0 = []; const capOn = typeof rule !== 'function' || rule('lvlcap');
+  const warn0 = multiDup ? ['Eine Klasse steht doppelt in der Mehrklassen-Liste – nur der erste Eintrag zählt.'] : []; const capOn = typeof rule !== 'function' || rule('lvlcap');
   if (capOn) { let over = Object.values(levels).reduce((a, b) => a + b, 0) - 20; if (over > 0) { warn0.push('Die Gesamtstufe darf höchstens 20 sein – überzählige Stufen werden ignoriert.'); for (const m of multi.slice().reverse()) { if (over <= 0) break; const cut = Math.min(over, levels[m.cls] - 0); levels[m.cls] -= cut; over -= cut; } if (over > 0) levels[ch.cls] = Math.max(1, levels[ch.cls] - over); } }
   for (const k of Object.keys(levels)) if (levels[k] <= 0) delete levels[k];
   const L = Math.max(1, Object.values(levels).reduce((a, b) => a + b, 0));
@@ -276,7 +277,7 @@ function derive(ch, hb) {
   c.initAdv = lv('bar') >= 7 || (lv('fig') >= 3 && subOf('fig') === 'champion');
   if(lv('hxguard')>=10&&subOf('hxguard')==='protector')c.initAdv=true;
   let speed = sp.speedFn ? sp.speedFn(c) : sp.speed; const spParts = [sp.name + ' ' + fmtM(speed)];
-  if(lv('hxform')&&(ch.play.hxForms||[]).includes('Sehne')){speed+=3;spParts.push('Wandelsehne +3 m');}
+  if(lv('hxform')&&(Array.isArray(ch.play.hxForms)?ch.play.hxForms:[]).includes('Sehne')){speed+=3;spParts.push('Wandelsehne +3 m');}
   const heavy = ar.type === 'heavy';
   if (lv('bar') >= 5 && !heavy) { speed += 3; spParts.push('Schnelle Bewegung +3 m'); }
   if (lv('ran') >= 6 && !heavy) { speed += 3; spParts.push('Umherstreifen +3 m'); }
@@ -490,7 +491,7 @@ function derive(ch, hb) {
   if (ch.species === 'goliath' && ch.speciesChoice === 'fire') xd.push({ k: 'gfire', label: 'Feuerriese', n: 1, s: 10, res: 'giant', note: 'Feuer' });
   if (ch.species === 'goliath' && ch.speciesChoice === 'frost') xd.push({ k: 'gfrost', label: 'Frostriese', n: 1, s: 6, res: 'giant', note: 'Kälte' });
   if ((ch.invocations || []).includes('lifedrinker') && lv('wlk') >= 9) xd.push({ k: 'lifedr', label: 'Lebenstrinker (Paktwaffe)', n: 1, s: 6 });
-  if(lv('hxform')&&(ch.play.hxForms||[]).includes('Klinge'))xd.push({k:'hx_form_blade',hxGroup:'hxform',label:'Wandelklinge (aktiv)',n:1,s:HX_DIE(lv('hxform'))});
+  if(lv('hxform')&&(Array.isArray(ch.play.hxForms)?ch.play.hxForms:[]).includes('Klinge'))xd.push({k:'hx_form_blade',hxGroup:'hxform',label:'Wandelklinge (aktiv)',n:1,s:HX_DIE(lv('hxform'))});
   if(lv('hxguard')>=3&&subOf('hxguard')==='defier')xd.push({k:'hx_guard_defier',hxGroup:'hxguard',label:'Drängende Wacht (herausgefordert)',n:1,s:lv('hxguard')>=18?8:4});
   if(lv('hxexec')){const l=lv('hxexec'),s=HX_DIE(l);xd.push({k:'hx_exec_full',hxGroup:'hxexec',label:'Urteil (Ziel über 50 % TP)',n:1,s},{k:'hx_exec_blood',hxGroup:'hxexec',label:'Urteil (Ziel höchstens 50 % TP)',n:l>=11?3:2,s});if(l>=20)xd.push({k:'hx_exec_quarter',hxGroup:'hxexec',label:'Endurteil (Ziel höchstens 25 % TP)',n:4,s});}
   c.dmgExtras = xd;
@@ -536,7 +537,7 @@ function rollExpr(expr) {
   let total = 0; const parts = []; const groups = [];
   const re = /([+-]?)(\d*)W(\d+)|([+-]?)(\d+)/g; let m;
   while ((m = re.exec(e))) {
-    if (m[3]) { const n = +(m[2] || 1), s = +m[3], sign = m[1] === '-' ? -1 : 1; const r = []; for (let i = 0; i < n; i++) r.push(1 + Math.floor(rnd() * s)); total += sign * r.reduce((a, b) => a + b, 0); parts.push((sign < 0 ? '−' : '') + n + 'W' + s + '[' + r.join(',') + ']'); groups.push({ sides: s, rolls: r, sign }); }
+    if (m[3]) { const n = Math.min(+(m[2] || 1), 1000), s = Math.min(+m[3], 10000); /* Obergrenzen gegen ausufernde Ausdrücke */ if (!s) continue; const sign = m[1] === '-' ? -1 : 1; const r = []; for (let i = 0; i < n; i++) r.push(1 + Math.floor(rnd() * s)); total += sign * r.reduce((a, b) => a + b, 0); parts.push((sign < 0 ? '−' : '') + n + 'W' + s + '[' + r.join(',') + ']'); groups.push({ sides: s, rolls: r, sign }); }
     else if (m[5]) { const v = (m[4] === '-' ? -1 : 1) * +m[5]; total += v; parts.push(sgn(v)); }
   }
   return { total, detail: parts.join(' '), groups };

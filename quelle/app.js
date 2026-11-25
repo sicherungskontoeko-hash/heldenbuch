@@ -113,7 +113,7 @@ async function connectDb() {
   } catch (e) { DB = null; S.store = 'local'; paintSave(); }
 }
 
-function normChar(c) { if (c && typeof migrateChar === 'function') migrateChar(c); const d = newChar(); for (const k of Object.keys(d)) if (c[k] === undefined) c[k] = d[k]; c.play = Object.assign(d.play, (c.play && typeof c.play === 'object') ? c.play : {}); c.misc = Object.assign(d.misc, (c.misc && typeof c.misc === 'object') ? c.misc : {}); if (!Array.isArray(c.play.cond)) c.play.cond = []; if (!Array.isArray(c.play.ds)) c.play.ds = [0, 0]; if (c.alignment && typeof alignKey === 'function') { const ak = alignKey(c.alignment); if (ak) c.alignment = ALIGN[ak].name; } return c; }
+function normChar(c) { if (c && typeof migrateChar === 'function') migrateChar(c); const d = newChar(); for (const k of Object.keys(d)) if (c[k] === undefined) c[k] = d[k]; c.play = Object.assign(d.play, (c.play && typeof c.play === 'object') ? c.play : {}); c.misc = Object.assign(d.misc, (c.misc && typeof c.misc === 'object') ? c.misc : {}); if (!Array.isArray(c.play.cond)) c.play.cond = []; if (c.play.hxForms !== undefined && !Array.isArray(c.play.hxForms)) delete c.play.hxForms; /* Wandelgestalt ist nur ein Zug-Zustand */ if (!Array.isArray(c.play.ds)) c.play.ds = [0, 0]; if (c.alignment && typeof alignKey === 'function') { const ak = alignKey(c.alignment); if (ak) c.alignment = ALIGN[ak].name; } return c; }
 /* ---------- Beispiel ---------- */
 function sampleChar() {
   return newChar({ name: 'Beispiel: Brann Eisenfaust', cls: 'pal', level: 3, sub: 'devotion', species: 'dwarf', bg: 'soldier', bgPlus: { str: 2, con: 1 },
@@ -327,9 +327,11 @@ function dmgRoll(ch) {
 }
 
 /* ---------- Angriffszauber: Angriff → Treffer? → Schaden, auch mehrere Strahlen ---------- */
-function spellAttack(ch, s, count, expr, tail, note, atk) { S.sa = { name: s.name, sid: s.id, k: 1, count, expr, tail, note: note || '', atk, tgt: S.tgt || '' }; saAttack(); }
+function spellAttack(ch, s, count, expr, tail, note, atk) { S.sa = { name: s.name, sid: s.id, k: 1, count, expr, tail, note: note || '', atk, tgt: S.tgt || '', cid: ch && ch.id }; saAttack(); }
+/* Angriffsdialog gehört zum auslösenden Helden: nach einem Heldenwechsel abbrechen */
+function saStale() { const o = S.sa; if (!o || !o.cid || (cur() && cur().id === o.cid)) return false; S.sa = null; if (typeof orbPrompt === 'function') orbPrompt(''); bannerToast('Angriff abgebrochen', 'Der Held wurde gewechselt.'); return true; }
 function saAttack() {
-  const o = S.sa; if (!o) return; const c = derive(cur(), S.hb);
+  const o = S.sa; if (!o || saStale()) return; const c = derive(cur(), S.hb);
   if(String(o.sid||'').startsWith('hx_'))o.tgt=S.tgt||'';
   S.lastAttack = null;
   const lbl = o.name + (o.count > 1 ? ' · ' + o.k + '/' + o.count : '') + ': Angriff';
@@ -341,23 +343,23 @@ function saNext() { const o = S.sa; if (!o) return; orbPrompt(''); if (o.k < o.c
 /* Eismesser: nach dem Angriff (Treffer oder nicht) explodiert er – GES-Rettungswurf, kein halber Schaden */
 function iceKnifeBurst() { const k = S.iceKnife; S.iceKnife = null; if (!k) return; setTimeout(() => (typeof saveDmg === 'function' ? saveDmg({ label: 'Eismesser: Explosion (1,5 m um das Ziel)', expr: k.expr, ab: 'GES', dc: k.dc, half: false, type: 'Kälte', tgt: k.tgt }) : rollDmg(k.expr, 'Eismesser: Explosion')), 400); }
 function saHit() {
-  const o = S.sa; if (!o) return;
+  const o = S.sa; if (!o || saStale()) return;
   const P = cur().play; const c = derive(cur(), S.hb); let base = o.expr; const add = [];
   if (P.fx && P.fx.hm && markOk(P, 'hm', o.tgt || '')) { base += '+1W' + (c.lv('ran') >= 20 ? 10 : 6); add.push('Mal des Jägers'); }
   if (P.fx && P.fx.hex && markOk(P, 'hex', o.tgt || '')) { base += '+1W6'; add.push('Verhexen'); }
   const expr = o.crit ? base.replace(/(\d+)W(\d+)/g, (m, n, d) => 2 * n + 'W' + d) : base;
   const r = rollExpr(expr); const mm = /W(\d+)/.exec(expr);
   if (o.sid === 'sorcerous-burst') burstExplode(r, Math.max(0, spellCtx(c, 'sorcerous-burst').mod));
-  pushLog({ label: o.name + (o.count > 1 ? ' · ' + o.k + '/' + o.count : '') + ': Schaden' + (o.crit ? ' (kritisch)' : ''), groups: r.groups, total: r.total, detail: r.detail + (o.note ? ' · ' + o.note : '') + (add.length ? ' · inkl. ' + add.join(', ') : '') + (o.k === 1 && o.tail ? ' · ' + o.tail : ''), sides: mm ? +mm[1] : 0, nat: r.total, crit: o.crit });
+  pushLog({ label: o.name + (o.count > 1 ? ' · ' + o.k + '/' + o.count : '') + ': Schaden' + (o.crit ? ' (kritisch)' : ''), groups: r.groups, total: r.total, detail: r.detail + (o.note ? ' · ' + o.note : '') + (add.length ? ' · inkl. ' + add.join(', ') : '') + (o.tail ? ' · ' + o.tail : ''), sides: mm ? +mm[1] : 0, nat: r.total, crit: o.crit });
   if (o.tgt && o.tgt.startsWith('n:') && typeof onlineFight === 'function' && onlineFight()) return applyPrompt(o.tgt, r.total, o.name, '', () => saNext());
   saNext();
 }
 function rollDmg(expr, label) { const r = rollExpr(expr); const m = /W(\d+)/.exec(String(expr)); const g = /\[([\d,]+)\]/.exec(r.detail); pushLog({ label, groups: r.groups, total: r.total, detail: r.detail, sides: m ? +m[1] : 0, nat: g ? g[1].split(',').reduce((a, b) => a + +b, 0) : r.total }); }
 function pushLog(e) { e.t = Date.now(); if (S.secret) e.secret = true; if (e.sides && !e.dset && typeof d3setOf === 'function') e.dset = d3setOf(cur()); const d3on = typeof d3ok === 'function' && d3ok(e.sides); if (!d3on && e.sides === 20 && (e.nat === 20 || e.nat === 1) && typeof themeBurst === 'function') { const k = e.nat === 1 ? 'fumble' : 'crit'; setTimeout(() => themeBurst(k), 820); } /* nur ohne 3D-Würfel; themeBurst prüft selbst die Einstellung */ S.log.unshift(e); S.log = S.log.slice(0, 30); if (typeof histAdd === 'function') histAdd(e); showToast(e); const l = $('#log'); if (l) l.innerHTML = logHtml(); if ((e.sides || e.share) && !e.preview) shareRoll(e); }
 /* ---------- Würfelschale: viele Würfel über den Bildschirm ---------- */
-function showMulti(e, flat) {
-  const t = $('#toast'); const tray = $('#tray');
-  clearTimeout(showMulti.fade); clearInterval(showMulti.iv); clearTimeout(showMulti.st);
+function showMulti(e, flat, seq) {
+  const t = $('#toast'); const tray = $('#tray'); if (seq === undefined) seq = showToast.seq = (showToast.seq || 0) + 1; showToast.hs = showToast.hs || [];
+  clearTimeout(showMulti.fade); clearTimeout(showMulti.fade2); clearInterval(showMulti.iv); clearTimeout(showMulti.st);
   const extra = Math.max(0, flat.length - 30); const list = flat.slice(0, 30); const n = list.length;
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
   const has3 = typeof d3ok === 'function'; const set = has3 ? (e.dset || d3setOf(cur())) : ''; const rollMs = typeof vfxRollMs === 'function' ? vfxRollMs() : 850; if (!rollMs) reduce = true;
@@ -380,7 +382,7 @@ function showMulti(e, flat) {
     const fx = side === 0 ? -W * 0.6 : side === 1 ? W * 0.6 : (vrand() - 0.5) * W;
     const fy = side === 2 ? -H * 0.6 : side === 3 ? H * 0.6 : (vrand() - 0.5) * H;
     el.style.cssText = 'left:' + (x0 + col * cell + (cell - size) / 2 + jx) + 'px;top:' + (y0 + r * cell + (cell - size) / 2 + jy) + 'px;width:' + size + 'px;height:' + size + 'px;--fx:' + fx + 'px;--fy:' + fy + 'px;--rot:' + ((vrand() < 0.5 ? -1 : 1) * (360 + vrand() * 540)) + 'deg;--fr:' + ((vrand() - 0.5) * 30) + 'deg;animation-delay:' + (i * 28) + 'ms;animation-duration:' + Math.max(0.25, rollMs / 1000).toFixed(2) + 's';
-    if (has3 && d3ok(d.sides)) { el.dataset.d3 = '1'; if (live3 && !reduce) { el.innerHTML = '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>'; const o = { dur: Math.round(rollMs * 0.82) + i * 60 }; el._h = (art && W3D.supports(d.sides, set) && W3D.roll(el.firstChild, d.sides, d.v, set, o)) || d3roll(el.firstChild, d.sides, d.v, set, o); } else el.innerHTML = d3h(d, reduce ? d.v : 1 + Math.floor(vrand() * d.sides), 'rolling-x'); }
+    if (has3 && d3ok(d.sides)) { el.dataset.d3 = '1'; if (live3 && !reduce) { el.innerHTML = '<span class="die d3 rolling3" style="--dg:' + D3_SETS[set].glow + '"></span>'; const o = { dur: Math.round(rollMs * 0.82) + i * 60 }; el._h = (art && W3D.supports(d.sides, set) && W3D.roll(el.firstChild, d.sides, d.v, set, o)) || d3roll(el.firstChild, d.sides, d.v, set, o); showToast.hs.push(el._h); } else el.innerHTML = d3h(d, reduce ? d.v : 1 + Math.floor(vrand() * d.sides), 'rolling-x'); }
     else el.innerHTML = dieSvg(d.sides, reduce ? d.v : 1 + Math.floor(vrand() * d.sides), 'rolling-x');
     tray.appendChild(el); return el;
   });
@@ -388,7 +390,7 @@ function showMulti(e, flat) {
   t.hidden = false; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
   t.innerHTML = '<div class="tt">' + head + '<div class="tv dim">…</div></div>';
   const land = () => {
-    clearInterval(showMulti.iv); t.onclick = () => { t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
+    if (seq !== showToast.seq) return; clearInterval(showMulti.iv); t.onclick = () => { t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
     /* Höchst- und Tiefstwert nur leise markieren: kein Krit, keine natürliche 20/1 */
     els.forEach((el, i) => { const d = list[i]; const pair = (e.pairVals || []).includes(d.v); const cls = pair ? ' pair' : d.v === d.sides ? ' max' : d.v === 1 ? ' min' : '';
       if (el.dataset.d3) { if (el._h) el._h.skip(); el.innerHTML = d3h(d, d.v, 'land' + cls + (d.neg ? ' neg' : '')); if (art && W3D.supports(d.sides, set)) { const dv = el.firstChild, svg = dv.innerHTML; if (!W3D.still(dv, d.sides, d.v, set, {})) dv.innerHTML = svg; } return; }
@@ -399,11 +401,11 @@ function showMulti(e, flat) {
     t.innerHTML = '<div class="tt">' + head + '<div class="tv">' + esc(e.total) + '</div><div class="td">' + esc(e.detail) + (extra ? ' · ' + extra + ' weitere Würfel nicht gezeigt' : '') + '</div></div>';
     let sb = tray.querySelector('.tsum'); if (!sb) { sb = document.createElement('div'); sb.className = 'tsum'; tray.appendChild(sb); }
     sb.innerHTML = '<span>' + esc(e.label) + '</span><b>' + esc(e.total) + '</b>';
-    showMulti.fade = setTimeout(() => { tray.classList.add('fade'); setTimeout(() => { tray.hidden = true; tray.innerHTML = ''; }, 600); }, 3600);
+    showMulti.fade = setTimeout(() => { tray.classList.add('fade'); showMulti.fade2 = setTimeout(() => { if (seq !== showToast.seq) return; tray.hidden = true; tray.innerHTML = ''; }, 600); }, 3600);
     showToast.tm = setTimeout(() => { t.hidden = true; }, 7000);
   };
   if (reduce) return land();
-  if (has3) { d3snd('roll', n, set); t.onclick = () => { clearTimeout(showMulti.st); t.onclick = null; land(); }; }
+  if (has3) { d3snd('roll', n, set); t.onclick = () => { if (seq !== showToast.seq) return; clearTimeout(showMulti.st); t.onclick = null; land(); }; }
   showMulti.iv = setInterval(() => els.forEach((el, i) => { if (el.dataset.d3) return; const tx = el.querySelector('text'); if (tx) tx.textContent = 1 + Math.floor(vrand() * list[i].sides); }), 80);
   showMulti.st = setTimeout(land, rollMs + n * 28);
 }
@@ -430,9 +432,13 @@ function dieSvg(sides, n, cls) {
 }
 function showToast(e) {
   const t = $('#toast'); clearTimeout(showToast.tm); clearInterval(showToast.iv); clearTimeout(showToast.st);
+  /* Neue Anzeige: eigene Nummer; alte Animationen (Einzel- und Mehrfachwurf) dürfen das Ergebnis danach nicht mehr überschreiben */
+  const seq = showToast.seq = (showToast.seq || 0) + 1; const hsOld = showToast.hs || []; showToast.hs = []; hsOld.forEach((h) => { try { h && h.skip(); } catch (x) {} });
+  clearTimeout(showMulti.fade); clearTimeout(showMulti.fade2); clearInterval(showMulti.iv); clearTimeout(showMulti.st);
   document.querySelectorAll('.d3stage').forEach((x) => x.remove()); document.querySelectorAll('.d3quake').forEach((x) => x.classList.remove('d3quake')); /* neuer Wurf: alte grosse Effekte weg */
   const flat = (e.groups || []).flatMap((g) => g.rolls.map((v) => ({ v, sides: g.sides, neg: g.sign < 0 })));
-  if (flat.length > 1) return showMulti(e, flat);
+  if (flat.length > 1) return showMulti(e, flat, seq);
+  { const tray = $('#tray'); if (tray && !tray.hidden) { tray.hidden = true; tray.innerHTML = ''; } } /* Schale eines früheren Mehrfachwurfs weg */
   const sides = e.sides || 0;
   if (!sides && !flat.length) { /* kein Würfelwurf (Ereignis, Hinweis): kleine Meldung statt Würfelfenster */
     t.hidden = true; const tot = typeof e.total === 'number' || /^\d/.test(String(e.total)) ? ': ' + e.total : e.total === '✗' ? ' ✗' : '';
@@ -449,7 +455,7 @@ function showToast(e) {
   const wide = art && sides === 100 ? ' w100' : art && sides === 4 ? ' w4' : ''; /* W100 als Artefakt: Zehner- und Einerwürfel nebeneinander; W4 (Eckzahlen) und W100 auf dem Handy grösser */
   const dieH = (v, cls) => use3 ? '<span class="die d3 ' + cls + wide + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(sides, v, set, { gold: / crit/.test(cls) && sides === 20, dead: / fum/.test(cls) && sides === 20, cracks: / fum/.test(cls) && sides === 20 }) + '</span>' : dieSvg(sides, v, cls);
   const final = () => {
-    clearInterval(showToast.iv); t.onclick = (ev) => { if (ev.target.closest('[data-act]')) return; t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
+    if (seq !== showToast.seq) return; clearInterval(showToast.iv); t.onclick = (ev) => { if (ev.target.closest('[data-act]')) return; t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
     const dice = vals.map((v, i) => dieH(v, 'land' + (i === keep ? hl : ' drop'))).join('');
     const tip = typeof rollTip === 'function' ? rollTip(e) : '';
     t.innerHTML = '<div class="trow"><div class="dice' + wide + '">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer' + (nat && nat < 20 ? ' (erweiterter Bereich)' : '') + '!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
@@ -465,7 +471,7 @@ function showToast(e) {
     t.innerHTML = '<div class="trow"><div class="dice' + wide + '">' + vals.map(() => '<span class="die d3 rolling3' + wide + '" style="--dg:' + D3_SETS[set].glow + '"></span>').join('') + '</div><div class="tt">' + head + '<div class="tv dim">…</div></div></div>';
     d3snd('roll', vals.length, set); let left = vals.length; const hs = [];
     t.querySelectorAll('.die').forEach((el, i) => { const o = { dur: Math.round(rollMs * 0.9) + i * (rollMs > 400 ? 140 : 50), onDone: () => { if (--left === 0) final(); } }; hs.push((art && W3D.roll(el, sides, vals[i], set, o)) || d3roll(el, sides, vals[i], set, o)); });
-    t.onclick = () => { hs.forEach((h) => h.skip()); };
+    showToast.hs = hs; t.onclick = () => { hs.forEach((h) => h.skip()); };
     return;
   }
   if (!sides || reduce || !rollMs) return final();
@@ -883,7 +889,7 @@ function renderSheet(c) {
     return '<div class="atk' + (sub ? ' sub' : '') + '"><div class="an"><b>' + (sub ? '<span aria-hidden="true">↳ </span>geworfen' : esc(a.name)) + '</b>' + xpl(a.atkParts ? ['Angriff: ' + a.atkParts.join(' + '), 'Schaden: ' + (a.dmgParts || []).join(' + ')] : null) + '<small>' + esc(a.props) + (a.mastery ? ' · <abbr title="' + esc(MASTERY[a.mastery][1]) + '">' + MASTERY[a.mastery][0] + '</abbr>' : '') + '</small></div>' +
       '<button class="rb" data-act="atk" data-arg="' + esc(ai) + '">' + sgn(a.atk) + '</button>' +
       '<button class="rb dmgb" data-act="dmg" data-expr="' + esc(dm(a.dmg)) + '" data-label="' + esc(a.name) + ': Schaden">' + esc(dm(a.dmg)) + ' <small>' + a.dtype + '</small></button>' +
-      (a.dmg2 ? '<button class="rb dmgb" data-act="dmg" data-expr="' + esc(dm(a.dmg2)) + '" data-label="' + esc(a.name) + ' zweihändig">' + esc(dm(a.dmg2)) + ' <small>2H</small></button>' : '') + '</div>';
+      (a.dmg2 && !ch.shield ? '<button class="rb dmgb" data-act="dmg" data-expr="' + esc(dm(a.dmg2)) + '" data-label="' + esc(a.name) + ' zweihändig">' + esc(dm(a.dmg2)) + ' <small>2H</small></button>' : '') + '</div>';
   }).join('') + atkCantrips(c) + (c.sneak ? '<div class="atk"><div class="an"><b>Hinterhältiger Angriff</b><small>1× pro Zug</small></div><button class="rb dmgb" data-act="dmg" data-expr="' + esc(c.sneak) + '" data-label="Hinterhältiger Angriff">' + c.sneak + '</button></div>' : '') + '</div></section>';
   if (!c.res.length && c.classDC && c.classDC.length) h += '<section class="blk" data-grp="kampf faehig"><h2>Klassen-SG <small>' + c.classDC.map(([l, v]) => l + ' ' + v).join(' · ') + '</small></h2></section>';
   if (!c.res.length) h += slotsMini(c);
@@ -1270,7 +1276,7 @@ function joinCamp(v, silent) {
 /* Abgleich beim Beitreten und nach einem Verbindungsabbruch: Das Gerät bittet alle, ihren Stand nochmals zu senden.
    Öffentliche Server halten gespeicherte Nachrichten nicht immer zuverlässig (im Test bei EMQX beobachtet);
    so kommt ein neu verbundenes Gerät trotzdem sofort zu Mitspielern, Spielleitung und laufendem Kampf. */
-let helloUnsub = null, helloLast = 0; const helloSeen = new Set();
+let helloUnsub = null, helloLast = 0, helloReplyTm = 0, helloReplyLast = 0; const helloSeen = new Set();
 const helloRef = () => DB.doc('camp/' + S.camp + '/sync/hello');
 function sendHello(force) {
   if (!DB || !S.camp || !UID) return; const r = helloRef(); if (typeof r.ping !== 'function') return;
@@ -1278,18 +1284,20 @@ function sendHello(force) {
   r.ping({ from: UID, id: uidX(), t: now }).catch(() => {});
 }
 function subHello() {
-  if (helloUnsub) { try { helloUnsub(); } catch (e) {} helloUnsub = null; }
+  if (helloUnsub) { try { helloUnsub(); } catch (e) {} helloUnsub = null; } clearTimeout(helloReplyTm); helloReplyTm = 0;
   if (!DB || !S.camp) return; const r = helloRef(); if (typeof r.ping !== 'function') return;
   try { helloUnsub = r.onSnapshot((d) => { const v = d && d.exists ? d.data() : null;
     if (!v || typeof v !== 'object' || v.from === UID || typeof v.id !== 'string' || helloSeen.has(v.id) || Math.abs(Date.now() - (+v.t || 0)) > 120000) return;
-    helloSeen.add(v.id); const camp = S.camp;
-    setTimeout(() => { if (S.camp !== camp) return; writeMe(); if (isDM()) { metaRef().set(S.meta).catch(() => {}); if (S.combat) combatRef().set(S.combat).catch(() => {}); } }, 150 + Math.random() * 900);
+    helloSeen.add(v.id); while (helloSeen.size > 200) helloSeen.delete(helloSeen.values().next().value); /* Speicher begrenzen */
+    if (helloReplyTm) return; /* viele Anfragen kurz nacheinander: eine gemeinsame Antwort */
+    const camp = S.camp; const wait = Math.max(150 + Math.random() * 900, helloReplyLast + 3000 - Date.now());
+    helloReplyTm = setTimeout(() => { helloReplyTm = 0; if (S.camp !== camp) return; helloReplyLast = Date.now(); writeMe(); if (isDM()) { metaRef().set(S.meta).catch(() => {}); if (S.combat) combatRef().set(S.combat).catch(() => {}); } }, wait);
   }, () => {}); } catch (e) { helloUnsub = null; }
 }
 if (typeof HBNET !== 'undefined' && HBNET.onState) HBNET.onState((st) => { if (st === 'online' && S.camp) setTimeout(() => { writeMe(); sendHello(true); }, 800); });
 function leaveCamp() {
   if (campUnsub) { try { campUnsub(); } catch (e) {} campUnsub = null; }
-  if (helloUnsub) { try { helloUnsub(); } catch (e) {} helloUnsub = null; }
+  if (helloUnsub) { try { helloUnsub(); } catch (e) {} helloUnsub = null; } clearTimeout(helloReplyTm); helloReplyTm = 0;
   if (DB && S.camp && UID) DB.collection('camp/' + S.camp + '/players').doc(UID).delete().catch(() => {});
   if (combatUnsub) { try { combatUnsub(); } catch (e) {} combatUnsub = null; }
   if (metaUnsub) { try { metaUnsub(); } catch (e) {} metaUnsub = null; }

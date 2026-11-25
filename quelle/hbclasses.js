@@ -525,8 +525,9 @@ for(const [id,S] of Object.entries(HX_SPECIES)){if(SPECIES[id])throw Error('HX S
 function hxExtraEligible(x,a,ch,d){
  if(!x.hxGroup)return true;
  if(typeof offTurn==='function'&&offTurn())return false;
- if(d&&(d.cleave||d.ts))return false;
- if(x.hxGroup==='hxform')return a.melee&&(a.idx!==undefined||a.unarmed)&&(ch.play.hxForms||[]).includes('Klinge');
+ if(d&&d.cleave)return false;
+ if(d&&d.ts&&x.hxGroup!=='hxexec')return false; /* Urteil: True Strike ist ein Waffenangriff */
+ if(x.hxGroup==='hxform')return a.melee&&(a.idx!==undefined||a.unarmed)&&(Array.isArray(ch.play.hxForms)?ch.play.hxForms:[]).includes('Klinge');
  if(x.hxGroup==='hxexec')return a.idx!==undefined;
  if(x.hxGroup==='hxguard')return a.idx!==undefined&&a.melee;
  return false;
