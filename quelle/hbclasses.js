@@ -392,7 +392,7 @@ const HX_CLASSES = {
  [20,'Meister der Fäden','Wenn du Initiative würfelst, darfst du ohne Aktion einen Fadenträger erzeugen. Bei einer Fadenschlag-Magieaktion darfst du für alle Impulse Energieschaden statt Hiebschaden wählen. Beim Verschieben des Trägers als Bonusaktion kannst du bis zu 9 m statt 6 m bewegen.']],
  res:l=>l>=13?[HX_R('hxt_resist','Reissfester Faden',1,'short')]:[],
  subs:[
- HX_S('marionette','Marionette Artnkunst','Marionette','Dein Fadenträger ist eine Puppe nach deinem Entwurf. Sie schlägt mit, wenn du über sie angreifst, und wirft sich vor Verbündete – ohne je eine eigene Kreatur zu sein.',[
+ HX_S('marionette','Marionettenkunst','Marionette Art','Dein Fadenträger ist eine Puppe nach deinem Entwurf. Sie schlägt mit, wenn du über sie angreifst, und wirft sich vor Verbündete – ohne je eine eigene Kreatur zu sein.',[
  [3,'Marionettenhieb','Dein Fadenträger sieht wie eine von dir entworfene Puppe aus. Einmal pro eigener Fadenschlag-Aktion verursacht ein Treffer vom Träger zusätzlich 1W4 Hiebschaden, wenn das Ziel höchstens 1,5 m vom Träger entfernt ist.'],
  [6,'Wechselnde Gestalt','Beim Erzeugen des Trägers kannst du ihn nach Belieben als Holz-, Stoff- oder Knochenpuppe erscheinen lassen. Seine mechanischen Werte ändern sich nicht. Vorteil auf Proben zum Darbieten von Puppenspielen (Darbietung).'],
  [10,'Blockierpuppe','Reaktion, 1× pro kurzer Rast: Trifft ein Angriff eine andere Kreatur in 1,5 m um deinen Träger, reduziere Schaden um 2W6 + INT-Mod (mindestens 0). Der Träger verschwindet; du kannst ihn wie üblich neu erzeugen.'],
