@@ -1,17 +1,17 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-25T00:47:23+01:00
-- Revision (SHA-256 von index.html, gekürzt): 509bc35db36a9664
+- Zeitpunkt: 2026-11-25T18:53:38+01:00
+- Revision (SHA-256 von index.html, gekürzt): 6dc9738b79886323
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
-- System: Linux 6.18.44-fc-v819
+- System: Linux 6.18.44-fc-v880
 
 | Suite | Exit-Code | Ergebnis |
 |---|---|---|
 | Regeltests (rules.test.js) | 0 | ✔ Import bereinigt unbekannte Zauber 48 / 48 Tests bestanden  |
-| Regressionen HB-01–HB-11 (hb.test.js) | 0 | ✔ HB-11 Bewusstlos ausserhalb des Kampfes: kein Zauber 27 / 27 bestanden · /home/claude/hb-n1/quelle/index.html  |
+| Regressionen HB-01–HB-11 (hb.test.js) | 0 | ✔ HB-11 Bewusstlos ausserhalb des Kampfes: kein Zauber 27 / 27 bestanden · /home/claude/hb-main/quelle/index.html  |
 | Robustheit & Sonderfälle (cases.test.js) | 0 | ✔ HB-26 Fluchklinge: zweite Bonusaktion blockiert, keine Ressource verbraucht 23 / 23 bestanden  |
-| Kritischer Audit A01–A06 (audit2.test.js) | 0 | ✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/hb-n1/quelle/index.html  |
+| Kritischer Audit A01–A06 (audit2.test.js) | 0 | ✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/hb-main/quelle/index.html  |
 | Erklärkarten ⓘ (info.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 53 / 53 bestanden  |
 | Layout: ⚠ offene Punkte, Menüs (layout.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 29 / 29 bestanden  |
 | Würfel-Designs (dice.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 50 / 50 bestanden  |
@@ -47,7 +47,7 @@
 | Unterklassen-Bilder (subpics.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
 | Kampfseite am Handy: Angriffe früher, Warnungen oben (m01.test.js) | 0 | ✔ Keine Skriptfehler 108 / 108 bestanden  |
 | Bestiarium am Handy: Suche vor Einleitung (m03.test.js) | 0 | ✔ Keine Skriptfehler 90 / 90 bestanden  |
-| Erschaffen am Handy: Auswahl vor Zusammenfassung (m02.test.js) | 1 | ✔ Keine Skriptfehler 106 / 111 bestanden  |
+| Erschaffen am Handy: Auswahl vor Zusammenfassung (m02.test.js) | 0 | ✔ Keine Skriptfehler 111 / 111 bestanden  |
 | Grosstest: alle Ansichten, Reiter, Schritte, Klassen, Stimmungen (gross.test.js) | 0 | siehe Konsole |
 | Grosstest in der App (gross.test.js app) | 0 | siehe Konsole |
 | Klick-Fuzz: jeder Knopf in jeder Ansicht (klick.test.js) | 0 | siehe Konsole |
@@ -64,8 +64,9 @@
 | Effekte: Ton, Hintergrundgeräusche, Vibration (ton.test.js) | 0 | ✔ Keine Skriptfehler 18 / 18 bestanden  |
 | Effekte: Bedien-Animationen (ui.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
 | Ressourcen: Erklärungen zum Aufklappen (ressourcen.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
-| Kampf am Tisch: eigener Zug gut sichtbar (zug.test.js) | 0 | ✔ Keine Skriptfehler 18 / 18 bestanden  |
-| Erweiterung: 6 Klassen, 9 Völker, erweiterte Auswahl (erweiterung.test.js) | 0 | ✔ Keine Skriptfehler 33 / 33 bestanden  |
+| Kampf am Tisch: eigener Zug gut sichtbar (zug.test.js) | 0 | ✔ Keine Skriptfehler 20 / 20 bestanden  |
+| Erweiterung: 6 Klassen, 9 Völker, erweiterte Auswahl (erweiterung.test.js) | 0 | ✔ Keine Skriptfehler 39 / 39 bestanden  |
+| Prüfberichte 25.11.: Würfelanzeige, Schild, Tisch-Anfragen, Audit HB-01–HB-15 (pruefbericht.test.js) | 0 | ✔ Keine Skriptfehler 36 / 36 bestanden  |
 | Langsames Handy: CPU 4× gedrosselt (handy.test.js app) | 0 | ✔ Keine Skriptfehler  ([]) 17 / 17 bestanden  |
 | Abgleich mit dem SRD 5.2: Zauber und Monster (srd.test.js) | 0 | ✔ 339 Zauber und 164 Monster mit dem SRD 5.2 abgeglichen, 0 Abweichungen (8 begründete Ausnahmen)  |
 | Online-Tisch mit drei Geräten, lokal (echt.test.js --lokal) | 0 | ✔ Keine Skriptfehler auf den Geräten 12 / 12 bestanden (Server: lokal)  |
@@ -102,4 +103,4 @@
 | Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js) | 0 | ✔ Handy: kein Querscrollen bei den Spielern 18 / 18 bestanden  |
 | Spielabend mit Abenteuer: SL + 2 Spieler (sitzung.test.js) | 0 | ✔ Laptop der SL: kein Querscrollen (Tisch, Abenteuer) 54 / 54 bestanden  |
 
-Gesamtergebnis: mindestens eine Suite fehlgeschlagen
+Gesamtergebnis: alle Suiten bestanden

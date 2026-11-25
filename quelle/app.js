@@ -798,7 +798,7 @@ function mcSection(c) {
     h += '</div>';
   });
   const used = [ch.cls].concat((ch.multi || []).map((m) => m.cls));
-  if (total < 20) h += '<div class="row">' + field('Weitere Klasse hinzufügen', '<select id="addMc"><option value="">— Klasse wählen —</option>' + Object.entries(CLASSES).filter(([, C]) => homeOk(C)).filter(([k]) => !used.includes(k)).map(([k, C]) => '<option value="' + k + '">' + C.name + '</option>').join('') + '</select>') + '</div>';
+  if (total < 20) h += '<div class="row">' + field('Weitere Klasse hinzufügen', '<select id="addMc"><option value="">— Klasse wählen —</option>' + Object.entries(CLASSES).filter(([, C]) => homeOk(C)).filter(([k]) => !used.includes(k)).map(([k, C]) => { const why = mcBlock(ch, k); return '<option value="' + k + '"' + (why ? ' disabled' : '') + '>' + C.name + (why ? ' (' + esc(why) + ')' : '') + '</option>'; }).join('') + '</select>') + '</div>';
   return h;
 }
 
@@ -1782,7 +1782,7 @@ document.addEventListener('input', (ev) => { const t = ev.target; if (t.dataset 
 document.addEventListener('change', (ev) => {
   const t = ev.target;
   if (xChange(t)) return;
-  if (t.id === 'addMc' && t.value) { const ch = cur(); ch.multi = ch.multi || []; const total = ch.level + ch.multi.reduce((a, m) => a + (+m.level || 0), 0); if (total < 20) ch.multi.push({ cls: t.value, level: 1, order: '', land: 'temperate', cantrips: [], spells: [], arcanum: {} }); commit(); return; }
+  if (t.id === 'addMc' && t.value) { const ch = cur(); ch.multi = ch.multi || []; { const why = mcBlock(ch, t.value); if (why) { bannerToast('Multiclassing nicht möglich', CLASSES[t.value].name + ': ' + why + '.'); t.value = ''; return; } } const total = ch.level + ch.multi.reduce((a, m) => a + (+m.level || 0), 0); if (total < 20) ch.multi.push({ cls: t.value, level: 1, order: '', land: 'temperate', cantrips: [], spells: [], arcanum: {} }); commit(); return; }
   if (t.id === 'addW' && t.value) { cur().weapons.push({ w: t.value, bonus: 0, mastery: false, ab: 'auto' }); commit(); return; }
   if (t.id === 'sl') { S.sf.lvl = t.value; render(); return; }
   if (t.id === 'sc') { S.sf.cls = t.value; render(); return; }
