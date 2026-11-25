@@ -431,6 +431,7 @@ function diceModal() {
     '<div class="d3grid">' + ['klassik'].concat(D3_PLAYER).map(card).join('') + '</div>' +
     (typeof isDM === 'function' && isDM() ? '<p class="hint">Als Spielleitung würfelst du am Tisch für Monster automatisch mit <b>Schatten der Spielleitung</b>.</p>' : '') +
     '<div class="d3opts">' + (() => { const v = vfxLoad(); const both = v.critical === v.background && v.damage === v.background && v.status === v.background ? v.critical : ''; return '<div class="fld"><span>Effekte</span><div class="seg">' + [['aus', 'Aus'], ['dezent', 'Dezent'], ['intensiv', 'Intensiv']].map(([k, l]) => '<button class="' + (both === k ? 'on' : '') + '" data-act="vfx" data-arg="' + esc('level:' + k) + '">' + l + '</button>').join('') + '</div></div>'; })() +
+    '<div class="fld"><span>Wer würfelt?</span><div class="seg"><button class="' + (echtOn() ? '' : 'on') + '" data-act="echtSet" data-arg="0">Die App</button><button class="' + (echtOn() ? 'on' : '') + '" data-act="echtSet" data-arg="1">Eigene Würfel</button></div>' + (echtOn() ? '<small class="hint">Im Bogenkopf erscheint das Feld «Wurf»: Wert deines W20 eintragen (bei Vorteil oder Nachteil beide, z. B. 17 9), beim Schaden die Augensumme. Dann den Wurf antippen; die App rechnet die Boni dazu. Leer lassen: Die App würfelt.</small>' : '') + '</div>' +
     '<div class="fld"><span>Würfel rollen</span><div class="seg">' + [['normal', 'Normal'], ['kurz', 'Kurz'], ['aus', 'Aus']].map(([k, l]) => '<button class="' + (vs.roll === k ? 'on' : '') + '" data-act="vfx" data-arg="' + esc('roll:' + k) + '">' + l + '</button>').join('') + '</div></div>' +
     '<details class="vfxmore" id="vfxMoreDice"' + (S.vfxMoreDice ? ' open' : '') + '><summary>Details</summary>' +
     '<div class="fld"><span>Natürliche 20 und 1</span><div class="seg">' + [['aus', 'Aus'], ['dezent', 'Dezent'], ['intensiv', 'Intensiv']].map(([k, l]) => '<button class="' + (vs.critical === k ? 'on' : '') + '" data-act="vfx" data-arg="' + esc('critical:' + k) + '">' + l + '</button>').join('') + '</div></div>' +
@@ -443,6 +444,7 @@ function diceModal() {
   if (typeof W3D !== 'undefined') requestAnimationFrame(() => m.querySelectorAll('.d3card').forEach((b) => { const el = b.querySelector('.d3pv'); if (!el || !W3D.supports(20, b.dataset.arg)) return; const svg = el.innerHTML; if (!W3D.still(el, 20, 20, b.dataset.arg, {})) el.innerHTML = svg; }));
 }
 XA.diceOpen = () => diceModal();
+XA.echtSet = (t, a) => { try { localStorage.setItem('hb_echt', a === '1' ? '1' : '0'); } catch (e) {} S.echtV = ''; render(); diceModal(); };
 XA.diceSet = (t, a) => { const ch = cur(); if (!ch || !D3_SETS[a] || D3_SETS[a].dm) return; if (d3taken()[a]) return; ch.dice = a === 'klassik' ? '' : a; ch.diceAt = Date.now(); persist('c', ch.id); if (typeof queueMe === 'function') queueMe(); diceModal(); };
 /* alte Aktion (Voll/Ruhig/Aus): betrifft nur noch die Würfel, nicht mehr den Hintergrund */
 XA.diceFx = (t, a) => { const m = VFX_DF[a]; if (!m) return; vfxSet('roll', m.roll); vfxSet('critical', m.critical); diceModal(); };

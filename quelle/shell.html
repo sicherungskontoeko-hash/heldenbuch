@@ -233,6 +233,8 @@ td{font-family:var(--f-display);color:var(--gold-hi)}
 .shead .sigil{width:72px;height:72px;font-size:1.45rem}
 .shead p{margin:4px 0 0;color:var(--muted)}
 .sctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.itchg{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.85rem}.itchg input{width:5em;padding:5px 6px;font:inherit}
+.echtf{display:inline-flex;align-items:center;gap:4px;font-size:.8rem;color:var(--muted)}.echtf input{width:4.4em;min-width:0;padding:6px 6px;font:inherit;font-size:.9rem;text-align:center;border-radius:8px;border:1px solid var(--gold);background:var(--surface);color:var(--ink)}
 .seg{display:inline-flex;border:1px solid var(--line2);border-radius:999px;overflow:hidden;background:var(--sunk)}
 .seg button{border:0;background:none;padding:7px 13px;font-weight:700;font-size:.88rem;color:var(--muted)}
 .homeview{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin:12px 0 14px;padding:10px 12px;border:1px dashed var(--line);border-radius:10px}.homeview>span{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.homeview small{color:var(--muted);font-size:.82rem}
@@ -1420,6 +1422,7 @@ body{margin:0}
   .sheet .sctl .seg{flex:1 1 auto;width:auto;min-width:0}
   .sheet .sctl .seg button{flex:1 1 0;padding:6px 4px;font-size:.8rem;white-space:nowrap}
   .sheet .sctl .smore>summary{padding:6px 10px;font-size:.8rem;white-space:nowrap}
+  .sheet .sctl .echtf{flex:0 0 auto}.sheet .sctl .echtf span{display:none}.sheet .sctl .echtf input{width:2.9em;padding:6px 2px}
   /* Zugleiste: Aktion/Bonusaktion/Reaktion als flache Knöpfe, Bewegung und «Neuer Zug» in einer Zeile */
   .sheet .turnblk{padding:8px 10px;gap:6px}
   .turnblk .tbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
