@@ -885,6 +885,7 @@ function renderSheet(c) {
       '<button class="rb dmgb" data-act="dmg" data-expr="' + esc(dm(a.dmg)) + '" data-label="' + esc(a.name) + ': Schaden">' + esc(dm(a.dmg)) + ' <small>' + a.dtype + '</small></button>' +
       (a.dmg2 ? '<button class="rb dmgb" data-act="dmg" data-expr="' + esc(dm(a.dmg2)) + '" data-label="' + esc(a.name) + ' zweihändig">' + esc(dm(a.dmg2)) + ' <small>2H</small></button>' : '') + '</div>';
   }).join('') + atkCantrips(c) + (c.sneak ? '<div class="atk"><div class="an"><b>Hinterhältiger Angriff</b><small>1× pro Zug</small></div><button class="rb dmgb" data-act="dmg" data-expr="' + esc(c.sneak) + '" data-label="Hinterhältiger Angriff">' + c.sneak + '</button></div>' : '') + '</div></section>';
+  if (!c.res.length && c.classDC && c.classDC.length) h += '<section class="blk" data-grp="kampf faehig"><h2>Klassen-SG <small>' + c.classDC.map(([l, v]) => l + ' ' + v).join(' · ') + '</small></h2></section>';
   if (!c.res.length) h += slotsMini(c);
   if (c.spell.has || c.extraSpells.length) h += spellBlock(c);
   if (c.res.length) h += '<section class="blk" data-grp="kampf faehig"><h2>Ressourcen' + (c.classDC && c.classDC.length ? ' <small>' + c.classDC.map(([l, v]) => l + ' ' + v).join(' · ') + '</small>' : '') + '</h2>' + hlTip('Fähigkeiten mit begrenzten Nutzungen. Gefüllt = noch verfügbar; antippen verbraucht eine. Rasten füllen sie wieder auf.', 'p') + slotsRows(c) + '<div class="res">' + c.res.map((r) => {

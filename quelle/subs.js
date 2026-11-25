@@ -28,7 +28,7 @@ const NEW_SUBS = {
   [7,'Taktischer Blick','Du kannst als Bonusaktion eine Kreatur in 18 m mustern und erfährst RK, ob sie Resistenzen hat und ihren höchsten Rettungswurf.'],
   [10,'Gegenschlag','Verfehlt dich eine Kreatur im Nahkampf, kannst du als Reaktion einen Angriff gegen sie machen.'],
   [15,'Unerschütterlich','Du hast Vorteil auf Rettungswürfe gegen verängstigt, bezaubert und Umwerfen; Verbündete in 3 m teilen den Vorteil gegen verängstigt.'],
-  [18,'Bollwerk','Wachsame Haltung kostet keine Nutzung mehr, und deine Reaktionsangriffe verursachen +1W8 Schaden.']],
+  [18,'Unerschütterliche Wacht','Wachsame Haltung kostet keine Nutzung mehr, und deine Reaktionsangriffe verursachen +1W8 Schaden.']],
   res:(l,c)=>[{k:'wach',n:'Wachsame Haltung',max:l>=18?0:c.pb,reset:'long'}].filter((r)=>r.max) },
  mon:{ id:'water', name:'✦ Weg des fliessenden Wassers', feats:[
   [3,'Wasserpeitsche','1 Fokuspunkt, als Teil der Angriffsaktion: Ein waffenloser Schlag reicht 9 m weit; trifft er, kannst du das Ziel 3 m zu dir ziehen oder umwerfen (STÄ-Rettungswurf).'],

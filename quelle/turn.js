@@ -21,6 +21,11 @@ function tSpend(ch, k, label, force) {
   if (k === 'f') return true;
   if (!force) {
     const why = canAct(ch); if (why && !ruleGate(ch, label + ': ' + why, label + ' nicht möglich', true)) return false;
+    /* Ausserhalb des eigenen Zugs am Tisch gibt es nur Reaktionen und freie Handlungen */
+    if ((k === 'a' || k === 'b') && typeof offTurn === 'function' && offTurn()) {
+      if (rule('strict')) { bannerToast('Nicht dein Zug', label + ': Aktion und Bonusaktion gehen nur im eigenen Zug. Jetzt höchstens eine Reaktion.'); return false; }
+      bannerToast('Nicht dein Zug', label + ' wurde trotzdem ausgeführt (Regeln locker).');
+    }
     if (tLeft(ch, k) <= 0) {
       if (inFight(ch) && rule('strict')) { bannerToast(COST_DE[k] + ' schon verbraucht', label + ' ist in diesem Zug nicht mehr möglich. Neuer Zug: „Neuer Zug“ oder Zugwechsel am Tisch.'); return false; }
       if (inFight(ch)) bannerToast(COST_DE[k] + ' schon verbraucht', label + ' wurde trotzdem ausgeführt (Regeln locker).');
@@ -356,7 +361,7 @@ Object.assign(XA, {
   tToggle: (t, a, p, ch) => { const st = turnSt(ch); if (a === 'a') st.a = st.a >= st.aMax ? 0 : st.aMax; else st[a] = st[a] ? 0 : 1; commit(); openTurnPicker(a); },
   tNew: (t, a, p, ch) => { turnReset(ch); commit(); },
   tTime: (t, a, p, ch) => { timePass(ch, +a); commit(); },
-  tFight: (t, a, p, ch) => { ch.play.localFight = !ch.play.localFight; if (ch.play.localFight) turnReset(ch); commit(); },
+  tFight: (t, a, p, ch) => { ch.play.localFight = !ch.play.localFight; if (ch.play.localFight) turnReset(ch); else delete ch.play.hxForms; /* Wandelgestalt endet mit dem Kampf */ commit(); },
   tMove: (t, a, p, ch) => { const st = turnSt(ch); const c = derive(ch, S.hb); st.mv = Math.max(0, Math.min(c.speed + st.mvMax, (st.mv || 0) + +a)); commit(); },
   tFxOff: (t, a, p, ch) => { const P = ch.play; if (a === 'rage') rageEnd(P, 'freiwillig beendet'); else if (a === 'ws') wsEnd(ch, 'beendet'); else { if (P.conc && P.fxSrc && P.fxSrc[a] === P.conc.id) endConc(P); fxSet(P, a, false); } commit(); },
   tLoh: (t, a, p, ch) => { if (a === 'x') { orbPrompt(''); return; } const c = derive(ch, S.hb); const r = c.res.find((x) => x.k === 'loh'); const left = r.max - (+ch.play.res.loh || 0); const n = Math.max(0, Math.min(left, +($('#lohN') || {}).value || 0)); if (!n) return; if (!tSpend(ch, 'b', 'Handauflegen')) { orbPrompt(''); return; } ch.play.res.loh = (+ch.play.res.loh || 0) + n; if (a === 'me') { const P = ch.play; if (P.hp <= 0) { P.ds = [0, 0]; wakeUp(P); } P.hp = Math.min(c.hpMax, P.hp + n); } pushLog({ label: 'Handauflegen', total: n, detail: (a === 'me' ? 'auf dich · TP jetzt ' + ch.play.hp + '/' + c.hpMax : 'auf einen Verbündeten') + ' · Pool ' + (left - n) + '/' + r.max, share: true }); orbPrompt(''); commit(); }
@@ -415,7 +420,11 @@ function hxPulseTail(c,cid){const l=c.lv(cid),sub=c.subOf(cid),dc=8+c.pb+c.mod.i
  const remaining={hxf_dread:'b',hxf_trug:'f',hxm_screen:'r',hxm_step:'b',hxm_guard:'r',hxm_field:'a',hxm_read:'a',hxm_interrupt:'r',hxm_focus:'f',hxg_hold:'f',hxg_hard:'r',hxg_save:'r',hxt_resist:'f',hxt_block:'r',hxt_swarm:'b',hxt_snare:'a',hxt_break:'r',hxe_precise:'f',hxe_swing:'f',hxe_pressure:'f',hxb_spread:'f',hxb_wave:'a',hxb_sticky:'f',hxb_heal:'f',hxs_guest:'f'};
  for(const [key,cost] of Object.entries(remaining)){
   const title={hxf_dread:'Schreckgestalt',hxf_trug:'Trugwechsel',hxm_screen:'Geistesschirm',hxm_step:'Lufttritt',hxm_guard:'Schutzimpuls',hxm_field:'Kraftfeld',hxm_read:'Gedankenlesen',hxm_interrupt:'Unterbrechung',hxm_focus:'Fokussierter Schlag',hxg_hold:'Letzter Halt',hxg_hard:'Zähigkeit',hxg_save:'Rettender Zug',hxt_resist:'Reissfester Faden',hxt_block:'Blockierpuppe',hxt_swarm:'Schwarmwolke',hxt_snare:'Fadenschlinge',hxt_break:'Fadenbruch',hxe_precise:'Präziser Schnitt',hxe_swing:'Schwung',hxe_pressure:'Kampfdruck',hxb_spread:'Wandernde Seuche',hxb_wave:'Ausbreitungswelle',hxb_sticky:'Zäher Befall',hxb_heal:'Versengte Erholung',hxs_guest:'Gastrecht'}[key];
-  add({id:'hx_use_'+key,n:title,cost,res:key,when:c=>c.res.some(x=>x.k===key),sub:'SL: Auslöser und Ziel prüfen',run:(ch,c)=>{const f=c.features.find(x=>x.n===title);tLog(title,(f?f.t:'Merkmaltext beachten.')+' · Effekt am Tisch anwenden.');}});
+  add({id:'hx_use_'+key,n:title,cost,res:key,when:c=>c.res.some(x=>x.k===key),sub:'SL: Auslöser und Ziel prüfen',run:(ch,c)=>{const f=c.features.find(x=>x.n===title);const m=a=>sgn(c.mod[a]).replace('−','-');
+   /* Fähigkeiten mit festem Würfelausdruck würfeln direkt, wie Abfangen */
+   const dice={hxg_hard:['2W8'+m('con'),'Schaden um diesen Wert verringern'],hxm_guard:['2W8'+m('int'),'Schaden um diesen Wert verringern'],hxt_block:['2W6'+m('int'),'Schaden um diesen Wert verringern'],hxg_save:['2W10','Verbündeter bleibt auf 1 TP; diesen unveränderlichen Schaden erleidest du'],hxb_wave:['2W'+HX_DIE(c.lv('hxblight')),'nekrotischer Schaden je Ziel bei misslungenem KON-Rettungswurf gegen Seuchen-SG, sonst die Hälfte']}[key];
+   if(dice){tRoll(dice[0],title+': '+dice[1]);return;}
+   tLog(title,(f?f.t:'Merkmaltext beachten.')+' · Effekt am Tisch anwenden.');}});
  }
 })();
 

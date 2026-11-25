@@ -454,7 +454,7 @@ function derive(ch, hb) {
   c.attacksPer = Math.max(lv('fig') ? step(1, [[5, 2], [11, 3], [20, 4]])(lv('fig')) : 1, ['bar', 'mon', 'pal', 'ran', 'rk', 'fk', 'ma'].some((k) => lv(k) >= 5) || (lv('bw') >= 6 && subOf('bw') === 'battle') ? 2 : 1, lv('ma') >= 18 && subOf('ma') === 'combat' ? 3 : 1);
   c.attacksPer=Math.max(c.attacksPer,...classList.filter(e=>e.C.hxExtra&&e.lvl>=e.C.hxExtra).map(()=>2));
   c.classDC = []; const dcOf = (a) => 8 + pb + c.mod[a];
-  for(const e of classList)if(e.C.hxDC)c.classDC.push([e.C.name+'-SG',dcOf(e.C.hxDC)]);
+  for(const e of classList)if(e.C.hxDC)c.classDC.push([e.C.hxDCn||e.C.name+'-SG',dcOf(e.C.hxDC)]);
   if (lv('rk')) c.classDC.push(['Runen-SG', dcOf('int')]); if (lv('bw')) c.classDC.push(['Blut-SG', dcOf('con')], ['Blutangriff', sgn(pb + c.mod.con)]); if (lv('fk')) c.classDC.push(['Fluch-SG', dcOf('cha') + (lv('fk') >= 3 && subOf('fk') === 'judge' ? 1 : 0)]); if (lv('ma')) c.classDC.push(['Geräte-SG', dcOf('int') + (lv('ma') >= 17 ? 1 : 0)]);
   if (lv('bw')) { const n = step(1, [[5, 2], [11, 3], [17, 4]])(L); const add = (ch.opts || []).includes('stark') || ((multi.find((m) => m.cls === 'bw') || {}).opts || []).includes('stark') ? c.mod.con : 0; att.push({ name: 'Blutlanze' + (n > 1 ? ' (' + n + ' Strahlen)' : ''), ab: 'con', atk: pb + c.mod.con, die: '1W10', dmod: add, dmg: '1W10' + (add ? sgn(add) : ''), dtype: 'Nekrotisch', props: '18 m · Magieaktion', melee: false, ranged: true, prof: true }); }
   c.critRange = lv('fig') >= 3 && subOf('fig') === 'champion' ? (lv('fig') >= 15 ? 18 : 19) : 20;

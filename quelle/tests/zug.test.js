@@ -42,6 +42,15 @@ const SETUP = (turnMine) => { Object.keys(S.chars).forEach((k) => delete S.chars
     await p.evaluate(() => { cur().play.localFight = false; hlSetLevel('pro'); render(); }); await p.click('[data-act="d20"][data-kind="init"]'); await p.waitForTimeout(300);
     T('Stufe «Erfahren» (ohne Zugleiste): bleibt aus', await p.evaluate(() => cur().play.localFight === false));
     await ctx.close(); }
+  { /* Grosstest Befund 1: ausserhalb des eigenen Zugs nur Reaktionen */
+    const p = await b.newPage({ viewport: { width: 1280, height: 900 } }); p.on('pageerror', (e) => errs.push(e.message));
+    await p.addInitScript(() => { localStorage.setItem('hb_sample_done', '1'); localStorage.setItem('hb_dice_fx', 'aus'); localStorage.setItem('hb_w3d', '0'); });
+    await p.goto('file://' + target); await p.waitForTimeout(400);
+    const r = await p.evaluate(`(${SETUP.toString()})(false); (() => { const ch = cur(); turnReset(ch); const a = tSpend(ch, 'a', 'Test'), bb = tSpend(ch, 'b', 'Test'), rr = tSpend(ch, 'r', 'Test'); const t = turnSt(ch); return { a, bb, rr, ta: t.a, tb: t.b, tr: t.r }; })()`);
+    T('Strenge Regeln am Tisch: im fremden Zug keine Aktion und Bonusaktion, Reaktion erlaubt', r.a === false && r.bb === false && r.rr === true && r.ta === 0 && r.tb === 0 && r.tr === 1, r);
+    const r2 = await p.evaluate(`(${SETUP.toString()})(true); (() => { const ch = cur(); turnReset(ch); return tSpend(ch, 'a', 'Test') && tSpend(ch, 'b', 'Test'); })()`);
+    T('Im eigenen Zug: Aktion und Bonusaktion wie gewohnt', r2 === true);
+    await p.close(); }
   T('Keine Skriptfehler', errs.length === 0, errs.slice(0, 3));
   await b.close(); console.log(pass + ' / ' + (pass + fail) + ' bestanden'); process.exit(fail ? 1 : 0);
 })();
