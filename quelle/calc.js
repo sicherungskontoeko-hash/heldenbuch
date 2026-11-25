@@ -53,6 +53,12 @@ function asiLevels(cls, level) {
 const MC_ARMOR = { bar: ['shield'], brd: ['light'], cle: ['light', 'medium', 'shield'], dru: ['light', 'shield'], fig: ['light', 'medium', 'shield'], pal: ['light', 'medium', 'shield'], ran: ['light', 'medium', 'shield'], rog: ['light'], wlk: ['light'] };
 const MC_MARTIAL = ['bar', 'fig', 'pal', 'ran'];
 const MC_SKILL = { brd: ALL_SKILLS, ran: CLASSES.ran.skills, rog: CLASSES.rog.skills };
+/* Regelkonformes Multiclassing: Hauptattribut der neuen und aller bisherigen Klassen mindestens 13. Rückgabe: Grund oder null */
+function mcBlock(ch, k) {
+  const c = derive(ch, typeof S !== 'undefined' ? S.hb : {}); const ids = [k, ch.cls].concat((ch.multi || []).map((m) => m && m.cls)).filter((x, i, a) => x && CLASSES[x] && a.indexOf(x) === i);
+  const miss = ids.map((id) => { const req = MC_PREREQ[id] || []; return req.every((grp) => grp.some((a) => c.abil[a] >= 13)) ? null : CLASSES[id].name + ': ' + req.map((g) => g.map((a) => AB_K[a]).join(' oder ')).join(' und ') + ' 13'; }).filter(Boolean);
+  return miss.length ? 'braucht ' + miss.join(', ') : null;
+}
 const MC_PREREQ = { bar: [['str']], brd: [['cha']], cle: [['wis']], dru: [['wis']], fig: [['str', 'dex']], mon: [['dex'], ['wis']], pal: [['str'], ['cha']], ran: [['dex'], ['wis']], rog: [['dex']], sor: [['cha']], wlk: [['cha']], wiz: [['int']] };
 function derive(ch, hb) {
   hb = hb || {};

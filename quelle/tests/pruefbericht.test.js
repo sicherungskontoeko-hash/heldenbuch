@@ -69,6 +69,12 @@ const W = (ms) => new Promise((r) => setTimeout(r, ms));
   T('HB-13: Urteil auch mit True Strike', au.ts === true, au.ts);
   T('HB-14: Angriffsdialog bricht nach Heldenwechsel ab', au.saBound, au);
   T('HB-15: Würfelausdruck begrenzt', au.big === 1000, au.big);
+  /* HB-12: nur regelkonformes Multiclassing (Entscheid 25.11.) */
+  const mcr = await p.evaluate(() => { const ch = normChar(newChar({ name: 'M', cls: 'wiz', level: 3, base: { str: 10, dex: 12, con: 14, int: 16, wis: 13, cha: 8 } })); S.chars = { [ch.id]: ch }; S.cur = ch.id; S.view = 'build';
+    let opts = null; for (let st = 0; st < 7; st++) { S.step = st; render(); const sel = document.getElementById('addMc'); if (sel) { opts = [...sel.options].filter((o) => o.value).map((o) => o.value + (o.disabled ? '-' : '+')); break; } }
+    const sel = document.getElementById('addMc'); sel.value = 'fig'; sel.dispatchEvent(new Event('change', { bubbles: true })); const after = (ch.multi || []).length;
+    const ok = mcBlock(ch, 'cle'), no = mcBlock(ch, 'fig'); return { opts, after, ok, no }; });
+  T('Mehrklasse nur regelkonform: Kämpfer gesperrt (STÄ/GES unter 13), Kleriker möglich', mcr.opts.includes('fig-') && mcr.opts.includes('cle+') && mcr.after === 0 && mcr.ok === null && /Kämpfer/.test(mcr.no), mcr);
   T('Keine Skriptfehler', errs.length === 0, errs.slice(0, 3));
   await b.close(); console.log(pass + ' / ' + (pass + fail) + ' bestanden'); process.exit(fail ? 1 : 0);
 })();
