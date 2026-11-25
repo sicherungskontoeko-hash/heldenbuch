@@ -84,6 +84,10 @@ run "Kampf am Tisch: eigener Zug gut sichtbar (zug.test.js)" node tests/zug.test
 run "Erweiterung: 6 Klassen, 9 Völker, erweiterte Auswahl (erweiterung.test.js)" node tests/erweiterung.test.js
 run "Prüfberichte 25.11.: Würfelanzeige, Schild, Tisch-Anfragen, Audit HB-01–HB-15 (pruefbericht.test.js)" node tests/pruefbericht.test.js
 run "Tischhilfen: eigene Würfel, Zugleiste, Ladungen, Regeln der Runde, Vorbereiten (tischhilfen.test.js)" node tests/tischhilfen.test.js
+run "Sicherheit: fremder Text wirkt nie als HTML (sicherheit.test.js)" node tests/sicherheit.test.js
+run "Begleiter und Reittiere: Werte, TP, Initiative, eigene Würfel (begleiter.test.js)" node tests/begleiter.test.js
+run "Bedienung mit Tastatur und im Querformat (bedienung.test.js)" node tests/bedienung.test.js
+run "Zufallsspieler: 3 Minuten zufällige Bedienung ohne Fehler (zufallsspieler.test.js)" node tests/zufallsspieler.test.js --min=3
 run "Langsames Handy: CPU 4× gedrosselt (handy.test.js app)" node tests/handy.test.js app/Heldenbuch.html --drossel=4
 run "Abgleich mit dem SRD 5.2: Zauber und Monster (srd.test.js)" node tests/srd.test.js
 run "Online-Tisch mit drei Geräten, lokal (echt.test.js --lokal)" node tests/echt.test.js --lokal

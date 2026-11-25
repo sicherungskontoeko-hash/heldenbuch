@@ -177,10 +177,12 @@ function compBlock(c) {
   h += '<div class="row">' + field('Begleiter hinzufügen', '<select id="addComp"><option value="">— wählen —</option>' + Object.entries(COMPANIONS).map(([k, T]) => '<option value="' + k + '">' + esc(T.name) + ' (' + esc(T.from) + ')</option>').join('') + '</select>') + '</div>';
   return h + '</section>';
 }
-function rawD20(mod, label, isAtk) {
-  const r1 = 1 + Math.floor(rnd() * 20), r2 = 1 + Math.floor(rnd() * 20); const m = S.mode;
+function rawD20(mod, label, isAtk, opt) {
+  let r1 = 1 + Math.floor(rnd() * 20), r2 = 1 + Math.floor(rnd() * 20); const m = S.mode;
+  /* Eigene Würfel (Feld «Wurf»); Würfe der Claude-Brücke würfelt immer die App */
+  const ev = opt && opt.app ? null : typeof echtTake === 'function' ? echtTake(20) : null; if (ev) { r1 = ev[0]; if (ev.length > 1) r2 = ev[1]; }
   const use = m === 'adv' ? Math.max(r1, r2) : m === 'dis' ? Math.min(r1, r2) : r1;
-  pushLog({ label, total: use + mod, detail: (m === 'normal' ? 'W20 ' + use : (m === 'adv' ? 'Vorteil ' : 'Nachteil ') + r1 + '/' + r2) + ' ' + sgn(mod), crit: isAtk && use === 20, fumble: use === 1, sides: 20, nat: use, pair: m !== 'normal' ? [r1, r2] : null, keep: use === r1 ? 0 : 1, adv: m === 'adv' });
+  pushLog({ label, total: use + mod, detail: (m === 'normal' ? 'W20 ' + use : (m === 'adv' ? 'Vorteil ' : 'Nachteil ') + r1 + '/' + r2) + ' ' + sgn(mod) + (ev ? ' · echter Würfel' + (m !== 'normal' && ev.length < 2 ? ', zweiter W20 von der App' : '') : ''), crit: isAtk && use === 20, fumble: use === 1, sides: 20, nat: use, pair: m !== 'normal' ? [r1, r2] : null, keep: use === r1 ? 0 : 1, adv: m === 'adv' });
   return use + mod;
 }
 
@@ -438,7 +440,7 @@ const XA = {
   invNew: (t, a, p, ch) => { ch.inv = ch.inv || []; ch.inv.push({ n: 'Neuer Gegenstand', qty: 1, kg: 0 }); commit(); },
   compDel: (t, a, p, ch) => { ch.comps.splice(+a, 1); commit(); },
   compHp: (t, a, p, ch) => { const x = ch.comps[+a]; const n = Math.max(0, +$('#cHp' + a).value || 0); if (!x || !n) return; const s = compStat(derive(ch, S.hb), x); x.hp = t.dataset.d === 'dmg' ? Math.max(0, x.hp - n) : Math.min(s.hpMax, x.hp + n); if (x.hp <= 0) pushLog({ label: s.name, total: '0', detail: x.t === 'steed' ? 'Das Ross verschwindet, bis du Ross finden erneut wirkst.' : 'Bei 0 TP' }); commit(); },
-  compInit: (t, a, p, ch) => { const x = ch.comps[+a]; const c = S.combat; if (!x || !c) return; const s = compStat(derive(ch, S.hb), x); const b = s.ab ? mod(s.ab.dex) : 0; const r = 1 + Math.floor(rnd() * 20); saveCombat(Object.assign({}, c, { npcs: (c.npcs || []).concat([{ id: uidX(), name: s.name + ' (' + ch.name.replace(/^Beispiel:\s*/, '') + ')', v: r + b, dex: b, ally: true }]), t: Date.now() })); pushLog({ label: s.name + ': Initiative', total: r + b, detail: 'W20 ' + r + ' ' + sgn(b), sides: 20, nat: r }); },
+  compInit: (t, a, p, ch) => { const x = ch.comps[+a]; const c = S.combat; if (!x || !c) return; const s = compStat(derive(ch, S.hb), x); const b = s.ab ? mod(s.ab.dex) : 0; const ev = typeof echtTake === 'function' ? echtTake(20) : null; const r = ev ? ev[0] : 1 + Math.floor(rnd() * 20); saveCombat(Object.assign({}, c, { npcs: (c.npcs || []).concat([{ id: uidX(), name: s.name + ' (' + ch.name.replace(/^Beispiel:\s*/, '') + ')', v: r + b, dex: b, ally: true }]), t: Date.now() })); pushLog({ label: s.name + ': Initiative', total: r + b, detail: 'W20 ' + r + ' ' + sgn(b) + (ev ? ' · echter Würfel' : ''), sides: 20, nat: r }); },
   xroll: (t) => rawD20(+t.dataset.mod, t.dataset.label, !!t.dataset.atk),
   npcHp: (t, a) => { const c = S.combat; if (!c) return; const n = Math.max(0, +($('#nh_' + a) || {}).value || 0); if (!n) return; const npcs = (c.npcs || []).map((x) => x.id === a ? Object.assign({}, x, { hp: t.dataset.d === 'dmg' ? Math.max(0, x.hp - n) : Math.min(x.hpMax, x.hp + n) }) : x); const x = npcs.find((y) => y.id === a); const dead = x && x.hp <= 0 && (c.npcs.find((y) => y.id === a) || {}).hp > 0; if (dead) pushLog({ label: x.name + ' besiegt', total: '†', detail: 'Auf 0 TP', share: true }); saveCombat(Object.assign({}, c, { npcs, t: Date.now(), log: dead ? clog(c, x.name + ' ist besiegt') : c.log })); },
   grpRest: (t, a) => { const me = cur(); if (me && !dmOut(UID) && typeof restGate === 'function' && !restGate(me, a)) return; const id = uidX(); if (me) me.play.restSeen = id; saveMeta({ rest: { id, kind: a, t: Date.now() } }); if (me && !dmOut(UID)) doRest(me, a); else bannerToast(a === 'long' ? 'Lange Rast für alle' : 'Kurze Rast für alle', a === 'long' ? 'Alle Helden setzen TP, Trefferwürfel und Zauber zurück.' : 'Jeder Spieler bekommt die Frage, ob er Trefferwürfel ausgibt.'); },

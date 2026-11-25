@@ -163,7 +163,6 @@ function advXp(A, e, lv) {
 const advLevel = (C) => +((String(C.level || '').match(/\d+/g) || []).pop() || 0);
 
 /* ---------- Entscheidungen ---------- */
-function advFlagVal(A, st, id) { const f = (A.flags || []).find((x) => x.id === id); return f ? st.flags[id] || '' : ''; }
 function advFlagChips(A, st, ids) {
   return '<div class="advfl">' + ids.map((id) => { const f = (A.flags || []).find((x) => x.id === id); if (!f) return ''; const v = st.flags[id] || '';
     return '<div class="advflr"><span>' + esc(f.label) + '</span><div class="chips">' + Object.keys(f.opts).map((o) => chip(v === o, esc(o), 'data-act="advFlag" data-arg="' + esc(id) + '" data-v="' + esc(o) + '"')).join('') + '</div></div>'; }).join('') + '</div>';

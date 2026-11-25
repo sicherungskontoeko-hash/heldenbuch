@@ -482,7 +482,7 @@ function showToast(e) {
     if (seq !== showToast.seq) return; clearInterval(showToast.iv); t.onclick = (ev) => { if (ev.target.closest('[data-act]')) return; t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
     const dice = vals.map((v, i) => dieH(v, 'land' + (i === keep ? hl : ' drop'))).join('');
     const tip = typeof rollTip === 'function' ? rollTip(e) : '';
-    t.innerHTML = '<div class="trow"><div class="dice' + wide + '">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer' + (nat && nat < 20 ? ' (erweiterter Bereich)' : '') + '!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
+    t.innerHTML = '<div class="trow"><div class="dice' + wide + '">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + esc(e.total) + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer' + (nat && nat < 20 ? ' (erweiterter Bereich)' : '') + '!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
     if (art) t.querySelectorAll('.die.d3').forEach((el, i) => { const svg = el.innerHTML; if (!W3D.still(el, sides, vals[i], set, { gold: i === keep && nat === 20, dim: i !== keep || nat === 1 })) el.innerHTML = svg;
       else if (i === keep && nat === 1 && typeof d3cracks === 'function') el.insertAdjacentHTML('beforeend', '<svg class="d3s d3crkov" viewBox="0 0 100 100" aria-hidden="true">' + d3cracks(D3_SETS[set]) + '</svg>'); /* Risse im Würfel wie bisher */ });
     if (use3) { d3snd('land', 1, set); if (nat !== 20 && nat !== 1 && typeof vfxVibrate === 'function') vfxVibrate('land'); if (nat === 20 || nat === 1) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, nat === 20 ? 'n20' : 'n1', crl); d3snd(nat === 20 ? 'n20' : 'n1'); if (typeof vfxVibrate === 'function') vfxVibrate(nat === 20 ? 'n20' : 'n1'); } }
@@ -504,7 +504,7 @@ function showToast(e) {
   showToast.iv = setInterval(() => { t.querySelectorAll('.die text').forEach((x) => { x.textContent = flick(); }); }, 70);
   showToast.st = setTimeout(final, Math.min(e.pair ? 950 : 750, rollMs));
 }
-const logHtml = () => S.log.length ? S.log.map((e) => '<li><span>' + esc(e.label) + '</span><b' + (e.crit ? ' class="crit"' : '') + '>' + e.total + '</b><small>' + esc(e.detail) + '</small></li>').join('') : '<li class="empty">Noch nichts gewürfelt. Tippe auf einen Wert.</li>';
+const logHtml = () => S.log.length ? S.log.map((e) => '<li><span>' + esc(e.label) + '</span><b' + (e.crit ? ' class="crit"' : '') + '>' + esc(e.total) + '</b><small>' + esc(e.detail) + '</small></li>').join('') : '<li class="empty">Noch nichts gewürfelt. Tippe auf einen Wert.</li>';
 
 /* ---------- Bausteine ---------- */
 const chip = (on, label, attrs, dis) => '<button type="button" class="chip' + (on ? ' on' : '') + '"' + (dis && !on ? ' disabled' : '') + ' ' + attrs + '>' + label + '</button>';
@@ -1275,7 +1275,7 @@ function playerDoc(v) {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
   const p = Object.assign({}, v); const str = (x, n) => (typeof x === 'string' ? x.slice(0, n) : '');
   p.char = str(v.char, 60) || '?'; p.pl = str(v.pl, 40); p.cls = str(v.cls, 20); p.clsName = str(v.clsName, 80); p.portrait = str(v.portrait, 40); p.pimg = safeImg(v.pimg);
-  p.rolls = (Array.isArray(v.rolls) ? v.rolls : []).filter((r) => r && typeof r === 'object' && Number.isFinite(r.t)).slice(-40).map((r) => Object.assign({}, r, { label: str(r.label, 200), detail: str(r.detail, 400), total: typeof r.total === 'number' ? r.total : typeof r.total === 'string' ? r.total.slice(0, 20) : '?' }));
+  p.rolls = (Array.isArray(v.rolls) ? v.rolls : []).filter((r) => r && typeof r === 'object' && Number.isFinite(r.t)).slice(-40).map((r) => Object.assign({}, r, { label: str(r.label, 200), detail: str(r.detail, 400), total: typeof r.total === 'number' ? r.total : typeof r.total === 'string' ? r.total.slice(0, 20) : '?', sides: Number.isInteger(r.sides) && r.sides >= 0 && r.sides <= 100 ? r.sides : 0, nat: Number.isFinite(r.nat) ? r.nat : undefined, dset: typeof r.dset === 'string' && typeof D3_SETS !== 'undefined' && ownKey(D3_SETS, r.dset) ? r.dset : '' }));
   for (const k of ['hp', 'hpMax', 'temp', 'ac', 'dex', 'level']) if (v[k] != null && !Number.isFinite(+v[k])) delete p[k];
   if (v.cond != null && !Array.isArray(v.cond)) delete p.cond; else if (Array.isArray(v.cond)) p.cond = v.cond.filter((x) => typeof x === 'string').slice(0, 30);
   if (v.init != null && (typeof v.init !== 'object' || Array.isArray(v.init))) delete p.init;
@@ -1479,7 +1479,7 @@ function setMyInit(v) { S.myInit = { v: +v, cid: S.combat.id }; if (S.modal === 
 function pcBits(x) {
   if (!x.hpMax) return ''; const pct = Math.max(0, Math.min(100, (x.hp / x.hpMax) * 100));
   const p = (S.table || {})[x.key.slice(2)] || {}; const cond = (p.cond || []).map((n) => '<span class="ncond">' + esc(n) + '</span>').join('');
-  return '<span class="pchp' + (x.hp <= 0 ? ' down' : pct <= 25 ? ' crit' : pct <= 50 ? ' low' : '') + '"><i style="width:' + pct + '%"></i></span><span class="nhp">TP ' + x.hp + '/' + x.hpMax + (p.ac ? ' · RK ' + p.ac : '') + '</span>' + cond;
+  return '<span class="pchp' + (x.hp <= 0 ? ' down' : pct <= 25 ? ' crit' : pct <= 50 ? ' low' : '') + '"><i style="width:' + pct + '%"></i></span><span class="nhp">TP ' + esc(x.hp) + '/' + esc(x.hpMax) + (p.ac ? ' · RK ' + esc(p.ac) : '') + '</span>' + cond;
 }
 function order() {
   const c = S.combat; if (!c || !c.active) return [];
