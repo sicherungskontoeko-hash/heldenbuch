@@ -125,7 +125,7 @@ function brMob(a) {
     const at = a.angriff ? brFind(M[7], a.angriff, (z) => z[0]) : M[7][0]; if (!at) throw new Error('Angriffe von ' + x.name + ': ' + M[7].map((z) => z[0]).join(', '));
     const tg = npcTargets(); const t = a.ziel ? brFind(tg, a.ziel, (z) => z.name) : null; if (a.ziel && !t) throw new Error('Ziel «' + a.ziel + '» nicht am Tisch. Ziele: ' + tg.map((z) => z.name).join(', '));
     const m0 = S.mode; const v = BR_FOLD(a.vorteil); S.mode = v === 'vorteil' ? 'adv' : v === 'nachteil' ? 'dis' : 'normal';
-    let tot, e; try { tot = rawD20(at[1], x.name + ': ' + at[0], true); e = S.log[0]; } finally { S.mode = m0; }
+    let tot, e; try { tot = rawD20(at[1], x.name + ': ' + at[0], true, { app: true }); e = S.log[0]; } finally { S.mode = m0; }
     if (typeof npcAtkCount === 'function') npcAtkCount(x.id);
     const nat = e && e.nat; const roll = x.name + ': ' + at[0] + ' ' + tot + ' (' + (e ? e.detail : '') + ')';
     if (!t) return roll + '. Kein Ziel angegeben: ob das trifft, entscheidest du; Schaden wäre ' + at[2] + ' ' + at[3] + '.';
