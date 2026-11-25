@@ -9,11 +9,11 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
   await p.evaluate(() => { window.ADV_IDS = new Set([ADV_MACHTADER, ADV_KRUG].flatMap((A) => A.mobs.map((o) => 'u-' + o.id))); });
   T('Jeder Bestiarium-Eintrag hat ein Bild, keine Bilder ohne Eintrag', await p.evaluate(() => Object.keys(BESTIARY).every((k) => MOB_PIC[k]) && Object.keys(MOB_PIC).every((k) => BESTIARY[k] || ADV_IDS.has(k))), await p.evaluate(() => Object.keys(MOB_PIC).filter((k) => !BESTIARY[k] && !ADV_IDS.has(k))));
   T('Alle Kreaturen der eingebauten Abenteuer haben ein Bild', await p.evaluate(() => [ADV_MACHTADER, ADV_KRUG].every((A) => A.mobs.every((o) => MOB_PIC['u-' + o.id]))), await p.evaluate(() => [ADV_MACHTADER, ADV_KRUG].flatMap((A) => A.mobs.filter((o) => !MOB_PIC['u-' + o.id]).map((o) => o.id))));
-  T('Neue Bilder sind klein (je höchstens 8 KB)', await p.evaluate(() => Object.values(MOB_PIC).every((u) => u.length < 8 * 1024 * 4 / 3 + 40)));
+  T('Bilder bleiben klein (ausgeschnittene je höchstens 8 KB, neu gemalte 256 px je höchstens 32 KB)', await p.evaluate(() => Object.values(MOB_PIC).every((u) => u.length < 32 * 1024 * 4 / 3 + 40) && Object.values(MOB_PIC).filter((u) => u.length > 8 * 1024 * 4 / 3 + 40).length <= 50));
   await p.evaluate(() => { localStorage.setItem('hb_dice_fx', 'aus'); advMobsInstall(ADV_KRUG); S.view = 'mobs'; render(); });
   T('Abenteuer-Kreatur im Bestiarium mit Bild', await p.evaluate(() => !!BESTIARY['u-krug-knut'] && [...document.querySelectorAll('details.mob.haspic')].some((d) => /Knut/.test(d.textContent))));
   T('Bestiarium: alle Einträge mit Bild', await p.evaluate(() => document.querySelectorAll('details.mob.haspic .mpic').length === Object.keys(BESTIARY).length));
-  T('Bilder laden (WebP)', await p.evaluate(async () => { const i = document.querySelector('details.mob.haspic .mpic'); i.loading = 'eager'; await i.decode().catch(() => {}); return i.naturalHeight === 96; }));
+  T('Bilder laden (WebP)', await p.evaluate(async () => { const i = document.querySelector('details.mob.haspic .mpic'); i.loading = 'eager'; await i.decode().catch(() => {}); return i.naturalHeight === 96 || i.naturalHeight === 256; }));
   T('Detail zeigt das grosse Bild', await p.evaluate(() => !!document.querySelector('details.mob.haspic .mpicL')));
   T('Handy: kein Querscrollen im Bestiarium', await p.evaluate(() => document.documentElement.scrollWidth <= 391));
   await p.evaluate(() => { UID = 'me1'; const n = normChar(newChar({ name: 'Mira', cls: 'fig', level: 5 })); S.chars[n.id] = n; S.cur = n.id; window.saveCombat = (c) => { S.combat = c; paintCamp(); };
