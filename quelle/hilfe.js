@@ -11,7 +11,7 @@ const HL_OPTS = {
 const HL_LEVELS = {
   neu: { n: 'Einsteiger', t: 'Alles wird erklärt: Kurzerklärungen bei den Werten, ein Zug-Leitfaden und nach jedem Wurf ein Satz, was er bedeutet. Zum Lernen gedacht, dafür voller.', o: { erkl: 1, tipps: 1, zug: 1, nach: 1, rw: 0 } },
   std: { n: 'Standard', t: 'Zugleiste und ?-Knöpfe. Nachbessern erscheint nur, wenn du etwas einsetzen kannst.', o: { erkl: 1, tipps: 0, zug: 1, nach: 1, rw: 0 } },
-  pro: { n: 'Erfahren', t: 'Nur dein Bogen: tippen, würfeln, fertig. Keine Zugleiste, keine Erklärungen, keine Leisten nach dem Wurf. Du führst deinen Zug selbst.', o: { erkl: 0, tipps: 0, zug: 0, nach: 0, rw: 0 } }
+  pro: { n: 'Erfahren', t: 'Nur dein Bogen: tippen, würfeln, fertig. Keine Erklärungen, keine Leisten nach dem Wurf, keine Zugleiste. Soll die App trotzdem Aktionen und Zauberplätze zählen, schalte unten die Zugleiste ein.', o: { erkl: 0, tipps: 0, zug: 0, nach: 0, rw: 0 } }
 };
 function hlState() {
   if (S.hl) return S.hl;
@@ -34,9 +34,12 @@ const hlTip = (t, tag) => (hlOn('tipps') ? '<' + (tag || 'small') + ' class="nb"
 function hlPanel(where) {
   const s = hlState(); const cust = hlCustom();
   return '<div class="hllv" role="radiogroup" aria-label="Hilfe-Stufe">' + Object.entries(HL_LEVELS).map(([k, L]) => '<button type="button" role="radio" aria-checked="' + (s.lvl === k && !cust) + '" class="hlc' + (s.lvl === k ? (cust ? ' part' : ' on') : '') + '" data-act="hlLvl" data-arg="' + esc(k) + '" data-where="' + esc(where) + '"><b>' + L.n + (s.lvl === k && cust ? ' <em>angepasst</em>' : '') + '</b><small>' + esc(L.t) + '</small></button>').join('') + '</div>' +
+    /* Zugleiste immer sichtbar: Wie viel erklärt wird und ob die App den Zug zählt, sind zwei getrennte Fragen */
+    '<div class="rulelist hlzug">' + hlRow('zug', where) + '</div>' +
     '<details class="hlfine"' + (cust || S.hlFine ? ' open' : '') + '><summary>Einzeln anpassen</summary><div class="rulelist">' +
-    Object.entries(HL_OPTS).map(([k, o]) => '<label class="rulerow"><input type="checkbox" data-act="hlT" data-arg="' + esc(k) + '" data-where="' + esc(where) + '"' + (hlOn(k) ? ' checked' : '') + '><span><b>' + esc(o[0]) + '</b><small>' + esc(o[1]) + '</small></span></label>').join('') + '</div></details>';
+    Object.entries(HL_OPTS).filter(([k]) => k !== 'zug').map(([k, o]) => '<label class="rulerow"><input type="checkbox" data-act="hlT" data-arg="' + esc(k) + '" data-where="' + esc(where) + '"' + (hlOn(k) ? ' checked' : '') + '><span><b>' + esc(o[0]) + '</b><small>' + esc(o[1]) + '</small></span></label>').join('') + '</div></details>';
 }
+const hlRow = (k, where) => '<label class="rulerow"><input type="checkbox" data-act="hlT" data-arg="' + esc(k) + '" data-where="' + esc(where) + '"' + (hlOn(k) ? ' checked' : '') + '><span><b>' + esc(HL_OPTS[k][0]) + '</b><small>' + esc(HL_OPTS[k][1]) + '</small></span></label>';
 function hlOpen() {
   const m = $('#modal'); S.modal = 'hilfe'; S.more = false; document.querySelectorAll('details.mnu[open]').forEach((d) => { d.open = false; });
   m.innerHTML = '<div class="dlg hldlg" role="dialog" aria-modal="true" aria-label="Hilfen"><div class="dph"><b>Hilfen</b><button class="x" data-act="closeModal" aria-label="Schliessen">×</button></div>' +

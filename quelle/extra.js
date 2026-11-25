@@ -67,6 +67,14 @@ const GEAR = [['Entdeckerpaket (Rucksack, Schlafsack, Zunderbüchse, 10 Fackeln,
 function itemList(ch) { return (ch.items || []).filter((x) => MAGIC_ITEMS[x.id] || x.custom); }
 function itemDef(x) { return MAGIC_ITEMS[x.id] || { name: x.name || 'Gegenstand', text: x.text || '', att: !!x.attNeed }; }
 function itemActive(x) { const d = itemDef(x); return (x.eq !== false) && (!d.att || x.att) && !d.cons; }
+/* Ladungen pro Gegenstand (je Exemplar getrennt): Höchstwert aus dem Text («7 Ladungen») oder selbst gesetzt. Aufladen von Hand – wie viel bei Morgengrauen zurückkommt, steht beim Gegenstand. */
+function itemChgMax(x) { if (+x.chgMax > 0) return Math.min(99, +x.chgMax); const d = MAGIC_ITEMS[x.id]; const m = d && !d.cons && /(?:^|[^\dW+])(\d+) Ladungen/.exec(d.text || ''); return m ? +m[1] : 0; }
+function itemChgHtml(x) {
+  const mx = itemChgMax(x); const u = esc(x.uid);
+  if (!mx) return S.chgEdit === x.uid ? '<label class="itchg">Ladungen <input type="number" min="1" max="99" inputmode="numeric" data-xact="itChgMax" data-uid="' + u + '" aria-label="Höchstzahl Ladungen" placeholder="Anzahl"></label>' : '<button class="btn sm ghost" data-act="itChgOn" data-arg="' + u + '" title="Einen Zähler für die Ladungen dieses Gegenstands anlegen">Ladungen zählen</button>';
+  const left = Math.max(0, mx - (+x.chgU || 0));
+  return '<span class="itchg"><button class="btn sm" data-act="itChg" data-arg="' + u + '" data-d="1"' + (left ? '' : ' disabled') + ' title="Eine Ladung einsetzen">Ladung einsetzen</button><span class="stepper sm"><button data-act="itChg" data-arg="' + u + '" data-d="1" aria-label="eine Ladung weniger"' + (left ? '' : ' disabled') + '>−</button><b aria-label="Ladungen übrig">' + left + ' / ' + mx + '</b><button data-act="itChg" data-arg="' + u + '" data-d="-1" aria-label="eine Ladung zurück"' + (left < mx ? '' : ' disabled') + '>+</button></span></span>';
+}
 function attuneCount(ch) { return itemList(ch).filter((x) => itemDef(x).att && x.att).length; }
 function itemFx(ch) {
   const out = [];
@@ -109,6 +117,7 @@ function gearBlock(c, inBuilder) {
     if (d.drink) ctl += '<button class="btn sm heal" data-act="itDrink" data-arg="' + esc(x.uid) + '">Trinken (' + d.drink.replace('W', 'W') + ')</button>';
     else if (d.cons) ctl += '<button class="btn sm ghost" data-act="itUse" data-arg="' + esc(x.uid) + '">Verbrauchen</button>';
     if (d.extra && active) ctl += '<button class="btn sm ghost" data-act="dmg" data-expr="' + esc(d.extra) + '" data-label="' + esc(d.name) + ': ' + d.extraT + '">+' + d.extra + ' ' + d.extraT + '</button>';
+    if (!d.cons && !d.drink && (MAGIC_ITEMS[x.id] || x.custom)) ctl += itemChgHtml(x);
     if (d.cons) ctl += '<div class="stepper sm"><button data-act="itQty" data-arg="' + esc(x.uid) + '" data-d="-1" aria-label="weniger">−</button><b>' + (+x.qty || 1) + '</b><button data-act="itQty" data-arg="' + esc(x.uid) + '" data-d="1" aria-label="mehr">+</button></div>';
     return '<div class="itm' + (active || d.cons ? '' : ' off') + '"><div><b>' + esc(d.name) + (x.label ? ' <small>' + esc(x.label) + '</small>' : '') + '</b><small>' + (d.curse ? '<span class="curse">☠ verflucht</span> · ' : '') + esc(d.r || 'eigen') + (d.att ? ' · Einstimmung' : '') + ' · ' + esc(d.text) + (d.wpn && (x.w === '' || x.w == null) ? ' <em>Wähle die Waffe, damit der Bonus wirkt.</em>' : '') + '</small></div><div class="chips">' + ctl + '<button class="x" data-act="itDel" data-arg="' + esc(x.uid) + '" aria-label="Entfernen">×</button></div></div>';
   }).join('') + '</div>' : '<p class="empty">Noch keine magischen Gegenstände.</p>';
@@ -299,11 +308,29 @@ function dmTools() {
     h += '<details class="fgrp gift dmd" data-k="gift"' + (S.gPre ? ' open' : dmo('gift', false)) + '><summary><b>Beute und Erfahrung verteilen</b></summary>' + (typeof lootBox === 'function' ? lootBox() : '') + '<div class="row">' + field('An', '<select id="gTo"><option value="all">Alle am Tisch</option>' + ps.filter(([u]) => u !== UID).map(([u, p]) => '<option value="' + u + '"' + (G.to === u ? ' selected' : '') + '>' + esc(p.char) + '</option>').join('') + '</select>') + field('EP (je Held)', '<input type="number" id="gXp" min="0" placeholder="0"' + gv('xp') + '>') + field('Gold (je Held)', '<input type="number" id="gGm" min="0" placeholder="0"' + gv('gm') + '>') + '</div><div class="row">' + field('Gegenstand', (() => { const vis = itemVis(); return '<select id="gItem"><option value="">— kein Gegenstand —</option>' + Object.entries(MAGIC_ITEMS).filter(([k]) => vis(k) || G.item === k).map(([k, d]) => '<option value="' + k + '"' + (G.item === k ? ' selected' : '') + '>' + esc((d.adv ? '✦ ' : '') + d.name) + '</option>').join('') + '</select>'; })()) + field('Oder freier Eintrag', '<input type="text" id="gText" placeholder="z. B. Karte zur Schwarzen Feste"' + gv('text') + '>') + '</div><div class="chips"><button class="btn sm" data-act="gift">Verteilen</button></div></details>';
     h += '<details class="fgrp dmd" data-k="ho"' + dmo('ho', false) + '><summary><b>Handout teilen</b></summary><div class="row">' + field('Titel', '<input type="text" id="hoT" placeholder="z. B. Brief des Barons">') + '</div>' + field('Text', '<textarea id="hoX" rows="3" placeholder="Was die Gruppe lesen soll …"></textarea>') + '<div class="chips"><button class="btn sm" data-act="hoAdd">Teilen</button></div></details>';
     h += '<details class="fgrp dmd" data-k="note"' + dmo('note', !!dmNoteGet()) + '><summary><b>Deine Notizen <small>nur für dich</small></b></summary>' + '<textarea id="dmNote" rows="5" placeholder="Geheimnisse, Pläne, Werte …">' + esc(dmNoteGet()) + '</textarea></details>';
+    h += tableRulesDM();
     h += '</div></section>';
   }
+  h += tableRulesMine();
   const ho = (M.handouts || []).slice().reverse();
   if (ho.length) h += '<section class="blk"><h2>Handouts</h2>' + ho.map((x) => '<details class="ho"><summary><b>' + esc(x.title || 'Handout') + '</b><small>' + ago(x.t) + '</small>' + (isDM() ? '<button class="x" data-act="hoDel" data-arg="' + esc(x.id) + '" aria-label="Handout löschen">×</button>' : '') + '</summary><p>' + esc(x.text).replace(/\n/g, '<br>') + '</p></details>').join('') + '</section>';
   return h;
+}
+/* ---------- Regeln der Runde: Die Spielleitung schlägt ihre Regeloptionen vor; jeder sieht die Abweichungen und übernimmt sie nur auf Wunsch ---------- */
+const rulesNow = () => Object.fromEntries(Object.keys(RULE_OPTS).map((k) => [k, rule(k)]));
+const rulesDiff = (R) => Object.keys(RULE_OPTS).filter((k) => R && typeof R[k] === 'boolean' && R[k] !== rule(k));
+function tableRulesDM() {
+  const R = S.meta && S.meta.rules; const d = R ? rulesDiff(R) : [];
+  return '<details class="fgrp dmd" data-k="rules"' + (S.dmOpen && S.dmOpen.rules ? ' open' : '') + '><summary><b>Regeln der Runde</b></summary><p class="hint">Schlägt allen am Tisch deine Regeloptionen vor (Mehr → Regeloptionen). Wer andere Einstellungen hat, sieht die Unterschiede und entscheidet selbst, ob er sie übernimmt.</p>' +
+    (R ? '<p class="hint">' + (d.length ? 'Deine Einstellungen haben sich seit dem Vorschlag geändert.' : 'Vorgeschlagen ' + ago(S.meta.rulesAt || 0) + '.') + '</p>' : '') +
+    '<div class="chips"><button class="btn sm ghost" data-act="trPropose">' + (R ? 'Erneut vorschlagen' : 'Meine Regeln vorschlagen') + '</button>' + (R ? '<button class="btn sm ghost" data-act="trClear">Vorschlag zurückziehen</button>' : '') + '</div></details>';
+}
+function tableRulesMine() {
+  const M = S.meta || {}; const R = M.rules; if (!R || isDM()) return ''; const d = rulesDiff(R); if (!d.length) return '';
+  let seen = ''; try { seen = sessionStorage.getItem('hb_tr_' + S.camp) || ''; } catch (e) {} if (seen === String(M.rulesAt || '')) return '';
+  const on = (v) => (v ? 'an' : 'aus');
+  return '<section class="blk trules"><h2>Regeln der Runde</h2><p class="hint">Die Spielleitung spielt mit anderen Regeloptionen als dein Gerät:</p><ul class="trl">' + d.map((k) => '<li><b>' + esc(RULE_OPTS[k].n) + '</b> <small>Spielleitung: ' + on(R[k]) + ' · du: ' + on(rule(k)) + '</small></li>').join('') + '</ul>' +
+    '<div class="chips"><button class="btn sm" data-act="trTake">Übernehmen</button><button class="btn sm ghost" data-act="trKeep">Meine behalten</button></div></section>';
 }
 function dmNoteGet() { try { return localStorage.getItem('heldenbuch_dm_' + S.camp) || ''; } catch (e) { return S.dmNote || ''; } }
 function dmNoteSet(v) { const camp = S.camp; S.dmNote = v; try { localStorage.setItem('heldenbuch_dm_' + camp, v); } catch (e) {} if (DB && UID && camp) { const db = DB, uid = UID; later('dmn_' + camp, 800, () => { db.collection('data/users/' + uid).doc('n_' + camp).set({ kind: 'n', json: JSON.stringify({ camp, text: v }) }).catch(() => {}); }); } }
@@ -311,6 +338,7 @@ function applyMeta() {
   const ch = cur(); if (!ch || !S.camp) return; const P = ch.play; const M = S.meta;
   P.camps = P.camps || {}; if (!P.camps[S.camp]) { P.camps[S.camp] = Date.now(); P.restSeen = M.rest ? M.rest.id : ''; P.gifts = (M.gifts || []).map((g) => g.id); P.hoSeen = (M.handouts || []).length; commit(false); return; }
   let changed = false;
+  if (M.rules && M.rulesAt && !isDM() && S.trNote !== M.rulesAt && rulesDiff(M.rules).length) { S.trNote = M.rulesAt; bannerToast('Regeln der Runde', 'Die Spielleitung spielt mit anderen Regeloptionen. Unter «Tisch» siehst du die Unterschiede.'); }
   if (M.rest && M.rest.id !== P.restSeen) { P.restSeen = M.rest.id; if (!P.dead) { if (M.rest.kind === 'short') shortRestOpen(ch); else doRest(ch, M.rest.kind, true); bannerToast(M.rest.kind === 'long' ? 'Lange Rast' : 'Kurze Rast', 'Die Spielleitung hat für alle eine Rast eingelegt.'); } changed = true; }
   P.gifts = P.gifts || [];
   for (const g of M.gifts || []) {
@@ -399,6 +427,9 @@ function printSheet() { try { S.view = 'sheet'; render(); setTimeout(() => windo
 const XA = {
   itAtt: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; if (!x.att && attuneCount(ch) >= (derive(ch, S.hb).attuneMax || 3)) { pushLog({ label: 'Einstimmung', total: '✗', detail: 'Du bist schon auf ' + attuneCount(ch) + ' Gegenstände eingestimmt (Maximum).' }); return; } x.att = !x.att; commit(); },
   itDel: (t, a, p, ch) => { ch.items = (ch.items || []).filter((i) => i.uid !== a); commit(); },
+  itChgOn: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; S.chgEdit = a; render(); const el = document.querySelector('[data-xact="itChgMax"][data-uid="' + CSS.escape(a) + '"]'); if (el) el.focus(); },
+  itChg: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; const mx = itemChgMax(x); if (!mx) return; const d = +t.dataset.d; const u = Math.max(0, Math.min(mx, (+x.chgU || 0) + d)); if (u === (+x.chgU || 0)) return; x.chgU = u; commit();
+    if (d > 0) pushLog({ label: itemDef(x).name + (x.label ? ' (' + x.label + ')' : '') + ': Ladung eingesetzt', total: (mx - u) + ' / ' + mx, detail: (mx - u) ? 'Noch ' + (mx - u) + (mx - u === 1 ? ' Ladung.' : ' Ladungen.') : 'Keine Ladung mehr. Was beim Verbrauch der letzten Ladung passiert, steht beim Gegenstand.', share: true }); },
   itQty: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; x.qty = Math.max(0, (+x.qty || 1) + +t.dataset.d); if (!x.qty) ch.items = ch.items.filter((i) => i !== x); commit(); },
   itUse: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; pushLog({ label: itemDef(x).name, total: '✦', detail: itemDef(x).text, share: true }); XA.itQty({ dataset: { d: -1 } }, a, p, ch); },
   itDrink: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; const d = itemDef(x); const r = rollExpr(d.drink); const c = derive(ch, S.hb); const P = ch.play; if (P.hp <= 0) { P.ds = [0, 0]; wakeUp(P); } P.hp = Math.min(c.hpMax, P.hp + r.total); pushLog({ label: d.name, total: r.total, detail: r.detail + ' · TP jetzt ' + P.hp + '/' + c.hpMax, groups: r.groups, sides: 4, nat: r.total }); XA.itQty({ dataset: { d: -1 } }, a, p, ch); },
@@ -424,12 +455,19 @@ const XA = {
   optUse: (t, a, p, ch) => optUse(ch, t.dataset.set, a),
   print: () => printSheet()
 };
+Object.assign(XA, {
+  trPropose: () => { if (!isDM()) return; saveMeta({ rules: rulesNow(), rulesAt: Date.now() }); bannerToast('Regeln vorgeschlagen', 'Alle am Tisch sehen die Unterschiede zu ihren Einstellungen.'); },
+  trClear: () => { if (!isDM()) return; saveMeta({ rules: null, rulesAt: 0 }); },
+  trTake: () => { const R = S.meta && S.meta.rules; if (!R) return; rule('strict'); const d = rulesDiff(R); d.forEach((k) => { S.rules[k] = R[k]; }); try { localStorage.setItem('hb_rules', JSON.stringify(S.rules)); } catch (e) {} if (d.includes('homeview') && typeof SRCH_HOME !== 'undefined') SRCH_HOME = null; bannerToast('Regeln übernommen', d.map((k) => RULE_OPTS[k].n).join(', ')); render(); paintCamp(); },
+  trKeep: () => { try { sessionStorage.setItem('hb_tr_' + S.camp, String((S.meta && S.meta.rulesAt) || '')); } catch (e) {} paintCamp(); render(); }
+});
 function xChange(t) {
   const ch = cur();
   if (t.id === 'subSpAdd' && t.value) { const path = (t.dataset.pre || '') + 'subSpells'; let a = getP(ch, path); if (!Array.isArray(a)) { a = []; setP(ch, path, a); } if (!a.includes(t.value)) a.push(t.value); commit(); return true; }
   if (t.id === 'addItem' && t.value) { ch.items = ch.items || []; const d = MAGIC_ITEMS[t.value]; const lab = ($('#itemLabel') || {}).value || ''; const ex = d.cons && ch.items.find((x) => x.id === t.value && (x.label || '') === lab.trim()); if (ex) ex.qty = (+ex.qty || 1) + 1; else ch.items.push({ uid: uidX(), id: t.value, att: false, eq: true, qty: 1, w: d.wpn && ch.weapons.length === 1 ? 0 : '', label: lab.trim() }); commit(); return true; }
   if (t.id === 'addGear' && t.value !== '') { const g = GEAR[+t.value]; ch.inv = ch.inv || []; const ex = ch.inv.find((x) => x.n === g[0]); if (ex) ex.qty = (+ex.qty || 0) + 1; else ch.inv.push({ n: g[0], qty: 1, kg: g[1] }); commit(); return true; }
   if (t.id === 'addComp' && t.value) { ch.comps = ch.comps || []; const x = { t: t.value, name: '', hp: null }; if (t.value === 'steed') { x.kind = 'celestial'; x.lvl = 2; } if (t.value === 'custom') { x.name = 'Eigener Begleiter'; x.ac = 12; x.hpMax = 20; } ch.comps.push(x); commit(); return true; }
+  if (t.dataset && t.dataset.xact === 'itChgMax') { const x = itemList(ch).find((i) => i.uid === t.dataset.uid); const v = Math.round(+t.value); if (x && v >= 1) { x.chgMax = Math.min(99, v); x.chgU = 0; S.chgEdit = null; commit(); } return true; }
   if (t.dataset && t.dataset.xact === 'itW') { const x = itemList(ch).find((i) => i.uid === t.dataset.uid); if (x) { x.w = t.value === '' ? '' : +t.value; commit(); } return true; }
   return false;
 }

@@ -160,6 +160,23 @@ function rollState(kind) {
   const mode = adv.length && dis.length ? 'normal' : adv.length ? 'adv' : dis.length ? 'dis' : 'normal';
   return { mode, adv, dis, fail, k, c };
 }
+/* ---------- Eigene Würfel (Würfel-Set → «Eigene Würfel»): Wert ins Feld «Wurf» im Bogenkopf, dann den Wurf antippen ---------- */
+const echtOn = () => { try { return localStorage.getItem('hb_echt') === '1'; } catch (e) { return false; } };
+/* sides 20: ein oder zwei W20-Werte · sides 0: Augensumme zwischen lo und hi. Ungültig → Hinweis, die App würfelt selbst. */
+function echtTake(sides, lo, hi) {
+  if (!echtOn()) return null; const raw = String(S.echtV || '').trim(); if (!raw) return null;
+  const v = raw.split(/[^0-9]+/).filter(Boolean).map(Number);
+  S.echtV = ''; const el = document.getElementById('echtIn'); if (el) el.value = '';
+  const ok = sides === 20 ? v.length >= 1 && v.length <= 2 && v.every((x) => x >= 1 && x <= 20) : v.length >= 1 && v.reduce((a, b) => a + b, 0) >= lo && v.reduce((a, b) => a + b, 0) <= hi;
+  if (!ok) { if (typeof bannerToast === 'function') setTimeout(() => bannerToast('Wurf ungültig: ' + raw, (sides === 20 ? 'Ein W20 zeigt 1 bis 20.' : 'Die Würfel ergeben ' + lo + ' bis ' + hi + '.') + ' Die App hat selbst gewürfelt.'), 50); return null; }
+  if (sides !== 20) { S.echtSum = Date.now(); return [v.reduce((a, b) => a + b, 0)]; }
+  return v;
+}
+function echtField() {
+  if (!echtOn()) return '';
+  return '<label class="echtf" title="Eigene Würfel: Zeigt dein W20 z. B. 17, trage 17 ein und tippe dann den Wurf an. Bei Vorteil oder Nachteil beide Werte (17 9). Beim Schaden die Augensumme aller Würfel. Leer: Die App würfelt."><span>Wurf</span><input id="echtIn" type="text" inputmode="numeric" autocomplete="off" maxlength="7" placeholder="W20" aria-label="Echter Würfelwert" value="' + esc(S.echtV || '') + '"></label>';
+}
+document.addEventListener('input', (ev) => { if (ev.target && ev.target.id === 'echtIn') { ev.target.value = ev.target.value.replace(/[^0-9 /,]/g, ''); S.echtV = ev.target.value; } });
 function d20(mod, label, opts = {}) {
   const ch = cur();
   if (ch?.play?.dead) { pushLog({ label, total: '✗', detail: 'Dein Held ist gefallen.' }); return null; }
@@ -168,11 +185,15 @@ function d20(mod, label, opts = {}) {
   const ex = +(ch?.play?.exh || 0) * 2;
   let r1 = 1 + Math.floor(rnd() * 20), r2 = 1 + Math.floor(rnd() * 20);
   const notes = [];
+  /* Eigene Würfel: eingegebene Werte statt der App-Würfel (bei Vorteil/Nachteil zwei; fehlt der zweite, würfelt die App ihn) */
+  const ev = opts.preview ? null : echtTake(20); let real = '';
+  if (ev) { r1 = ev[0]; if (ev.length > 1) r2 = ev[1]; real = st.mode === 'normal' || ev.length > 1 ? 'echter Würfel' : 'echter Würfel, zweiter W20 von der App'; }
   if (ch && ch.species === 'halfling') {
     const keepIdx = st.mode === 'adv' ? (r1 >= r2 ? 1 : 2) : st.mode === 'dis' ? (r1 <= r2 ? 1 : 2) : 1;
-    if (keepIdx === 1 && r1 === 1) { r1 = 1 + Math.floor(rnd() * 20); notes.push('Glück: die 1 neu gewürfelt → ' + r1); }
-    else if (keepIdx === 2 && r2 === 1) { r2 = 1 + Math.floor(rnd() * 20); notes.push('Glück: die 1 neu gewürfelt → ' + r2); }
+    if (keepIdx === 1 && r1 === 1) { r1 = 1 + Math.floor(rnd() * 20); notes.push('Glück: die 1 neu gewürfelt → ' + r1 + (real ? ' (von der App)' : '')); }
+    else if (keepIdx === 2 && r2 === 1) { r2 = 1 + Math.floor(rnd() * 20); notes.push('Glück: die 1 neu gewürfelt → ' + r2 + (real ? ' (von der App)' : '')); }
   }
+  if (real) notes.unshift(real);
   let use = r1, how = '';
   if (st.mode === 'adv') { use = Math.max(r1, r2); how = 'Vorteil ' + r1 + '/' + r2; }
   if (st.mode === 'dis') { use = Math.min(r1, r2); how = 'Nachteil ' + r1 + '/' + r2; }
@@ -205,6 +226,9 @@ function d20(mod, label, opts = {}) {
 /* Würfel aus Teilen rollen (Schaden mit Krit, Kampfstilen usw.) */
 function rollParts(parts, flat) {
   const groups = []; const det = []; let total = 0;
+  /* Eigene Würfel: eingegebene Augensumme aller Würfel, Boni rechnet die App dazu */
+  const dz = parts.filter((p) => p.n && p.s); const real = dz.length ? echtTake(0, dz.reduce((a, p) => a + p.n, 0), dz.reduce((a, p) => a + p.n * p.s, 0)) : null;
+  if (real) { const v = real[0]; return { total: v + (flat || 0), groups: [], real: true, detail: 'echte Würfel ' + v + ' (' + dz.map((p) => p.n + 'W' + p.s + ' ' + p.tag).join(' + ') + ')' + (flat ? ' ' + sgn(flat) : '') }; }
   for (const p of parts) {
     if (!p.n || !p.s) continue;
     let r = Array.from({ length: p.n }, () => 1 + Math.floor(rnd() * p.s));
@@ -355,7 +379,7 @@ function saHit() {
   saNext();
 }
 function rollDmg(expr, label) { const r = rollExpr(expr); const m = /W(\d+)/.exec(String(expr)); const g = /\[([\d,]+)\]/.exec(r.detail); pushLog({ label, groups: r.groups, total: r.total, detail: r.detail, sides: m ? +m[1] : 0, nat: g ? g[1].split(',').reduce((a, b) => a + +b, 0) : r.total }); }
-function pushLog(e) { e.t = Date.now(); if (S.secret) e.secret = true; if (e.sides && !e.dset && typeof d3setOf === 'function') e.dset = d3setOf(cur()); const d3on = typeof d3ok === 'function' && d3ok(e.sides); if (!d3on && e.sides === 20 && (e.nat === 20 || e.nat === 1) && typeof themeBurst === 'function') { const k = e.nat === 1 ? 'fumble' : 'crit'; setTimeout(() => themeBurst(k), 820); } /* nur ohne 3D-Würfel; themeBurst prüft selbst die Einstellung */ S.log.unshift(e); S.log = S.log.slice(0, 30); if (typeof histAdd === 'function') histAdd(e); showToast(e); const l = $('#log'); if (l) l.innerHTML = logHtml(); if ((e.sides || e.share) && !e.preview) shareRoll(e); }
+function pushLog(e) { if (S.echtSum && Date.now() - S.echtSum < 3000 && e.sides !== 20) { e.sides = 0; e.groups = null; e.pair = null; e.real = true; } S.echtSum = 0; e.t = Date.now(); if (S.secret) e.secret = true; if (e.sides && !e.dset && typeof d3setOf === 'function') e.dset = d3setOf(cur()); const d3on = typeof d3ok === 'function' && d3ok(e.sides); if (!d3on && e.sides === 20 && (e.nat === 20 || e.nat === 1) && typeof themeBurst === 'function') { const k = e.nat === 1 ? 'fumble' : 'crit'; setTimeout(() => themeBurst(k), 820); } /* nur ohne 3D-Würfel; themeBurst prüft selbst die Einstellung */ S.log.unshift(e); S.log = S.log.slice(0, 30); if (typeof histAdd === 'function') histAdd(e); showToast(e); const l = $('#log'); if (l) l.innerHTML = logHtml(); if ((e.sides || e.share) && !e.preview) shareRoll(e); }
 /* ---------- Würfelschale: viele Würfel über den Bildschirm ---------- */
 function showMulti(e, flat, seq) {
   const t = $('#toast'); const tray = $('#tray'); if (seq === undefined) seq = showToast.seq = (showToast.seq || 0) + 1; showToast.hs = showToast.hs || [];
@@ -862,7 +886,7 @@ function renderSheet(c) {
   /* Kopf wie die Banner der anderen Seiten: Rahmen mit dem Bild der Klasse rechts, ohne zusätzliche Höhe */
   const shArt = typeof bannerStyle === 'function' ? bannerStyle('bogen') : '';
   h += '<header class="shead"><div class="who' + (shArt ? ' hasart' : '') + '"' + (shArt ? ' style="' + shArt + '"' : '') + '>' + sigil(ch) + '<div><h1><button type="button" class="hrn" data-act="renameHero" title="Namen ändern">' + esc(ch.name) + '<span aria-hidden="true">✎</span></button></h1><p>' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' (' + esc(c.subName) + ')' : '') + '<span class="shx"> · ' + c.sp.name + ' · ' + esc(c.bg.name) + (ch.alignment ? ' · ' + esc(ch.alignment) + (typeof alignKey === 'function' && alignKey(ch.alignment) ? ' ' + ii('al', alignKey(ch.alignment), ch.alignment) : '') : '') + '</span></p></div></div>' +
-    '<div class="sctl"><div class="seg" role="group" aria-label="Würfelmodus">' + [['dis', 'Nachteil'], ['normal', 'Normal'], ['adv', 'Vorteil']].map(([k, l]) => '<button class="' + (S.mode === k ? 'on' : '') + '" data-act="mode" data-arg="' + esc(k) + '">' + l + '</button>').join('') + '</div>' +
+    '<div class="sctl"><div class="seg" role="group" aria-label="Würfelmodus">' + [['dis', 'Nachteil'], ['normal', 'Normal'], ['adv', 'Vorteil']].map(([k, l]) => '<button class="' + (S.mode === k ? 'on' : '') + '" data-act="mode" data-arg="' + esc(k) + '">' + l + '</button>').join('') + '</div>' + echtField() +
     '<details class="mnu smore"><summary class="btn ghost" aria-label="Rast und weitere Aktionen" title="Rast und weitere Aktionen">Rast · ⋯</summary><div class="mnul"><button data-act="rest" data-arg="short">Kurze Rast</button><button data-act="rest" data-arg="long" data-confirm="Lange Rast: TP, Trefferwürfel, Zauberplätze und alle Ressourcen werden zurückgesetzt.">Lange Rast</button><hr><button data-act="exportOne" data-arg="' + esc(ch.id) + '">Exportieren</button><button data-act="print">Drucken</button><button data-act="renameHero">Namen ändern</button><button data-act="diceOpen">Würfel-Set</button><hr><button data-act="turnBack">⟲ Zug zurückspulen</button><button data-act="histOpen">Würfelverlauf</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="stOpen">Stolperstein melden</button><button data-act="explain">Rechenweg ' + (explainOn() ? 'ausblenden' : 'anzeigen') + '</button></div></details></div></header>' + hlTip('Würfelmodus: Bei <b>Vorteil</b> würfelst du zwei W20 und nimmst den höheren, bei <b>Nachteil</b> den niedrigeren. Viele Fälle (Zustände, Ziel) erkennt die App selbst – sonst sagt es dir die Spielleitung.', 'p');
   /* Kopfleiste: Reiter und die Kernwerte (TP, RK, Initiative, Bewegung, Konzentration, Zustände) – bleibt beim Scrollen oben */
   h += '<div class="shbar' + (S.hpOpen || P.hp <= 0 ? ' hpo' : '') + '">' + sheetNav(c) + vbarHtml(c) + '</div>';
@@ -1686,9 +1710,9 @@ document.addEventListener('click', (ev) => {
     dmg: () => rollDmg(t.dataset.expr, t.dataset.label),
     hp: () => { const n = Math.max(0, +$('#hpAmt').value || 0); if (!n) { $('#hpAmt').focus(); return; } S.hpOpen = false; hpChange(ch, arg, n); },
     spendHd: () => { const c = derive(ch, S.hb); if (rule('hdrest') || c.hdPool.length > 1) return shortRestOpen(ch); const pools = hdPools(c, ch.play); const p = pools.find((x) => x.used < x.n); if (p && spendHdDie(ch, p.d)) commit(); },
-    deathRoll: () => { const c = derive(ch, S.hb); const P = ch.play; if (P.hp == null) P.hp = c.hpMax; if (P.stable) { pushLog({ label: 'Todesrettungswurf', total: '✓', detail: 'Du bist stabil – keine Todesrettungswürfe mehr, bis du Schaden nimmst.' }); return; } if (P.hp > 0 || P.dead) return; const notes = []; let r = 1 + Math.floor(rnd() * 20);
+    deathRoll: () => { const c = derive(ch, S.hb); const P = ch.play; if (P.hp == null) P.hp = c.hpMax; if (P.stable) { pushLog({ label: 'Todesrettungswurf', total: '✓', detail: 'Du bist stabil – keine Todesrettungswürfe mehr, bis du Schaden nimmst.' }); return; } if (P.hp > 0 || P.dead) return; const notes = []; const ev = echtTake(20); let r = ev ? ev[0] : 1 + Math.floor(rnd() * 20); if (ev) notes.push('echter Würfel');
       if (ch.species === 'halfling' && r === 1) { r = 1 + Math.floor(rnd() * 20); notes.push('Glück: 1 neu gewürfelt'); }
-      if (c.lv('fig') >= 18 && c.subOf('fig') === 'champion') { const r2 = 1 + Math.floor(rnd() * 20); notes.push('Überlebender: Vorteil ' + r + '/' + r2 + (Math.max(r, r2) >= 18 ? ', 18–20 zählt als 20' : '')); r = Math.max(r, r2); if (r >= 18) r = 20; }
+      if (c.lv('fig') >= 18 && c.subOf('fig') === 'champion') { const r2 = ev && ev[1] ? ev[1] : 1 + Math.floor(rnd() * 20); notes.push('Überlebender: Vorteil ' + r + '/' + r2 + (Math.max(r, r2) >= 18 ? ', 18–20 zählt als 20' : '')); r = Math.max(r, r2); if (r >= 18) r = 20; }
       const ex = 2 * (+P.exh || 0); const eff = r === 20 || r === 1 ? r : r - ex; if (ex && r !== 20 && r !== 1) notes.push('Erschöpfung −' + ex); let msg = '';
       if (r === 20) { P.hp = 1; P.ds = [0, 0]; P.stable = false; wakeUp(P); msg = 'Natürliche 20: Du kommst mit 1 TP zurück und bist wieder bei Bewusstsein!'; } else if (r === 1) { P.ds[1] = Math.min(3, P.ds[1] + 2); msg = 'Natürliche 1: zwei Fehlschläge'; } else if (eff >= 10) { P.ds[0] = Math.min(3, P.ds[0] + 1); msg = 'Erfolg'; } else { P.ds[1] = Math.min(3, P.ds[1] + 1); msg = 'Fehlschlag'; }
       if (P.ds[0] >= 3 && P.hp <= 0) { msg += ' – stabil (bewusstlos, 0 TP, keine weiteren Würfe)'; P.stable = true; P.ds = [0, 0]; } if (P.ds[1] >= 3) { msg += ' – gefallen'; fall(P); } pushLog({ label: 'Todesrettungswurf', total: eff, detail: msg + (notes.length ? ' · ' + notes.join(' · ') : ''), sides: 20, nat: r, crit: r === 20, fumble: r === 1 }); commit(); },

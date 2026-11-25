@@ -7,7 +7,9 @@ const HELP = {
     'D&D 2024: Pro Zug darfst du nur einen Zauberplatz verbrauchen (Zaubertricks und Gratiswirkungen zählen nicht). Fähigkeiten „1× pro Zug“ wie Hinterhältiger Angriff oder Kolossjäger lassen sich nur einmal anwählen.',
     'Im Kampf am Tisch kannst du oben ein Ziel wählen. Dann wirken seine Zustände automatisch: z. B. Vorteil gegen ein liegendes Ziel im Nahkampf, kritischer Treffer gegen ein bewusstloses Ziel, Mal des Jägers nur gegen das markierte Ziel.',
     '„Neuer Zug“ setzt alles zurück. Im Kampf am Tisch passiert das automatisch, wenn du an der Reihe bist.',
-    'Du willst deinen Zug lieber selbst führen? Unter Mehr → Hilfen die Stufe „Erfahren“ wählen oder nur die Zugleiste ausschalten. Dann zählt und sperrt die App nichts.']],
+    'Vorbereiten: Du legst einen Auslöser in eigenen Worten fest. Tritt er ein, tippst du „Auslösen (R)“; das kostet deine Reaktion. Die Vorbereitung verfällt zu Beginn deines nächsten Zugs.',
+    'Du willst deinen Zug lieber selbst führen? Unter Mehr → Hilfen die Stufe „Erfahren“ wählen oder nur die Zugleiste ausschalten. Dann zählt und sperrt die App nichts. Umgekehrt lässt sich die Zugleiste auch bei „Erfahren“ einschalten.',
+    'Mit echten Würfeln spielen: Rast · ⋯ → Würfel-Set → „Eigene Würfel“. Dann trägst du im Feld „Wurf“ ein, was dein W20 zeigt (bei Vorteil oder Nachteil beide Werte, z. B. 17 9), beim Schaden die Augensumme, und tippst den Wurf an. Die App rechnet Boni und Zustände dazu.']],
   werte: ['Attribute & Rettungswürfe', [
     'Die sechs Attribute sind Stärke, Geschicklichkeit, Konstitution, Intelligenz, Weisheit und Charisma. Die grosse Zahl ist der Modifikator, der beim Würfeln zählt; die kleine ist der Attributswert.',
     'Attributswurf: Die Spielleitung verlangt z. B. einen Stärkewurf, um eine Tür aufzudrücken. Tippe auf das Attribut.',

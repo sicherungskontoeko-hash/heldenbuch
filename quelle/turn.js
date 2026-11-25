@@ -10,6 +10,7 @@ function turnSt(ch) {
 function turnReset(ch, keepReaction) {
   const t = turnSt(ch); const r = t.r;
   if(!keepReaction)delete ch.play.hxForms;
+  if (!keepReaction) delete ch.play.ready; /* Vorbereitete Handlung verfällt zu Beginn des nächsten eigenen Zugs */
   ch.play.turn = { a: 0, aMax: 1, b: 0, r: keepReaction ? r : 0, atk: 0, mv: 0, mvMax: 0, bonusAtk: 0, bSpell: false, slotSpell: false, lightIdx: null, aMagic: 0, aSurge: 0 };
   const fx = ch.play.fx || {}; delete fx.reckless; delete fx.aim; if (!keepReaction) delete fx.dodge; ch.play.fx = fx;
   if (!keepReaction && typeof startOfTurn === 'function') { try { startOfTurn(ch); } catch (e) {} }
@@ -204,7 +205,17 @@ function stdRun(ch, c, id) {
   else if (id === 'hide') d20(c.skills.ste.val, 'Verstecken (Heimlichkeit)', { kind: 'check:dex:ste:' + c.skills.ste.prof });
   else if (id === 'search') d20(c.skills.prc.val, 'Suchen (Wahrnehmung)', { kind: 'check:wis:prc:' + c.skills.prc.prof });
   else if (id === 'study') d20(c.skills.inv.val, 'Studieren (Nachforschungen)', { kind: 'check:int:inv:' + c.skills.inv.prof });
+  else if (id === 'ready') readyAsk();
   else { const s = STD_ACTIONS.find((x) => x[0] === id); tLog(s[1], s[3] || ''); }
+}
+/* Vorbereiten: Auslöser in eigenen Worten; tritt er ein, kostet die vorbereitete Handlung deine Reaktion. Gilt bis zum Beginn deines nächsten Zugs. */
+function readyAsk() {
+  orbPrompt('<div class="pr"><b>Vorbereiten</b><p>Wann handelst du, und was tust du dann? Tritt der Auslöser ein, tippst du «Auslösen»: Das kostet deine Reaktion.</p>' +
+    '<label class="fld"><span>Auslöser</span><input type="text" id="readyTrig" maxlength="80" placeholder="z. B. Sobald die Tür aufgeht"></label>' +
+    '<label class="fld"><span>Handlung</span><input type="text" id="readyWhat" maxlength="80" placeholder="z. B. Angriff mit dem Bogen"></label>' +
+    '<p class="hint">Ein Zauber wird jetzt gewirkt (der Platz ist verbraucht) und braucht bis zum Auslösen deine Konzentration.</p>' +
+    '<div class="chips end"><button class="btn ghost" data-act="readyNo">Abbrechen</button><button class="btn" data-act="readyGo">Vorbereiten</button></div></div>');
+  setTimeout(() => { const el = document.getElementById('readyTrig'); if (el) el.focus(); }, 50);
 }
 function featureCost(text) { if (/Reaktion/.test(text)) return 'r'; if (/Bonusaktion/.test(text)) return 'b'; if (/\b(Magieaktion|Aktion)\b/.test(text)) return 'a'; return 'f'; }
 
@@ -306,6 +317,7 @@ function turnExtras(c, slim) {
   const extra = [];
   if (!slim && t.atk > 0 && t.atk < c.attacksPer) extra.push('<span class="tinfo">Angriffsaktion: noch ' + (c.attacksPer - t.atk) + ' Angriff' + (c.attacksPer - t.atk > 1 ? 'e' : '') + '</span>' + c.attacks.filter((a) => !a.name.startsWith('Blutlanze')).map((a, i) => '<button class="chip tq" data-act="tUse" data-arg="atk:' + c.attacks.indexOf(a) + '">' + esc(a.name) + ' ' + sgn(a.atk) + '</button>').join(''));
   if (!slim && t.bonusAtk > 0) extra.push('<span class="tinfo">Schlaghagel: noch ' + t.bonusAtk + ' Schlag</span><button class="chip tq" data-act="tUse" data-arg="bfl:0">Waffenloser Schlag</button>');
+  const rd = ch.play.ready; if (rd && rd.trig) extra.push('<span class="tinfo">Vorbereitet: ' + esc(rd.trig) + (rd.what ? ' → ' + esc(rd.what) : '') + '</span><button class="chip tq" data-act="readyFire" title="Der Auslöser ist eingetreten: Handlung mit deiner Reaktion ausführen">Auslösen (R)</button><button class="chip" data-act="readyDrop" title="Vorbereitung aufgeben">×</button>');
   const incap = (ch.play.cond || []).find((k) => COND[k] && COND[k].fx && COND[k].fx.incap); if (incap) extra.push('<span class="tinfo warnc">' + COND[incap].name + ': keine Aktionen, Bonusaktionen oder Reaktionen.</span>');
   const fx = ch.play.fx || {}; const act = [];
   const FXN = { reckless: 'Tollkühn', aim: 'Ruhiges Zielen', innate: 'Angeborene Zauberei', sacred: 'Heilige Waffe', bless: 'Segnen', hm: 'Mal des Jägers', hex: 'Verhexen', df: 'Göttliche Gunst', shill: 'Shillelagh', flame: 'Flamme in der Hand', vex: 'Bedrängen' };
@@ -322,7 +334,7 @@ function turnExtras(c, slim) {
 function turnSlim(c) {
   const ch = c.char; const extra = turnExtras(c, true);
   const online = typeof onlineFight === 'function' && onlineFight();
-  const ctx = (online ? tgtSelect(c) : '') + (!online && ch.play.localFight ? '<button class="chip on" data-act="tFight" title="Kampfmodus beenden">⚔ Kampfmodus an</button>' : '');
+  const ctx = (online ? tgtSelect(c) : '') + (!online && ch.play.localFight ? '<button class="chip on" data-act="tFight" title="Kampfmodus beenden">⚔ Kampfmodus an</button>' : '') + (online || ch.play.localFight ? '<button class="chip" data-act="hlT" data-arg="zug" title="Aktion, Bonusaktion, Reaktion und Zauberplätze wieder mitzählen (ändert nur die Zugleiste, nicht die Hilfe-Stufe)">Zug mitzählen</button>' : '');
   const durs = !online && Object.keys(ch.play.fxDur || {}).length > 0;
   const eff = typeof effMineHtml === 'function' ? effMineHtml() : '';
   if (!extra.length && !ctx && !durs && !eff) return '';
@@ -366,6 +378,10 @@ Object.assign(XA, {
   tFav: (t, a, p, ch) => { ch.favs = ch.favs || []; const i = ch.favs.indexOf(a); if (i >= 0) ch.favs.splice(i, 1); else ch.favs.push(a); commit(); const k = turnOpts(derive(ch, S.hb)).find((o) => o.id === a); if (S.modal === 'turn' && k) openTurnPicker(k.cost === 'f' ? 'b' : k.cost); },
   tToggle: (t, a, p, ch) => { const st = turnSt(ch); if (a === 'a') st.a = st.a >= st.aMax ? 0 : st.aMax; else st[a] = st[a] ? 0 : 1; commit(); openTurnPicker(a); },
   tNew: (t, a, p, ch) => { turnReset(ch); commit(); },
+  readyGo: (t, a, p, ch) => { const tr = (($('#readyTrig') || {}).value || '').trim(); const wh = (($('#readyWhat') || {}).value || '').trim(); if (!tr) { const el = $('#readyTrig'); if (el) { el.focus(); el.setAttribute('aria-invalid', 'true'); } return; } ch.play.ready = { trig: tr.slice(0, 80), what: wh.slice(0, 80), t: Date.now() }; orbPrompt(''); tLog('Vorbereitet', 'Auslöser: ' + tr + (wh ? ' · Handlung: ' + wh : '') + ' · kostet beim Auslösen die Reaktion'); commit(); },
+  readyNo: () => orbPrompt(''),
+  readyFire: (t, a, p, ch) => { const rd = ch.play.ready; if (!rd) return; if (!tSpend(ch, 'r', 'Vorbereitete Handlung')) return; delete ch.play.ready; tLog('Vorbereitete Handlung ausgelöst', rd.trig + (rd.what ? ' → ' + rd.what : '') + ' · Reaktion verbraucht'); commit(); },
+  readyDrop: (t, a, p, ch) => { if (!ch.play.ready) return; delete ch.play.ready; tLog('Vorbereitung aufgegeben', ''); commit(); },
   tTime: (t, a, p, ch) => { timePass(ch, +a); commit(); },
   tFight: (t, a, p, ch) => { ch.play.localFight = !ch.play.localFight; if (ch.play.localFight) turnReset(ch); else delete ch.play.hxForms; /* Wandelgestalt endet mit dem Kampf */ commit(); },
   tMove: (t, a, p, ch) => { const st = turnSt(ch); const c = derive(ch, S.hb); st.mv = Math.max(0, Math.min(c.speed + st.mvMax, (st.mv || 0) + +a)); commit(); },

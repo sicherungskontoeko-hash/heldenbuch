@@ -542,6 +542,13 @@ function rollExpr(expr) {
   const e = String(expr).replace(/\s/g, '').replace(/−/g, '-').replace(/[dD]/g, 'W');
   let total = 0; const parts = []; const groups = [];
   const re = /([+-]?)(\d*)W(\d+)|([+-]?)(\d+)/g; let m;
+  /* Eigene Würfel (nur in der App): eingegebene Augensumme statt gewürfelter Werte, feste Zahlen zählen dazu */
+  if (typeof echtTake === 'function' && typeof echtOn === 'function' && echtOn()) {
+    let n = 0, hi = 0, neg = false, flat = 0; const r2 = /([+-]?)(\d*)W(\d+)|([+-]?)(\d+)/g; let q;
+    while ((q = r2.exec(e))) { if (q[3]) { const k = Math.min(+(q[2] || 1), 1000), s = Math.min(+q[3], 10000); if (!s) continue; if (q[1] === '-') neg = true; n += k; hi += k * s; } else if (q[5]) flat += (q[4] === '-' ? -1 : 1) * +q[5]; }
+    const v = n && !neg ? echtTake(0, n, hi) : null;
+    if (v) return { total: v[0] + flat, detail: 'echte Würfel ' + v[0] + (flat ? ' ' + sgn(flat) : ''), groups: [], real: true };
+  }
   while ((m = re.exec(e))) {
     if (m[3]) { const n = Math.min(+(m[2] || 1), 1000), s = Math.min(+m[3], 10000); /* Obergrenzen gegen ausufernde Ausdrücke */ if (!s) continue; const sign = m[1] === '-' ? -1 : 1; const r = []; for (let i = 0; i < n; i++) r.push(1 + Math.floor(rnd() * s)); total += sign * r.reduce((a, b) => a + b, 0); parts.push((sign < 0 ? '−' : '') + n + 'W' + s + '[' + r.join(',') + ']'); groups.push({ sides: s, rolls: r, sign }); }
     else if (m[5]) { const v = (m[4] === '-' ? -1 : 1) * +m[5]; total += v; parts.push(sgn(v)); }
