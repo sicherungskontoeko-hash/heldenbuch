@@ -626,8 +626,8 @@ function renderBuild(c) {
   const st = S.step;
   if (st === 0) {
     body += '<div class="row hname">' + field('Name deines Helden', txt('name', ch.name === 'Neuer Held' ? '' : ch.name, 'z. B. Brakk Eisenfaust', 'autocomplete="off"')) + '</div>';
-    body += '<h2>Klasse wählen</h2>' + homeToggle() + '<div class="cards pics">' + Object.entries(CLASSES).filter(([k, C]) => homeOk(C, ch.cls === k)).map(([k, C]) =>
-      '<button class="card haspic' + (ch.cls === k ? ' on' : '') + '" data-act="setCls" data-arg="' + esc(k) + '">' + picOf('cls', k) + '<b>' + C.name + '</b><small>W' + C.hd + ' · ' + C.prim.map((a) => AB_K[a]).join('/') + (C.caster ? ' · Zauber' : '') + '</small><small class="sub">' + (C.subs ? C.subs.length + ' Unterklassen' : C.sub.name) + (C.home ? ' · ✦ Heldenbuch' : '') + '</small>' + ii('cls', k, C.name) + '</button>').join('') + '</div>' + flavBox(c.cls.name, c.cls.flavor, 'cls', ch.cls);
+    body += '<h2>Klasse wählen</h2><div class="cards pics">' + Object.entries(CLASSES).filter(([k, C]) => homeOk(C, ch.cls === k)).map(([k, C]) =>
+      '<button class="card haspic' + (ch.cls === k ? ' on' : '') + '" data-act="setCls" data-arg="' + esc(k) + '">' + picOf('cls', k) + '<b>' + C.name + '</b><small>W' + C.hd + ' · ' + C.prim.map((a) => AB_K[a]).join('/') + (C.caster ? ' · Zauber' : '') + '</small><small class="sub">' + (C.subs ? C.subs.length + ' Unterklassen' : C.sub.name) + (C.home ? ' · ✦ Heldenbuch' : '') + '</small>' + ii('cls', k, C.name) + '</button>').join('') + '</div>' + homeToggle() + flavBox(c.cls.name, c.cls.flavor, 'cls', ch.cls);
     body += '<div class="row">' + field('Stufe', '<div class="stepper"><button data-act="lvl" data-arg="-1" aria-label="Stufe senken">−</button><b>' + ch.level + '</b><button data-act="lvl" data-arg="1" aria-label="Stufe erhöhen">+</button></div>', 'Übungsbonus ' + sgn(c.pb)) +
       field('Trefferpunkte pro Stufe', sel('hpMode', ch.hpMode, [['avg', 'Durchschnitt (' + (c.hd / 2 + 1) + ')'], ['roll', 'Selbst gewürfelt']])) + '</div>';
     if (ch.hpMode === 'roll' && ch.level > 1) {
@@ -641,7 +641,7 @@ function renderBuild(c) {
     body += mcSection(c);
   }
   if (st === 1) {
-    body += '<h2>Spezies</h2>' + homeToggle() + '<div class="cards pics sp">' + Object.entries(SPECIES).filter(([k, s]) => homeOk(s, ch.species === k)).map(([k, s]) => '<button class="card haspic' + (ch.species === k ? ' on' : '') + '" data-act="setSpecies" data-arg="' + esc(k) + '">' + picOf('sp', k) + '<b>' + s.name + '</b><small>' + s.size + ' · ' + fmtM(s.speed) + (s.dv ? ' · Dunkelsicht' : '') + '</small>' + ii('sp', k, s.name) + '</button>').join('') + '</div>' + flavBox(SPECIES[ch.species] && SPECIES[ch.species].name, SPECIES[ch.species] && SPECIES[ch.species].flavor, 'sp', ch.species);
+    body += '<h2>Spezies</h2><div class="cards pics sp">' + Object.entries(SPECIES).filter(([k, s]) => homeOk(s, ch.species === k)).map(([k, s]) => '<button class="card haspic' + (ch.species === k ? ' on' : '') + '" data-act="setSpecies" data-arg="' + esc(k) + '">' + picOf('sp', k) + '<b>' + s.name + '</b><small>' + s.size + ' · ' + fmtM(s.speed) + (s.dv ? ' · Dunkelsicht' : '') + '</small>' + ii('sp', k, s.name) + '</button>').join('') + '</div>' + homeToggle() + flavBox(SPECIES[ch.species] && SPECIES[ch.species].name, SPECIES[ch.species] && SPECIES[ch.species].flavor, 'sp', ch.species);
     const sp = c.sp;
     if (sp.choice) body += '<h3>' + sp.choice.label + '</h3><div class="chips">' + Object.entries(sp.choice.opts).map(([k, l]) => chip(ch.speciesChoice === k, l, 'data-act="pick" data-path="speciesChoice" data-val="' + esc(k) + '"')).join('') + '</div>';
     if (sp.skillPick) body += '<h3 id="a-spskill">Fertigkeit (' + sp.name + ')</h3><div class="chips">' + sp.skillPick.map((s) => chipI(ch.speciesSkill === s, SKILLS[s][0], 'data-act="pick" data-path="speciesSkill" data-val="' + esc(s) + '"', false, 'sk', s, SKILLS[s][0])).join('') + '</div>';
