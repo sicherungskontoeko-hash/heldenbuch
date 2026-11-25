@@ -6,9 +6,9 @@
      hb_dice_snd 1/0            → Würfelgeräusche an/aus
    Ändert jemand einen alten Schalter (alte Version, anderer Tab), wird nur dieser Teil übernommen.
    Präsentation ändert nie Würfelergebnisse: sichtbarer Zufall kommt aus vrand(), nicht aus rnd(). */
-const VFX_DEF = Object.freeze({ profile: 'auto', roll: 'normal', critical: 'dezent', damage: 'dezent', status: 'dezent', background: 'dezent', dice3d: 'classic', menu: true, diceSound: false, eventSound: false, ambience: false, haptics: false });
+const VFX_DEF = Object.freeze({ profile: 'auto', roll: 'normal', critical: 'dezent', damage: 'dezent', status: 'dezent', background: 'dezent', menu: true, diceSound: false, eventSound: false, ambience: false, haptics: false });
 const VFX_LV = ['aus', 'dezent', 'intensiv'];
-const VFX_OK = { profile: ['auto', 'eco', 'balanced', 'max'], roll: ['normal', 'kurz', 'aus'], critical: VFX_LV, damage: VFX_LV, status: VFX_LV, background: VFX_LV, dice3d: ['classic', 'artifact'] };
+const VFX_OK = { profile: ['auto', 'eco', 'balanced', 'max'], roll: ['normal', 'kurz', 'aus'], critical: VFX_LV, damage: VFX_LV, status: VFX_LV, background: VFX_LV };
 const VFX_DF = { voll: { roll: 'normal', critical: 'intensiv' }, ruhig: { roll: 'aus', critical: 'dezent' }, aus: { roll: 'aus', critical: 'aus' } };
 const VFX_BF = { stark: 'intensiv', dezent: 'dezent', aus: 'aus' };
 const vrand = () => (typeof NATIVE_RANDOM === 'function' ? NATIVE_RANDOM() : Math.random());
@@ -111,7 +111,7 @@ function vfxBlock() {
     row('Effekte:', 'level', lv, both) +
     row('Würfel:', 'roll', [['normal', 'Normal'], ['kurz', 'Kurz'], ['aus', 'Aus']], s.roll) +
     (red ? '<p class="hint vfxred">Dein Gerät wünscht weniger Bewegung: bewegte Effekte und rollende Würfel bleiben aus.</p>' : '') +
-    '<details class="vfxmore" id="vfxMore"' + (S.vfxMore ? ' open' : '') + '><summary>Einzeln einstellen</summary>' +
+    '<details class="vfxmore" id="vfxMore"' + (S.vfxMore ? ' open' : '') + '><summary>Details</summary>' +
     row('Leistung:', 'profile', [['auto', 'Auto'], ['eco', 'Energiesparend'], ['balanced', 'Ausgewogen'], ['max', 'Maximal']], s.profile) +
     (s.profile === 'auto' ? '<p class="hint vfxtier">Auto wählt gerade «' + tierName[t] + '».</p>' : '') +
     row('Natürliche 20 und 1:', 'critical', lv, s.critical) +
@@ -138,6 +138,6 @@ XA.vfx = (t, a) => {
   if (k === 'eventSound' && v && typeof tonEvent === 'function') tonEvent('heal');
   if (S.modal === 'theme' && typeof openThemeModal === 'function') openThemeModal(); else if (S.modal === 'dice' && typeof diceModal === 'function') diceModal(); else render();
 };
-document.addEventListener('toggle', (ev) => { if (ev.target && ev.target.id === 'vfxMore') S.vfxMore = ev.target.open; }, true);
+document.addEventListener('toggle', (ev) => { if (ev.target && ev.target.id === 'vfxMore') S.vfxMore = ev.target.open; if (ev.target && ev.target.id === 'vfxMoreDice') S.vfxMoreDice = ev.target.open; }, true);
 /* Systemeinstellung «weniger Bewegung» ändert sich zur Laufzeit: sofort übernehmen */
 try { matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => { VFX_RT.cache = null; if (typeof applyFxLevel === 'function') applyFxLevel(); if (typeof vfxUiApply === 'function') vfxUiApply(); if (typeof startFx === 'function') startFx(); }); } catch (e) {}

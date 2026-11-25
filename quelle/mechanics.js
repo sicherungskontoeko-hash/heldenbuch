@@ -95,6 +95,8 @@ function heroRes(ch, c) {
   const out = []; if (!ch) return out; const P = ch.play || {};
   if (c.lv && c.lv('bar') && P.raging && !c.heavyArmor) out.push(['Wucht', 'Kampfrausch'], ['Stich', 'Kampfrausch'], ['Hieb', 'Kampfrausch']);
   if (ch.species === 'dwarf') out.push(['Gift', 'Zwergische Unverwüstlichkeit']);
+  if(ch.species==='hxgolem')out.push(['Gift','Werkstoffkörper']);
+  if(c.lv&&c.lv('hxmind')>=7)out.push(['Psychisch','Klarer Geist']);
   const sp = SPECIES[ch.species]; if (sp && sp.choice && ch.speciesChoice && /\(([^)]+)\)/.test(sp.choice.opts[ch.speciesChoice] || '') && ['dragonborn', 'tiefling'].includes(ch.species)) out.push([/\(([^)]+)\)/.exec(sp.choice.opts[ch.speciesChoice])[1], sp.name]);
   return out;
 }

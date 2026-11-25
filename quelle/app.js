@@ -189,6 +189,11 @@ function d20(mod, label, opts = {}) {
   if (k.type === 'attack' && ch && st.adv.includes('Bedrängen')) fxSet(ch.play, 'vex', false);
   if (k.type === 'attack') S.lastAttack = { crit, fumble, total, nat: use, mode: st.mode };
   if (k.type === 'init' && S.combat && S.combat.active) setMyInit(total);
+  /* Ohne Online-Tisch: Initiative würfeln heisst «der Kampf beginnt» – Kampfmodus an, damit die Zugregeln gelten */
+  if (k.type === 'init' && ch && !onlineFight() && !ch.play.localFight && typeof turnTrack === 'function' && turnTrack() && !opts.preview) {
+    ch.play.localFight = true; if (typeof turnReset === 'function') turnReset(ch); setTimeout(() => commit(), 0);
+    bannerToast('Kampfmodus an', 'Die App zählt jetzt deinen Zug: Aktion, Bonusaktion, Reaktion und nur ein Zauberplatz pro Zug. Ausschalten über «⚔ Kampfmodus».');
+  }
   const prts = opts.parts || (c && typeof partsFor === 'function' ? partsFor(c, opts.kind) : null);
   S.lastRoll = { label, mod: mod + bonus - ex, total, type: k.type, nat: use };
   let boost = 0;
@@ -206,6 +211,7 @@ function rollParts(parts, flat) {
     let note = '';
     if (p.savage) { const r2 = Array.from({ length: p.n }, () => 1 + Math.floor(rnd() * p.s)); const a = r.reduce((x, y) => x + y, 0), b = r2.reduce((x, y) => x + y, 0); note = ' (Wilder Angreifer: ' + a + ' oder ' + b + ')'; if (b > a) r = r2; }
     let eff = r;
+    if(p.hxFloor2){eff=eff.map(v=>Math.max(2,v));note+=' (Letzter Widerstand: 1 zählt als 2)';}
     if (p.gwf) { eff = r.map((v) => (v <= 2 ? 3 : v)); if (eff.some((v, i) => v !== r[i])) note += ' (grosse Waffen: 1–2 zählen als 3)'; }
     total += eff.reduce((x, y) => x + y, 0);
     groups.push({ sides: p.s, rolls: eff, sign: 1 });
@@ -247,9 +253,10 @@ function renderDmgPrompt() {
   if (a.light && !d.cleave) opts.push(chip(d.off, 'Zusatzangriff mit Zweitwaffe', 'data-act="dpT" data-arg="off" title="Ohne Attributsmodifikator, ausser mit Kampf mit zwei Waffen"'));
   if (a.idx !== undefined && c.feats.some((x) => x.id === 'savage')) { const used = onceUsed(ch, 'savage'); opts.push(chip(d.savage && !used, 'Wilder Angreifer (1× pro Zug)' + (used ? ' – schon genutzt' : ''), 'data-act="dpT" data-arg="savage"', used)); }
   if (c.critMark && !d.fumble && (d.crit0 === undefined ? !d.crit : !d.crit0) && d.nat >= c.critMark) opts.push(chip(d.crit, 'Gegen ' + c.critMarkLabel + ': kritisch (' + c.critMark + '+)', 'data-act="dpT" data-arg="crit"'));
+  if(c.lv('hxexec')>=14&&c.subOf('hxexec')==='headsman'&&a.idx!==undefined&&!d.fumble&&!d.crit0&&d.nat===19)opts.push(chip(d.crit,'Scharfrichter: Ziel angeschlagen (kritisch)','data-act="dpT" data-arg="crit"'));
   const bo = typeof boostOpts === 'function' ? boostOpts(c, 'attack') : []; const bown = bo.filter((x) => !x.ext);
   if (!d.fumble || bown.some((x) => x.how !== 'add')) opts.push('<span class="bsep">Nachbessern:</span>' + bown.map((x) => '<button class="chip" data-act="boostAtk" data-arg="' + esc(x.k) + '">' + esc(x.label) + '</button>').join('') + bo.filter((x) => x.ext && ['xW4', 'xW6', 'xW8'].includes(x.k)).map((x) => '<button class="chip" data-act="boostAtk" data-arg="' + esc(x.k) + '">' + x.label + '</button>').join(''));
-  (c.dmgExtras || []).forEach((x) => { const r = x.res && c.res.find((y) => y.k === x.res); const left = r ? r.max - (+P.res[x.res] || 0) : 1; const used = !XD_MULTI.has(x.k) && onceUsed(ch, 'xd_' + x.k); opts.push(chip((d.xd || []).includes(x.k) && !used, esc(x.label) + (x.n ? ' +' + x.n + 'W' + x.s : '') + (x.flat ? ' +' + x.flat : '') + (used ? ' – schon genutzt' : ''), 'data-act="dpX" data-arg="' + esc(x.k) + '"', !left || used)); });
+  (c.dmgExtras || []).filter(x=>hxExtraEligible(x,a,ch,d)).forEach((x) => { const r = x.res && c.res.find((y) => y.k === x.res); const left = r ? r.max - (+P.res[x.res] || 0) : 1; const used = !XD_MULTI.has(x.k) && onceUsed(ch, 'xd_' + hxExtraKey(x)); opts.push(chip((d.xd || []).includes(x.k) && !used, esc(x.label) + (x.n ? ' +' + x.n + 'W' + x.s : '') + (x.flat ? ' +' + x.flat : '') + (used ? ' – schon genutzt' : ''), 'data-act="dpX" data-arg="' + esc(x.k) + '"', !left || used)); });
   for (const [k, R] of Object.entries(RIDERS)) if (P.fx && P.fx[k] && (k !== 'ewpn' || a.idx !== undefined)) { const on = d['r_' + k] !== false; opts.push(chip(on, R.tag + ' +' + R.n(+P.fx[k + '_L'] || 1) + 'W' + R.s + (R.ask ? ' (' + R.ask + '?)' : ''), 'data-act="dpR" data-arg="' + esc(k) + '"')); }
   if (P.fx && P.fx.hm) { const ok = markOk(P, 'hm', d.tgt); const on = ok && d.hm !== false; d.hm = on; opts.push(chip(on, 'Mal des Jägers +1W' + (c.lv('ran') >= 20 ? 10 : 6) + (P.fx.hmTgt ? ' (auf ' + partName(P.fx.hmTgt) + ')' : ' (gegen das markierte Ziel)') + (ok ? '' : ' – nicht das markierte Ziel'), 'data-act="dpT" data-arg="hm"', !ok)); }
   if (P.fx && P.fx.hex) { const ok = markOk(P, 'hex', d.tgt); const on = ok && d.hex !== false; d.hex = on; opts.push(chip(on, 'Verhexen +1W6' + (P.fx.hexTgt ? ' (auf ' + partName(P.fx.hexTgt) + ')' : ' (gegen das verhexte Ziel)') + (ok ? '' : ' – nicht das verhexte Ziel'), 'data-act="dpT" data-arg="hex"', !ok)); }
@@ -297,7 +304,8 @@ function dmgRoll(ch) {
   if (P.fx && P.fx.hex && d.hex !== false && markOk(P, 'hex', d.tgt)) parts.push({ n: 1, s: 6, tag: 'Verhexen (nekrotisch)' });
   if (c.lv('pal') >= 11 && !a.ranged) parts.push({ n: 1, s: 8, tag: 'Strahlende Schläge' });
   let smiteNote = '';
-  for (const x of (c.dmgExtras || []).filter((y) => (d.xd || []).includes(y.k))) { if (!XD_MULTI.has(x.k)) { if (onceUsed(ch, 'xd_' + x.k)) continue; once.push('xd_' + x.k); } if (x.res) { const r = c.res.find((y) => y.k === x.res); const used = +P.res[x.res] || 0; if (!r || used >= r.max) continue; P.res[x.res] = used + 1; smiteNote += ' · ' + r.n + ' verbraucht'; } if (x.n) parts.push({ n: x.n, s: x.s, tag: x.label.replace(/ \(.*\)$/, '') + (x.note ? ' (' + x.note + ')' : '') }); if (x.flat) flat += x.flat; }
+  const hxGroups=new Set();
+  for (const x of (c.dmgExtras || []).filter((y) => (d.xd || []).includes(y.k)&&hxExtraEligible(y,a,ch,d))) { if(x.hxGroup){if(hxGroups.has(x.hxGroup))continue;hxGroups.add(x.hxGroup);} if (!XD_MULTI.has(x.k)) { if (onceUsed(ch, 'xd_' + hxExtraKey(x))) continue; once.push('xd_' + hxExtraKey(x)); } if (x.res) { const r = c.res.find((y) => y.k === x.res); const used = +P.res[x.res] || 0; if (!r || used >= r.max) continue; P.res[x.res] = used + 1; smiteNote += ' · ' + r.n + ' verbraucht'; } if (x.n) parts.push({ n: x.n, s: x.s, hxFloor2:x.hxGroup==='hxexec'&&c.lv('hxexec')>=15&&x.k!=='hx_exec_full', tag: x.label.replace(/ \(.*\)$/, '') + (x.note ? ' (' + x.note + ')' : '') }); if (x.flat) flat += x.flat; }
   if (d.smite) {
     const inF = inFight(ch); const sb = inF && rule('strict') && (tLeft(ch, 'b') <= 0 || canAct(ch)); const sl = inF && rule('strict') && turnTrack() && d.smite !== 'free' && turnSt(ch).slotSpell && !offTurn();
     if (sb || sl) { smiteNote += ' · Niederstrecken nicht möglich (' + (sb ? 'keine Bonusaktion' : 'schon ein Zauberplatz in diesem Zug') + ')'; d.smite = 0; }
@@ -322,6 +330,7 @@ function dmgRoll(ch) {
 function spellAttack(ch, s, count, expr, tail, note, atk) { S.sa = { name: s.name, sid: s.id, k: 1, count, expr, tail, note: note || '', atk, tgt: S.tgt || '' }; saAttack(); }
 function saAttack() {
   const o = S.sa; if (!o) return; const c = derive(cur(), S.hb);
+  if(String(o.sid||'').startsWith('hx_'))o.tgt=S.tgt||'';
   S.lastAttack = null;
   const lbl = o.name + (o.count > 1 ? ' · ' + o.k + '/' + o.count : '') + ': Angriff';
   const total = d20(o.atk ?? c.spell.atk, lbl, { kind: 'attack:spell', crit: 20 }); if (total === null) { S.sa = null; return; }
@@ -353,7 +362,7 @@ function showMulti(e, flat) {
   let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
   const has3 = typeof d3ok === 'function'; const set = has3 ? (e.dset || d3setOf(cur())) : ''; const rollMs = typeof vfxRollMs === 'function' ? vfxRollMs() : 850; if (!rollMs) reduce = true;
   const live3 = has3 && n <= ({ eco: 2, balanced: 4, max: 6 }[typeof vfxTier === 'function' ? vfxTier() : 'balanced'] || 4); /* so viele Würfel drehen sich echt, sonst einfache Darstellung */
-  const art = has3 && n <= 12 && typeof W3D !== 'undefined' && typeof vfxLoad === 'function' && vfxLoad().dice3d === 'artifact'; /* Artefaktwürfel (WebGL) bis 12 Würfel, sonst bisherige Darstellung */
+  const art = has3 && n <= 12 && typeof W3D !== 'undefined'; /* Artefaktwürfel (WebGL) bis 12 Würfel, sonst bisherige Darstellung */
   const d3h = (d, v, cls) => '<span class="die d3 ' + cls + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(d.sides, v, set, { gold: / crit/.test(cls) && d.sides === 20, dead: / fum/.test(cls) && d.sides === 20, cracks: / fum/.test(cls) && d.sides === 20, thin: n > 6 }) + '</span>';
   const W = window.innerWidth, H = window.innerHeight;
   const areaW = W * 0.86, areaH = H * 0.52, top0 = H * 0.2;
@@ -435,16 +444,17 @@ function showToast(e) {
   const hl = (e.crit ? ' crit' : e.fumble ? ' fum' : '');
   const use3 = typeof d3ok === 'function' && d3ok(sides); const set = use3 ? (e.dset || d3setOf(cur())) : ''; const rollMs = typeof vfxRollMs === 'function' ? vfxRollMs() : 850; const crl = use3 && typeof d3critLv === 'function' ? d3critLv() : 'aus';
   const nat = sides === 20 ? +vals[keep] : 0; /* natürliche 20/1 aus dem behaltenen W20, unabhängig vom Regel-Krit */
-  /* Artefaktwürfel v5 (Vorschau, Schalter im Würfel-Fenster): nur wo vorhanden, sonst bisherige Darstellung */
-  const art = use3 && typeof W3D !== 'undefined' && typeof vfxLoad === 'function' && vfxLoad().dice3d === 'artifact' && W3D.supports(sides, set);
-  const wide = art && sides === 100 ? ' w100' : ''; /* W100 als Artefakt: Zehner- und Einerwürfel nebeneinander */
+  /* Artefaktwürfel (Standard): räumliche WebGL-Würfel; ohne WebGL, bei Kontextverlust oder auf zu langsamen Geräten die bisherige Darstellung */
+  const art = use3 && typeof W3D !== 'undefined' && W3D.supports(sides, set);
+  const wide = art && sides === 100 ? ' w100' : art && sides === 4 ? ' w4' : ''; /* W100 als Artefakt: Zehner- und Einerwürfel nebeneinander; W4 (Eckzahlen) und W100 auf dem Handy grösser */
   const dieH = (v, cls) => use3 ? '<span class="die d3 ' + cls + wide + '" style="--dg:' + D3_SETS[set].glow + '">' + d3svg(sides, v, set, { gold: / crit/.test(cls) && sides === 20, dead: / fum/.test(cls) && sides === 20, cracks: / fum/.test(cls) && sides === 20 }) + '</span>' : dieSvg(sides, v, cls);
   const final = () => {
     clearInterval(showToast.iv); t.onclick = (ev) => { if (ev.target.closest('[data-act]')) return; t.hidden = true; if (typeof histOpen === 'function') XA.histOpen(); };
     const dice = vals.map((v, i) => dieH(v, 'land' + (i === keep ? hl : ' drop'))).join('');
     const tip = typeof rollTip === 'function' ? rollTip(e) : '';
     t.innerHTML = '<div class="trow"><div class="dice' + wide + '">' + dice + '</div><div class="tt">' + head + '<div class="tv' + hl + '">' + e.total + '</div><div class="td">' + esc(e.detail) + (e.crit ? ' · Kritischer Treffer' + (nat && nat < 20 ? ' (erweiterter Bereich)' : '') + '!' : '') + '</div></div>' + (e.boost && !e.preview ? '<button class="tplus" data-act="boostOpen" aria-label="Nachbessern: Inspiration, Glückskind, Würfel von Verbündeten" title="Nachbessern">＋</button>' : '') + '</div>' + (tip ? '<div class="ttip">' + tip + '</div>' : '');
-    if (art) t.querySelectorAll('.die.d3').forEach((el, i) => { const svg = el.innerHTML; if (!W3D.still(el, sides, vals[i], set, { gold: i === keep && nat === 20, dim: i !== keep || nat === 1 })) el.innerHTML = svg; });
+    if (art) t.querySelectorAll('.die.d3').forEach((el, i) => { const svg = el.innerHTML; if (!W3D.still(el, sides, vals[i], set, { gold: i === keep && nat === 20, dim: i !== keep || nat === 1 })) el.innerHTML = svg;
+      else if (i === keep && nat === 1 && typeof d3cracks === 'function') el.insertAdjacentHTML('beforeend', '<svg class="d3s d3crkov" viewBox="0 0 100 100" aria-hidden="true">' + d3cracks(D3_SETS[set]) + '</svg>'); /* Risse im Würfel wie bisher */ });
     if (use3) { d3snd('land', 1, set); if (nat !== 20 && nat !== 1 && typeof vfxVibrate === 'function') vfxVibrate('land'); if (nat === 20 || nat === 1) { const el = t.querySelectorAll('.die')[keep]; d3effect(el, set, nat === 20 ? 'n20' : 'n1', crl); d3snd(nat === 20 ? 'n20' : 'n1'); if (typeof vfxVibrate === 'function') vfxVibrate(nat === 20 ? 'n20' : 'n1'); } }
     showToast.tm = setTimeout(() => { t.hidden = true; }, tip ? 9000 : 6500);
   };
@@ -606,7 +616,8 @@ function openModal(kind, data) {
 
 /* ---------- Builder ---------- */
 const picOf = (kind, k) => (typeof HAS_PIC !== 'undefined' && (HAS_PIC[kind] || []).includes(k) ? '<span class="cpic pic-' + kind + '-' + k + '" aria-hidden="true"></span>' : '');
-const subPic = (ck, id) => (typeof SUB_PIC !== 'undefined' && SUB_PIC.includes(ck + '-' + id) ? '<span class="opic pic-sub-' + ck + '-' + id + '" aria-hidden="true"></span>' : '');
+/* Unterklassen ohne eigenes Bild (Erweiterung): das Bild der Klasse */
+const subPic = (ck, id) => (typeof SUB_PIC !== 'undefined' && SUB_PIC.includes(ck + '-' + id) ? '<span class="opic pic-sub-' + ck + '-' + id + '" aria-hidden="true"></span>' : typeof HAS_PIC !== 'undefined' && (HAS_PIC.cls || []).includes(ck) ? '<span class="opic pic-cls-' + ck + '" aria-hidden="true"></span>' : '');
 function flavBox(n, t, kind, k) { if (!t) return ''; const pic = kind ? picOf(kind, k).replace('cpic', 'fpic') : ''; return '<div class="flav' + (pic ? ' wpic' : '') + (kind === 'sp' || kind === 'bg' ? ' wide' : '') + '">' + pic + '<p><b>' + esc(n) + '</b> – ' + esc(t.replace(/^✦ /, '')) + '</p></div>'; }
 function slimBanner(k, t, p) { return '<div class="hero-intro banner slim" style="' + bannerStyle(k) + '"><h1>' + t + '</h1><p>' + p + '</p></div>'; }
 function renderBuild(c) {
@@ -615,8 +626,8 @@ function renderBuild(c) {
   const st = S.step;
   if (st === 0) {
     body += '<div class="row hname">' + field('Name deines Helden', txt('name', ch.name === 'Neuer Held' ? '' : ch.name, 'z. B. Brakk Eisenfaust', 'autocomplete="off"')) + '</div>';
-    body += '<h2>Klasse wählen</h2><div class="cards pics">' + Object.entries(CLASSES).map(([k, C]) =>
-      '<button class="card haspic' + (ch.cls === k ? ' on' : '') + '" data-act="setCls" data-arg="' + esc(k) + '">' + picOf('cls', k) + '<b>' + C.name + '</b><small>W' + C.hd + ' · ' + C.prim.map((a) => AB_K[a]).join('/') + (C.caster ? ' · Zauber' : '') + '</small><small class="sub">' + (C.subs ? C.subs.length + ' Unterklassen' : C.sub.name) + (C.home ? ' · ✦ Heldenbuch' : '') + '</small>' + ii('cls', k, C.name) + '</button>').join('') + '</div>' + flavBox(c.cls.name, c.cls.flavor, 'cls', ch.cls);
+    body += '<h2>Klasse wählen</h2><div class="cards pics">' + Object.entries(CLASSES).filter(([k, C]) => homeOk(C, ch.cls === k)).map(([k, C]) =>
+      '<button class="card haspic' + (ch.cls === k ? ' on' : '') + '" data-act="setCls" data-arg="' + esc(k) + '">' + picOf('cls', k) + '<b>' + C.name + '</b><small>W' + C.hd + ' · ' + C.prim.map((a) => AB_K[a]).join('/') + (C.caster ? ' · Zauber' : '') + '</small><small class="sub">' + (C.subs ? C.subs.length + ' Unterklassen' : C.sub.name) + (C.home ? ' · ✦ Heldenbuch' : '') + '</small>' + ii('cls', k, C.name) + '</button>').join('') + '</div>' + homeToggle() + flavBox(c.cls.name, c.cls.flavor, 'cls', ch.cls);
     body += '<div class="row">' + field('Stufe', '<div class="stepper"><button data-act="lvl" data-arg="-1" aria-label="Stufe senken">−</button><b>' + ch.level + '</b><button data-act="lvl" data-arg="1" aria-label="Stufe erhöhen">+</button></div>', 'Übungsbonus ' + sgn(c.pb)) +
       field('Trefferpunkte pro Stufe', sel('hpMode', ch.hpMode, [['avg', 'Durchschnitt (' + (c.hd / 2 + 1) + ')'], ['roll', 'Selbst gewürfelt']])) + '</div>';
     if (ch.hpMode === 'roll' && ch.level > 1) {
@@ -630,7 +641,7 @@ function renderBuild(c) {
     body += mcSection(c);
   }
   if (st === 1) {
-    body += '<h2>Spezies</h2><div class="cards pics sp">' + Object.entries(SPECIES).map(([k, s]) => '<button class="card haspic' + (ch.species === k ? ' on' : '') + '" data-act="setSpecies" data-arg="' + esc(k) + '">' + picOf('sp', k) + '<b>' + s.name + '</b><small>' + s.size + ' · ' + fmtM(s.speed) + (s.dv ? ' · Dunkelsicht' : '') + '</small>' + ii('sp', k, s.name) + '</button>').join('') + '</div>' + flavBox(SPECIES[ch.species] && SPECIES[ch.species].name, SPECIES[ch.species] && SPECIES[ch.species].flavor, 'sp', ch.species);
+    body += '<h2>Spezies</h2><div class="cards pics sp">' + Object.entries(SPECIES).filter(([k, s]) => homeOk(s, ch.species === k)).map(([k, s]) => '<button class="card haspic' + (ch.species === k ? ' on' : '') + '" data-act="setSpecies" data-arg="' + esc(k) + '">' + picOf('sp', k) + '<b>' + s.name + '</b><small>' + s.size + ' · ' + fmtM(s.speed) + (s.dv ? ' · Dunkelsicht' : '') + '</small>' + ii('sp', k, s.name) + '</button>').join('') + '</div>' + homeToggle() + flavBox(SPECIES[ch.species] && SPECIES[ch.species].name, SPECIES[ch.species] && SPECIES[ch.species].flavor, 'sp', ch.species);
     const sp = c.sp;
     if (sp.choice) body += '<h3>' + sp.choice.label + '</h3><div class="chips">' + Object.entries(sp.choice.opts).map(([k, l]) => chip(ch.speciesChoice === k, l, 'data-act="pick" data-path="speciesChoice" data-val="' + esc(k) + '"')).join('') + '</div>';
     if (sp.skillPick) body += '<h3 id="a-spskill">Fertigkeit (' + sp.name + ')</h3><div class="chips">' + sp.skillPick.map((s) => chipI(ch.speciesSkill === s, SKILLS[s][0], 'data-act="pick" data-path="speciesSkill" data-val="' + esc(s) + '"', false, 'sk', s, SKILLS[s][0])).join('') + '</div>';
@@ -781,7 +792,7 @@ function mcSection(c) {
     h += '</div>';
   });
   const used = [ch.cls].concat((ch.multi || []).map((m) => m.cls));
-  if (total < 20) h += '<div class="row">' + field('Weitere Klasse hinzufügen', '<select id="addMc"><option value="">— Klasse wählen —</option>' + Object.entries(CLASSES).filter(([k]) => !used.includes(k)).map(([k, C]) => '<option value="' + k + '">' + C.name + '</option>').join('') + '</select>') + '</div>';
+  if (total < 20) h += '<div class="row">' + field('Weitere Klasse hinzufügen', '<select id="addMc"><option value="">— Klasse wählen —</option>' + Object.entries(CLASSES).filter(([, C]) => homeOk(C)).filter(([k]) => !used.includes(k)).map(([k, C]) => '<option value="' + k + '">' + C.name + '</option>').join('') + '</select>') + '</div>';
   return h;
 }
 
@@ -878,7 +889,7 @@ function renderSheet(c) {
   if (c.spell.has || c.extraSpells.length) h += spellBlock(c);
   if (c.res.length) h += '<section class="blk" data-grp="kampf faehig"><h2>Ressourcen' + (c.classDC && c.classDC.length ? ' <small>' + c.classDC.map(([l, v]) => l + ' ' + v).join(' · ') + '</small>' : '') + '</h2>' + hlTip('Fähigkeiten mit begrenzten Nutzungen. Gefüllt = noch verfügbar; antippen verbraucht eine. Rasten füllen sie wieder auf.', 'p') + slotsRows(c) + '<div class="res">' + c.res.map((r) => {
     const used = +P.res[r.k] || 0;
-    if (r.pool) return '<div class="rs"><div><b>' + resName(c, r) + '</b><small>' + (r.max - used) + ' von ' + r.max + ' · ' + RESET_DE[r.reset] + '</small></div><div class="pool"><input type="number" id="pool_' + r.k + '" min="1" placeholder="TP" aria-label="Punkte"><button class="btn sm" data-act="pool" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '">Ausgeben</button></div>' + resWhy(c, r) + '</div>';
+    if (r.pool) return '<div class="rs rpool"><div><b>' + resName(c, r) + '</b><small>' + (r.max - used) + ' von ' + r.max + ' · ' + RESET_DE[r.reset] + '</small></div><div class="pool"><input type="number" id="pool_' + r.k + '" min="1" placeholder="TP" aria-label="Punkte"><button class="btn sm" data-act="pool" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '">Ausgeben</button></div>' + resWhy(c, r) + '</div>';
     return '<div class="rs"><div><b>' + resName(c, r) + '</b><small>' + RESET_DE[r.reset] + (r.note ? ' · ' + r.note : '') + '</small></div>' + (r.max > 8 ? '<div class="stepper sm"><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="1" aria-label="verbrauchen">−</button><b>' + (r.max - used) + '/' + r.max + '</b><button data-act="resUse" data-arg="' + esc(r.k) + '" data-max="' + esc(r.max) + '" data-d="-1" aria-label="zurück">+</button></div>' : pips('res.' + r.k, r.max, used)) + resWhy(c, r) + '</div>';
   }).join('') + '</div></section>';
   h += optBlock(c);
@@ -938,7 +949,9 @@ const rinfOpen = (k) => !!(S.rinf && S.rinf[k]);
 const infoBtn = (k, name) => '<button type="button" class="rii" data-act="resInfo" data-arg="' + esc(k) + '" aria-expanded="' + rinfOpen(k) + '" aria-label="Erklärung: ' + esc(name) + '" title="Was ist das?">ⓘ</button>';
 const resDet = (k, text, src) => '<div class="rinf"' + (rinfOpen(k) ? '' : ' hidden') + ' data-k="' + esc(k) + '"><p>' + esc(text) + '</p>' + (src ? '<small>' + esc(src) + '</small>' : '') + '</div>';
 /* Name mit ⓘ: das letzte Wort bleibt mit dem Symbol zusammen (kein ⓘ allein auf einer Zeile) */
-const resName = (c, r) => { if (!resInfo(c, r)) return esc(r.n); const i = r.n.lastIndexOf(' '); return esc(r.n.slice(0, i + 1)) + '<span class="nw">' + esc(r.n.slice(i + 1)) + infoBtn(r.k, r.n) + '</span>'; };
+/* Klassenzusatz wie «(Paladin)» nur bei mehreren Klassen; er unterscheidet dann gleichnamige Ressourcen */
+const resLabel = (c, r) => (c.multi ? r.n : r.n.replace(new RegExp('\\s*\\((' + Object.values(CLASSES).map((C) => C.name).join('|') + ')\\)$'), ''));
+const resName = (c, r) => { const n = resLabel(c, r); if (!resInfo(c, r)) return esc(n); const i = n.lastIndexOf(' '); return esc(n.slice(0, i + 1)) + '<span class="nw">' + esc(n.slice(i + 1)) + infoBtn(r.k, n) + '</span>'; };
 const resWhy = (c, r) => { const i = resInfo(c, r); return i ? resDet(r.k, i.t, i.src) : ''; };
 XA.resInfo = (t, a) => { S.rinf = S.rinf || {}; S.rinf[a] = !S.rinf[a]; const row = t.closest('.rs'); const d = row && row.querySelector('.rinf'); if (d) d.hidden = !S.rinf[a]; t.setAttribute('aria-expanded', String(!!S.rinf[a])); };
 function slotsMini(c) {
@@ -1154,12 +1167,15 @@ function spellCard(s, tag, cast) {
 }
 
 /* ---------- Zauber-Nachschlagewerk ---------- */
+/* Umschalter direkt an der Klassen- und Spezieswahl: Standard (SRD) oder erweitert (mit eigenen Klassen und Völkern) */
+function homeToggle() { const on = rule('homeview'); return '<div class="homeview"><span>Auswahl</span><div class="seg"><button class="' + (on ? '' : 'on') + '" data-act="homeView" data-arg="0">Standard</button><button class="' + (on ? 'on' : '') + '" data-act="homeView" data-arg="1">Erweitert</button></div><small>' + (on ? 'mit eigenen Klassen und Völkern (Hausregeln)' : 'nur Klassen und Völker aus dem SRD') + '</small></div>'; }
+XA.homeView = (t, a) => { rule('homeview'); S.rules.homeview = a === '1'; try { localStorage.setItem('hb_rules', JSON.stringify(S.rules)); } catch (e) {} SRCH_HOME = null; render(); };
 function renderSpellBook() {
   const f = S.sf; const q = f.q.trim().toLowerCase();
   const list = allSpells(S.hb).filter((s) => (f.lvl === 'all' || s.lvl === +f.lvl) && (f.cls === 'all' || s.classes.includes(f.cls)) && (!q || (s.name + ' ' + s.en + ' ' + s.text).toLowerCase().includes(q)));
   return '<div class="book"><div class="filters"><input type="search" id="sq" value="' + esc(f.q) + '" placeholder="Zauber suchen (deutsch oder englisch) …" aria-label="Suche">' +
     '<select id="sl" aria-label="Grad">' + [['all', 'Alle Grade'], ['0', 'Zaubertricks']].concat([1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => [String(g), 'Grad ' + g])).map(([v, l]) => '<option value="' + v + '"' + (f.lvl === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>' +
-    '<select id="sc" aria-label="Klasse"><option value="all">Alle Klassen</option>' + Object.entries(CLASSES).filter(([, C]) => C.caster).map(([k, C]) => '<option value="' + k + '"' + (f.cls === k ? ' selected' : '') + '>' + C.name + '</option>').join('') + '</select></div>' +
+    '<select id="sc" aria-label="Klasse"><option value="all">Alle Klassen</option>' + Object.entries(CLASSES).filter(([k, C]) => C.caster && homeOk(C, f.cls === k)).map(([k, C]) => '<option value="' + k + '"' + (f.cls === k ? ' selected' : '') + '>' + C.name + '</option>').join('') + '</select></div>' +
     '<p class="hint">' + list.length + ' Zauber · Auswahl aus dem SRD 5.2.1, eigene Zauber über „Hausregeln“.</p><div class="splist cvl">' + list.map((s) => spellCard(s, s.home ? 'Hausregel' : s.classes.map((k) => (CLASSES[k] || {}).name).filter(Boolean).join(', '), false)).join('') + '</div></div>';
 }
 
@@ -1711,7 +1727,7 @@ document.addEventListener('click', (ev) => {
     atk: () => weaponAttack(ch, +arg),
     dpT: () => { if (S.dp) { S.dp[arg] = !S.dp[arg]; renderDmgPrompt(); } },
     dpR: () => { if (S.dp) { S.dp['r_' + arg] = S.dp['r_' + arg] === false; renderDmgPrompt(); } },
-    dpX: () => { if (S.dp) { const x = S.dp.xd || (S.dp.xd = []); const i = x.indexOf(arg); if (i >= 0) x.splice(i, 1); else x.push(arg); renderDmgPrompt(); } },
+    dpX: () => { if (S.dp) { const x = S.dp.xd || (S.dp.xd = []); const i = x.indexOf(arg); if (i >= 0) x.splice(i, 1); else {const z=derive(ch,S.hb).dmgExtras.find(y=>y.k===arg);if(z&&z.hxGroup){const group=derive(ch,S.hb).dmgExtras.filter(y=>y.hxGroup===z.hxGroup).map(y=>y.k);for(let j=x.length-1;j>=0;j--)if(group.includes(x[j]))x.splice(j,1);}x.push(arg);} renderDmgPrompt(); } },
     dpSmite: () => { if (S.dp) { S.dp.smite = arg === '0' ? 0 : arg; renderDmgPrompt(); } },
     dpMiss: () => { grazeMiss(ch); S.dp = null; orbPrompt(''); },
     dpRoll: () => dmgRoll(ch),

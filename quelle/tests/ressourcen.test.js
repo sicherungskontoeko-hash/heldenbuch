@@ -24,6 +24,10 @@ let pass = 0, fail = 0; const T = (n, ok, info) => { if (ok) pass++; else fail++
   T('Antippen von ⓘ klappt die Erklärung auf (volle Zeilenbreite)', open.open && open.h > 20 && open.w > 0.9 && open.ex === 'true', open);
   await p.evaluate(() => render());
   T('Bleibt nach dem Neuzeichnen offen, zweites Antippen schliesst', await p.evaluate(() => !document.querySelector('.res .rs .rinf').hidden) && await p.click('.res .rs .rii').then(() => p.evaluate(() => document.querySelector('.res .rs .rinf').hidden)));
+  const lab = await p.evaluate(() => [...document.querySelectorAll('.res .rs b')].map((b) => b.textContent).join(' | '));
+  T('Eine Klasse: kein Klassenzusatz wie «(Paladin)»', /Göttliche Macht fokussieren/.test(lab) && !/\(Paladin\)/.test(lab), lab);
+  const row = await p.evaluate(() => { const r = [...document.querySelectorAll('.res .rs')].find((x) => /Göttliche Macht/.test(x.textContent)); const a = r.querySelector('b').getBoundingClientRect(), pp = r.querySelector('.pips').getBoundingClientRect(); return { sameRow: pp.top < a.bottom, right: pp.left > a.left }; });
+  T('Handy: Kreise bleiben rechts neben dem Namen', row.sameRow && row.right, row);
   await p.evaluate(() => { hlSetLevel('pro'); render(); });
   T('Stufe «Erfahren»: Symbol und Erklärungen ausgeblendet', await p.evaluate(() => [...document.querySelectorAll('.rinf, .rii')].every((d) => getComputedStyle(d).display === 'none')));
   T('Keine Skriptfehler', errs.length === 0, errs.slice(0, 3));

@@ -37,7 +37,7 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     await p.evaluate(() => { S.camp = ''; S.table = {}; S.modal = null; $('#modal').hidden = true; });
     /* Würfe */
     await p.evaluate(() => { localStorage.setItem('hb_dice_fx', 'voll'); pushLog({ label: 'Test', total: 14, detail: 'W20 [14]', sides: 20, nat: 14 }); });
-    await p.waitForTimeout(300); T(dev.n + ': Wurf läuft animiert (voll)', await p.evaluate(() => !!document.querySelector('#toast .die.d3.rolling3 svg')));
+    await p.waitForTimeout(300); T(dev.n + ': Wurf läuft animiert (voll)', await p.evaluate(() => !!document.querySelector('#toast .die.d3.rolling3 svg, #toast .die.d3.rolling3 canvas')));
     await p.locator('#toast').click({ force: true }); await p.waitForTimeout(80); T(dev.n + ': Antippen überspringt', await p.evaluate(() => !!document.querySelector('#toast .die.d3.land') && !document.querySelector('#toast .rolling3')));
     T(dev.n + ': Wurf trägt das Set und wird mit Set geteilt', await p.evaluate(() => S.log[0].dset === 'weltenhain' && myRolls()[0].dset === 'weltenhain' && myRolls()[0].nat === 14));
     await p.evaluate(() => { localStorage.setItem('hb_dice_fx', 'voll'); pushLog({ label: 'Krit', total: 25, detail: 'W20 [20]', sides: 20, nat: 20, crit: true }); }); await p.waitForTimeout(1250);
