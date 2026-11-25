@@ -211,6 +211,7 @@ function rollParts(parts, flat) {
     let note = '';
     if (p.savage) { const r2 = Array.from({ length: p.n }, () => 1 + Math.floor(rnd() * p.s)); const a = r.reduce((x, y) => x + y, 0), b = r2.reduce((x, y) => x + y, 0); note = ' (Wilder Angreifer: ' + a + ' oder ' + b + ')'; if (b > a) r = r2; }
     let eff = r;
+    if(p.hxFloor2){eff=eff.map(v=>Math.max(2,v));note+=' (Letzter Widerstand: 1 zählt als 2)';}
     if (p.gwf) { eff = r.map((v) => (v <= 2 ? 3 : v)); if (eff.some((v, i) => v !== r[i])) note += ' (grosse Waffen: 1–2 zählen als 3)'; }
     total += eff.reduce((x, y) => x + y, 0);
     groups.push({ sides: p.s, rolls: eff, sign: 1 });
@@ -252,9 +253,10 @@ function renderDmgPrompt() {
   if (a.light && !d.cleave) opts.push(chip(d.off, 'Zusatzangriff mit Zweitwaffe', 'data-act="dpT" data-arg="off" title="Ohne Attributsmodifikator, ausser mit Kampf mit zwei Waffen"'));
   if (a.idx !== undefined && c.feats.some((x) => x.id === 'savage')) { const used = onceUsed(ch, 'savage'); opts.push(chip(d.savage && !used, 'Wilder Angreifer (1× pro Zug)' + (used ? ' – schon genutzt' : ''), 'data-act="dpT" data-arg="savage"', used)); }
   if (c.critMark && !d.fumble && (d.crit0 === undefined ? !d.crit : !d.crit0) && d.nat >= c.critMark) opts.push(chip(d.crit, 'Gegen ' + c.critMarkLabel + ': kritisch (' + c.critMark + '+)', 'data-act="dpT" data-arg="crit"'));
+  if(c.lv('hxexec')>=14&&c.subOf('hxexec')==='headsman'&&a.idx!==undefined&&!d.fumble&&!d.crit0&&d.nat===19)opts.push(chip(d.crit,'Scharfrichter: Ziel angeschlagen (kritisch)','data-act="dpT" data-arg="crit"'));
   const bo = typeof boostOpts === 'function' ? boostOpts(c, 'attack') : []; const bown = bo.filter((x) => !x.ext);
   if (!d.fumble || bown.some((x) => x.how !== 'add')) opts.push('<span class="bsep">Nachbessern:</span>' + bown.map((x) => '<button class="chip" data-act="boostAtk" data-arg="' + esc(x.k) + '">' + esc(x.label) + '</button>').join('') + bo.filter((x) => x.ext && ['xW4', 'xW6', 'xW8'].includes(x.k)).map((x) => '<button class="chip" data-act="boostAtk" data-arg="' + esc(x.k) + '">' + x.label + '</button>').join(''));
-  (c.dmgExtras || []).forEach((x) => { const r = x.res && c.res.find((y) => y.k === x.res); const left = r ? r.max - (+P.res[x.res] || 0) : 1; const used = !XD_MULTI.has(x.k) && onceUsed(ch, 'xd_' + x.k); opts.push(chip((d.xd || []).includes(x.k) && !used, esc(x.label) + (x.n ? ' +' + x.n + 'W' + x.s : '') + (x.flat ? ' +' + x.flat : '') + (used ? ' – schon genutzt' : ''), 'data-act="dpX" data-arg="' + esc(x.k) + '"', !left || used)); });
+  (c.dmgExtras || []).filter(x=>hxExtraEligible(x,a,ch,d)).forEach((x) => { const r = x.res && c.res.find((y) => y.k === x.res); const left = r ? r.max - (+P.res[x.res] || 0) : 1; const used = !XD_MULTI.has(x.k) && onceUsed(ch, 'xd_' + hxExtraKey(x)); opts.push(chip((d.xd || []).includes(x.k) && !used, esc(x.label) + (x.n ? ' +' + x.n + 'W' + x.s : '') + (x.flat ? ' +' + x.flat : '') + (used ? ' – schon genutzt' : ''), 'data-act="dpX" data-arg="' + esc(x.k) + '"', !left || used)); });
   for (const [k, R] of Object.entries(RIDERS)) if (P.fx && P.fx[k] && (k !== 'ewpn' || a.idx !== undefined)) { const on = d['r_' + k] !== false; opts.push(chip(on, R.tag + ' +' + R.n(+P.fx[k + '_L'] || 1) + 'W' + R.s + (R.ask ? ' (' + R.ask + '?)' : ''), 'data-act="dpR" data-arg="' + esc(k) + '"')); }
   if (P.fx && P.fx.hm) { const ok = markOk(P, 'hm', d.tgt); const on = ok && d.hm !== false; d.hm = on; opts.push(chip(on, 'Mal des Jägers +1W' + (c.lv('ran') >= 20 ? 10 : 6) + (P.fx.hmTgt ? ' (auf ' + partName(P.fx.hmTgt) + ')' : ' (gegen das markierte Ziel)') + (ok ? '' : ' – nicht das markierte Ziel'), 'data-act="dpT" data-arg="hm"', !ok)); }
   if (P.fx && P.fx.hex) { const ok = markOk(P, 'hex', d.tgt); const on = ok && d.hex !== false; d.hex = on; opts.push(chip(on, 'Verhexen +1W6' + (P.fx.hexTgt ? ' (auf ' + partName(P.fx.hexTgt) + ')' : ' (gegen das verhexte Ziel)') + (ok ? '' : ' – nicht das verhexte Ziel'), 'data-act="dpT" data-arg="hex"', !ok)); }
@@ -302,7 +304,8 @@ function dmgRoll(ch) {
   if (P.fx && P.fx.hex && d.hex !== false && markOk(P, 'hex', d.tgt)) parts.push({ n: 1, s: 6, tag: 'Verhexen (nekrotisch)' });
   if (c.lv('pal') >= 11 && !a.ranged) parts.push({ n: 1, s: 8, tag: 'Strahlende Schläge' });
   let smiteNote = '';
-  for (const x of (c.dmgExtras || []).filter((y) => (d.xd || []).includes(y.k))) { if (!XD_MULTI.has(x.k)) { if (onceUsed(ch, 'xd_' + x.k)) continue; once.push('xd_' + x.k); } if (x.res) { const r = c.res.find((y) => y.k === x.res); const used = +P.res[x.res] || 0; if (!r || used >= r.max) continue; P.res[x.res] = used + 1; smiteNote += ' · ' + r.n + ' verbraucht'; } if (x.n) parts.push({ n: x.n, s: x.s, tag: x.label.replace(/ \(.*\)$/, '') + (x.note ? ' (' + x.note + ')' : '') }); if (x.flat) flat += x.flat; }
+  const hxGroups=new Set();
+  for (const x of (c.dmgExtras || []).filter((y) => (d.xd || []).includes(y.k)&&hxExtraEligible(y,a,ch,d))) { if(x.hxGroup){if(hxGroups.has(x.hxGroup))continue;hxGroups.add(x.hxGroup);} if (!XD_MULTI.has(x.k)) { if (onceUsed(ch, 'xd_' + hxExtraKey(x))) continue; once.push('xd_' + hxExtraKey(x)); } if (x.res) { const r = c.res.find((y) => y.k === x.res); const used = +P.res[x.res] || 0; if (!r || used >= r.max) continue; P.res[x.res] = used + 1; smiteNote += ' · ' + r.n + ' verbraucht'; } if (x.n) parts.push({ n: x.n, s: x.s, hxFloor2:x.hxGroup==='hxexec'&&c.lv('hxexec')>=15&&x.k!=='hx_exec_full', tag: x.label.replace(/ \(.*\)$/, '') + (x.note ? ' (' + x.note + ')' : '') }); if (x.flat) flat += x.flat; }
   if (d.smite) {
     const inF = inFight(ch); const sb = inF && rule('strict') && (tLeft(ch, 'b') <= 0 || canAct(ch)); const sl = inF && rule('strict') && turnTrack() && d.smite !== 'free' && turnSt(ch).slotSpell && !offTurn();
     if (sb || sl) { smiteNote += ' · Niederstrecken nicht möglich (' + (sb ? 'keine Bonusaktion' : 'schon ein Zauberplatz in diesem Zug') + ')'; d.smite = 0; }
@@ -327,6 +330,7 @@ function dmgRoll(ch) {
 function spellAttack(ch, s, count, expr, tail, note, atk) { S.sa = { name: s.name, sid: s.id, k: 1, count, expr, tail, note: note || '', atk, tgt: S.tgt || '' }; saAttack(); }
 function saAttack() {
   const o = S.sa; if (!o) return; const c = derive(cur(), S.hb);
+  if(String(o.sid||'').startsWith('hx_'))o.tgt=S.tgt||'';
   S.lastAttack = null;
   const lbl = o.name + (o.count > 1 ? ' · ' + o.k + '/' + o.count : '') + ': Angriff';
   const total = d20(o.atk ?? c.spell.atk, lbl, { kind: 'attack:spell', crit: 20 }); if (total === null) { S.sa = null; return; }
@@ -612,7 +616,8 @@ function openModal(kind, data) {
 
 /* ---------- Builder ---------- */
 const picOf = (kind, k) => (typeof HAS_PIC !== 'undefined' && (HAS_PIC[kind] || []).includes(k) ? '<span class="cpic pic-' + kind + '-' + k + '" aria-hidden="true"></span>' : '');
-const subPic = (ck, id) => (typeof SUB_PIC !== 'undefined' && SUB_PIC.includes(ck + '-' + id) ? '<span class="opic pic-sub-' + ck + '-' + id + '" aria-hidden="true"></span>' : '');
+/* Unterklassen ohne eigenes Bild (Erweiterung): das Bild der Klasse */
+const subPic = (ck, id) => (typeof SUB_PIC !== 'undefined' && SUB_PIC.includes(ck + '-' + id) ? '<span class="opic pic-sub-' + ck + '-' + id + '" aria-hidden="true"></span>' : typeof HAS_PIC !== 'undefined' && (HAS_PIC.cls || []).includes(ck) ? '<span class="opic pic-cls-' + ck + '" aria-hidden="true"></span>' : '');
 function flavBox(n, t, kind, k) { if (!t) return ''; const pic = kind ? picOf(kind, k).replace('cpic', 'fpic') : ''; return '<div class="flav' + (pic ? ' wpic' : '') + (kind === 'sp' || kind === 'bg' ? ' wide' : '') + '">' + pic + '<p><b>' + esc(n) + '</b> – ' + esc(t.replace(/^✦ /, '')) + '</p></div>'; }
 function slimBanner(k, t, p) { return '<div class="hero-intro banner slim" style="' + bannerStyle(k) + '"><h1>' + t + '</h1><p>' + p + '</p></div>'; }
 function renderBuild(c) {
@@ -621,8 +626,8 @@ function renderBuild(c) {
   const st = S.step;
   if (st === 0) {
     body += '<div class="row hname">' + field('Name deines Helden', txt('name', ch.name === 'Neuer Held' ? '' : ch.name, 'z. B. Brakk Eisenfaust', 'autocomplete="off"')) + '</div>';
-    body += '<h2>Klasse wählen</h2><div class="cards pics">' + Object.entries(CLASSES).map(([k, C]) =>
-      '<button class="card haspic' + (ch.cls === k ? ' on' : '') + '" data-act="setCls" data-arg="' + esc(k) + '">' + picOf('cls', k) + '<b>' + C.name + '</b><small>W' + C.hd + ' · ' + C.prim.map((a) => AB_K[a]).join('/') + (C.caster ? ' · Zauber' : '') + '</small><small class="sub">' + (C.subs ? C.subs.length + ' Unterklassen' : C.sub.name) + (C.home ? ' · ✦ Heldenbuch' : '') + '</small>' + ii('cls', k, C.name) + '</button>').join('') + '</div>' + flavBox(c.cls.name, c.cls.flavor, 'cls', ch.cls);
+    body += '<h2>Klasse wählen</h2><div class="cards pics">' + Object.entries(CLASSES).filter(([k, C]) => homeOk(C, ch.cls === k)).map(([k, C]) =>
+      '<button class="card haspic' + (ch.cls === k ? ' on' : '') + '" data-act="setCls" data-arg="' + esc(k) + '">' + picOf('cls', k) + '<b>' + C.name + '</b><small>W' + C.hd + ' · ' + C.prim.map((a) => AB_K[a]).join('/') + (C.caster ? ' · Zauber' : '') + '</small><small class="sub">' + (C.subs ? C.subs.length + ' Unterklassen' : C.sub.name) + (C.home ? ' · ✦ Heldenbuch' : '') + '</small>' + ii('cls', k, C.name) + '</button>').join('') + '</div>' + homeToggle() + flavBox(c.cls.name, c.cls.flavor, 'cls', ch.cls);
     body += '<div class="row">' + field('Stufe', '<div class="stepper"><button data-act="lvl" data-arg="-1" aria-label="Stufe senken">−</button><b>' + ch.level + '</b><button data-act="lvl" data-arg="1" aria-label="Stufe erhöhen">+</button></div>', 'Übungsbonus ' + sgn(c.pb)) +
       field('Trefferpunkte pro Stufe', sel('hpMode', ch.hpMode, [['avg', 'Durchschnitt (' + (c.hd / 2 + 1) + ')'], ['roll', 'Selbst gewürfelt']])) + '</div>';
     if (ch.hpMode === 'roll' && ch.level > 1) {
@@ -636,7 +641,7 @@ function renderBuild(c) {
     body += mcSection(c);
   }
   if (st === 1) {
-    body += '<h2>Spezies</h2><div class="cards pics sp">' + Object.entries(SPECIES).map(([k, s]) => '<button class="card haspic' + (ch.species === k ? ' on' : '') + '" data-act="setSpecies" data-arg="' + esc(k) + '">' + picOf('sp', k) + '<b>' + s.name + '</b><small>' + s.size + ' · ' + fmtM(s.speed) + (s.dv ? ' · Dunkelsicht' : '') + '</small>' + ii('sp', k, s.name) + '</button>').join('') + '</div>' + flavBox(SPECIES[ch.species] && SPECIES[ch.species].name, SPECIES[ch.species] && SPECIES[ch.species].flavor, 'sp', ch.species);
+    body += '<h2>Spezies</h2><div class="cards pics sp">' + Object.entries(SPECIES).filter(([k, s]) => homeOk(s, ch.species === k)).map(([k, s]) => '<button class="card haspic' + (ch.species === k ? ' on' : '') + '" data-act="setSpecies" data-arg="' + esc(k) + '">' + picOf('sp', k) + '<b>' + s.name + '</b><small>' + s.size + ' · ' + fmtM(s.speed) + (s.dv ? ' · Dunkelsicht' : '') + '</small>' + ii('sp', k, s.name) + '</button>').join('') + '</div>' + homeToggle() + flavBox(SPECIES[ch.species] && SPECIES[ch.species].name, SPECIES[ch.species] && SPECIES[ch.species].flavor, 'sp', ch.species);
     const sp = c.sp;
     if (sp.choice) body += '<h3>' + sp.choice.label + '</h3><div class="chips">' + Object.entries(sp.choice.opts).map(([k, l]) => chip(ch.speciesChoice === k, l, 'data-act="pick" data-path="speciesChoice" data-val="' + esc(k) + '"')).join('') + '</div>';
     if (sp.skillPick) body += '<h3 id="a-spskill">Fertigkeit (' + sp.name + ')</h3><div class="chips">' + sp.skillPick.map((s) => chipI(ch.speciesSkill === s, SKILLS[s][0], 'data-act="pick" data-path="speciesSkill" data-val="' + esc(s) + '"', false, 'sk', s, SKILLS[s][0])).join('') + '</div>';
@@ -787,7 +792,7 @@ function mcSection(c) {
     h += '</div>';
   });
   const used = [ch.cls].concat((ch.multi || []).map((m) => m.cls));
-  if (total < 20) h += '<div class="row">' + field('Weitere Klasse hinzufügen', '<select id="addMc"><option value="">— Klasse wählen —</option>' + Object.entries(CLASSES).filter(([k]) => !used.includes(k)).map(([k, C]) => '<option value="' + k + '">' + C.name + '</option>').join('') + '</select>') + '</div>';
+  if (total < 20) h += '<div class="row">' + field('Weitere Klasse hinzufügen', '<select id="addMc"><option value="">— Klasse wählen —</option>' + Object.entries(CLASSES).filter(([, C]) => homeOk(C)).filter(([k]) => !used.includes(k)).map(([k, C]) => '<option value="' + k + '">' + C.name + '</option>').join('') + '</select>') + '</div>';
   return h;
 }
 
@@ -1162,12 +1167,15 @@ function spellCard(s, tag, cast) {
 }
 
 /* ---------- Zauber-Nachschlagewerk ---------- */
+/* Umschalter direkt an der Klassen- und Spezieswahl: Standard (SRD) oder erweitert (mit eigenen Klassen und Völkern) */
+function homeToggle() { const on = rule('homeview'); return '<div class="homeview"><span>Auswahl</span><div class="seg"><button class="' + (on ? '' : 'on') + '" data-act="homeView" data-arg="0">Standard</button><button class="' + (on ? 'on' : '') + '" data-act="homeView" data-arg="1">Erweitert</button></div><small>' + (on ? 'mit eigenen Klassen und Völkern (Hausregeln)' : 'nur Klassen und Völker aus dem SRD') + '</small></div>'; }
+XA.homeView = (t, a) => { rule('homeview'); S.rules.homeview = a === '1'; try { localStorage.setItem('hb_rules', JSON.stringify(S.rules)); } catch (e) {} SRCH_HOME = null; render(); };
 function renderSpellBook() {
   const f = S.sf; const q = f.q.trim().toLowerCase();
   const list = allSpells(S.hb).filter((s) => (f.lvl === 'all' || s.lvl === +f.lvl) && (f.cls === 'all' || s.classes.includes(f.cls)) && (!q || (s.name + ' ' + s.en + ' ' + s.text).toLowerCase().includes(q)));
   return '<div class="book"><div class="filters"><input type="search" id="sq" value="' + esc(f.q) + '" placeholder="Zauber suchen (deutsch oder englisch) …" aria-label="Suche">' +
     '<select id="sl" aria-label="Grad">' + [['all', 'Alle Grade'], ['0', 'Zaubertricks']].concat([1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => [String(g), 'Grad ' + g])).map(([v, l]) => '<option value="' + v + '"' + (f.lvl === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>' +
-    '<select id="sc" aria-label="Klasse"><option value="all">Alle Klassen</option>' + Object.entries(CLASSES).filter(([, C]) => C.caster).map(([k, C]) => '<option value="' + k + '"' + (f.cls === k ? ' selected' : '') + '>' + C.name + '</option>').join('') + '</select></div>' +
+    '<select id="sc" aria-label="Klasse"><option value="all">Alle Klassen</option>' + Object.entries(CLASSES).filter(([k, C]) => C.caster && homeOk(C, f.cls === k)).map(([k, C]) => '<option value="' + k + '"' + (f.cls === k ? ' selected' : '') + '>' + C.name + '</option>').join('') + '</select></div>' +
     '<p class="hint">' + list.length + ' Zauber · Auswahl aus dem SRD 5.2.1, eigene Zauber über „Hausregeln“.</p><div class="splist cvl">' + list.map((s) => spellCard(s, s.home ? 'Hausregel' : s.classes.map((k) => (CLASSES[k] || {}).name).filter(Boolean).join(', '), false)).join('') + '</div></div>';
 }
 
@@ -1719,7 +1727,7 @@ document.addEventListener('click', (ev) => {
     atk: () => weaponAttack(ch, +arg),
     dpT: () => { if (S.dp) { S.dp[arg] = !S.dp[arg]; renderDmgPrompt(); } },
     dpR: () => { if (S.dp) { S.dp['r_' + arg] = S.dp['r_' + arg] === false; renderDmgPrompt(); } },
-    dpX: () => { if (S.dp) { const x = S.dp.xd || (S.dp.xd = []); const i = x.indexOf(arg); if (i >= 0) x.splice(i, 1); else x.push(arg); renderDmgPrompt(); } },
+    dpX: () => { if (S.dp) { const x = S.dp.xd || (S.dp.xd = []); const i = x.indexOf(arg); if (i >= 0) x.splice(i, 1); else {const z=derive(ch,S.hb).dmgExtras.find(y=>y.k===arg);if(z&&z.hxGroup){const group=derive(ch,S.hb).dmgExtras.filter(y=>y.hxGroup===z.hxGroup).map(y=>y.k);for(let j=x.length-1;j>=0;j--)if(group.includes(x[j]))x.splice(j,1);}x.push(arg);} renderDmgPrompt(); } },
     dpSmite: () => { if (S.dp) { S.dp.smite = arg === '0' ? 0 : arg; renderDmgPrompt(); } },
     dpMiss: () => { grazeMiss(ch); S.dp = null; orbPrompt(''); },
     dpRoll: () => dmgRoll(ch),

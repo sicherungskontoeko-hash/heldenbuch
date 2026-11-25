@@ -262,6 +262,7 @@ function derive(ch, hb) {
   homebrew.forEach((h) => { if (+h.ac) { ac += +h.ac; acParts.push(h.name + ' ' + sgn(+h.ac)); } });
   if (+ch.misc.ac) { ac += +ch.misc.ac; acParts.push('Sonstiges ' + sgn(+ch.misc.ac)); }
   if (((ch.play || {}).fx || {}).shield) { ac += 5; acParts.push('Schild (Zauber) +5'); }
+  if(lv('hxguard')>=6 && subOf('hxguard')==='bastion' && (ar.type!=='none'||(ch.shield&&profArmor.has('shield')))){ac++;acParts.push('Gehärteter Stand +1');}
   c.ac = ac; c.acParts = acParts;
   c.armorStealthDis = !!ar.stealth; c.armorNonProf = ar.type !== 'none' && !profArmor.has(ar.type); c.heavyArmor = ar.type === 'heavy'; c.armorType = ar.type;
 
@@ -273,7 +274,9 @@ function derive(ch, hb) {
   if (+ch.misc.init) { init += +ch.misc.init; initParts.push('Sonstiges ' + sgn(+ch.misc.init)); }
   c.init = init; c.initParts = initParts;
   c.initAdv = lv('bar') >= 7 || (lv('fig') >= 3 && subOf('fig') === 'champion');
+  if(lv('hxguard')>=10&&subOf('hxguard')==='protector')c.initAdv=true;
   let speed = sp.speedFn ? sp.speedFn(c) : sp.speed; const spParts = [sp.name + ' ' + fmtM(speed)];
+  if(lv('hxform')&&(ch.play.hxForms||[]).includes('Sehne')){speed+=3;spParts.push('Wandelsehne +3 m');}
   const heavy = ar.type === 'heavy';
   if (lv('bar') >= 5 && !heavy) { speed += 3; spParts.push('Schnelle Bewegung +3 m'); }
   if (lv('ran') >= 6 && !heavy) { speed += 3; spParts.push('Umherstreifen +3 m'); }
@@ -390,6 +393,11 @@ function derive(ch, hb) {
   const isMonk = !!lv('mon') && ar.type === 'none' && !ch.shield; c.martialArts = isMonk;
   const unarmedAb = isMonk && c.mod.dex > c.mod.str ? 'dex' : 'str';
   att.push({ name: 'Waffenloser Schlag', ab: unarmedAb, die: isMonk ? '1' + maDie : '', atkParts: [AB_K[unarmedAb] + ' ' + sgn(c.mod[unarmedAb]), 'Übung ' + sgn(pb)].concat(+ch.misc.atk ? ['Sonstiges ' + sgn(+ch.misc.atk)] : []), dmgParts: isMonk ? ['1' + maDie, AB_K[unarmedAb] + ' ' + sgn(c.mod[unarmedAb])] : ['1 + STÄ ' + sgn(c.mod.str)], dmod: isMonk ? c.mod[unarmedAb] : Math.max(0, 1 + c.mod.str), gwf: false, light: false, finesse: false, ranged: false, unarmed: true, rage: rageDmg && unarmedAb === 'str' && ar.type !== 'heavy', atk: c.mod[unarmedAb] + pb + (+ch.misc.atk || 0), dmg: isMonk ? '1' + maDie + sgn(c.mod[unarmedAb]).replace('+0', '').replace('−0', '') : String(Math.max(1, 1 + c.mod.str)), dtype: 'Wucht', props: '', melee: true, prof: true });
+  if(ch.species==='hxbone'){
+    /* Ossari: Knochenklinge ist ein waffenloser Schlag. Mönche wählen den grösseren Würfel und dürfen GES nutzen (Kampfkunst), nicht beides addiert. Kampfrausch-Bonus wie beim normalen waffenlosen Schlag. */
+    const bAb=unarmedAb, bMod=c.mod[bAb], bDie=isMonk&&+maDie.slice(1)>6?'1'+maDie:'1W6';
+    for(const dtype of ['Hieb','Stich'])att.push({name:'Knochenklinge ('+dtype+')',ab:bAb,die:bDie,dmod:bMod,atk:bMod+pb+atkMisc,dmg:bDie+(bMod?sgn(bMod):''),dtype,props:'Natürliche Waffe · waffenloser Schlag',atkParts:[AB_K[bAb]+' '+sgn(bMod),'Übung '+sgn(pb)].concat(atkMisc?['Sonstiges '+sgn(atkMisc)]:[]),dmgParts:[bDie,AB_K[bAb]+' '+sgn(bMod)],gwf:false,light:false,finesse:false,melee:true,ranged:false,unarmed:true,prof:true,rage:rageDmg&&bAb==='str'&&ar.type!=='heavy'});
+  }
   const masteryAny = classList.some((e) => e.C.mastery);
   const thrownAtt = []; const shillOn = !!((ch.play || {}).fx || {}).shill; const shillAb = ((c.extraSpells || []).find((e) => e.id === 'shillelagh') || {}).ab || (lv('dru') ? 'wis' : lv('wlk') ? 'cha' : 'wis');
   (ch.weapons || []).forEach((w, i) => {
@@ -444,7 +452,9 @@ function derive(ch, hb) {
   }
   c.sneak = lv('rog') ? Math.ceil(lv('rog') / 2) + 'W6' : null;
   c.attacksPer = Math.max(lv('fig') ? step(1, [[5, 2], [11, 3], [20, 4]])(lv('fig')) : 1, ['bar', 'mon', 'pal', 'ran', 'rk', 'fk', 'ma'].some((k) => lv(k) >= 5) || (lv('bw') >= 6 && subOf('bw') === 'battle') ? 2 : 1, lv('ma') >= 18 && subOf('ma') === 'combat' ? 3 : 1);
+  c.attacksPer=Math.max(c.attacksPer,...classList.filter(e=>e.C.hxExtra&&e.lvl>=e.C.hxExtra).map(()=>2));
   c.classDC = []; const dcOf = (a) => 8 + pb + c.mod[a];
+  for(const e of classList)if(e.C.hxDC)c.classDC.push([e.C.name+'-SG',dcOf(e.C.hxDC)]);
   if (lv('rk')) c.classDC.push(['Runen-SG', dcOf('int')]); if (lv('bw')) c.classDC.push(['Blut-SG', dcOf('con')], ['Blutangriff', sgn(pb + c.mod.con)]); if (lv('fk')) c.classDC.push(['Fluch-SG', dcOf('cha') + (lv('fk') >= 3 && subOf('fk') === 'judge' ? 1 : 0)]); if (lv('ma')) c.classDC.push(['Geräte-SG', dcOf('int') + (lv('ma') >= 17 ? 1 : 0)]);
   if (lv('bw')) { const n = step(1, [[5, 2], [11, 3], [17, 4]])(L); const add = (ch.opts || []).includes('stark') || ((multi.find((m) => m.cls === 'bw') || {}).opts || []).includes('stark') ? c.mod.con : 0; att.push({ name: 'Blutlanze' + (n > 1 ? ' (' + n + ' Strahlen)' : ''), ab: 'con', atk: pb + c.mod.con, die: '1W10', dmod: add, dmg: '1W10' + (add ? sgn(add) : ''), dtype: 'Nekrotisch', props: '18 m · Magieaktion', melee: false, ranged: true, prof: true }); }
   c.critRange = lv('fig') >= 3 && subOf('fig') === 'champion' ? (lv('fig') >= 15 ? 18 : 19) : 20;
@@ -480,6 +490,9 @@ function derive(ch, hb) {
   if (ch.species === 'goliath' && ch.speciesChoice === 'fire') xd.push({ k: 'gfire', label: 'Feuerriese', n: 1, s: 10, res: 'giant', note: 'Feuer' });
   if (ch.species === 'goliath' && ch.speciesChoice === 'frost') xd.push({ k: 'gfrost', label: 'Frostriese', n: 1, s: 6, res: 'giant', note: 'Kälte' });
   if ((ch.invocations || []).includes('lifedrinker') && lv('wlk') >= 9) xd.push({ k: 'lifedr', label: 'Lebenstrinker (Paktwaffe)', n: 1, s: 6 });
+  if(lv('hxform')&&(ch.play.hxForms||[]).includes('Klinge'))xd.push({k:'hx_form_blade',hxGroup:'hxform',label:'Wandelklinge (aktiv)',n:1,s:HX_DIE(lv('hxform'))});
+  if(lv('hxguard')>=3&&subOf('hxguard')==='defier')xd.push({k:'hx_guard_defier',hxGroup:'hxguard',label:'Drängende Wacht (herausgefordert)',n:1,s:lv('hxguard')>=18?8:4});
+  if(lv('hxexec')){const l=lv('hxexec'),s=HX_DIE(l);xd.push({k:'hx_exec_full',hxGroup:'hxexec',label:'Urteil (Ziel über 50 % TP)',n:1,s},{k:'hx_exec_blood',hxGroup:'hxexec',label:'Urteil (Ziel höchstens 50 % TP)',n:l>=11?3:2,s});if(l>=20)xd.push({k:'hx_exec_quarter',hxGroup:'hxexec',label:'Endurteil (Ziel höchstens 25 % TP)',n:4,s});}
   c.dmgExtras = xd;
   /* Hinweise auf Regelkonflikte */
   const hints = [];

@@ -52,7 +52,10 @@ function srchIndex() {
   L.forEach((e) => { e.fn = fold(e.name); e.fe = fold(e.en); e.ft = fold(e.sub + ' ' + e.text); });
   SRCH_IDX = L; return L;
 }
-function srchAll() { const L = srchIndex().slice(); for (const h of Object.values(S.hb || {})) { const e = { cat: 'home', id: h.id, name: h.name, sub: (typeof HB_KIND !== 'undefined' ? HB_KIND[h.kind] : h.kind) || '', text: h.text || '', src: 'haus', hbKind: h.kind }; e.fn = fold(e.name); e.fe = ''; e.ft = fold(e.sub + ' ' + e.text); L.push(e); } return L; }
+/* Standard-Ansicht: eigene Klassen, Unterklassen, Merkmale und Völker ausblenden */
+let SRCH_HOME = null;
+const srchHome = (e) => { if (!['cls', 'sub', 'feature', 'option', 'species'].includes(e.cat)) return false; const k = String(e.id).split(':')[0]; return e.cat === 'species' ? !!(SPECIES[k] || {}).home : !!(CLASSES[k] || {}).home; };
+function srchAll() { const L = (typeof rule === 'function' && !rule('homeview') ? srchIndex().filter((e) => !srchHome(e)) : srchIndex().slice()); for (const h of Object.values(S.hb || {})) { const e = { cat: 'home', id: h.id, name: h.name, sub: (typeof HB_KIND !== 'undefined' ? HB_KIND[h.kind] : h.kind) || '', text: h.text || '', src: 'haus', hbKind: h.kind }; e.fn = fold(e.name); e.fe = ''; e.ft = fold(e.sub + ' ' + e.text); L.push(e); } return L; }
 function srchRun(q, cat, src) {
   const words = fold(q).split(/\s+/).filter(Boolean); const L = srchAll();
   const out = [];

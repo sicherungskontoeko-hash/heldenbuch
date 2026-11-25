@@ -7,9 +7,12 @@ const RULE_OPTS = {
   restcombat: { n: 'Keine Rast während eines Kampfes', t: 'Kurze und lange Rast sind gesperrt, solange ein Kampf läuft (am Tisch oder im lokalen Kampfmodus).', d: true },
   restzero: { n: 'Lange Rast nur mit mindestens 1 TP', t: 'Wer bei 0 TP ist, erhält keine Vorteile einer langen Rast, bis er stabilisiert und geheilt wurde.', d: true },
   bgfeat: { n: 'Herkunftstalent gehört zum Hintergrund', t: 'Jeder Hintergrund bringt sein festes Herkunftstalent mit (D&D 2024). Aus: Talent bei jedem Hintergrund frei wählbar (Hausregel). Ein frei gewähltes Talent gibt es auch mit «Eigener Hintergrund».', d: true },
+  homeview: { n: 'Erweiterte Auswahl: eigene Klassen und Völker', t: 'Zeigt beim Erschaffen, beim Multiclassing und in der Suche auch die Heldenbuch-eigenen Klassen und Völker (Hausregeln wie Runenmeister, Blutweber, Formwandler oder Golem). Aus: nur die Klassen und Völker aus dem SRD. Bestehende Helden mit eigener Klasse oder eigenem Volk bleiben unverändert spielbar.', d: false },
   hdrest: { n: 'Trefferwürfel nur in einer kurzen Rast', t: 'Trefferwürfel gibst du im Dialog der kurzen Rast aus. Aus: auch direkt auf dem Bogen (Hausregel).', d: true }
 };
 function rule(k) { if (!S.rules) { try { S.rules = JSON.parse(localStorage.getItem('hb_rules') || '{}') || {}; } catch (e) { S.rules = {}; } } const v = S.rules[k]; return v === undefined ? !!(RULE_OPTS[k] || {}).d : !!v; }
+/* Standard: nur SRD-Klassen und -Völker; eigene (home) nur mit «Erweiterte Auswahl» oder wenn der Held sie schon hat */
+const homeOk = (x, keep) => !x || !x.home || !!keep || rule('homeview');
 XA.ruleT = (t, a) => { rule(a); S.rules[a] = !rule(a); try { localStorage.setItem('hb_rules', JSON.stringify(S.rules)); } catch (e) {} render(); };
 function rulesBlock() {
   return '<section class="panel rulesp"><h2>Regeloptionen</h2><p class="hint">Standard ist D&D 2024 (SRD 5.2.1). Abweichungen schaltest du hier als Hausregel. Die Einstellung gilt auf diesem Gerät.</p><div class="rulelist">' +
@@ -331,8 +334,9 @@ XA.srDone = (t, a, p, ch) => {
   if (!restGate(ch, 'short')) return;
   const c = derive(ch, S.hb); const P = ch.play; if (P.hp == null) P.hp = c.hpMax; const pools = hdPools(c, P); const det = []; let heal = 0;
   if (P.hp > 0) for (const pl of pools) { const n = Math.min(+want[pl.d] || 0, pl.n - pl.used); for (let i = 0; i < n; i++) { const r = rollExpr('1W' + pl.d); const g = Math.max(0, r.total + c.mod.con); heal += g; det.push('W' + pl.d + '[' + r.total + ']'); pl.used++; } }
+  const xtra=[]; if(det.length){if(ch.species==='hxleaf'){heal+=c.pb;xtra.push('Lichternte +'+c.pb);}if(c.lv('hxform')>=15){const k=Math.max(1,c.mod.con);heal+=k;xtra.push('Zellgedächtnis +'+k);}}
   hdSync(c, P, pools); const old = P.hp; P.hp = Math.min(c.hpMax, P.hp + heal);
-  if (det.length) pushLog({ label: 'Trefferwürfel', total: P.hp - old, detail: det.join(' ') + ' ' + sgn(c.mod.con) + ' KON je Würfel · TP ' + P.hp + '/' + c.hpMax, share: true });
+  if (det.length) pushLog({ label: 'Trefferwürfel', total: P.hp - old, detail: det.join(' ') + ' ' + sgn(c.mod.con) + ' KON je Würfel' + (xtra.length ? ' · ' + xtra.join(' · ') : '') + ' · TP ' + P.hp + '/' + c.hpMax, share: true });
   doRest(ch, 'short', false, true);
 };
 function restGate(ch, kind) {

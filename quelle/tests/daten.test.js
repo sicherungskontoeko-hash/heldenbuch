@@ -33,10 +33,11 @@ const WERTE = () => { const r = {}; Object.values(S.chars).forEach((ch) => { con
     encStore([{ id: 'etest', name: 'Testbegegnung', mobs: [{ mid: 'goblin', n: 3 }], t: Date.now() }]);
     XA.advOpen(null, 'machtader'); XA.advTab(null, 'ch:k2');
     return Object.keys(S.chars).length; });
-  T('Ausgangslage: ' + n + ' Helden angelegt', n === 49, n);
+  const nExp = await p.evaluate(() => Object.keys(CLASSES).length * 3 + 1); /* drei je Klasse (Stufe 1, 5, 20) und ein Mehrklassen-Held */
+  T('Ausgangslage: ' + n + ' Helden angelegt', n === nExp, { n, nExp });
   const vorher = await p.evaluate(WERTE);
   const datei = await p.evaluate(() => exportData(Object.values(S.chars), true));
-  T('Sicherung enthält alle Helden und Extras', await p.evaluate((d) => { const o = JSON.parse(d); return o.chars.length === 49 && o.hb.some((h) => h.id === 'hbtest1') && o.extra.mobs.some((m) => m.id === 'dtest') && o.extra.enc.some((e) => e.id === 'etest'); }, datei));
+  T('Sicherung enthält alle Helden und Extras', await p.evaluate(([d, d2]) => { const o = JSON.parse(d); return o.chars.length === d2 && o.hb.some((h) => h.id === 'hbtest1') && o.extra.mobs.some((m) => m.id === 'dtest') && o.extra.enc.some((e) => e.id === 'etest'); }, [datei, nExp]));
   // alles löschen, neu laden, Sicherung einspielen
   await p.evaluate(() => { localStorage.clear(); });
   await p.reload(); await p.waitForTimeout(600);
@@ -44,12 +45,12 @@ const WERTE = () => { const r = {}; Object.values(S.chars).forEach((ch) => { con
   await p.evaluate((d) => { localStorage.setItem('hb_dice_fx', 'aus'); Object.keys(S.chars).forEach((k) => { delete S.chars[k]; persist('c', k); }); importJson(d); }, datei);
   const nachher = await p.evaluate(WERTE);
   const diff = Object.keys(vorher).filter((k) => vorher[k] !== nachher[k]);
-  T('Nach dem Laden: alle 49 Helden mit identischen Werten und Spielständen', Object.keys(nachher).length === 49 && !diff.length, diff.slice(0, 3).map((k) => [k, vorher[k], nachher[k]]));
+  T('Nach dem Laden: alle ' + nExp + ' Helden mit identischen Werten und Spielständen', Object.keys(nachher).length === nExp && !diff.length, diff.slice(0, 3).map((k) => [k, vorher[k], nachher[k]]));
   T('Hausregel, eigenes Monster, Begegnung wieder da', await p.evaluate(() => !!S.hb.hbtest1 && !!BESTIARY['u-dtest'] && encLoad().some((e) => e.id === 'etest')));
   // 2. Neustart
   await p.waitForTimeout(1200); await p.reload(); await p.waitForTimeout(800);
   const neu = await p.evaluate(WERTE);
-  T('Neustart: alles bleibt erhalten', Object.keys(neu).length === 49 && Object.keys(vorher).every((k) => vorher[k] === neu[k]), Object.keys(neu).length);
+  T('Neustart: alles bleibt erhalten', Object.keys(neu).length === nExp && Object.keys(vorher).every((k) => vorher[k] === neu[k]), Object.keys(neu).length);
   T('Neustart: Abenteuer-Fortschritt erhalten', await p.evaluate(() => { const d = advDb(); return d.st.machtader && d.st.machtader.ch === 'k2'; }));
   // 3. Alte und kaputte Dateien
   const alt = await p.evaluate(() => { const before = Object.keys(S.chars).length;
@@ -90,6 +91,6 @@ const WERTE = () => { const r = {}; Object.values(S.chars).forEach((ch) => { con
   T('Plausibilität: ' + pl.z + ' Kombinationen (Spezies × Hintergrund × Klasse × Stufe) ohne Auffälligkeit', pl.n === 0, pl);
   await b.close();
   T('Keine Skriptfehler', !errs.length, errs.slice(0, 5));
-  out.forEach((r) => console.log((r.ok ? '✔ ' : '✘ ') + r.n + (r.ok ? '' : '  → ' + JSON.stringify(r.got).slice(0, 1500))));
+  out.forEach((r) => console.log((r.ok ? '✔ ' : '✘ ') + r.n + (r.ok ? '' : '  → ' + String(JSON.stringify(r.got)).slice(0, 1500))));
   const f = out.filter((r) => !r.ok).length; console.log((out.length - f) + ' / ' + out.length + ' bestanden'); process.exit(f ? 1 : 0);
 })();
