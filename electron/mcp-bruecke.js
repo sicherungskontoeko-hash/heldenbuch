@@ -38,21 +38,21 @@ const TOOLS = [
     description: 'Würfelt für die Spielleitung, z. B. W20 oder 2W6+3. verdeckt=true: Spieler sehen es nicht.',
     inputSchema: { type: 'object', properties: { ausdruck: { type: 'string' }, wofuer: { type: 'string' }, verdeckt: { type: 'boolean' } }, required: ['ausdruck'] } }
 ];
-const INSTRUCTIONS = 'Heldenbuch: D&D-Tisch (Regeln 2024) der Spielleitung. Tokens sparen: zuerst lage (beginnt mit dem Spielstand), danach lage mit nur_neu=true; voll und nachschlagen nur bei Bedarf. Am Ende des Abends abend_abschliessen. ' +
+const INSTRUCTIONS = 'Fablecrown (bisher Heldenbuch): D&D-Tisch (Regeln 2024) der Spielleitung. Tokens sparen: zuerst lage (beginnt mit dem Spielstand), danach lage mit nur_neu=true; voll und nachschlagen nur bei Bedarf. Am Ende des Abends abend_abschliessen. ' +
   'Antworte kurz auf Deutsch (Schweiz, ss statt ß). Die Spieler sehen nur Handouts (an_spieler) und geteilte Würfe. Ändere nur, worum die Spielleitung bittet.';
 
 function readInfo() { try { return JSON.parse(fs.readFileSync(INFO, 'utf8')); } catch (e) { return null; } }
 function callApp(name, args) {
   return new Promise((resolve) => {
     const info = readInfo();
-    if (!info || !info.port || !info.token) return resolve({ ok: false, text: 'Das Heldenbuch ist nicht offen. Starte die PC-App vom Heldenbuch und öffne den Tisch.' });
+    if (!info || !info.port || !info.token) return resolve({ ok: false, text: 'Fablecrown ist nicht offen. Starte die PC-App von Fablecrown und öffne den Tisch.' });
     const body = JSON.stringify({ name, args: args || {} });
     const req = http.request({ host: '127.0.0.1', port: info.port, path: '/tool', method: 'POST', timeout: 20000, headers: { 'content-type': 'application/json', 'content-length': Buffer.byteLength(body), 'x-hb-token': info.token } }, (res) => {
       let d = ''; res.setEncoding('utf8'); res.on('data', (c) => { d += c; if (d.length > 200000) req.destroy(); });
-      res.on('end', () => { try { const j = JSON.parse(d); resolve({ ok: !!j.ok, text: String(j.text || '') }); } catch (e) { resolve({ ok: false, text: 'Unerwartete Antwort vom Heldenbuch (' + res.statusCode + ').' }); } });
+      res.on('end', () => { try { const j = JSON.parse(d); resolve({ ok: !!j.ok, text: String(j.text || '') }); } catch (e) { resolve({ ok: false, text: 'Unerwartete Antwort von Fablecrown (' + res.statusCode + ').' }); } });
     });
-    req.on('timeout', () => { req.destroy(); resolve({ ok: false, text: 'Das Heldenbuch antwortet nicht. Ist das Fenster offen?' }); });
-    req.on('error', () => resolve({ ok: false, text: 'Das Heldenbuch ist nicht offen. Starte die PC-App vom Heldenbuch und öffne den Tisch.' }));
+    req.on('timeout', () => { req.destroy(); resolve({ ok: false, text: 'Fablecrown antwortet nicht. Ist das Fenster offen?' }); });
+    req.on('error', () => resolve({ ok: false, text: 'Fablecrown ist nicht offen. Starte die PC-App von Fablecrown und öffne den Tisch.' }));
     req.end(body);
   });
 }
@@ -63,7 +63,7 @@ async function handle(m) {
   try {
     if (method === 'initialize') {
       const want = m.params && m.params.protocolVersion; const v = VERSIONS.includes(want) ? want : VERSIONS[1];
-      return send({ jsonrpc: '2.0', id, result: { protocolVersion: v, capabilities: { tools: { listChanged: false } }, serverInfo: { name: 'heldenbuch', title: 'Heldenbuch', version: '1.9' }, instructions: INSTRUCTIONS } });
+      return send({ jsonrpc: '2.0', id, result: { protocolVersion: v, capabilities: { tools: { listChanged: false } }, serverInfo: { name: 'heldenbuch', title: 'Fablecrown', version: '1.9' }, instructions: INSTRUCTIONS } });
     }
     if (method === 'ping') return has && send({ jsonrpc: '2.0', id, result: {} });
     if (method === 'tools/list') return send({ jsonrpc: '2.0', id, result: { tools: TOOLS } });

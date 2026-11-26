@@ -2,7 +2,7 @@
 #   Android (APK), Windows (Installer + portable EXE), macOS (DMG), Linux (AppImage)
 # und veröffentlicht die Web-App (für iPhone und Browser) auf GitHub Pages.
 # Die App-Dateien (www/, Heldenbuch.html) baut der erste Schritt immer frisch aus quelle/.
-name: Heldenbuch bauen
+name: Fablecrown bauen
 
 on:
   push:
@@ -165,7 +165,7 @@ jobs:
         run: |
           V=$(node -p "require('./package.json').version.split('.').slice(0, 2).join('.')")
           echo "tag=v$V.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
-          echo "name=Heldenbuch $V.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "name=Fablecrown $V.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
       - uses: actions/download-artifact@v4
         with:
           path: dl
@@ -188,6 +188,8 @@ jobs:
             | Mac (Intel und Apple) | [Heldenbuch.dmg](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch.dmg) | Wird einige Minuten nach den anderen nachgeliefert. App in «Programme» ziehen; beim ersten Start Systemeinstellungen › Datenschutz und Sicherheit › «Trotzdem öffnen». |
             | Linux | [Heldenbuch.AppImage](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch.AppImage) | Ausführbar machen und starten. |
             | iPhone, iPad, Browser | [Web-App](${{ env.PAGES_URL }}) | In Safari öffnen › Teilen › «Zum Home-Bildschirm». |
+
+            Fablecrown (bisher Heldenbuch): Die Dateinamen bleiben vorerst gleich, damit Links und Aktualisierungen funktionieren.
 
             Version ${{ steps.ver.outputs.tag }}. Die App ist nicht von Apple oder Microsoft signiert; deshalb die Warnungen beim ersten Start.
           files: dl/**/*

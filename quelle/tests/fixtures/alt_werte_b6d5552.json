@@ -1,0 +1,107 @@
+{
+ "cur": "cmwxmhznoc5qb",
+ "werte": {
+  "cmwxmhznnqbeo": {
+   "name": "Alda Testfeld",
+   "ac": 19,
+   "hpMax": 31,
+   "init": 0,
+   "pb": 2,
+   "saves": {
+    "str": 3,
+    "dex": 0,
+    "con": 2,
+    "int": -1,
+    "wis": 3,
+    "cha": 4
+   },
+   "slots": [
+    3
+   ],
+   "res": [
+    [
+     "loh",
+     15,
+     "long"
+    ],
+    [
+     "smite",
+     1,
+     "long"
+    ],
+    [
+     "pcd",
+     2,
+     "long"
+    ],
+    [
+     "stone",
+     2,
+     "long"
+    ]
+   ]
+  },
+  "cmwxmhznoc5qb": {
+   "name": "Ilva Probe",
+   "ac": 11,
+   "hpMax": 56,
+   "init": 1,
+   "pb": 4,
+   "saves": {
+    "str": 3,
+    "dex": 1,
+    "con": 2,
+    "int": 3,
+    "wis": 5,
+    "cha": 0
+   },
+   "slots": [
+    4,
+    3,
+    3,
+    3,
+    1
+   ],
+   "res": [
+    [
+     "ar",
+     1,
+     "long"
+    ]
+   ]
+  },
+  "cmwxmhzno7fbv": {
+   "name": "Borin Stahl",
+   "ac": 12,
+   "hpMax": 44,
+   "init": 1,
+   "pb": 3,
+   "saves": {
+    "str": 6,
+    "dex": 1,
+    "con": 5,
+    "int": -1,
+    "wis": 1,
+    "cha": 0
+   },
+   "slots": [],
+   "res": [
+    [
+     "sw",
+     3,
+     "long"
+    ],
+    [
+     "as",
+     1,
+     "short"
+    ],
+    [
+     "hb_hbtest1",
+     2,
+     "long"
+    ]
+   ]
+  }
+ }
+}

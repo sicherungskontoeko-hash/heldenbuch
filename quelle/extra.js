@@ -416,7 +416,7 @@ function optUse(ch, key, k) {
 }
 
 /* ---------- WhatsApp-Einladung ---------- */
-function inviteText() { if (isApp()) return appInviteText(); return 'Komm an unseren Tisch im Heldenbuch! ⚔\n' + APP_URL + '\nKampagne: ' + (S.camp || 'unsere-kampagne') + '\n(Beim ersten Mal lädt dich die Spielleitung per E-Mail als Bearbeiter ein.)'; }
+function inviteText() { if (isApp()) return appInviteText(); return 'Komm an unseren Tisch in Fablecrown! ⚔\n' + APP_URL + '\nKampagne: ' + (S.camp || 'unsere-kampagne') + '\n(Beim ersten Mal lädt dich die Spielleitung per E-Mail als Bearbeiter ein.)'; }
 function inviteHtml() {
   const t = encodeURIComponent(inviteText());
   return '<div class="invite"><a class="btn wa" href="https://wa.me/?text=' + t + '" target="_blank" rel="noopener">Per WhatsApp einladen</a><button class="btn ghost sm" data-act="invCopy">Einladung kopieren</button></div>';
@@ -506,7 +506,7 @@ XA.more = () => { S.more = !S.more; const bn = $('#bnav'); if (bn) bn.innerHTML 
 function helpView() {
   const sec = (t, items) => '<section class="blk"><h2>' + t + '</h2><ul class="help">' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></section>';
   const app = typeof APP_MODE !== 'undefined' && APP_MODE === 'app';
-  return '<div class="camp helpv"><div class="hero-intro banner" style="' + bannerStyle('magier') + '"><h1>So funktioniert das Heldenbuch</h1><p>Alles Wichtige auf einen Blick. Tippe auf hervorgehobene Werte, um zu würfeln.</p></div>' +
+  return '<div class="camp helpv"><div class="hero-intro banner" style="' + bannerStyle('magier') + '"><h1>So funktioniert Fablecrown</h1><p>Alles Wichtige auf einen Blick. Tippe auf hervorgehobene Werte, um zu würfeln.</p></div>' +
     '<section class="blk hlsec"><h2>Wie viel Hilfe?</h2><p class="hint">Einsteiger bekommen alles erklärt, Erfahrene sehen nur ihren Bogen. Gilt auf diesem Gerät.</p>' + hlPanel('help') + '</section>' +
     sec('Helden erschaffen', ['Unter <b>Erschaffen</b> gehst du Schritt für Schritt durch Klasse, Herkunft, Attribute, Fertigkeiten, Zauber und Ausrüstung.', 'Rote Hinweise rechts (auf dem Handy oben) zeigen, was noch fehlt – antippen bringt dich direkt zum richtigen Feld.', 'Alle Werte (RK, TP, Angriffe, Zauber-SG, Plätze) rechnet die App automatisch.', 'Helden aus <b>D&amp;D Beyond</b>: dort den Charakter als PDF exportieren, dann unter <b>Helden → Helden aus Datei laden</b> das PDF wählen. Die App zeigt vorher, was übernommen und angeglichen wird. Inhalte ausserhalb des SRD legt sie als Hausregel nur auf deinem Gerät an.']) +
     sec('Spielen', ['Auf dem <b>Bogen</b> tippst du Attribute, Fertigkeiten, Rettungswürfe oder Angriffe an – die App würfelt mit Animation und beachtet Vor-/Nachteil und Zustände.', 'Oben im Bogen wechselst du zwischen <b>Kampf, Werte, Zauber, Fähigkeiten, Ausrüstung, Begleiter</b> und <b>Notizen</b>. Darunter stehen immer TP, RK, Initiative und Bewegung – TP antippen trägt Schaden oder Heilung ein.', 'Vertan? <b>↶</b> rechts in der Reiterleiste nimmt den letzten Schritt zurück, <b>↷</b> holt ihn wieder. <b>⟲ Zug</b> (Zugleiste oder ⋯) spult alles seit Beginn deines Zuges zurück.', 'Jeder Wurf landet im <b>Würfelverlauf</b> (Würfelfenster antippen oder Mehr → Würfelverlauf), auch die der Kreaturen und Mitspieler.', 'Zauber wirken zieht den Platz automatisch ab. Konzentration, Segnen, Mal des Jägers usw. werden verfolgt.', 'Bei 0 TP würfelst du Todesrettungswürfe. Nach drei Fehlschlägen entscheidet die Spielleitung über Gnade.', 'Der Würfelbecher (am Computer unten links, auf dem Handy oben in der Kopfleiste) würfelt beliebige Würfel (bis 30 Stück).']) +
@@ -519,10 +519,10 @@ function helpView() {
 function isApp() { return typeof APP_MODE !== 'undefined' && APP_MODE === 'app'; }
 const WEB_APP = 'https://sicherungskontoeko-hash.github.io/heldenbuch/';
 function appLink(code) { if (!/^https?:/.test(location.protocol) || /^https?:\/\/localhost/.test(location.href)) return WEB_APP + '#raum=' + encodeURIComponent(code); const srv = hbLs.get('hb_server', 'hivemq'); return location.origin + location.pathname + '#raum=' + encodeURIComponent(code) + (srv !== 'hivemq' && srv !== 'custom' ? '&srv=' + srv : ''); }
-function appInviteText() { const code = S.camp || ''; const l = appLink(code); return 'Komm an unseren Tisch im Heldenbuch! ⚔\n' + (l ? l + '\n' : '') + 'Raumcode: ' + code + '\nÖffne das Heldenbuch, tippe unten auf „Tisch“ und gib den Code ein.'; }
+function appInviteText() { const code = S.camp || ''; const l = appLink(code); return 'Komm an unseren Tisch in Fablecrown! ⚔\n' + (l ? l + '\n' : '') + 'Raumcode: ' + code + '\nÖffne Fablecrown, tippe unten auf „Tisch“ und gib den Code ein.'; }
 function newRoomCode(name) { const base = campSlug(name || '').slice(0, 20) || 'runde'; const abc = 'abcdefghjkmnpqrstuvwxyz23456789'; let r = ''; for (let i = 0; i < 8; i++) r += abc[Math.floor(rnd() * abc.length)]; return base + '-' + r; }
 function appCampStatus() {
-  if (typeof HB_NOCRYPTO !== 'undefined' && HB_NOCRYPTO) return '<p class="cstat bad">Online-Tisch nicht verfügbar: Dieser Browser bietet keine sichere Verschlüsselung (WebCrypto). Öffne die App über https oder als installierte App – unverschlüsselt sendet das Heldenbuch nie.</p>';
+  if (typeof HB_NOCRYPTO !== 'undefined' && HB_NOCRYPTO) return '<p class="cstat bad">Online-Tisch nicht verfügbar: Dieser Browser bietet keine sichere Verschlüsselung (WebCrypto). Öffne die App über https oder als installierte App – unverschlüsselt sendet Fablecrown nie.</p>';
   const st = HBNET.state; const name = (Object.entries(HB_BROKERS).find(([k]) => k === hbLs.get('hb_server', 'hivemq')) || [0, ['eigener Server']])[1][0];
   if (st === 'online') return '<p class="cstat ok">● Online' + (!S.share ? ' – du würfelst verdeckt' : S.secret ? ' – deine Würfe erscheinen nur bei der Spielleitung' : ' – deine Würfe werden geteilt') + ' <small>(' + esc(name) + ')</small></p>' + SECRET_NOTE();
   if (st === 'verbinde') return '<p class="cstat">◌ Verbinde mit dem Tisch …</p>';

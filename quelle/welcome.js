@@ -7,7 +7,7 @@ const plLabel = (p) => (p && p.pl ? ' <small class="plname">(' + esc(p.pl) + ')<
 function welcomeNeeded() { return !myName() && !(navigator.webdriver && !window.__hbWelcomeTest); }
 function welcomeOpen(edit) {
   S.modal = 'welcome'; const m = $('#modal'); const room = !edit && isApp() && !S.camp;
-  m.innerHTML = '<div class="dlg welcome" role="dialog" aria-modal="true" aria-label="' + (edit ? 'Dein Name' : 'Willkommen') + '"><h2>' + (edit ? 'Dein Name' : 'Willkommen im Heldenbuch') + '</h2>' +
+  m.innerHTML = '<div class="dlg welcome" role="dialog" aria-modal="true" aria-label="' + (edit ? 'Dein Name' : 'Willkommen') + '"><h2>' + (edit ? 'Dein Name' : 'Willkommen bei Fablecrown') + '</h2>' +
     '<p class="hint">' + (edit ? 'So sehen dich die anderen am Tisch.' : 'Wie heisst du? So sehen dich die anderen am Tisch, z. B. „Lyra (Manu)“. Kein Konto, kein Passwort.') + '</p>' +
     '<label class="fld"><span>Dein Name</span><input type="text" id="wName" maxlength="24" autocomplete="nickname" value="' + esc(myName()) + '"></label>' +
     (room ? '<label class="fld"><span>Raumcode (falls du schon einen hast)</span><input type="text" id="wRoom" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="von deiner Spielleitung"></label>' : '') +

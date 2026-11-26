@@ -79,7 +79,7 @@ function infoContent(kind, key) {
   if (kind === 'cls') {
     const C = CLASSES[key]; if (!C) return null;
     const feats = (C.feats || []).filter((f) => f[0] <= 3);
-    return { t: C.name, sub: (C.home ? '✦ Heldenbuch-Klasse' : 'Klasse'), flav: (C.flavor || '').replace(/^✦ /, ''),
+    return { t: C.name, sub: (C.home ? '✦ Fablecrown-Klasse' : 'Klasse'), flav: (C.flavor || '').replace(/^✦ /, ''),
       dl: infoRow('Trefferwürfel', 'W' + C.hd) + infoRow('Hauptattribut', C.prim.map((a) => AB_DE[a]).join(' oder ')) + infoRow('Rettungswürfe', C.saves.map((a) => AB_DE[a]).join(', ')) +
         infoRow('Rüstung', (C.armor || []).length ? C.armor.map((a) => ARMOR_DE[a] || a).join(', ') : 'keine') + infoRow('Waffen', WPN_DE[C.weapons] || '') +
         infoRow('Fertigkeiten', 'wähle ' + C.skillN + ': ' + C.skills.map((s) => SKILLS[s][0]).join(', ')) + infoRow('Zauber', C.caster ? { full: 'ja, voller Zauberwirker', half: 'ja, ab Stufe 1–2 (halber Zauberwirker)', pact: 'ja, Paktmagie' }[C.caster] || 'ja' : 'nein') +
@@ -89,7 +89,7 @@ function infoContent(kind, key) {
   if (kind === 'sp') {
     const sp = SPECIES[key]; if (!sp) return null;
     let tr = []; try { const tmp = JSON.parse(JSON.stringify(ch || newChar({}))); tmp.species = key; tmp.speciesChoice = sp.choice ? (key === (ch || {}).species ? ch.speciesChoice : Object.keys(sp.choice.opts)[0]) : ''; const tc = derive(normChar(tmp), S.hb); tr = typeof sp.traits === 'function' ? sp.traits(tc) : (sp.traits || []); } catch (e) { tr = []; }
-    return { t: sp.name, sub: sp.home ? '✦ Heldenbuch-Spezies' : sp.legacy ? 'Spezies aus dem SRD 5.1 (ältere Regeln)' : 'Spezies', flav: (sp.flavor || '').replace(/^✦ /, ''),
+    return { t: sp.name, sub: sp.home ? '✦ Fablecrown-Spezies' : sp.legacy ? 'Spezies aus dem SRD 5.1 (ältere Regeln)' : 'Spezies', flav: (sp.flavor || '').replace(/^✦ /, ''),
       dl: infoRow('Grösse', sp.size) + infoRow('Bewegung', fmtM(sp.speed)) + infoRow('Dunkelsicht', sp.dv ? fmtM(sp.dv) : 'nein') + (sp.choice ? infoRow(sp.choice.label, Object.values(sp.choice.opts).join(', ')) : ''),
       more: tr.length ? '<h4>Merkmale</h4>' + infoFeats(tr.map(([n, t]) => [0, n, t])) : '' };
   }

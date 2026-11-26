@@ -70,7 +70,7 @@ const HELP = {
     'Bekommst du von anderen einen Bonus (z. B. Segnen +1W4 oder Bardische Inspiration), wählst du den Würfel unter „Von Verbündeten“.']],
   build: ['Helden erstellen', [
     'Gehe die Schritte oben der Reihe nach durch: Klasse, Spezies, Hintergrund, Attribute, Zauber, Abschluss. Du kannst jederzeit zurückspringen.',
-    'Unterklassen werden ab Stufe 3 wählbar. Mit ✦ markierte Inhalte sind Eigenkreationen des Heldenbuchs, alles andere stammt aus dem SRD 5.2.',
+    'Unterklassen werden ab Stufe 3 wählbar. Mit ✦ markierte Inhalte sind Eigenkreationen von Fablecrown, alles andere stammt aus dem SRD 5.2.',
     'Fehlt noch etwas, zeigt die App einen Hinweis mit Link zur passenden Stelle.']],
   auto: ['Was rechnet die App – was entscheidet die SL?', [
     'Automatisch: deine Werte, Angriffs- und Schadenswürfe, Zauberplätze, Ressourcen, Aktionsökonomie, Dauer deiner Wirkungen, deine Zustände, Konzentrationsproben bei eigenem Schaden, Rasten.',
@@ -81,7 +81,7 @@ const HELP = {
     'Die Optionen gelten auf diesem Gerät. Sprecht am Tisch ab, welche Hausregeln ihr nutzt.']],
   sub: ['Unterklassen', [
     'Ab Stufe 3 wählst du eine Unterklasse. Sie gibt deiner Klasse eine Richtung und bringt auf bestimmten Stufen eigene Merkmale.',
-    'Die erste Unterklasse jeder SRD-Klasse stammt aus dem SRD 5.2. Alle mit ✦ markierten sind Eigenkreationen des Heldenbuchs – mit eigenen Ideen, Namen und Regeln. Frag deine Spielleitung, ob sie am Tisch erlaubt sind.',
+    'Die erste Unterklasse jeder SRD-Klasse stammt aus dem SRD 5.2. Alle mit ✦ markierten sind Eigenkreationen von Fablecrown – mit eigenen Ideen, Namen und Regeln. Frag deine Spielleitung, ob sie am Tisch erlaubt sind.',
     'Ressourcen, Zusatzschaden und Aktionen der gewählten Unterklasse erscheinen automatisch auf dem Bogen, in der Zugleiste und im Trefferdialog.']],
   attr: ['Attributswerte', [
     'Standardwerte: Verteile 15, 14, 13, 12, 10 und 8 auf die sechs Attribute. Punktekauf: 27 Punkte, jeder Wert zwischen 8 und 15. Gewürfelt / frei: Trage eigene Werte ein, z. B. aus 4W6, bei denen der niedrigste Würfel wegfällt.',

@@ -1,4 +1,4 @@
-# Prüft das Heldenbuch in den Browser-Engines, die es lokal nicht gibt:
+# Prüft Fablecrown (bisher Heldenbuch) in den Browser-Engines, die es lokal nicht gibt:
 #   WebKit (Safari, iPhone) unter Linux und macOS, Firefox unter Linux,
 #   dazu einen echten Online-Tisch mit drei Geräten über die öffentlichen Server.
 # Läuft bei jedem Pull Request auf main und von Hand (Actions → Browser prüfen → Run workflow).

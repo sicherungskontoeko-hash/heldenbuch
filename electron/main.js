@@ -14,7 +14,7 @@ const bridgeFile = () => path.join(dataDir(), 'mcp-bruecke.js');
 function createWindow() {
   win = new BrowserWindow({
     width: 1280, height: 860, minWidth: 380, minHeight: 600,
-    backgroundColor: '#130E0A', title: 'Heldenbuch', autoHideMenuBar: true,
+    backgroundColor: '#130E0A', title: 'Fablecrown', autoHideMenuBar: true,
     icon: path.join(__dirname, '..', 'build', 'icon.png'),
     webPreferences: { contextIsolation: true, sandbox: true, spellcheck: true, preload: path.join(__dirname, 'preload.js') }
   });
@@ -28,8 +28,8 @@ function createWindow() {
 /* Werkzeug-Aufruf ans Fenster weiterreichen und auf die Antwort warten */
 function execTool(name, args) {
   return new Promise((resolve) => {
-    if (!win || win.isDestroyed()) return resolve({ ok: false, text: 'Das Heldenbuch-Fenster ist zu. Öffne die PC-App.' });
-    const id = ++seq; const tm = setTimeout(() => { pending.delete(id); resolve({ ok: false, text: 'Das Heldenbuch antwortet nicht.' }); }, 14000);
+    if (!win || win.isDestroyed()) return resolve({ ok: false, text: 'Das Fablecrown-Fenster ist zu. Öffne die PC-App.' });
+    const id = ++seq; const tm = setTimeout(() => { pending.delete(id); resolve({ ok: false, text: 'Fablecrown antwortet nicht.' }); }, 14000);
     pending.set(id, (r) => { clearTimeout(tm); resolve(r); });
     win.webContents.send('hb-tool', { id, name, args });
   });

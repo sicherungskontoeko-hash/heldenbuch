@@ -19,7 +19,7 @@ function startToolServer({ exec, infoFile, timeoutMs = 15000 }) {
     req.on('data', (c) => { body += c; if (body.length > 65536) { out(413, false, 'Zu gross'); req.destroy(); } });
     req.on('end', async () => {
       let m; try { m = JSON.parse(body); } catch (e) { return out(400, false, 'Ungültig'); }
-      let done = false; const tm = setTimeout(() => { if (!done) { done = true; out(504, false, 'Das Heldenbuch antwortet nicht. Ist das Fenster offen?'); } }, timeoutMs);
+      let done = false; const tm = setTimeout(() => { if (!done) { done = true; out(504, false, 'Fablecrown antwortet nicht. Ist das Fenster offen?'); } }, timeoutMs);
       try { const r = await exec(String(m.name || ''), m.args && typeof m.args === 'object' ? m.args : {}); if (!done) { done = true; clearTimeout(tm); out(200, !!r.ok, String(r.text || '')); } }
       catch (e) { if (!done) { done = true; clearTimeout(tm); out(200, false, String((e && e.message) || e)); } }
     });

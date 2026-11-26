@@ -1,4 +1,4 @@
-# Heldenbuch – Quellcode
+# Fablecrown (bisher Heldenbuch) – Quellcode
 
 Deutschsprachiger D&D-5e-Charakterbogen und Spieltisch als eine einzige HTML-Datei.
 Regelgrundlage: **D&D 2024 / SRD 5.2 (CC-BY-4.0)**. Mit ✦ markierte Inhalte sind eigene Erfindungen (Hausregeln).
@@ -145,7 +145,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | verlauf.js | Würfelverlauf: alle Würfe (Held, Kreaturen, Mitspieler) mit Details, auf dem Gerät gespeichert (200) |
 | hilfe.js | Hilfe-Stufe (Einsteiger · Standard · Erfahren): Erklärknöpfe, Einsteiger-Tipps, Zug-Leitfaden, Wurferklärung, Zugleiste an/aus, Nachbessern, Rechenweg |
 | spellflav.js | Zauberbilder: wie man sich jeden Zauber vorstellt |
-| dice3d.js | Räumliche Würfel (SVG), 10 Designs + Heldenbuch + Spielleitung, Effekte für 20 und 1, Geräusche, Set-Vergabe pro Raum |
+| dice3d.js | Räumliche Würfel (SVG), 10 Designs + Fablecrown + Spielleitung, Effekte für 20 und 1, Geräusche, Set-Vergabe pro Raum |
 | levelup.js | Stufenaufstieg-Assistent (Aufstieg · Das ist neu · Entscheiden) mit Feier-Effekt |
 | savedmg.js | Schaden mit Rettungswurf des Ziels: Abfrage vor dem Schadenswurf (Zauber, andauernde Zauber, Klassenmerkmale) |
 | mechanics.js | Abläufe mit Zwischenschritt: Zustände durch Rettungswurf, Zielzustand und Deckung beim Gegnerangriff, Reaktionen bei Treffern, Zusatzeffekte von Monsterangriffen, Entrinnen |

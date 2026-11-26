@@ -1,0 +1,126 @@
+{
+  "heldenbuch": 1,
+  "exportiert": "2026-11-26T14:03:39.594Z",
+  "chars": [
+    {
+      "id": "cmwxmhzno7fbv",
+      "v": 2,
+      "name": "Borin Stahl",
+      "player": "",
+      "level": 5,
+      "cls": "fig",
+      "order": "",
+      "land": "temperate",
+      "species": "human",
+      "speciesChoice": "",
+      "speciesSkill": "",
+      "speciesSpellAbility": "wis",
+      "bg": "soldier",
+      "bgCustom": {
+        "name": "Eigener Hintergrund",
+        "abil": [
+          "str",
+          "dex",
+          "con"
+        ],
+        "skills": [
+          "ath",
+          "prc"
+        ],
+        "feat": "alert"
+      },
+      "bgMode": "21",
+      "bgPlus": {
+        "str": 2,
+        "con": 1
+      },
+      "method": "standard",
+      "base": {
+        "str": 15,
+        "dex": 13,
+        "con": 14,
+        "int": 8,
+        "wis": 12,
+        "cha": 10
+      },
+      "classSkills": [],
+      "extraSkills": [],
+      "expertise": [],
+      "freeSkills": [],
+      "freeExp": [],
+      "bonusSpells": [],
+      "humanFeat": "skilled",
+      "asi": {},
+      "styles": [],
+      "invocations": [],
+      "mi": {},
+      "cantrips": [],
+      "spells": [],
+      "book": [],
+      "arcanum": {},
+      "armor": "none",
+      "armorBonus": 0,
+      "shield": false,
+      "shieldBonus": 0,
+      "mageArmor": false,
+      "weapons": [],
+      "misc": {
+        "ac": 0,
+        "save": 0,
+        "dc": 0,
+        "atk": 0,
+        "speed": 0,
+        "hp": 0,
+        "init": 0
+      },
+      "hpMode": "avg",
+      "hpRolls": {},
+      "gold": 0,
+      "inventory": "",
+      "notes": "",
+      "appearance": "",
+      "alignment": "",
+      "languages": "Gemeinsprache",
+      "homebrew": [
+        "hbtest1"
+      ],
+      "featOpt": {},
+      "multi": [],
+      "items": [],
+      "inv": [],
+      "comps": [],
+      "xp": 0,
+      "play": {
+        "hp": null,
+        "temp": 0,
+        "hdUsed": 0,
+        "ds": [
+          0,
+          0
+        ],
+        "slots": {},
+        "pact": 0,
+        "res": {
+          "sw": 1,
+          "as": 1
+        },
+        "insp": true,
+        "exh": 0,
+        "raging": false,
+        "cond": []
+      },
+      "updated": 1795701819588
+    }
+  ],
+  "hb": [
+    {
+      "id": "hbtest1",
+      "kind": "feature",
+      "name": "Äthermaschine (Test)",
+      "text": "Eigene Hausregel",
+      "ac": 1,
+      "uses": 2,
+      "reset": "long"
+    }
+  ]
+}

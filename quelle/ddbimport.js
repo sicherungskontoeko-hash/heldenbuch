@@ -193,7 +193,7 @@ function ddbBuild(F, hb) {
   const rep = { ok: [], adj: [], miss: [], hint: [], hb: [] }; const extraNotes = []; const feats = [];
   /* Klassen */
   const cl = [];
-  for (const m of g('CLASS LEVEL').matchAll(/([A-Za-z][A-Za-z' -]*?)\s+(\d+)/g)) { const id = DDB_CLS[ddbLow(m[1])]; if (id && !cl.some((x) => x.id === id)) cl.push({ id, lvl: +m[2], en: m[1].trim() }); else if (!id) rep.miss.push('Klasse ' + m[1].trim() + ' ' + m[2] + ' (gibt es im Heldenbuch nicht)'); }
+  for (const m of g('CLASS LEVEL').matchAll(/([A-Za-z][A-Za-z' -]*?)\s+(\d+)/g)) { const id = DDB_CLS[ddbLow(m[1])]; if (id && !cl.some((x) => x.id === id)) cl.push({ id, lvl: +m[2], en: m[1].trim() }); else if (!id) rep.miss.push('Klasse ' + m[1].trim() + ' ' + m[2] + ' (gibt es in Fablecrown nicht)'); }
   if (!cl.length) return { err: 'Keine bekannte Klasse gefunden („' + (g('CLASS LEVEL') || 'leer') + '“).' };
   const ft = ddbFeatures(Object.keys(F).filter((k) => /^FeaturesTraits\d+$/.test(k)).sort((a, b) => +a.slice(14) - +b.slice(14)).map((k) => F[k]).join('\n'));
   const blk = (re) => ft.find((b) => re.test(b.name));
@@ -239,7 +239,7 @@ function ddbBuild(F, hb) {
   else {
     ch.humanFeat = ''; ch.speciesFallback = true; const tr = ft.filter((b) => /SPECIES|RACIAL/i.test(b.sec) && b.text).map((b) => b.name + ': ' + b.text);
     ch.homebrew.push(hbMake('feature', 'Volk: ' + (race || 'unbekannt'), { text: (tr.join('\n\n') || 'Spezies aus D&D Beyond.') + '\n\n(Aus D&D Beyond übernommen.)' }));
-    rep.miss.push('Spezies «' + (race || '?') + '» gibt es im Heldenbuch nicht – vorläufig Mensch, die Merkmale stehen als Hausregel beim Helden'); rep.hb.push('Volk: ' + race);
+    rep.miss.push('Spezies «' + (race || '?') + '» gibt es in Fablecrown nicht – vorläufig Mensch, die Merkmale stehen als Hausregel beim Helden'); rep.hb.push('Volk: ' + race);
   }
   const SPd = SPECIES[ch.species];
   if (SPd.choice) {
@@ -325,7 +325,7 @@ function ddbBuild(F, hb) {
   mast.forEach((id) => { if (!wids.includes(id) && eq.some((x) => ddbWeapon(x.n) === id)) wids.push(id); });
   ch.weapons = wids.map((w) => ({ w, mastery: mast.has(w) }));
   if (wids.length) rep.ok.push('Waffen: ' + wids.map((w) => WEAPONS[w][0]).join(', '));
-  if (wMiss.length) rep.miss.push('Angriffe ohne Heldenbuch-Waffe: ' + wMiss.join(', '));
+  if (wMiss.length) rep.miss.push('Angriffe ohne Fablecrown-Waffe: ' + wMiss.join(', '));
   /* Rüstung so wählen, dass die RK passt */
   const armors = [...new Set(eq.map((x) => ddbArmor(x.n)).filter(Boolean))]; const hasShield = eq.some((x) => /^shield\b/i.test(x.n));
   const pdfAC = num('AC'); const cand = [];
@@ -365,7 +365,7 @@ function ddbBuild(F, hb) {
     const lst = new Set(info.list.map((s) => s.id)); const mine = spells.filter((s) => s.id && re.test(s.src) && lst.has(s.id));
     const can = [...new Set(mine.filter((s) => getSpell(s.id, hb).lvl === 0).map((s) => s.id))];
     const lev = [...new Set(mine.filter((s) => getSpell(s.id, hb).lvl > 0).map((s) => s.id))].filter((id) => !info.always.includes(id));
-    tgt.cantrips = can.slice(0, info.cantripN); if (can.length > info.cantripN) rep.hint.push(CLASSES[x.id].name + ': ' + (can.length - info.cantripN) + ' Zaubertrick(s) mehr als im Heldenbuch erlaubt – weggelassen');
+    tgt.cantrips = can.slice(0, info.cantripN); if (can.length > info.cantripN) rep.hint.push(CLASSES[x.id].name + ': ' + (can.length - info.cantripN) + ' Zaubertrick(s) mehr als in Fablecrown erlaubt – weggelassen');
     if (x.id === 'wiz') tgt.book = lev.slice();
     if (lev.length <= info.prepN) tgt.spells = lev;
     else { tgt.spells = []; rep.hint.push(CLASSES[x.id].name + ': D&D Beyond listet ' + lev.length + ' verfügbare Zauber – bitte ' + info.prepN + ' vorbereiten'); }
@@ -398,7 +398,7 @@ function ddbBuild(F, hb) {
   ch.homebrew = [...new Set(ch.homebrew)];
   /* Abgleich mit den PDF-Zahlen über «Sonstiges» */
   c = derive(ch, hb);
-  const adj = (k, have, want, label, unit) => { if (want == null || isNaN(want) || want === have) return; const d = Math.round((want - have) * 10) / 10; ch.misc[k] = Math.round(((+ch.misc[k] || 0) + d) * 10) / 10; rep.adj.push(label + ' ' + (d > 0 ? '+' : '') + String(d).replace('.', ',') + (unit || '') + ' (D&D Beyond ' + String(want).replace('.', ',') + (unit || '') + ', Heldenbuch ' + String(have).replace('.', ',') + (unit || '') + ')'); };
+  const adj = (k, have, want, label, unit) => { if (want == null || isNaN(want) || want === have) return; const d = Math.round((want - have) * 10) / 10; ch.misc[k] = Math.round(((+ch.misc[k] || 0) + d) * 10) / 10; rep.adj.push(label + ' ' + (d > 0 ? '+' : '') + String(d).replace('.', ',') + (unit || '') + ' (D&D Beyond ' + String(want).replace('.', ',') + (unit || '') + ', Fablecrown ' + String(have).replace('.', ',') + (unit || '') + ')'); };
   adj('hp', c.hpMax, num('MaxHP'), 'TP-Maximum');
   adj('ac', c.ac, pdfAC, 'RK');
   adj('init', c.init, num('Init'), 'Initiative');
@@ -408,7 +408,7 @@ function ddbBuild(F, hb) {
   const svN = { str: 'ST Strength', dex: 'ST Dexterity', con: 'ST Constitution', int: 'ST Intelligence', wis: 'ST Wisdom', cha: 'ST Charisma' };
   const svD = AB.filter((k) => num(svN[k]) != null && num(svN[k]) !== c.saves[k].val).map((k) => AB_K[k] + ' ' + (num(svN[k]) >= 0 ? '+' : '') + num(svN[k]) + ' statt ' + (c.saves[k].val >= 0 ? '+' : '') + c.saves[k].val);
   if (svD.length) rep.hint.push('Rettungswürfe weichen ab: ' + svD.join(', '));
-  const skD = ALL_SKILLS.filter((s) => !!c.skills[s].prof !== P.includes(s)).map((s) => SKILLS[s][0] + (c.skills[s].prof ? ' (im Heldenbuch zusätzlich)' : ' (fehlt)'));
+  const skD = ALL_SKILLS.filter((s) => !!c.skills[s].prof !== P.includes(s)).map((s) => SKILLS[s][0] + (c.skills[s].prof ? ' (in Fablecrown zusätzlich)' : ' (fehlt)'));
   if (skD.length) rep.hint.push('Fertigkeiten weichen ab: ' + skD.join(', '));
   rep.ok.push('Fertigkeiten: ' + ALL_SKILLS.filter((s) => c.skills[s].prof).map((s) => SKILLS[s][0] + (c.skills[s].prof === 2 ? ' (Expertise)' : '')).join(', '));
   /* Spielstand */

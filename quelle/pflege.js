@@ -64,7 +64,7 @@ function stCtx() {
   return p.join(' · ');
 }
 const stTime = (t) => { const d = new Date(t); return d.toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }); };
-function stText() { const L = stLoad(); return 'Stolpersteine aus dem Heldenbuch (' + stVer() + '), ' + L.length + ' Einträge:\n' + L.map((x) => '- ' + stTime(x.t) + ' | ' + x.w + ' | ' + x.x).join('\n'); }
+function stText() { const L = stLoad(); return 'Stolpersteine aus Fablecrown (' + stVer() + '), ' + L.length + ' Einträge:\n' + L.map((x) => '- ' + stTime(x.t) + ' | ' + x.w + ' | ' + x.x).join('\n'); }
 function stOpen(keep) {
   const L = stLoad(); const m = $('#modal'); S.modal = 'stolper'; S.more = false;
   document.querySelectorAll('details.mnu[open]').forEach((d) => { d.open = false; });
@@ -81,7 +81,7 @@ function stOpen(keep) {
   m.hidden = false; if (!keep) { const i = $('#stX'); if (i) i.focus(); }
 }
 Object.assign(XA, {
-  pfBkGo: () => { pfBkHide(); doExport(Object.values(S.chars), 'Heldenbuch_Sicherung.json', true); },
+  pfBkGo: () => { pfBkHide(); doExport(Object.values(S.chars), 'Fablecrown_Sicherung.json', true); },
   pfBkLater: () => { pfBkHide(); },
   stOpen: () => { S.stCtx = stCtx(); stOpen(); },
   stAdd: () => {
