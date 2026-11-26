@@ -94,7 +94,8 @@ run "GK-11 Gnaden-Dialog auf Deutsch (gk-gnade.test.js)" node tests/gk-gnade.tes
 run "GK-09 Prüfpaket: beide Fassungen und Manifest (gk-paket.test.js)" node tests/gk-paket.test.js
 run "GK-10 SRD-5.2.1-Attribution wortgetreu (gk-lizenz.test.js)" node tests/gk-lizenz.test.js
 run "Fablecrown: Name, Bildmarke, Kompatibilität B01–B15 (fc-marke.test.js)" node tests/fc-marke.test.js
-run "Fablecrown Vault V1: E2E-Verschlüsselung, Warteschlange, Konflikte (vault.test.js)" node tests/vault.test.js
+run "Fablecrown Vault V2: Kern, zwei Geräte, Kopplung, Konflikte, Verlauf (vault.test.js)" node tests/vault.test.js
+run "Fablecrown Vault V2 in der App: zwei Browserprofile gegen Prüfserver (vault-app.test.js)" node tests/vault-app.test.js
 run "Begleiter und Reittiere: Werte, TP, Initiative, eigene Würfel (begleiter.test.js)" node tests/begleiter.test.js
 run "Bedienung mit Tastatur und im Querformat (bedienung.test.js)" node tests/bedienung.test.js
 run "Zufallsspieler: 3 Minuten zufällige Bedienung ohne Fehler (zufallsspieler.test.js)" node tests/zufallsspieler.test.js --min=3

@@ -63,6 +63,7 @@ function pendKeys() { const out = new Set(); try { for (let i = 0; i < localStor
 function persist(kind, id) {
   const key = kind + '_' + id; const t = pendMark(key);
   lsSet([key]);
+  if (typeof vaultMark === 'function') vaultMark(kind, id);
   if (!DB) return;
   S.saving = 'Speichert …'; paintSave();
   later(key, 700, async () => {
@@ -85,6 +86,7 @@ function paintSave() {
   const ok = S.store === 'db' && S.saving === 'Gespeichert';
   if (S.saveErr && !ok) { el.textContent = '⚠ Nicht gespeichert – bitte exportieren'; return; }
   el.textContent = S.store === 'db' ? (S.saving ? S.saving + (S.saveErr ? ' · ' + (isApp() ? 'Gerätespeicher' : 'Browserspeicher') + ' voll' : '') : (isApp() ? 'Auf diesem Gerät gespeichert' : 'In deinem Konto gespeichert')) : 'Nur in diesem Browser gespeichert';
+  if (typeof vaultSaveTxt === 'function') el.textContent += vaultSaveTxt();
 }
 async function connectDb() {
   try {
@@ -584,7 +586,7 @@ function renderHeroes() {
       '<div class="acts2"><button data-act="exportOne" data-arg="' + esc(id) + '">Exportieren</button><button data-act="dupChar" data-arg="' + esc(id) + '">Duplizieren</button>' +
       (conf ? '<button class="del" data-act="delChar" data-arg="' + esc(id) + '">Wirklich löschen?</button><button data-act="noDel">Nein</button>' : '<button class="del" data-act="askDel" data-arg="' + esc(id) + '">Löschen</button>') + '</div></article>';
   }
-  h += '</div>' + brokenHtml(failed) + (isApp() ? transferHtml() : '') + '<div class="herobar"><label class="btn ghost filebtn" title="Fablecrown- oder Heldenbuch-Datei (.json) oder Charakterbogen-PDF aus D&amp;D Beyond">Helden aus Datei laden<input type="file" id="importFile" accept=".json,application/json,.pdf,application/pdf"></label><button class="btn ghost" data-act="importText">Text einfügen</button>' + (ids.length ? '<button class="btn ghost" data-act="exportAll" title="Helden, Hausregeln, eigene Monster, Begegnungen und SL-Notizen in einer Datei">Alles sichern</button>' : '') + '</div>';
+  h += '</div>' + brokenHtml(failed) + (isApp() ? transferHtml() : '') + '<div class="herobar"><label class="btn ghost filebtn" title="Fablecrown- oder Heldenbuch-Datei (.json) oder Charakterbogen-PDF aus D&amp;D Beyond">Helden aus Datei laden<input type="file" id="importFile" accept=".json,application/json,.pdf,application/pdf"></label><button class="btn ghost" data-act="importText">Text einfügen</button>' + (typeof vaultBtn === 'function' ? vaultBtn() : '') + (ids.length ? '<button class="btn ghost" data-act="exportAll" title="Helden, Hausregeln, eigene Monster, Begegnungen und SL-Notizen in einer Datei">Alles sichern</button>' : '') + '</div>';
   return h;
 }
 
@@ -1928,6 +1930,7 @@ Object.assign(XA, {
   if (!S.chars[S.cur]) S.cur = Object.keys(S.chars)[0] || null;
   try { resumeLoad(); } catch (e) {}
   try { const cp = JSON.parse(localStorage.getItem('heldenbuch_camp') || 'null'); if (cp) { S.camp = cp.code || ''; S.share = cp.share !== false; S.secret = !!cp.secret; } } catch (e) {}
+  try { if (typeof vaultInit === 'function') vaultInit(); } catch (e) {}
   render();
   if (typeof welcomeNeeded === 'function' && welcomeNeeded()) welcomeOpen();
   embers();
