@@ -73,11 +73,11 @@ const HXS = ['hxferrali', 'hxsilk', 'hxgolem', 'hxrift', 'hxleaf', 'hxoculi', 'h
     for (const id of hx) for (const sb of CLASSES[id].subs) for (const lv of [1, 3, 6, 11, 18, 20]) {
       Object.keys(S.chars).forEach((k) => delete S.chars[k]); const ch = normChar(newChar({ name: 'E', cls: id, level: lv, sub: lv >= 3 ? sb.id : '', base, weapons: [{ w: 'longsword' }], armor: 'chainmail' })); S.chars[ch.id] = ch; S.cur = ch.id; ch.play.localFight = true;
       const c = derive(ch, S.hb);
-      for (const o of turnOpts(c).filter((x) => /^f:hx_/.test(x.id))) { turnReset(ch); close(); const resK = (FEAT_ACTIONS.find((f) => 'f:' + f.id === o.id) || {}).res; const r0 = resK ? +(ch.play.res[resK] || 0) : 0;
+      for (const o of turnOpts(c).filter((x) => /^f:hx_/.test(x.id))) { ch.play.res = {}; turnReset(ch); close(); const fa = FEAT_ACTIONS.find((f) => 'f:' + f.id === o.id) || {}; const resK = fa.res; const r0 = resK ? +(ch.play.res[resK] || 0) : 0;
         try { turnRun(ch, o.id); out.runs++; } catch (e) { out.bad.push(o.id + ': ' + e.message); continue; } close(); const t = turnSt(ch);
         const okCost = o.cost === 'a' ? t.a >= 1 : o.cost === 'b' ? t.b === 1 && t.a === 0 : o.cost === 'r' ? t.r === 1 && t.a === 0 && t.b === 0 : t.a === 0 && t.b === 0 && t.r === 0;
         if (!okCost) out.bad.push(id + lv + ' ' + o.id + ' Kosten ' + o.cost + ' → ' + JSON.stringify({ a: t.a, b: t.b, r: t.r }));
-        if (resK && +(ch.play.res[resK] || 0) !== r0 + 1) out.bad.push(o.id + ' Ressource ' + resK + ' nicht gebucht');
+        if (resK && +(ch.play.res[resK] || 0) !== r0 + (fa.resN || 1)) out.bad.push(o.id + ' Ressource ' + resK + ' nicht gebucht');
         if (o.cost !== 'f') { const t1 = JSON.stringify(ch.play.res); const n1 = (S.log || []).length; const before = JSON.stringify({ a: t.a, b: t.b, r: t.r }); turnRun(ch, o.id); close(); const t2 = turnSt(ch);
           if (o.cost !== 'a' && JSON.stringify(ch.play.res) !== t1) out.bad.push(o.id + ' zweite ' + o.cost + ' im selben Zug hat Ressource verbraucht'); if (o.cost === 'b' && t2.b !== 1) out.bad.push(o.id + ' Bonusaktion doppelt'); }
       } }
@@ -119,13 +119,13 @@ const HXS = ['hxferrali', 'hxsilk', 'hxgolem', 'hxrift', 'hxleaf', 'hxoculi', 'h
 
   /* ---------- Völker im Kampf ---------- */
   const spc = await p.evaluate(() => { const mk = (o) => { const ch = normChar(newChar(Object.assign({ name: 'V', level: 5, weapons: [{ w: 'longsword' }] }, o))); S.chars = { [ch.id]: ch }; S.cur = ch.id; ch.play.localFight = true; turnReset(ch); return ch; };
-    let ch = mk({ cls: 'bar', species: 'hxbone', base: { str: 16, dex: 14, con: 14, int: 8, wis: 10, cha: 10 } }); let c = derive(ch, S.hb); const bone = c.attacks.filter((a) => /Knochenklinge/.test(a.name)).map((a) => a.dmg + '/' + a.dtype + '/' + !!a.rage + '/' + (a.dmg === '1W6' + sgn(c.mod.str)));
+    let ch = mk({ cls: 'bar', species: 'hxbone', base: { str: 16, dex: 14, con: 14, int: 8, wis: 10, cha: 10 } }); let c = derive(ch, S.hb); const bone = c.attacks.filter((a) => /Knochenklinge/.test(a.name)).map((a) => a.dmg + '/' + a.dtype + '/' + !!a.rage + '/' + (a.dmg === '1W8' + sgn(c.mod.str)));
     ch = mk({ cls: 'mon', species: 'hxbone', level: 11, base: { str: 10, dex: 16, con: 14, int: 8, wis: 14, cha: 10 }, weapons: [] }); c = derive(ch, S.hb); const monk = c.attacks.filter((a) => /Knochenklinge/.test(a.name)).map((a) => a.dmg + '/' + a.ab);
     ch = mk({ cls: 'fig', species: 'hxferrali' }); c = derive(ch, S.hb); const fer = { atk: c.attacksPer, opts: turnOpts(c).filter((o) => /Hand|Arm/.test(o.n)).length };
     const gol = ['clay', 'ceramic', 'forged'].map((v) => { const g = mk({ cls: 'fig', species: 'hxgolem', speciesChoice: v }); const cc = derive(g, S.hb); return v + ':' + cc.res.filter((r) => /^hxsp_/.test(r.k)).map((r) => r.k + '/' + r.reset).join() + ':' + turnOpts(cc).filter((o) => /^f:hx_(naht|ton|gefu)$/.test(o.id)).map((o) => o.id + o.cost).join(); });
     ch = mk({ cls: 'fig', species: 'hxgolem', speciesChoice: 'ceramic' }); ch.play.hp = 5; turnRun(ch, 'f:hx_naht'); const healed = ch.play.hp > 5 && turnSt(ch).b === 1;
     return { bone, monk, fer, gol, healed }; });
-  T('Gratling: Knochenklinge Hieb/Stich 1W6 + STÄ, Kampfrausch zählt', spc.bone.length === 2 && spc.bone.every((x) => /\/true\/true$/.test(x)) && /Hieb/.test(spc.bone[0]) && /Stich/.test(spc.bone[1]), spc.bone);
+  T('Gratling: Knochenklinge Hieb/Stich 1W8 + STÄ (Balance V06a), Kampfrausch zählt', spc.bone.length === 2 && spc.bone.every((x) => /\/true\/true$/.test(x)) && /Hieb/.test(spc.bone[0]) && /Stich/.test(spc.bone[1]), spc.bone);
   T('Gratling-Mönch: Kampfkunstwürfel statt 1W6, GES erlaubt (nicht addiert)', spc.monk.join() === '1W10+3/dex,1W10+3/dex', spc.monk);
   T('Brachar: vier Arme geben keinen zusätzlichen Angriff und keine Zusatzaktion', spc.fer.atk === 2 && spc.fer.opts === 0, spc.fer);
   T('Golem: Bauart bestimmt Fähigkeit, Kosten und Rast', spc.gol.join(' | ') === 'clay:hxsp_ton/short:f:hx_tonb | ceramic:hxsp_naht/long:f:hx_nahtb | forged:hxsp_gefu/long:f:hx_gefur', spc.gol);

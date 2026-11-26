@@ -250,7 +250,7 @@ function validateChar(o) {
   (Array.isArray(o.multi) ? o.multi : []).forEach((m, i) => { if (!m || !nvOwn(CLASSES, m.cls)) e.push('Multiclass ' + (i + 1) + ': unbekannte Klasse.'); else if (!Number.isInteger(+m.level) || +m.level < 1) e.push('Multiclass ' + (i + 1) + ': Stufe ungültig.'); });
   (Array.isArray(o.weapons) ? o.weapons : []).forEach((w, i) => { if (!w || !nvOwn(WEAPONS, w.w)) e.push('Waffe ' + (i + 1) + ': unbekannt (' + String(w && w.w).slice(0, 40) + ').'); });
   if (o.play !== undefined && (typeof o.play !== 'object' || !o.play)) e.push('Spielstand („play“) ist ungültig.');
-  if (o.play && typeof o.play === 'object' && o.play.hxForms !== undefined && (!Array.isArray(o.play.hxForms) || o.play.hxForms.some((f) => !['Klinge', 'Panzer', 'Greifer', 'Sehne'].includes(f)))) e.push('Wandelgestalt („play.hxForms“) ist ungültig.');
+  if (o.play && typeof o.play === 'object' && o.play.hxForms !== undefined && (!Array.isArray(o.play.hxForms) || o.play.hxForms.some((f) => !['Klinge', 'Panzer', 'Greifer', 'Sehne', 'Flügel'].includes(f)))) e.push('Wandelgestalt („play.hxForms“) ist ungültig.');
   { const seen = new Set([o.cls]); (Array.isArray(o.multi) ? o.multi : []).forEach((m, i) => { if (m && CLASSES[m.cls]) { if (seen.has(m.cls)) e.push('Multiclass ' + (i + 1) + ': ' + CLASSES[m.cls].name + ' kommt doppelt vor.'); seen.add(m.cls); } }); }
   return e;
 }

@@ -1,0 +1,1923 @@
+{
+ "reference_commit": "b6d5552",
+ "reviewed_commit": "4397e36",
+ "principle": "buff_before_nerf",
+ "decisions": [
+  {
+   "id": "C01a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "W4/W6 allein ist auf Stufe 1–4 kaum spürbar; KON betont die Körperanpassung. Vergleich: Abfangen des Bollwerks 1W4+KON, Deflect Attacks des Mönchs deutlich mehr. Dip-Risiko gering, weil Panzer jede Runde eine Bonusaktion bis Stufe 6 kostet.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "W4/W6 allein ist auf Stufe 1–4 kaum spürbar; KON betont die Körperanpassung. Vergleich: Abfangen des Bollwerks 1W4+KON, Deflect Attacks des Mönchs deutlich mehr. Dip-Risiko gering, weil Panzer jede Runde eine Bonusaktion bis Stufe 6 kostet.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C01b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js",
+    "quelle/app.js"
+   ],
+   "reasoning": "Die Bonusaktionssteuer jeder Runde ist der Hauptgrund für die C-Einstufung. Dauerhafte Anpassung ab 7 entspricht einem Kampfrausch-ähnlichen Zustand; Endet bei Wechsel, Beenden, Kampfunfähigkeit oder Rast. Klinge bleibt einmal pro Zug.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Die Bonusaktionssteuer jeder Runde ist der Hauptgrund für die C-Einstufung. Dauerhafte Anpassung ab 7 entspricht einem Kampfrausch-ähnlichen Zustand; Endet bei Wechsel, Beenden, Kampfunfähigkeit oder Rast. Klinge bleibt einmal pro Zug.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js",
+    "quelle/app.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C01c",
+   "status": "reject",
+   "problem_confirmed": false,
+   "evidence": [
+    "Regeltext hbclasses.js"
+   ],
+   "reasoning": "Eine Anpassung, die einen Dauerplatz belegt, um einmalig wenige temporäre TP (ca. 6–9) zu geben, ist mit C01b umständlich und bringt wenig. Zellgedächtnis (C01e) liefert die Ausdauer sauberer.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "",
+   "implemented": false,
+   "changed_files": [],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C01d",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Folgt aus C01b; nur Dauer, Zahl zwei unverändert.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Folgt aus C01b; nur Dauer, Zahl zwei unverändert.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C01e",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Endliche Selbstheilung aus eigenen Trefferwürfeln, 1× pro Rast; kein freier Würfel. In der App als Text, Heilung über die TP-Eingabe (manuell).",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Endliche Selbstheilung aus eigenen Trefferwürfeln, 1× pro Rast; kein freier Würfel. In der App als Text, Heilung über die TP-Eingabe (manuell).",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C01f",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js",
+    "quelle/rules.js"
+   ],
+   "reasoning": "Flug auf Stufe 17 ist ein angemessener Meilenstein (Vollendete Form war nur W10). Als fünfte Anpassung, belegt einen Platz, kein Schweben.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Flug auf Stufe 17 ist ein angemessener Meilenstein (Vollendete Form war nur W10). Als fünfte Anpassung, belegt einen Platz, kein Schweben.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js",
+    "quelle/rules.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C01g",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Bestehender Freier Wandel bleibt, nur konsistent zur Dauer: drei Plätze, kein vierter.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Bestehender Freier Wandel bleibt, nur konsistent zur Dauer: drei Plätze, kein vierter.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C02a",
+   "status": "reject",
+   "problem_confirmed": false,
+   "evidence": [
+    "Regeltext hbclasses.js"
+   ],
+   "reasoning": "Wildgestalt ist bereits B; mit C01b ist Sehne ohnehin dauerhaft. Zusätzliche +3 m wären Geschwindigkeitsinflation ohne neuen Spielwert.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "",
+   "implemented": false,
+   "changed_files": [],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C02b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Kurzer Radius, eine Runde, WEI-Rettungswurf: pro kurzer Rast angemessen.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Kurzer Radius, eine Runde, WEI-Rettungswurf: pro kurzer Rast angemessen.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C02c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Zusammen mit C01a nötig, sonst KON doppelt. Ergebnis 2 Wandelwürfel + KON.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Zusammen mit C01a nötig, sonst KON doppelt. Ergebnis 2 Wandelwürfel + KON.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C03a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Durchgang durch Feinde jeder Grösse mit Sehne passt zur Identität; Ende im Feld, Wände und Gelegenheitsangriffe bleiben ausgeschlossen bzw. normal.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Durchgang durch Feinde jeder Grösse mit Sehne passt zur Identität; Ende im Feld, Wände und Gelegenheitsangriffe bleiben ausgeschlossen bzw. normal.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C03b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Beseitigt den Reaktionskonflikt mit Panzer; nur Rettungswürfe gegen Gepackt/Festgesetzt.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Beseitigt den Reaktionskonflikt mit Panzer; nur Rettungswürfe gegen Gepackt/Festgesetzt.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C04a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Ohne Ressource fehlt dem Geistwirker jede Entscheidungstiefe gegenüber Hexenmeister/Mönch. Pool 2–6, Reset kurze Rast; bei 2 kurzen Rasten 6–18 Punkte am Tag, mit max. einer Fähigkeit pro Zug vertretbar.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Ohne Ressource fehlt dem Geistwirker jede Entscheidungstiefe gegenüber Hexenmeister/Mönch. Pool 2–6, Reset kurze Rast; bei 2 kurzen Rasten 6–18 Punkte am Tag, mit max. einer Fähigkeit pro Zug vertretbar.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C04b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Ersetzt Gedankenstoss, 1 Punkt, keine Doppelverschiebung.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Ersetzt Gedankenstoss, 1 Punkt, keine Doppelverschiebung.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C04c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "2W6+INT als Reaktion ist auf Stufe 2 stark, aber auf 2 Einsätze pro kurzer Rast begrenzt; vergleichbar mit Schild aus einem Magier-Dip. Kleinerer Würfel bleibt eine mögliche Nachjustierung nach Spieltest (nicht umgesetzt).",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "2W6+INT als Reaktion ist auf Stufe 2 stark, aber auf 2 Einsätze pro kurzer Rast begrenzt; vergleichbar mit Schild aus einem Magier-Dip. Kleinerer Würfel bleibt eine mögliche Nachjustierung nach Spieltest (nicht umgesetzt).",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C04d",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Bewegung 0 für eine Runde, WEI-Rettungswurf, 1 Punkt: schwächer als Festgesetzt.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Bewegung 0 für eine Runde, WEI-Rettungswurf, 1 Punkt: schwächer als Festgesetzt.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C04e",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Starke Bosskontrolle, aber 2 Punkte und Rettungswurf.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Starke Bosskontrolle, aber 2 Punkte und Rettungswurf.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C04f",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Selektive Fläche 5W8 statt drei Impulsen; bei 3+ Gegnern deutlich stärker, aber 2 von 4 Punkten; vergleichbar mit Feuerball eines Zauberers dieser Stufe.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Selektive Fläche 5W8 statt drei Impulsen; bei 3+ Gegnern deutlich stärker, aber 2 von 4 Punkten; vergleichbar mit Feuerball eines Zauberers dieser Stufe.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C04g",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Eine Runde gelähmt ohne Konzentration ist stark, kostet aber die Hälfte des Pools; legendäre Resistenz greift. Risiko Kettenlähmung mehrerer Geistwirker als Spieltest-Punkt notiert.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Eine Runde gelähmt ohne Konzentration ist stark, kostet aber die Hälfte des Pools; legendäre Resistenz greift. Risiko Kettenlähmung mehrerer Geistwirker als Spieltest-Punkt notiert.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C05a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Fernkraft ist die Telekinese-Nische; 3/6 m und 6-m-Kraftfeld, Rettungswurf und Grössenlimit bleiben.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Fernkraft ist die Telekinese-Nische; 3/6 m und 6-m-Kraftfeld, Rettungswurf und Grössenlimit bleiben.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C05b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Nachteil auf eine WEI-Probe war im Kampf fast wirkungslos; nächster Angriff ist ein echter Nutzen. Gedankenlesen 2×.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Nachteil auf eine WEI-Probe war im Kampf fast wirkungslos; nächster Angriff ist ein echter Nutzen. Gedankenlesen 2×.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C05c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Kleiner Schadensbonus einmal pro Zug für den Schadens-Pfad, der von C04 weniger profitiert.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Kleiner Schadensbonus einmal pro Zug für den Schadens-Pfad, der von C04 weniger profitiert.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C06a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Positionierung ist die Identität; 9 m Angriffsdistanz ab Ursprung bleibt.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Positionierung ist die Identität; 9 m Angriffsdistanz ab Ursprung bleibt.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C06b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Reine Utility.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Reine Utility.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C06c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Taktische Relevanz, Rettungswurf und Grössenlimit bleiben.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Taktische Relevanz, Rettungswurf und Grössenlimit bleiben.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C06d",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Skalierung passend zu C06a.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Skalierung passend zu C06a.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C06e",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Einfacher dauerhafter Vorteil statt Zähler; keine Immunität.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Einfacher dauerhafter Vorteil statt Zähler; keine Immunität.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C06f",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Besseres Positionsspiel ohne zusätzliche Aktion.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Besseres Positionsspiel ohne zusätzliche Aktion.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C06g",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Attraktiver Abschluss; nur halbe Deckung.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Attraktiver Abschluss; nur halbe Deckung.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C07a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Moderates Plus, weiter einmal pro Aktion.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Moderates Plus, weiter einmal pro Aktion.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C07b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Gibt der Marionette einen taktischen Kern; 1× pro Rast, Teleportation mit Platzbedingung.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Gibt der Marionette einen taktischen Kern; 1× pro Rast, Teleportation mit Platzbedingung.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C07c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Aktive Unterstützung mit sichtbarer Wirkung; Träger verschwindet weiterhin.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Aktive Unterstützung mit sichtbarer Wirkung; Träger verschwindet weiterhin.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C08a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Kleiner Zusatzschaden, kein Krit.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Kleiner Zusatzschaden, kein Krit.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C08b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Aufklärung als Bonusaktion; keine Sicht durch Wände.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Aufklärung als Bonusaktion; keine Sicht durch Wände.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C08c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Nur schwieriges Gelände; unbegrenzt als Bonusaktion vertretbar, stapelt nicht.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Nur schwieriges Gelände; unbegrenzt als Bonusaktion vertretbar, stapelt nicht.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C08d",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "High-Level-Mehrzielnische, einmal pro Aktion.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "High-Level-Mehrzielnische, einmal pro Aktion.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C09a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Kontrollnische, kein Stapeln.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Kontrollnische, kein Stapeln.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C09b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Rettungswerkzeug; Bonusaktion, 3 m, ohne Gelegenheitsangriffe.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Rettungswerkzeug; Bonusaktion, 3 m, ohne Gelegenheitsangriffe.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C09c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Kein Verlust des ganzen Zuges; ersetzter Fadenschlag verursacht keinen Schaden.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Kein Verlust des ganzen Zuges; ersetzter Fadenschlag verursacht keinen Schaden.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C09d",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Fortschritt gegenüber C06c (3 m → 6 m).",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Fortschritt gegenüber C06c (3 m → 6 m).",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C09e",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Endliche, starke Schutzreaktion.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Endliche, starke Schutzreaktion.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C10a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Kontrolle ohne Schadensverzicht 1× pro Rast ab 3 macht den Pfad früher attraktiv.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Kontrolle ohne Schadensverzicht 1× pro Rast ab 3 macht den Pfad früher attraktiv.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C10b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Kleine Verbesserung.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Kleine Verbesserung.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C10c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Stufe 18 liefert Schaden und Kontrolle zuverlässig; Zähler ab 18 entfernt.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Stufe 18 liefert Schaden und Kontrolle zuverlässig; Zähler ab 18 entfernt.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C11a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Kleine Verbesserung gegen Schadensverzicht.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Kleine Verbesserung gegen Schadensverzicht.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C11b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Keine Reaktionen statt nur Gelegenheitsangriffen kostet den nächsten periodischen Schaden; vergleichbar mit älterem Schockgriff.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Keine Reaktionen statt nur Gelegenheitsangriffen kostet den nächsten periodischen Schaden; vergleichbar mit älterem Schockgriff.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C11c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Kontrollalternative auf Stufe 10, kostet Bonusaktion und Schaden, Rettungswurf.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Kontrollalternative auf Stufe 10, kostet Bonusaktion und Schaden, Rettungswurf.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C11d",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Situativ, öfter nutzbar.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Situativ, öfter nutzbar.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "C11e",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "High-Level-Belohnung der Kontrollspezialisierung.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "High-Level-Belohnung der Kontrollspezialisierung.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V01a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Eine zusätzliche Objektinteraktion insgesamt ist ein echter, eng begrenzter Kampfnutzen; Aktion Benutzen, Magie und Komponenten ausgeschlossen.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Eine zusätzliche Objektinteraktion insgesamt ist ein echter, eng begrenzter Kampfnutzen; Aktion Benutzen, Magie und Komponenten ausgeschlossen.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V01b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "Regeltext hbclasses.js"
+   ],
+   "reasoning": "Unverändert lassen, wie vorgeschlagen.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "",
+   "implemented": false,
+   "changed_files": [],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V01c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Stärke-Identität (vgl. Goliath); SL entscheidet über sinnvollen Einsatz.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Stärke-Identität (vgl. Goliath); SL entscheidet über sinnvollen Einsatz.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V02a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Fallrettung und vertikales Abenteuer, kein Aufstieg.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Fallrettung und vertikales Abenteuer, kein Aufstieg.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V02b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Regelmässig nutzbare Defensive mit bestehendem SG.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Regelmässig nutzbare Defensive mit bestehendem SG.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V02c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Vom Eigentümer am 26.11. entschieden (Seidling sonst zu schwach). Volkstext angepasst; Flug nur bis Zugende, ÜB-mal pro langer Rast, ab Charakterstufe 5 – vergleichbar mit Drachenblütigem/Aasimar.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Vom Eigentümer am 26.11. entschieden (Seidling sonst zu schwach). Volkstext angepasst; Flug nur bis Zugende, ÜB-mal pro langer Rast, ab Charakterstufe 5 – vergleichbar mit Drachenblütigem/Aasimar.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V03a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Gleiche Schranken wie V01a; Schwanz statt Arme.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Gleiche Schranken wie V01a; Schwanz statt Arme.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V03b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Klettern ist die Nische; Überschneidung mit Höhlenwanderer akzeptiert (dieser behält 36 m Dunkelsicht, Quetschen, Höhlenkunde).",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Klettern ist die Nische; Überschneidung mit Höhlenwanderer akzeptiert (dieser behält 36 m Dunkelsicht, Quetschen, Höhlenkunde).",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V03c",
+   "status": "partial",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Alternative gegen erzwungene Verschiebung übernommen; Reset bleibt bei kurzer Rast (ÜB/lange Rast wäre auf niedrigen Stufen eine Verschlechterung).",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Alternative gegen erzwungene Verschiebung übernommen; Reset bleibt bei kurzer Rast (ÜB/lange Rast wäre auf niedrigen Stufen eine Verschlechterung).",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V04a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Thematische Defensive.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Thematische Defensive.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V04b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Eindeutige Schutzidentität.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Eindeutige Schutzidentität.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V04c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Kleine Nachhaltigkeit.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Kleine Nachhaltigkeit.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V04d",
+   "status": "reject",
+   "problem_confirmed": false,
+   "evidence": [
+    "Regeltext hbclasses.js"
+   ],
+   "reasoning": "Mit V04a–c bereits deutlich verbessert; Zaubermerkmal mit Attributswahl für bestehende Helden würde das Volk Richtung A schieben und neue Auswahlpfade erfordern.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "",
+   "implemented": false,
+   "changed_files": [],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V05a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Reichweite.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Reichweite.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V05b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Deutliche situative Stärke, nur Unsichtbarkeit.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Deutliche situative Stärke, nur Unsichtbarkeit.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V05c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Kleiner allgemeiner Nutzen, kein Neuwurf.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Kleiner allgemeiner Nutzen, kein Neuwurf.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V06a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/calc.js"
+   ],
+   "reasoning": "1W8 statt 1W6; mit Mönch wird der grössere Würfel gewählt, nicht addiert (calc.js).",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "1W8 statt 1W6; mit Mönch wird der grössere Würfel gewählt, nicht addiert (calc.js).",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/calc.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V06b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "reasoning": "Zwei Einsätze pro Rast.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Zwei Einsätze pro Rast.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js",
+    "quelle/turn.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V06c",
+   "status": "reject",
+   "problem_confirmed": false,
+   "evidence": [
+    "Regeltext hbclasses.js"
+   ],
+   "reasoning": "Überschneidet sich mit Steinblütigem (natürliche RK 13) und gäbe jedem ungerüsteten Zauberwirker Magierrüstung umsonst; V06a/b reichen.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "",
+   "implemented": false,
+   "changed_files": [],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V07a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Kleiner Puffer.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Kleiner Puffer.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V07b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Entspricht offiziellen Vergleichswerten (Feenschritt ÜB-mal); Bereitschaft und Platz bleiben Bedingung.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Entspricht offiziellen Vergleichswerten (Feenschritt ÜB-mal); Bereitschaft und Platz bleiben Bedingung.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "V07c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Fertigkeitswahl; bestehende Helden wählen über die normale Auswahl.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Fertigkeitswahl; bestehende Helden wählen über die normale Auswahl.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "N01",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/hbclasses.js"
+   ],
+   "reasoning": "Nachgerechnet: ab Stufe 13 kostet Blutpreis ceil(L/2) TP; Blutstillung mit Lebensfluss heilt 2 Blutwürfel + 2×KON (L13, KON +5: Mittel ≈ 19), Puls gibt ≈ 9 zurück → netto ≥ 0 pro Runde, ausserhalb des Kampfes beliebig wiederholbar. Minimal korrigiert: Finanzierung über Blutpreis/TP-Opfer löst den Puls nicht aus; übrige Heilquellen bleiben.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Nachgerechnet: ab Stufe 13 kostet Blutpreis ceil(L/2) TP; Blutstillung mit Lebensfluss heilt 2 Blutwürfel + 2×KON (L13, KON +5: Mittel ≈ 19), Puls gibt ≈ 9 zurück → netto ≥ 0 pro Runde, ausserhalb des Kampfes beliebig wiederholbar. Minimal korrigiert: Finanzierung über Blutpreis/TP-Opfer löst den Puls nicht aus; übrige Heilquellen bleiben.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/hbclasses.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "N02",
+   "status": "reject",
+   "problem_confirmed": false,
+   "evidence": [
+    "Regeltext subs2.js"
+   ],
+   "reasoning": "Geprüft: kostenlose Module ausserhalb des Kampfes ergeben v. a. Utility; einzige übertragbare Kampfvorbereitung ist 1W8+INT temporäre TP (Feldreparatur) pro gerüstetem Verbündeten – auf Stufe 18 nicht erheblich. Keine Heilungs- oder Ressourcenschleife.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "",
+   "implemented": false,
+   "changed_files": [],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "N03a",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/subs2.js"
+   ],
+   "reasoning": "Crescendo trifft bis zu drei Ziele und hätte die eigenen Kosten sofort zurückerzeugt (Rekursion).",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Crescendo trifft bis zu drei Ziele und hätte die eigenen Kosten sofort zurückerzeugt (Rekursion).",
+   "implemented": true,
+   "changed_files": [
+    "quelle/subs2.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "N03b",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/subs2.js"
+   ],
+   "reasoning": "Präzisierung ohne Nerf.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Präzisierung ohne Nerf.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/subs2.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "N03c",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/subs2.js"
+   ],
+   "reasoning": "Präzisierung ohne Nerf.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Präzisierung ohne Nerf.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/subs2.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "N04",
+   "status": "reject",
+   "problem_confirmed": false,
+   "evidence": [
+    "Regeltext subs2.js"
+   ],
+   "reasoning": "Frühling kostet Göttliche Macht, wirkt nur in der Aura und 1 Minute; grosse begrenzte Gruppenheilung ist erwünscht, keine Schleife.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "",
+   "implemented": false,
+   "changed_files": [],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  },
+  {
+   "id": "N05",
+   "status": "agree",
+   "problem_confirmed": true,
+   "evidence": [
+    "quelle/subs2.js"
+   ],
+   "reasoning": "Regelpräzisierung analog Tiermeister 2024: Angriff nur auf Befehl (Bonusaktion oder ersetzter Angriff), max. ein Befehl pro Zug; Rudelsturm nur beim Ersetzen.",
+   "cumulative_risk": "siehe BALANCE_REVIEW.md, Abschnitt Kumulativ",
+   "approved_scope": "Regelpräzisierung analog Tiermeister 2024: Angriff nur auf Befehl (Bonusaktion oder ersetzter Angriff), max. ein Befehl pro Zug; Rudelsturm nur beim Ersetzen.",
+   "implemented": true,
+   "changed_files": [
+    "quelle/subs2.js"
+   ],
+   "tests": [
+    {
+     "name": "fc-balance.test.js + Gesamtlauf",
+     "command": "bash tests/run-all.sh",
+     "status": "not_run",
+     "evidence": "Gesamtprüfung am Ende (Wunsch des Auftraggebers)"
+    }
+   ],
+   "open_questions": []
+  }
+ ],
+ "published": false,
+ "technical_note": "Taktpunkte (N03): Ressource als Aufbauressource markiert (build:true); kurze und lange Rast leeren sie statt aufzufüllen (extra.js doRest). Gewinn bei Treffern bleibt manuell über den Zähler."
+}

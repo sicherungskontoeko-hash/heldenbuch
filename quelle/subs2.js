@@ -23,11 +23,11 @@ const MORE_SUBS = {
    [14,'Grosses Finale','Aktion, 1× pro langer Rast: Feinde deiner Wahl in 9 m machen einen WEI-Rettungswurf oder sind bis zum Ende deines nächsten Zuges bezaubert und kampfunfähig; Verbündete in 9 m erhalten je einen Inspirationswürfel.']],
    res:(l)=> l>=14?[{k:'finale',n:'Grosses Finale',max:1,reset:'long'}]:[] },
   { id:'klingentakt', name:'✦ Schule des Klingentakts', desc:'Für dich ist ein Kampf ein Lied. Jeder Hieb setzt einen Takt, und wer deinen Rhythmus kennt, weiss, wann der Schlussakkord kommt.', feats:[
-   [3,'Taktgefühl','Übung mit mittelschwerer Rüstung und Krummsäbeln; eine Nahkampfwaffe dient dir als Zauberfokus. Jeder Treffer mit einer Waffe gibt dir 1 Taktpunkt (höchstens 3; sie verfallen nach einer kurzen Rast).'],
-   [3,'Rhythmuswechsel','Gib 1 Taktpunkt aus: +1W6 Schaden auf einen Treffer, oder +2 RK bis zum Beginn deines nächsten Zuges, oder 3 m Bewegung ohne Gelegenheitsangriffe.'],
+   [3,'Taktgefühl','Übung mit mittelschwerer Rüstung und Krummsäbeln; eine Nahkampfwaffe dient dir als Zauberfokus. Jeder Treffer mit einer Waffe gibt dir 1 Taktpunkt (höchstens 3). Du beginnst ohne Taktpunkte; nach einer kurzen oder langen Rast verfallen sie. Treffer des Crescendo erzeugen keine Taktpunkte.'],
+   [3,'Rhythmuswechsel','Gib 1 Taktpunkt aus: +1W6 Schaden auf einen Treffer, oder +2 RK bis zum Beginn deines nächsten Zuges, oder 3 m Bewegung ohne Gelegenheitsangriffe. Höchstens ein Rhythmuswechsel je auslösendem Treffer; +2 RK stapelt nicht mit sich selbst.'],
    [6,'Zusätzlicher Angriff','Mit der Angriffsaktion greifst du zweimal an; einen Angriff darfst du durch einen Zaubertrick ersetzen.'],
    [14,'Crescendo','Bonusaktion bei 3 Taktpunkten: Gib alle aus und mache einen Angriff gegen bis zu drei Kreaturen in Reichweite; jeder Treffer verursacht +3W6 Schallschaden.']],
-   res:(l)=>[{k:'takt',n:'Taktpunkte (durch Treffer füllen)',max:3,reset:'short'}] } ],
+   res:(l)=>[{k:'takt',n:'Taktpunkte (durch Treffer füllen)',max:3,reset:'short',build:true}] } ],
  cle:[
   { id:'sturmkrone', name:'✦ Domäne der Sturmkrone', desc:'Deine Gottheit thront in den Wolken. Wer ihr dient, trägt eine Krone aus Blitzen, die bei jedem Gebet aufflackert.', spells:{3:['thunderwave','fog-cloud','gust-of-wind','shatter'],5:['call-lightning','sleet-storm'],7:['ice-storm','fire-shield'],9:['cone-of-cold','flame-strike']}, feats:[
    [3,'Donnerkrone','Übung mit Kriegswaffen. Göttliche Macht fokussieren (Bonusaktion, 1 Minute): Eine Blitzkrone schwebt über dir; zu Beginn jedes deiner Züge macht eine Kreatur deiner Wahl in 9 m einen GES-Rettungswurf oder erleidet 2W6 Blitzschaden (3W6 ab Stufe 10).'],
@@ -112,10 +112,10 @@ const MORE_SUBS = {
    [15,'Pfad im Nebel','Bonusaktion: Nebelschritt ohne Zauberplatz, WEI-Mod-mal pro langer Rast.']],
    res:(l,c)=>[{k:'falle',n:'Fallensteller',max:c.pb,reset:'long'}].concat(l>=15?[{k:'nebelpfad',n:'Pfad im Nebel',max:Math.max(1,c.mod.wis),reset:'long'}]:[]) },
   { id:'wildbund', name:'✦ Wildbund-Hüter', desc:'Zwischen dir und deinem Tier gibt es kein Kommando, nur Einverständnis. Ihr jagt als ein einziges Wesen mit zwei Körpern.', feats:[
-   [3,'Wildbund','Ein Tiergefährte (Wolf, Falke oder Bär) begleitet dich (unter „Begleiter“ als „Wildgefährte“): RK 12 + ÜB, TP 8 + 4 × Waldläuferstufe; er handelt in deinem Zug, greift mit deinem Zauberangriff an und verursacht 1W6 + ÜB Schaden.'],
+   [3,'Wildbund','Ein Tiergefährte (Wolf, Falke oder Bär) begleitet dich (unter „Begleiter“ als „Wildgefährte“): RK 12 + ÜB, TP 8 + 4 × Waldläuferstufe; er handelt in deinem Zug, bewegt sich und nutzt ohne Befehl Ausweichen. Einen Angriff (mit deinem Zauberangriff, 1W6 + ÜB Schaden) macht er nur auf Befehl: als Bonusaktion oder indem du einen Angriff deiner Angriffsaktion ersetzt; höchstens ein Angriffsbefehl pro Zug.'],
    [3,'Zusammenspiel','Treffen du und dein Gefährte im selben Zug dieselbe Kreatur, erleidet sie einmal +1W6 Schaden.'],
    [7,'Bindung','Dein Gefährte addiert deinen ÜB auf Rettungswürfe und teilt deine Resistenzen.'],
-   [11,'Rudelsturm','Ersetzt du einen deiner Angriffe durch einen Befehl, greift dein Gefährte zweimal an.'],
+   [11,'Rudelsturm','Ersetzt du einen deiner Angriffe durch einen Befehl, greift dein Gefährte zweimal an (nicht beim Befehl per Bonusaktion). Weiterhin höchstens ein Angriffsbefehl pro Zug.'],
    [15,'Ein Herz','Reaktion: Wenn du oder dein Gefährte Schaden erleidet, darfst du ihn halbieren und die andere Hälfte auf den anderen übertragen.']] } ],
  rog:[
   { id:'duellant', name:'✦ Duellant vom Freien Hafen', desc:'In den Gassen des Freien Hafens zählt nur, wer zuletzt steht. Du forderst heraus, parierst – und lachst dabei.', feats:[
