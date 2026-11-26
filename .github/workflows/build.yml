@@ -169,12 +169,12 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: dl
+          pattern: Heldenbuch-*
+          merge-multiple: true
       - name: Übergang – Kopien unter den alten Namen (Heldenbuch …) für bestehende Links
         run: |
           for f in $(find dl -type f -name 'Fablecrown*'); do cp "$f" "$(dirname "$f")/$(basename "$f" | sed 's/^Fablecrown/Heldenbuch/')"; done
           find dl -type f | sort
-          pattern: Heldenbuch-*
-          merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.ver.outputs.tag }}
