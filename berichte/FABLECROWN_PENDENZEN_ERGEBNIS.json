@@ -1,0 +1,337 @@
+{
+ "produkt": "Fablecrown",
+ "datum": "2026-11-26",
+ "referenzcommit": "b6d5552",
+ "branches": [
+  "gk-korrekturen",
+  "fablecrown",
+  "balance",
+  "fc-pendenzen"
+ ],
+ "getestet_auf": "2f2acec",
+ "hinweis": "Status nach eigener Prüfung; Tests siehe Gesamtlauf. 06_Pendenzen.json bleibt unverändert.",
+ "pendenzen": [
+  {
+   "id": "GK-01..11",
+   "status": "UMGESETZT",
+   "branch": "gk-korrekturen",
+   "begruendung": "Alle elf Befunde umgesetzt, eigene Tests GK01–GK11; dazu GK-N01 (Wiederbeitritt), GK-N02 (Fusszeile verdeckt), GK-N04 (Verdacht: Chromium file:// localStorage).",
+   "dateien": [
+    "GK_ABSCHLUSSBERICHT.md",
+    "GK_TESTERGEBNISSE.json"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "BRANDING",
+   "status": "UMGESETZT",
+   "branch": "fablecrown",
+   "begruendung": "Name und Bildmarke sichtbar; technische Kennungen unverändert. Desktop-Programmname, Installer und Download-Dateinamen bewusst «Heldenbuch» (Kompatibilität, offene Entscheidung).",
+   "dateien": [
+    "tests/fc-marke.test.js"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "BL",
+   "status": "TEILWEISE_UMGESETZT",
+   "branch": "balance",
+   "begruendung": "70 Zustimmungen umgesetzt, 1 teilweise, 6 abgelehnt, 1 vertagt (V02c, Entscheidung nötig).",
+   "dateien": [
+    "BALANCE_REVIEW.md",
+    "BALANCE_DECISIONS.json"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-01",
+   "status": "NICHT_BEAUFTRAGT",
+   "branch": null,
+   "begruendung": "Nein laut Entscheidung.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-02",
+   "status": "NICHT_BEAUFTRAGT",
+   "branch": null,
+   "begruendung": "Nein.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-03",
+   "status": "NICHT_BEAUFTRAGT",
+   "branch": null,
+   "begruendung": "Nein.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-04",
+   "status": "VERTAGT",
+   "branch": null,
+   "begruendung": "Sichere Übergabe braucht authentisierte, bestätigte Zustellung mit Reservierung und Journal. Der bestehende MQTT-Raum (gemeinsamer Schlüssel, keine Zustellgarantie) erfüllt das nicht ohne Duplikations- oder Verlustrisiko. Vorschlag: nach Vault V2 auf dessen Geräteidentität und Revisionen aufbauen. Bis dahin: SL-Beute plus Entfernen beim Abgeber.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-05",
+   "status": "NICHT_BEAUFTRAGT",
+   "branch": null,
+   "begruendung": "Nein.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-06",
+   "status": "NICHT_BEAUFTRAGT",
+   "branch": null,
+   "begruendung": "Nein.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-07",
+   "status": "NICHT_BEAUFTRAGT",
+   "branch": null,
+   "begruendung": "Nein.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-08",
+   "status": "VERTAGT",
+   "branch": null,
+   "begruendung": "Braucht eine Blob-Schicht (IndexedDB) mit Grenzen und Export; Netzfreigabe über den Raum ist für grosse Medien ungeeignet. Sinnvoll zusammen mit dem Vault-Asset-Manifest.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-09",
+   "status": "NICHT_BEAUFTRAGT",
+   "branch": null,
+   "begruendung": "Nein.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-10",
+   "status": "VERTAGT",
+   "branch": null,
+   "begruendung": "Bedingt und optional; Verlauf ist auf 200 begrenzt, saubere Zähler bräuchten einen neuen Ereignispfad. Im Zweifel nicht umgesetzt.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-11",
+   "status": "UMGESETZT",
+   "branch": "fc-pendenzen",
+   "begruendung": "Probe anfordern über den Rundenstand, Antwort im Spielerdokument, SG optional oder nur auf dem SL-Gerät.",
+   "dateien": [
+    "quelle/encounter.js",
+    "quelle/app.js",
+    "quelle/rules.js"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-12",
+   "status": "TEILWEISE_UMGESETZT",
+   "branch": "fc-pendenzen",
+   "begruendung": "Verdeckter Wurf nur lokal bei der SL. Automatischer Modifikator nur für Wahrnehmung, Motiv erkennen und Nachforschungen (aus passiven Werten); sonst Eingabe. Ein sicherer SL-Kanal für alle Werte fehlt (gemeinsamer Raumschlüssel).",
+   "dateien": [
+    "quelle/encounter.js"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-13",
+   "status": "NICHT_BEAUFTRAGT",
+   "branch": null,
+   "begruendung": "Nein.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-14",
+   "status": "BEREITS_ERLEDIGT",
+   "branch": null,
+   "begruendung": "concCheck: SG max(10, halber Schaden) bis 30, pro Schadensinstanz inkl. von temporären TP aufgefangenem Schaden, Resistenz über Halbierung, 0 Schaden keine Probe, Kampfunfähigkeit und 0 TP beenden ohne Probe, Vorteil über Schauerlicher Geist, eigene Würfel. Keine Lücke gefunden.",
+   "dateien": [
+    "quelle/app.js concCheck/hpChange/knockOut"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-15",
+   "status": "TEILWEISE_UMGESETZT",
+   "branch": "fc-pendenzen",
+   "begruendung": "Bestand: SL-Rast über applyMeta. Lücke behoben: Ein Raumwechsel holte eine bereits gesehene Rast erneut nach (Gratis-Rast). Status, wer abgeschlossen hat, wurde nicht gebaut (nicht einfach ermittelbar).",
+   "dateien": [
+    "quelle/extra.js"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-16",
+   "status": "UMGESETZT",
+   "branch": "fc-pendenzen",
+   "begruendung": "Kästchen Heldeninspiration in der bestehenden Beute; kein Stapeln, Hinweis auf Weitergabe; einmalig über die Geschenk-ID.",
+   "dateien": [
+    "quelle/extra.js",
+    "quelle/rules.js"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-17",
+   "status": "NICHT_BEAUFTRAGT",
+   "branch": null,
+   "begruendung": "Nein.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-18",
+   "status": "VERTAGT",
+   "branch": null,
+   "begruendung": "Die Zugleiste zeigt bereits nur verfügbare Handlungen (Nachbessern-Leiste nur wenn einsetzbar). Ohne belegten Mehrwert keine zweite Logik; zusammen mit FC-28 später.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-19",
+   "status": "BEREITS_ERLEDIGT",
+   "branch": null,
+   "begruendung": "Undo vom Nutzer bestätigt, unverändert.",
+   "dateien": [],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-20",
+   "status": "NICHT_BEAUFTRAGT",
+   "branch": null,
+   "begruendung": "Nein.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-21",
+   "status": "BEREITS_ERLEDIGT",
+   "branch": null,
+   "begruendung": "Globale Suche als Fenster über jeder Ansicht (Strg+K, /, Suche-Knopf); Treffer ansehen und schliessen ohne Ansichtswechsel. Prüfung im Gesamtlauf.",
+   "dateien": [
+    "quelle/search.js"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-22",
+   "status": "UMGESETZT",
+   "branch": "fc-pendenzen",
+   "begruendung": "Editor-Leiste mit Sprung zu jeder Kategorie, Fertig und Verwerfen (stellt nur die Konfiguration her, Spielstand bleibt). Wiederverwendet die Schritte des Assistenten.",
+   "dateien": [
+    "quelle/app.js"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-23",
+   "status": "NICHT_BEAUFTRAGT",
+   "branch": null,
+   "begruendung": "Nein.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-24",
+   "status": "TEILWEISE_UMGESETZT",
+   "branch": "fc-pendenzen",
+   "begruendung": "Passive Werte bestanden; Dunkelsicht aus den Volksdaten ergänzt. Andere Sinne (Blindsicht aus Merkmalen, Teufelssicht) sind nicht als Daten vorhanden und werden nicht abgeleitet.",
+   "dateien": [
+    "quelle/app.js"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-25",
+   "status": "BEREITS_ERLEDIGT",
+   "branch": null,
+   "begruendung": "Hinweise ohne Sperren bestehen (Rüstung ohne Übung, Stärke, Einstimmung, Kampfstile, Mönch/Barbar). Zweihandwaffe + Schild ist aus den Daten nicht entscheidbar (Griff unbekannt), daher keine Warnung. Traglast-Option gibt es nicht.",
+   "dateien": [
+    "quelle/calc.js"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-26",
+   "status": "TEILWEISE_UMGESETZT",
+   "branch": "fc-pendenzen/balance",
+   "begruendung": "Regeneration geprüft: kurze Rast setzt short zurück, «1 zurück»-Ressourcen −1, lange Rast alles; Pakt bei kurzer Rast; Ladungen bewusst manuell (keine Spieluhr). Lücken behoben: Gratis-Rast durch Raumwechsel (FC-15), Taktpunkte füllten sich bei Rast statt zu verfallen (Balance N03).",
+   "dateien": [
+    "quelle/extra.js"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-27",
+   "status": "VERTAGT",
+   "branch": null,
+   "begruendung": "Verlinkung braucht stabile Referenz-IDs in den Merkmaltexten; automatische Worterkennung würde Alltagswörter (Licht, Schild, Befehl) falsch verlinken. Info-Karten (ⓘ) und Suche bestehen.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-28",
+   "status": "VERTAGT",
+   "branch": null,
+   "begruendung": "Nur eindeutige Voraussetzungen; mit FC-18 gemeinsam später, keine zweite Hinweislogik.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-29",
+   "status": "UMGESETZT",
+   "branch": "fc-pendenzen",
+   "begruendung": "Plätze, Pakt und bis 8 Ressourcen als Zahlen, aufklappbar bei der SL; geprüfter Eingang. Diese Zahlen sind für alle am Tisch technisch lesbar (gemeinsamer Raumschlüssel), wie TP und RK bisher.",
+   "dateien": [
+    "quelle/app.js"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-30",
+   "status": "NICHT_BEAUFTRAGT",
+   "branch": null,
+   "begruendung": "Nein.",
+   "dateien": [],
+   "tests": null
+  },
+  {
+   "id": "FC-31",
+   "status": "UMGESETZT",
+   "branch": "fc-pendenzen",
+   "begruendung": "Letzte Hauptansicht, Held, Bogen-Reiter und Abenteuer werden gerätelokal wiederhergestellt; nie Dialoge oder Beitritte; gelöschter Held → Heldenliste.",
+   "dateien": [
+    "quelle/app.js"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  },
+  {
+   "id": "FC-32",
+   "status": "TEILWEISE_UMGESETZT",
+   "branch": null,
+   "begruendung": "V0 (ADR, Bedrohungsmodell, Dateninventar) vorgelegt; V1/V2 noch nicht gebaut; V3 BLOCKIERT bis Freigabe von Anbieter/Konto/Kosten.",
+   "dateien": [
+    "VAULT_V0_ADR.md"
+   ],
+   "tests": "Gesamtlauf (siehe Bericht)"
+  }
+ ],
+ "freigabe": {
+  "public_release": false,
+  "produktives_cloud_deployment": false,
+  "neue_kosten": false
+ }
+}
