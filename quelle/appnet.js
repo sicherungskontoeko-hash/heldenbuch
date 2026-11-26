@@ -12,7 +12,10 @@ const HB_PREFIX = 'heldenbuch-v2/';
    und AES-GCM-verschlüsselte Daten (Schlüssel per PBKDF2 aus dem Raumcode). Unverschlüsselte Fremdnachrichten werden verworfen. */
 const HB_ROOM = new Map();
 var HB_NOCRYPTO = !(typeof crypto !== 'undefined' && crypto.subtle && crypto.getRandomValues);
-const hbB64 = (u) => btoa(String.fromCharCode(...u)); const hbUb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+/* Base64 ohne Spread-Argumente (GK-08): String.fromCharCode(...u) scheitert ab rund 100 KB am Argumentlimit.
+   Bytes blockweise in Zeichen umwandeln, dann EINMAL kodieren – einzeln kodierte Blöcke ergäben falsches Padding. */
+function hbB64(u) { let s = ''; for (let i = 0; i < u.length; i += 0x4000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x4000)); return btoa(s); }
+function hbUb64(s) { const b = atob(s); const u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
 function hbRoomOf(path) { const m = /^(camp|transfer)\/([^/]+)(\/.*)?$/.exec(path); return m ? { kind: m[1], code: m[2], rest: m[3] || '' } : { kind: 'x', code: path, rest: '' }; }
 function hbRoomKey(code) {
   if (HB_ROOM.has(code)) return HB_ROOM.get(code);
@@ -28,7 +31,10 @@ function hbRoomKey(code) {
   HB_ROOM.set(code, p); return p;
 }
 async function hbTopic(path) { const r = hbRoomOf(path); const k = await hbRoomKey(r.code); return { topic: HB_PREFIX + r.kind + '/' + k.tb + r.rest, key: k.key }; }
-async function hbSeal(key, obj) { const s = JSON.stringify(obj); if (!key) throw new Error('nocrypto'); const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(s)); return JSON.stringify({ e: 1, iv: hbB64(iv), ct: hbB64(new Uint8Array(ct)) }); }
+async function hbSeal(key, obj) { const s = JSON.stringify(obj); if (!key) throw new Error('nocrypto'); const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(s)); const env = JSON.stringify({ e: 1, iv: hbB64(iv), ct: hbB64(new Uint8Array(ct)) });
+  /* Was die Empfänger ohnehin verwerfen (HB_MAX_MSG), gar nicht erst senden – nie unverschlüsselt ausweichen */
+  if (env.length > HB_MAX_MSG) { if (typeof bannerToast === 'function' && Date.now() - (hbSeal.warned || 0) > 60000) hbSeal.warned = Date.now(), bannerToast('Nicht gesendet', 'Die Daten sind zu gross für den Online-Tisch (höchstens ' + (HB_MAX_MSG / 1e6) + ' MB verschlüsselt). Ein kleineres Porträt hilft.'); throw Object.assign(new Error('Nachricht zu gross'), { code: 'too_large' }); }
+  return env; }
 /* Obergrenzen für Empfangenes: ein Dokument (mit Porträt) bleibt weit darunter */
 const HB_MAX_MSG = 3e6, HB_MAX_PKT = 4e6, HB_DOC_ID = /^[A-Za-z0-9_.:@-]{1,80}$/;
 async function hbOpen(key, msg) {
