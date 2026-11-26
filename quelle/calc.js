@@ -520,9 +520,9 @@ function derive(ch, hb) {
 }
 
 function getSpell(id, hb) {
-  if (!id) return null;
-  if (id.startsWith('hb:')) { const h = (hb || {})[id.slice(3)]; return h && h.kind === 'spell' ? { id, name: h.name, en: 'Hausregel', lvl: +h.lvl || 0, school: h.school || 'evo', classes: h.classes || [], time: h.time || 'Aktion', range: h.range || '—', comp: h.comp || '—', dur: h.dur || 'Sofort', text: h.text || '', conc: !!h.conc, ritual: !!h.ritual, home: true } : null; }
-  return SPELLS[id] || null;
+  if (!id || typeof id !== 'string') return null;
+  if (id.startsWith('hb:')) { const h = hb && Object.prototype.hasOwnProperty.call(hb, id.slice(3)) ? hb[id.slice(3)] : null; return h && h.kind === 'spell' ? { id, name: h.name, en: 'Hausregel', lvl: +h.lvl || 0, school: h.school || 'evo', classes: h.classes || [], time: h.time || 'Aktion', range: h.range || '—', comp: h.comp || '—', dur: h.dur || 'Sofort', text: h.text || '', conc: !!h.conc, ritual: !!h.ritual, home: true } : null; }
+  return Object.prototype.hasOwnProperty.call(SPELLS, id) ? SPELLS[id] : null; /* nur eigene Einträge, nie geerbte wie «constructor» */
 }
 /* Sortierte Liste aller Zauber; wird pro Zustand der Hausregel-Zauber nur einmal gebaut (frühere Fassung sortierte bei jedem Aufruf neu) */
 let ALLSP = { key: null, list: [] };

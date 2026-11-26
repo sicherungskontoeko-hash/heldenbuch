@@ -122,7 +122,7 @@ XA.hitShield = () => { const h = S.hitPend; const ch = cur(); if (!h || !ch) ret
   else { S.hitPend = h; hitPrompt(h); } };
 /* Zusatzeffekt nach dem Eintragen: Rettungswurf würfeln bzw. „gepackt“ übernehmen */
 function riderPrompt(h) { const r = h.rider; if (!r) return; S.riderPend = h;
-  orbPrompt('<div class="pr"><b>' + esc(h.by) + ': ' + (r.kind === 'grab' ? 'Du bist gepackt' : esc(r.ab) + '-Rettungswurf SG ' + r.dc) + '</b><p>' + esc(r.txt) + '</p><div class="chips end">' +
+  orbPrompt('<div class="pr"><b>' + esc(h.by) + ': ' + (r.kind === 'grab' ? 'Du bist gepackt' : esc(r.ab) + '-Rettungswurf SG ' + esc(r.dc)) + '</b><p>' + esc(r.txt) + '</p><div class="chips end">' +
     (r.kind === 'grab' ? '<button class="btn ghost" data-act="riderGo" data-arg="no">Nicht übernehmen</button><button class="btn" data-act="riderGo" data-arg="cond">' + esc(condNames(r.conds)) + ' setzen</button>' : '<button class="btn" data-act="riderGo" data-arg="roll">Rettungswurf würfeln</button>') + '</div></div>'); }
 XA.riderGo = (t, a) => { const h = S.riderPend; S.riderPend = null; orbPrompt(''); const ch = cur(); if (!h || !ch || a === 'no') return; const r = h.rider;
   if (a === 'cond') return condOnMe(ch, r.conds, h.by + (r.kind === 'grab' ? ' (Entkommen SG ' + r.dc + ')' : ''));

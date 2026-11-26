@@ -1,0 +1,2200 @@
+{
+  "schemaVersion": 1,
+  "referenceCommit": "b6d5552",
+  "testedCommit": "d9f723442eb748a9c56cef0d7e1d7474ef81c78f",
+  "testedAt": "2026-11-26T16:20+01:00",
+  "releaseDecision": "TEILABNAHME",
+  "environment": {
+    "os": "Ubuntu 24.04.5 LTS (Linux 6.18.44)",
+    "node": "v22.23.5",
+    "npm": "10.9.9",
+    "playwright": "1.63.0 (package.json nennt 1.56.0; CI installiert 1.63.0)",
+    "browsers": [
+      "Chromium 157.0.8103.78 (lokal)",
+      "Firefox und WebKit nur über tests/engines.sh in der CI (browser.yml)"
+    ]
+  },
+  "builds": [
+    {
+      "variant": "artifact",
+      "file": "quelle/index.html",
+      "sha256": "4418cfe67e4fdf88c9a113448d2734df06ead0ca3cdabb55c918dfb85f8a469e"
+    },
+    {
+      "variant": "standalone",
+      "file": "quelle/app/Heldenbuch.html",
+      "sha256": "69e1aec7abae48c1f72cae0ab93eb1c147f2c50a207a08708be7dbd04c06368a"
+    },
+    {
+      "variant": "pwa",
+      "file": "quelle/app/www/index.html",
+      "sha256": "0034c4263005345929fc5dd5faf39491d5ee6d3957e9ac4d01caebce20e68e98"
+    }
+  ],
+  "findings": [
+    {
+      "id": "GK-01",
+      "status": "ABGENOMMEN",
+      "baselineReproduced": true,
+      "files": [
+        "quelle/rules.js (NV-Schema)",
+        "quelle/app.js (fightHtml, paintTurn, turnCall, pcBits)",
+        "quelle/encounter.js",
+        "quelle/effects.js",
+        "quelle/mechanics.js",
+        "quelle/mobfx.js",
+        "quelle/extra.js",
+        "quelle/mobpics.js"
+      ],
+      "commits": [
+        "8295583",
+        "6920ed2"
+      ],
+      "testResults": [
+        {
+          "id": "GK01-T01",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:2 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:3 (tests/gk-netz.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK01-T02",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:4 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:5 (tests/gk-netz.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK01-T03",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:6 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:7 (tests/gk-netz.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK01-T04",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:8 (tests/gk-netz.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK01-T05",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:9 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:10 (tests/gk-netz.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK01-T06",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:11 (tests/gk-netz.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        }
+      ],
+      "remainingRisks": [
+        "Neue Renderer müssen weiterhin esc() verwenden (sicherheit.test.js und gk-netz prüfen die bekannten Stellen)"
+      ]
+    },
+    {
+      "id": "GK-02",
+      "status": "ABGENOMMEN",
+      "baselineReproduced": true,
+      "files": [
+        "quelle/app.js (pushLog, LOG_PUB, myRolls)"
+      ],
+      "commits": [
+        "522ba8b",
+        "691231d"
+      ],
+      "testResults": [
+        {
+          "id": "GK02-T01",
+          "status": "PASS",
+          "variant": [
+            "artifact (Fake-DB) + app/www (zwei Geräte)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-wuerfe.log:1 (tests/gk-wuerfe.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK02-T02",
+          "status": "PASS",
+          "variant": [
+            "artifact (Fake-DB) + app/www (zwei Geräte)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-wuerfe.log:3 (tests/gk-wuerfe.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK02-T03",
+          "status": "PASS",
+          "variant": [
+            "artifact (Fake-DB) + app/www (zwei Geräte)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-wuerfe.log:4 (tests/gk-wuerfe.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK02-T04",
+          "status": "PASS",
+          "variant": [
+            "artifact (Fake-DB) + app/www (zwei Geräte)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-wuerfe.log:5 (tests/gk-wuerfe.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK02-T05",
+          "status": "PASS",
+          "variant": [
+            "artifact (Fake-DB) + app/www (zwei Geräte)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-wuerfe.log:6 (tests/gk-wuerfe.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK02-T06",
+          "status": "PASS",
+          "variant": [
+            "artifact (Fake-DB) + app/www (zwei Geräte)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-wuerfe.log:7 (tests/gk-wuerfe.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK02-T07",
+          "status": "PASS",
+          "variant": [
+            "artifact (Fake-DB) + app/www (zwei Geräte)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-wuerfe.log:8 (tests/gk-wuerfe.test.js)",
+            "protokolle/gk-suiten/gk-wuerfe.log:9 (tests/gk-wuerfe.test.js)",
+            "protokolle/gk-suiten/gk-wuerfe.log:10 (tests/gk-wuerfe.test.js)",
+            "protokolle/gk-suiten/gk-wuerfe.log:11 (tests/gk-wuerfe.test.js)"
+          ],
+          "note": "4 Prüfzeile(n)"
+        },
+        {
+          "id": "GK02-T08",
+          "status": "PASS",
+          "variant": [
+            "artifact (Fake-DB) + app/www (zwei Geräte)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-wuerfe.log:2 (tests/gk-wuerfe.test.js)",
+            "protokolle/gk-suiten/gk-wuerfe.log:12 (tests/gk-wuerfe.test.js)",
+            "protokolle/gk-suiten/gk-wuerfe.log:13 (tests/gk-wuerfe.test.js)"
+          ],
+          "note": "3 Prüfzeile(n)"
+        },
+        {
+          "id": "GK02-T09",
+          "status": "PASS",
+          "variant": [
+            "artifact (Fake-DB) + app/www (zwei Geräte)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-wuerfe.log:17 (tests/gk-wuerfe.test.js)",
+            "protokolle/gk-suiten/gk-wuerfe.log:19 (tests/gk-wuerfe.test.js)",
+            "protokolle/gk-suiten/gk-wuerfe.log:20 (tests/gk-wuerfe.test.js)"
+          ],
+          "note": "3 Prüfzeile(n)"
+        },
+        {
+          "id": "GK02-T10",
+          "status": "PASS",
+          "variant": [
+            "artifact (Fake-DB) + app/www (zwei Geräte)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-wuerfe.log:14 (tests/gk-wuerfe.test.js)",
+            "protokolle/gk-suiten/gk-wuerfe.log:15 (tests/gk-wuerfe.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        }
+      ],
+      "remainingRisks": [
+        "Ergebnis einer von der SL angeforderten Rettungswurf-Anfrage wird als ausdrückliche Antwort in den Kampfstand geschrieben (Entscheidung)"
+      ]
+    },
+    {
+      "id": "GK-03",
+      "status": "ABGENOMMEN",
+      "baselineReproduced": true,
+      "files": [
+        "quelle/rules.js (charShapeErrors, jsonShapeErrors, validateChar, validHb, cleanRefs, restoreBackup)",
+        "quelle/app.js (importPlan, importJson, lsGet, lsSet, charSafe, brokenHtml)",
+        "quelle/calc.js (getSpell)",
+        "quelle/extra.js"
+      ],
+      "commits": [
+        "5892d5c",
+        "827a67c"
+      ],
+      "testResults": [
+        {
+          "id": "GK03-T01",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-import.log:1 (tests/gk-import.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK03-T02",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-import.log:2 (tests/gk-import.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK03-T03",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-import.log:3 (tests/gk-import.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK03-T04",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-import.log:4 (tests/gk-import.test.js)",
+            "protokolle/gk-suiten/gk-import.log:5 (tests/gk-import.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK03-T05",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-import.log:6 (tests/gk-import.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK03-T06",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-import.log:7 (tests/gk-import.test.js)",
+            "protokolle/gk-suiten/gk-import.log:8 (tests/gk-import.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK03-T07",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-import.log:9 (tests/gk-import.test.js)",
+            "protokolle/gk-suiten/gk-import.log:10 (tests/gk-import.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK03-T08",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-import.log:11 (tests/gk-import.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK03-T09",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-import.log:12 (tests/gk-import.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK03-T10",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-import.log:13 (tests/gk-import.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK03-T11",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-import.log:14 (tests/gk-import.test.js)",
+            "protokolle/gk-suiten/gk-import.log:15 (tests/gk-import.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK03-T12",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-import.log:16 (tests/gk-import.test.js)",
+            "protokolle/gk-suiten/gk-import.log:17 (tests/gk-import.test.js)",
+            "protokolle/gk-suiten/gk-import.log:18 (tests/gk-import.test.js)",
+            "protokolle/gk-suiten/gk-import.log:19 (tests/gk-import.test.js)"
+          ],
+          "note": "4 Prüfzeile(n)"
+        }
+      ],
+      "remainingRisks": [
+        "Unbekannte zusätzliche Felder bleiben aus Gründen der Vorwärtskompatibilität erlaubt"
+      ]
+    },
+    {
+      "id": "GK-04",
+      "status": "ABGENOMMEN",
+      "baselineReproduced": true,
+      "files": [
+        "quelle/rules.js (spellCheck)",
+        "quelle/turn.js"
+      ],
+      "commits": [
+        "9a02394",
+        "250d368"
+      ],
+      "testResults": [
+        {
+          "id": "GK04-T01",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:2 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK04-T02",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:3 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK04-T03",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:4 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK04-T04",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:5 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK04-T05",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:6 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK04-T06",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:7 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK04-T07",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:10 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK04-T08",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:11 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK04-T09",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:12 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK04-T10",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:8 (tests/gk-zug.test.js)",
+            "protokolle/gk-suiten/gk-zug.log:9 (tests/gk-zug.test.js)",
+            "protokolle/gk-suiten/gk-zug.log:13 (tests/gk-zug.test.js)"
+          ],
+          "note": "3 Prüfzeile(n)"
+        },
+        {
+          "id": "GK04-T11",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:14 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        }
+      ],
+      "remainingRisks": []
+    },
+    {
+      "id": "GK-05",
+      "status": "ABGENOMMEN",
+      "baselineReproduced": true,
+      "files": [
+        "quelle/turn.js (offTurnGate, tCountAttack, bfl)",
+        "quelle/rules.js (tsGo)",
+        "quelle/app.js"
+      ],
+      "commits": [
+        "9a02394",
+        "250d368"
+      ],
+      "testResults": [
+        {
+          "id": "GK05-T01",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:15 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK05-T02",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:16 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK05-T03",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:17 (tests/gk-zug.test.js)",
+            "protokolle/gk-suiten/gk-zug.log:18 (tests/gk-zug.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK05-T04",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:19 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK05-T05",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:20 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK05-T06",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:21 (tests/gk-zug.test.js)",
+            "protokolle/gk-suiten/gk-zug.log:22 (tests/gk-zug.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK05-T07",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:23 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK05-T08",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:24 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK05-T09",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:25 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK05-T10",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:26 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        }
+      ],
+      "remainingRisks": [
+        "Durchspalten bleibt im fremden Zug erlaubt (Regel 2024)"
+      ]
+    },
+    {
+      "id": "GK-06",
+      "status": "ABGENOMMEN",
+      "baselineReproduced": true,
+      "files": [
+        "quelle/turn.js (readyBlock, readyAsk, readyGo, readyNo)"
+      ],
+      "commits": [
+        "9a02394",
+        "250d368"
+      ],
+      "testResults": [
+        {
+          "id": "GK06-T01",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:28 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK06-T02",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:29 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK06-T03",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:30 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK06-T04",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:31 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK06-T05",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:32 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK06-T06",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:33 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK06-T07",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:34 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK06-T08",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:35 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK06-T09",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:36 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK06-T10",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:37 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK06-T11",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:38 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK06-T12",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-zug.log:39 (tests/gk-zug.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        }
+      ],
+      "remainingRisks": []
+    },
+    {
+      "id": "GK-07",
+      "status": "ABGENOMMEN",
+      "baselineReproduced": true,
+      "files": [
+        "quelle/rules.js (nvCombat, nvMeta, validateCombatDoc, validateMetaDoc)",
+        "quelle/app.js (subCombat, subMeta, playerDoc, joinCamp, leaveCamp)"
+      ],
+      "commits": [
+        "8295583",
+        "6920ed2"
+      ],
+      "testResults": [
+        {
+          "id": "GK07-T01",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:12 (tests/gk-netz.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK07-T02",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:13 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:14 (tests/gk-netz.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK07-T03",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:15 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:16 (tests/gk-netz.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK07-T04",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:17 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:18 (tests/gk-netz.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK07-T05",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:19 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:20 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:21 (tests/gk-netz.test.js)"
+          ],
+          "note": "3 Prüfzeile(n)"
+        },
+        {
+          "id": "GK07-T06",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:28 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:29 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:30 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:32 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:33 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:34 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:35 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:36 (tests/gk-netz.test.js)"
+          ],
+          "note": "8 Prüfzeile(n)"
+        },
+        {
+          "id": "GK07-T07",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:23 (tests/gk-netz.test.js)",
+            "protokolle/gk-suiten/gk-netz.log:24 (tests/gk-netz.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK07-T08",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:25 (tests/gk-netz.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK07-T09",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone (zwei Geräte: app/www)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-netz.log:26 (tests/gk-netz.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        }
+      ],
+      "remainingRisks": [
+        "Rollen am Tisch sind nicht kryptografisch authentisiert (Architektur, nicht Teil des Auftrags)"
+      ]
+    },
+    {
+      "id": "GK-08",
+      "status": "IMPLEMENTIERT",
+      "baselineReproduced": true,
+      "files": [
+        "quelle/appnet.js (hbB64, hbUb64, hbSeal)"
+      ],
+      "commits": [
+        "5bbb959",
+        "92886b6"
+      ],
+      "testResults": [
+        {
+          "id": "GK08-T01",
+          "status": "PASS",
+          "variant": [
+            "app/www"
+          ],
+          "browser": [
+            "chromium 157.0.8103.78"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-b64.log:2 (tests/gk-b64.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK08-T02",
+          "status": "PASS",
+          "variant": [
+            "app/www"
+          ],
+          "browser": [
+            "chromium 157.0.8103.78"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-b64.log:3 (tests/gk-b64.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK08-T03",
+          "status": "PASS",
+          "variant": [
+            "app/www"
+          ],
+          "browser": [
+            "chromium 157.0.8103.78"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-b64.log:4 (tests/gk-b64.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK08-T04",
+          "status": "PASS",
+          "variant": [
+            "app/www"
+          ],
+          "browser": [
+            "chromium 157.0.8103.78"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-b64.log:5 (tests/gk-b64.test.js)",
+            "protokolle/gk-suiten/gk-b64.log:6 (tests/gk-b64.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK08-T05",
+          "status": "PASS",
+          "variant": [
+            "app/www"
+          ],
+          "browser": [
+            "chromium 157.0.8103.78"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-b64.log:7 (tests/gk-b64.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK08-T06",
+          "status": "PASS",
+          "variant": [
+            "app/www"
+          ],
+          "browser": [
+            "chromium 157.0.8103.78"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-b64.log:8 (tests/gk-b64.test.js)",
+            "protokolle/gk-suiten/gk-b64.log:9 (tests/gk-b64.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK08-T07",
+          "status": "NICHT_AUSGEFUEHRT",
+          "variant": null,
+          "browser": null,
+          "evidence": null,
+          "note": "keine Prüfzeile gefunden"
+        },
+        {
+          "id": "GK08-T08",
+          "status": "PASS",
+          "variant": [
+            "app/www"
+          ],
+          "browser": [
+            "chromium 157.0.8103.78"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-b64.log:10 (tests/gk-b64.test.js)",
+            "protokolle/gk-suiten/gk-b64.log:11 (tests/gk-b64.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        }
+      ],
+      "remainingRisks": [
+        "Firefox/WebKit nur in der CI geprüft"
+      ]
+    },
+    {
+      "id": "GK-09",
+      "status": "ABGENOMMEN",
+      "baselineReproduced": true,
+      "files": [
+        "quelle/pruefpaket.py",
+        "quelle/LIESMICH.md"
+      ],
+      "commits": [
+        "245ab09"
+      ],
+      "testResults": [
+        {
+          "id": "GK09-T01",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone + pwa (Paket)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-paket.log:5 (tests/gk-paket.test.js)",
+            "protokolle/gk-suiten/gk-paket.log:6 (tests/gk-paket.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK09-T02",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone + pwa (Paket)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-paket.log:7 (tests/gk-paket.test.js)",
+            "protokolle/gk-suiten/gk-paket.log:8 (tests/gk-paket.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK09-T03",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone + pwa (Paket)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-paket.log:9 (tests/gk-paket.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK09-T04",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone + pwa (Paket)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-paket.log:10 (tests/gk-paket.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK09-T05",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone + pwa (Paket)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-paket.log:4 (tests/gk-paket.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK09-T06",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone + pwa (Paket)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-paket.log:1 (tests/gk-paket.test.js)"
+          ],
+          "note": "1 Prüfzeile(n)"
+        },
+        {
+          "id": "GK09-T07",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone + pwa (Paket)"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-paket.log:5 (tests/gk-paket.test.js)",
+            "protokolle/gk-suiten/gk-paket.log:7 (tests/gk-paket.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        }
+      ],
+      "remainingRisks": [
+        "Android- und Electron-Pakete sind nicht Teil des Prüfpakets"
+      ]
+    },
+    {
+      "id": "GK-10",
+      "status": "ABGENOMMEN",
+      "baselineReproduced": true,
+      "files": [
+        "quelle/data.js (SRD_ATTRIBUTION, srdAttrHtml)",
+        "quelle/extra.js (helpView)",
+        "quelle/shell.html (Fusszeile)",
+        "quelle/app.js (render)",
+        "README.md",
+        "ANLEITUNG.md",
+        "www/download.html",
+        "quelle/LIESMICH.md"
+      ],
+      "commits": [
+        "70abf62",
+        "1538b6b",
+        "f970161"
+      ],
+      "testResults": [
+        {
+          "id": "GK10-T01",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-lizenz.log:1 (tests/gk-lizenz.test.js)",
+            "protokolle/gk-suiten/gk-lizenz.log:5 (tests/gk-lizenz.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK10-T02",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-lizenz.log:6 (tests/gk-lizenz.test.js)",
+            "protokolle/gk-suiten/gk-lizenz.log:12 (tests/gk-lizenz.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK10-T03",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-lizenz.log:7 (tests/gk-lizenz.test.js)",
+            "protokolle/gk-suiten/gk-lizenz.log:13 (tests/gk-lizenz.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK10-T04",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-lizenz.log:8 (tests/gk-lizenz.test.js)",
+            "protokolle/gk-suiten/gk-lizenz.log:14 (tests/gk-lizenz.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK10-T05",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-lizenz.log:2 (tests/gk-lizenz.test.js)",
+            "protokolle/gk-suiten/gk-lizenz.log:3 (tests/gk-lizenz.test.js)",
+            "protokolle/gk-suiten/gk-lizenz.log:4 (tests/gk-lizenz.test.js)"
+          ],
+          "note": "3 Prüfzeile(n)"
+        },
+        {
+          "id": "GK10-T06",
+          "status": "PASS",
+          "variant": [
+            "artifact + standalone"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-lizenz.log:9 (tests/gk-lizenz.test.js)",
+            "protokolle/gk-suiten/gk-lizenz.log:10 (tests/gk-lizenz.test.js)",
+            "protokolle/gk-suiten/gk-lizenz.log:11 (tests/gk-lizenz.test.js)",
+            "protokolle/gk-suiten/gk-lizenz.log:15 (tests/gk-lizenz.test.js)",
+            "protokolle/gk-suiten/gk-lizenz.log:16 (tests/gk-lizenz.test.js)",
+            "protokolle/gk-suiten/gk-lizenz.log:17 (tests/gk-lizenz.test.js)"
+          ],
+          "note": "6 Prüfzeile(n)"
+        }
+      ],
+      "remainingRisks": [
+        "SRD-5.1-Inhalte (Halbelf, Halbork, Kampfstile Duellieren und Schützen, einige Abenteuer-Monster) haben eine eigene Pflichtattribution, die nicht geprüft wurde"
+      ]
+    },
+    {
+      "id": "GK-11",
+      "status": "ABGENOMMEN",
+      "baselineReproduced": true,
+      "files": [
+        "quelle/app.js (Gnaden-Dialog)"
+      ],
+      "commits": [
+        "370b5c6"
+      ],
+      "testResults": [
+        {
+          "id": "GK11-T01",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-gnade.log:1 (tests/gk-gnade.test.js)",
+            "protokolle/gk-suiten/gk-gnade.log:4 (tests/gk-gnade.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK11-T02",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-gnade.log:2 (tests/gk-gnade.test.js)",
+            "protokolle/gk-suiten/gk-gnade.log:5 (tests/gk-gnade.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        },
+        {
+          "id": "GK11-T03",
+          "status": "PASS",
+          "variant": [
+            "artifact"
+          ],
+          "browser": [
+            "chromium"
+          ],
+          "evidence": [
+            "protokolle/gk-suiten/gk-gnade.log:3 (tests/gk-gnade.test.js)",
+            "protokolle/gk-suiten/gk-gnade.log:6 (tests/gk-gnade.test.js)"
+          ],
+          "note": "2 Prüfzeile(n)"
+        }
+      ],
+      "remainingRisks": []
+    }
+  ],
+  "newFindings": [
+    {
+      "id": "GK-N01",
+      "status": "bestätigt, behoben",
+      "summary": "Raum verlassen und sofort wieder betreten: danach keine Aktualisierungen mehr (Broker verarbeitete Abmelden nach dem erneuten Anmelden). Auf b6d5552 nachgestellt.",
+      "fix": "appnet.js: Abmelden 1,5 s verzögert, entfällt bei sofortigem Wiederabonnieren",
+      "commit": "0b2f126",
+      "tests": [
+        "tests/gk-netz.test.js (Wiederbeitritt ohne Pause)"
+      ]
+    },
+    {
+      "id": "GK-N02",
+      "status": "bestätigt, behoben (im Gesamtlauf gefunden)",
+      "summary": "Durch die zweigeteilte Lizenz-Fusszeile verdeckte der schwebende Würfelknopf die letzte Zeile bei 900×600 und 1024×768 (overlap.test.js, beide Fassungen).",
+      "fix": "shell.html: Pflichttext (lang=en) und deutscher Hinweis in einem Absatz",
+      "commit": "f970161",
+      "tests": [
+        "tests/overlap.test.js",
+        "tests/gk-lizenz.test.js"
+      ]
+    },
+    {
+      "id": "GK-N03",
+      "status": "Testanpassung (keine Produktänderung)",
+      "summary": "multi.test.js wirkte einen Aktionszauber im Zug eines anderen und brach seit GK-04 korrekt ab.",
+      "fix": "Test: SL gibt den Zug zuerst an Ilva; Gegnerangriff mit Schild-Reaktion im Zug des Gegners",
+      "commit": "aed6d31",
+      "tests": [
+        "tests/multi.test.js"
+      ]
+    },
+    {
+      "id": "GK-N04",
+      "status": "Verdacht (Testumgebung)",
+      "summary": "Chromium 157 (headless und voll) verliert bei file:// gelegentlich den eben geschriebenen localStorage über ein Neuladen; über http nie. Auch b6d5552 betroffen.",
+      "fix": "Test gk-import über lokalen Webserver; App unverändert",
+      "commit": "d9f7234",
+      "tests": [
+        "tests/gk-import.test.js"
+      ]
+    }
+  ],
+  "suiteRuns": [
+    {
+      "suite": "Regeltests (rules.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Import bereinigt unbekannte Zauber 48 / 48 Tests bestanden"
+    },
+    {
+      "suite": "Regressionen HB-01–HB-11 (hb.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ HB-11 Bewusstlos ausserhalb des Kampfes: kein Zauber 27 / 27 bestanden · /home/claude/hb-gk/quelle/index.html"
+    },
+    {
+      "suite": "Robustheit & Sonderfälle (cases.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ HB-26 Fluchklinge: zweite Bonusaktion blockiert, keine Ressource verbraucht 23 / 23 bestanden"
+    },
+    {
+      "suite": "Kritischer Audit A01–A06 (audit2.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/hb-gk/quelle/index.html"
+    },
+    {
+      "suite": "Erklärkarten ⓘ (info.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ handy: keine waagrechte Scrollleiste 53 / 53 bestanden"
+    },
+    {
+      "suite": "Layout: ⚠ offene Punkte, Menüs (layout.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ handy: keine waagrechte Scrollleiste 29 / 29 bestanden"
+    },
+    {
+      "suite": "Würfel-Designs (dice.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ handy: keine waagrechte Scrollleiste 50 / 50 bestanden"
+    },
+    {
+      "suite": "Stufenaufstieg-Assistent (levelup.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ handy: keine waagrechte Scrollleiste 28 / 28 bestanden"
+    },
+    {
+      "suite": "Gegnerangriff: Treffer prüfen vor Schaden (npc.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ critExpr verdoppelt alle Würfel 8 / 8 bestanden"
+    },
+    {
+      "suite": "Kampf-Nachzügler, Überraschung, Treffer zustellen, Bestiarium (combat2.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Planer: Monsterauswahl nach Fundort gruppiert, Verstärkung/überrascht im Kampf 40 / 40 bestanden"
+    },
+    {
+      "suite": "SL-Werkzeuge: Zufallsbegegnung, Aufladung, eigene Monster, Beute (dmtools.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 46 / 46 bestanden"
+    },
+    {
+      "suite": "Schaden mit Rettungswurf: erst fragen, dann würfeln (savedmg.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 18 / 18 bestanden"
+    },
+    {
+      "suite": "Abläufe mit Zwischenschritt: Zustände, Reaktionen, Zusatzeffekte (mechanics.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 40 / 40 bestanden"
+    },
+    {
+      "suite": "Aufgeräumter Spieltisch (table.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 29 / 29 bestanden"
+    },
+    {
+      "suite": "Abfragen und Ziele: nichts verdrängt, Ziel festgehalten (flow.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 15 / 15 bestanden"
+    },
+    {
+      "suite": "Sicherung: alles sichern und wiederherstellen (backup.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 11 / 11 bestanden"
+    },
+    {
+      "suite": "Willkommen: Name beim ersten Start (welcome.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 15 / 15 bestanden"
+    },
+    {
+      "suite": "Willkommen in der App (welcome.test.js app)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 15 / 15 bestanden"
+    },
+    {
+      "suite": "Spielabend sichern, Stolpersteine (pflege.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 32 / 32 bestanden"
+    },
+    {
+      "suite": "Import aus D&D Beyond (ddbimport.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 73 / 73 bestanden"
+    },
+    {
+      "suite": "Import aus D&D Beyond (ddbimport.test.js app)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 73 / 73 bestanden"
+    },
+    {
+      "suite": "Spielabend sichern, Stolpersteine, Server (pflege.test.js app)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 35 / 35 bestanden"
+    },
+    {
+      "suite": "Kampagnenbuch: Personen, Orte, Aufträge (kbuch.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 48 / 48 bestanden"
+    },
+    {
+      "suite": "Kampagnenbuch in der App (kbuch.test.js app)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 48 / 48 bestanden"
+    },
+    {
+      "suite": "Überdeckungen: 9 Bildschirmgrössen, alle Ansichten (overlap.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 20 / 20 bestanden"
+    },
+    {
+      "suite": "Überdeckungen in der App (overlap.test.js app)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 20 / 20 bestanden"
+    },
+    {
+      "suite": "Claude-Desktop-Brücke: MCP, Empfänger, Einrichtung (bruecke.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 49 / 49 bestanden"
+    },
+    {
+      "suite": "Claude-Desktop-Brücke in der App (bruecke.test.js app)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 49 / 49 bestanden"
+    },
+    {
+      "suite": "Download-Seite: Geräte, feste Links, Version (download.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 14 / 14 bestanden"
+    },
+    {
+      "suite": "Hilfe-Stufe: Einsteiger, Standard, Erfahren (hilfe.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 48 / 48 bestanden"
+    },
+    {
+      "suite": "Aufgeräumter Bogen: Kopfleiste, Kampfseite, Heldenliste (bogen.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 38 / 38 bestanden"
+    },
+    {
+      "suite": "Würfelverlauf (verlauf.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 24 / 24 bestanden"
+    },
+    {
+      "suite": "Rückgängig, Wiederholen, Zug zurückspulen (undo.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 30 / 30 bestanden"
+    },
+    {
+      "suite": "Claude als Helfer der Spielleitung (slhelfer.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 22 / 22 bestanden"
+    },
+    {
+      "suite": "Gegnerzug: Angriffe zählen, Zug beenden (npcturn.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 11 / 11 bestanden"
+    },
+    {
+      "suite": "Monsterbilder (mobpics.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 16 / 16 bestanden"
+    },
+    {
+      "suite": "Unterklassen-Bilder (subpics.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 9 / 9 bestanden"
+    },
+    {
+      "suite": "Kampfseite am Handy: Angriffe früher, Warnungen oben (m01.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 108 / 108 bestanden"
+    },
+    {
+      "suite": "Bestiarium am Handy: Suche vor Einleitung (m03.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 90 / 90 bestanden"
+    },
+    {
+      "suite": "Erschaffen am Handy: Auswahl vor Zusammenfassung (m02.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 111 / 111 bestanden"
+    },
+    {
+      "suite": "Grosstest: alle Ansichten, Reiter, Schritte, Klassen, Stimmungen (gross.test.js)",
+      "exitCode": 0,
+      "ergebnis": "siehe Konsole"
+    },
+    {
+      "suite": "Grosstest in der App (gross.test.js app)",
+      "exitCode": 0,
+      "ergebnis": "siehe Konsole"
+    },
+    {
+      "suite": "Klick-Fuzz: jeder Knopf in jeder Ansicht (klick.test.js)",
+      "exitCode": 0,
+      "ergebnis": "siehe Konsole"
+    },
+    {
+      "suite": "Daten: Sichern, Laden, Neustart, alte und kaputte Dateien, 5600 Kombinationen (daten.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 12 / 12 bestanden"
+    },
+    {
+      "suite": "Daten in der App (daten.test.js app)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 12 / 12 bestanden"
+    },
+    {
+      "suite": "Jeden Zauber wirken (zauber.test.js)",
+      "exitCode": 0,
+      "ergebnis": "siehe Konsole"
+    },
+    {
+      "suite": "Lange Zufallssitzung (affe.test.js)",
+      "exitCode": 0,
+      "ergebnis": "siehe Konsole"
+    },
+    {
+      "suite": "Befunde B-01–B-20 des Grosstests v1.9.40 (befunde.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 42 / 42 bestanden"
+    },
+    {
+      "suite": "Lesbarkeit: Kontrast in allen Stimmungen (kontrast.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Stimmung wueste 9 / 9 bestanden"
+    },
+    {
+      "suite": "Stimmungen: Wechsel, Zeichenrate, Aus und reduzierte Bewegung (stimmung.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 25 / 25 bestanden"
+    },
+    {
+      "suite": "Effekte: Einstellungen, alte Schalter, Leistung, Vibration (vfx.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 35 / 35 bestanden"
+    },
+    {
+      "suite": "Effekte: Schaden, Heilung, Rast, Stufe, Zustände, lokale Krits (ereignis.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 34 / 34 bestanden"
+    },
+    {
+      "suite": "Artefaktwürfel v5 (Prototyp): Schalter, WebGL, Rückfall (wuerfel3d.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 24 / 24 bestanden"
+    },
+    {
+      "suite": "Effekte: Ton, Hintergrundgeräusche, Vibration (ton.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 18 / 18 bestanden"
+    },
+    {
+      "suite": "Effekte: Bedien-Animationen (ui.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 15 / 15 bestanden"
+    },
+    {
+      "suite": "Ressourcen: Erklärungen zum Aufklappen (ressourcen.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 9 / 9 bestanden"
+    },
+    {
+      "suite": "Kampf am Tisch: eigener Zug gut sichtbar (zug.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 20 / 20 bestanden"
+    },
+    {
+      "suite": "Erweiterung: 6 Klassen, 9 Völker, erweiterte Auswahl (erweiterung.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 39 / 39 bestanden"
+    },
+    {
+      "suite": "Prüfberichte 25.11.: Würfelanzeige, Schild, Tisch-Anfragen, Audit HB-01–HB-15 (pruefbericht.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 37 / 37 bestanden"
+    },
+    {
+      "suite": "Tischhilfen: eigene Würfel, Zugleiste, Ladungen, Regeln der Runde, Vorbereiten (tischhilfen.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ keine Seitenfehler 43 bestanden, 0 fehlgeschlagen"
+    },
+    {
+      "suite": "Sicherheit: fremder Text wirkt nie als HTML (sicherheit.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ keine Seitenfehler, keine Dialoge 26 bestanden, 0 fehlgeschlagen"
+    },
+    {
+      "suite": "GK-01/GK-07 Vertrauensgrenze am Tisch: fremde Kampf-, Runden- und Spielerdaten (gk-netz.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine JavaScript-Fehler (Teil 2) 37 / 37 bestanden"
+    },
+    {
+      "suite": "GK-02 Verdeckte Würfe werden nie nachträglich geteilt (gk-wuerfe.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine JavaScript-Fehler (Teil 2) 21 / 21 bestanden"
+    },
+    {
+      "suite": "GK-03 Import und gespeicherter Bestand: Prüfung mit Feldpfad, keine Teilübernahme, Isolation (gk-import.test.js)",
+      "exitCode": 1,
+      "ergebnis": "mportierten Helden: jeder Bogenreiter ohne Fehler ✘ GK03-T11 Neustart: alle Helden wieder da, nichts als beschädigt markiert  → {\"r\":{\"n\":0,\"broken\":0},\"n0\":9}"
+    },
+    {
+      "suite": "GK-04/05/06 Aktionsökonomie: fremder Zug, Folgeangriffe, Vorbereiten (gk-zug.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine JavaScript-Fehler 40 / 40 bestanden"
+    },
+    {
+      "suite": "GK-08 Grosse verschlüsselte Nachrichten (gk-b64.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine JavaScript-Fehler 12 / 12 bestanden (chromium)"
+    },
+    {
+      "suite": "GK-11 Gnaden-Dialog auf Deutsch (gk-gnade.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine JavaScript-Fehler 7 / 7 bestanden"
+    },
+    {
+      "suite": "GK-09 Prüfpaket: beide Fassungen und Manifest (gk-paket.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine JavaScript-Fehler 11 / 11 bestanden"
+    },
+    {
+      "suite": "GK-10 SRD-5.2.1-Attribution wortgetreu (gk-lizenz.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine JavaScript-Fehler 17 / 17 bestanden"
+    },
+    {
+      "suite": "Begleiter und Reittiere: Werte, TP, Initiative, eigene Würfel (begleiter.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ keine Seitenfehler 12 bestanden, 0 fehlgeschlagen"
+    },
+    {
+      "suite": "Bedienung mit Tastatur und im Querformat (bedienung.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ keine Seitenfehler 15 bestanden, 0 fehlgeschlagen"
+    },
+    {
+      "suite": "Zufallsspieler: 3 Minuten zufällige Bedienung ohne Fehler (zufallsspieler.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ keine Seiten- oder Konsolenfehler 2 bestanden, 0 fehlgeschlagen"
+    },
+    {
+      "suite": "Langsames Handy: CPU 4× gedrosselt (handy.test.js app)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler  ([]) 17 / 17 bestanden"
+    },
+    {
+      "suite": "Abgleich mit dem SRD 5.2: Zauber und Monster (srd.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ 339 Zauber und 164 Monster mit dem SRD 5.2 abgeglichen, 0 Abweichungen (8 begründete Ausnahmen)"
+    },
+    {
+      "suite": "Online-Tisch mit drei Geräten, lokal (echt.test.js --lokal)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler auf den Geräten 12 / 12 bestanden (Server: lokal)"
+    },
+    {
+      "suite": "Online-Tisch, Server vergisst gespeicherte Nachrichten (echt.test.js --ohne-speicher)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler auf den Geräten 12 / 12 bestanden (Server: lokal, ohne gespeicherte Nachrichten)"
+    },
+    {
+      "suite": "Kampfstart: Initiative-Fenster, Auswahl (initcall.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 15 / 15 bestanden"
+    },
+    {
+      "suite": "Tischhilfen: passive Werte, Rast für alle, EP nach dem Kampf (tablehelp.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 9 / 9 bestanden"
+    },
+    {
+      "suite": "Gegenstände: SRD-Liste, Flüche, Ausrüstung (items.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 12 / 12 bestanden"
+    },
+    {
+      "suite": "Rettungswürfe der Monster (mobsaves.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 7 / 7 bestanden"
+    },
+    {
+      "suite": "Leistung: Zwischenspeicher, ruhige Listen, Spieltisch, Effekte (perf.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 18 / 18 bestanden"
+    },
+    {
+      "suite": "Gesinnung: neun Gesinnungen mit Erklärung (align.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 9 / 9 bestanden"
+    },
+    {
+      "suite": "Abenteuer: Machtader, Kampf auf Knopfdruck, Entscheidungen, Laden (adventure.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Seitenfehler 38/38 Prüfungen bestanden"
+    },
+    {
+      "suite": "Abenteuer: Wirtshaus zum letzten Krug (krug.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Seitenfehler 44/44 Prüfungen bestanden"
+    },
+    {
+      "suite": "Klicktest kurz (ui.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Keine Skriptfehler 15 / 15 bestanden"
+    },
+    {
+      "suite": "Abnahme-Klicktest (ui-full.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Chromium Desktop 1280: 212/212 Prüfungen ✔ Chromium Handy 390 (Touch): 212/212 Prüfungen"
+    },
+    {
+      "suite": "Kombinationen Klasse×Unterklasse×Stufe (combos.test.js)",
+      "exitCode": 0,
+      "ergebnis": "checked 1640 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz bar",
+      "exitCode": 0,
+      "ergebnis": "ran 218 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz brd",
+      "exitCode": 0,
+      "ergebnis": "ran 324 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz cle",
+      "exitCode": 0,
+      "ergebnis": "ran 400 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz dru",
+      "exitCode": 0,
+      "ergebnis": "ran 344 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz fig",
+      "exitCode": 0,
+      "ergebnis": "ran 218 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz mon",
+      "exitCode": 0,
+      "ergebnis": "ran 254 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz pal",
+      "exitCode": 0,
+      "ergebnis": "ran 376 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz ran",
+      "exitCode": 0,
+      "ergebnis": "ran 321 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz rog",
+      "exitCode": 0,
+      "ergebnis": "ran 242 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz sor",
+      "exitCode": 0,
+      "ergebnis": "ran 396 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz wlk",
+      "exitCode": 0,
+      "ergebnis": "ran 388 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz wiz",
+      "exitCode": 0,
+      "ergebnis": "ran 294 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz rk",
+      "exitCode": 0,
+      "ergebnis": "ran 282 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz bw",
+      "exitCode": 0,
+      "ergebnis": "ran 258 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz fk",
+      "exitCode": 0,
+      "ergebnis": "ran 218 bad 0"
+    },
+    {
+      "suite": "Zugleisten-Fuzz ma",
+      "exitCode": 0,
+      "ergebnis": "ran 292 bad 0"
+    },
+    {
+      "suite": "Online-Tisch (net.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Nach Verbindungsabbruch: Spieler verbindet neu, Würfe kommen an 7 / 7 bestanden"
+    },
+    {
+      "suite": "Selbst-Update Android-App (boot.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Im normalen Browser: keine Update-Logik 16 / 16 bestanden"
+    },
+    {
+      "suite": "Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Handy: kein Querscrollen bei den Spielern 18 / 18 bestanden"
+    },
+    {
+      "suite": "Spielabend mit Abenteuer: SL + 2 Spieler (sitzung.test.js)",
+      "exitCode": 0,
+      "ergebnis": "✔ Laptop der SL: kein Querscrollen (Tisch, Abenteuer) 54 / 54 bestanden"
+    }
+  ],
+  "decisions": [
+    "GK-07: ungültiges Dokument ganz verwerfen (Freitext gekürzt, unbekannte Zustände weg, unbekannte einfache Felder bleiben)",
+    "GK-07: Spielerdokumente feldweise (Held verschwindet nicht aus der Initiative)",
+    "GK-02: Freigabe-Metadaten in WeakMap, an Raum und Held gebunden; angeforderter Rettungswurf geht als Antwort an die SL",
+    "GK-03: Bestand nur Aufbau/Typen, Kontokopie beschädigt → Gerätekopie gewinnt",
+    "GK-05: Durchspalten im fremden Zug erlaubt (Regel 2024), Niederstrecken nach Gelegenheitsangriff gesperrt",
+    "GK-08: zusätzlich Sendegrenze 3 MB",
+    "GK-09: app/Heldenbuch.html = Standalone",
+    "GK-10: Pflichttext wortgetreu aus offizieller PDF, deutscher Hinweis im selben Absatz"
+  ],
+  "limitations": [
+    "Firefox und WebKit nur über CI (browser.yml), lokal nicht installiert",
+    "Keine echten Geräte, keine öffentlichen Broker mit Testdaten",
+    "GK-N04 (Verdacht): Chromium verliert bei file:// gelegentlich localStorage über Neuladen – in dieser Umgebung auch auf b6d5552 und mit Profil, über http nie; echte Desktop-Browser nicht geprüft",
+    "SRD-5.1-Attribution für Halbelf, Halbork, zwei Kampfstile und einige Monster nicht geprüft"
+  ]
+}

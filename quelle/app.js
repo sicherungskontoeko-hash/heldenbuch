@@ -14,7 +14,8 @@ const STEPS = ['Klasse', 'Herkunft', 'Attribute', 'Fertigkeiten und Talente', 'Z
 let DB = null, UID = null; const timers = {};
 /* Gesamtstand im Browser. Je Aufruf werden nur die genannten Datensätze geschrieben, damit ein zweiter Tab nichts überschreibt. */
 let LS_LAST = null;
-function lsGet() { try { const raw = localStorage.getItem('heldenbuch'); LS_LAST = raw; if (raw && typeof backupOnce === 'function' && /"v":\s*2/.test(raw) === false) backupOnce(raw); return JSON.parse(raw || 'null'); } catch (e) { return null; } }
+function lsGet() { let raw = null; try { raw = localStorage.getItem('heldenbuch'); LS_LAST = raw; if (raw && typeof backupOnce === 'function' && /"v":\s*2/.test(raw) === false) backupOnce(raw); const d = JSON.parse(raw || 'null'); if (raw && (!d || typeof d !== 'object' || (d.chars != null && !nvPlain(d.chars)))) throw new Error('form'); return d; }
+  catch (e) { /* Unlesbarer Gesamtstand: Rohtext aufbewahren, bevor ihn ein Speichern überschreibt (GK-03) */ if (raw) { try { if (localStorage.getItem('heldenbuch_defekt') !== raw) localStorage.setItem('heldenbuch_defekt', raw); S.lsDefekt = true; } catch (x) { S.lsDefekt = 'voll'; } } return null; } }
 function lsSet(keys) {
   let chars = S.chars, hb = S.hb;
   if (keys && !S.saveErr) {
@@ -27,6 +28,7 @@ function lsSet(keys) {
         } }
     } catch (e) { chars = S.chars; hb = S.hb; }
   }
+  if (S.broken && S.broken.size) { chars = Object.assign({}, chars); for (const [i, b] of S.broken) if (!Object.prototype.hasOwnProperty.call(chars, i)) Object.defineProperty(chars, i, { value: b.c, enumerable: true, writable: true, configurable: true }); } /* beschädigte Helden bleiben gespeichert */
   const data = JSON.stringify({ v: 2, chars, hb, cur: S.cur });
   try { localStorage.setItem('heldenbuch', data); if (localStorage.getItem('heldenbuch') !== data) throw new Error('verify'); LS_LAST = data; if (S.saveErr) { S.saveErr = false; paintSave(); } }
   catch (e) { if (!S.saveErr) { S.saveErr = true; bannerToast('Speichern im Browser fehlgeschlagen', (e && /quota/i.test(e.name + e.message) ? 'Der Speicher ist voll. ' : '') + 'Sichere deine Helden jetzt über „Exportieren“.'); } paintSave(); }
@@ -41,7 +43,8 @@ function lsExternal(e) {
   let changed = false;
   for (const [kind, src, dst] of [['c', d.chars, S.chars], ['h', d.hb && typeof d.hb === 'object' ? d.hb : {}, S.hb]]) {
     for (const i of Object.keys(dst)) if (!(i in src) && !keep(kind, i)) { delete dst[i]; changed = true; }
-    for (const [i, v] of Object.entries(src)) { if (!v || typeof v !== 'object' || keep(kind, i)) continue; if (JSON.stringify(dst[i]) !== JSON.stringify(v)) { dst[i] = kind === 'c' ? normChar(v) : v; changed = true; } }
+    if (kind === 'c' && S.broken) for (const i of [...S.broken.keys()]) if (!(i in src)) S.broken.delete(i);
+    for (const [i, v] of Object.entries(src)) { if (!v || typeof v !== 'object' || keep(kind, i) || nvProto(i)) continue; if (JSON.stringify(dst[i]) !== JSON.stringify(v)) { const n = kind === 'c' ? charSafe(i, v, 'anderer Tab') : v; if (!n) continue; dst[i] = n; changed = true; } }
   }
   LS_LAST = e.newValue;
   if (!changed) return;
@@ -94,13 +97,16 @@ async function connectDb() {
     /* Je Datensatz zusammenführen: ausstehende lokale Änderungen (auch Löschungen) gewinnen, bei Helden sonst der neuere Stand.
        Nur lokal vorhandene Datensätze werden beim ersten Abgleich und bei leerer Kopie übernommen, später gelten sie als anderswo gelöscht. */
     const pend = pendKeys(); let first = true; try { first = !localStorage.getItem('hb_merge2'); } catch (e) {}
-    const dbC = {}, dbH = {};
+    const dbC = {}, dbH = {}, dbBad = new Map();
     snap.docs.forEach((d) => { const v = d.data(); try { const o = JSON.parse(v.json); if (v.kind === 'n') { try { if (o.camp && !localStorage.getItem('heldenbuch_dm_' + o.camp)) localStorage.setItem('heldenbuch_dm_' + o.camp, o.text || ''); } catch (x) {} return; }
-      if (!o || typeof o !== 'object' || typeof o.id !== 'string' || !o.id) return; if (v.kind === 'c') dbC[o.id] = normChar(o); else if (v.kind === 'h') dbH[o.id] = o; } catch (e) {} });
+      if (!o || typeof o !== 'object' || typeof o.id !== 'string' || !o.id || nvProto(o.id)) return;
+      if (v.kind === 'c') { const e = charShapeErrors(o); if (e.length) dbBad.set(o.id, { c: o, err: e, src: 'Konto' }); else dbC[o.id] = normChar(o); } else if (v.kind === 'h') dbH[o.id] = o; } catch (e) {} });
+    /* Beschädigte Kopie im Konto: gültige Kopie auf diesem Gerät behalten und neu hochladen, sonst abseits halten */
+    for (const [i, b] of dbBad) if (!S.chars[i]) S.broken.set(i, b);
     const push = new Set(pend);
     const pick = (kind, local, remote, union) => { const out = {};
       for (const [i, o] of Object.entries(remote)) { const k = kind + '_' + i; if (pend.has(k)) continue; const l = local[i]; if (kind === 'c' && l && (+l.updated || 0) > (+o.updated || 0)) { out[i] = l; push.add(k); } else out[i] = o; }
-      for (const [i, l] of Object.entries(local)) { const k = kind + '_' + i; if (pend.has(k) || (union && !(i in remote))) { out[i] = l; push.add(k); } }
+      for (const [i, l] of Object.entries(local)) { const k = kind + '_' + i; if (pend.has(k) || (union && !(i in remote)) || (kind === 'c' && dbBad.has(i))) { out[i] = l; push.add(k); } }
       return out; };
     S.chars = pick('c', S.chars, dbC, first || snap.empty || !Object.keys(dbC).length);
     S.hb = pick('h', S.hb, dbH, first || snap.empty);
@@ -331,8 +337,8 @@ function dmgRoll(ch) {
   const hxGroups=new Set();
   for (const x of (c.dmgExtras || []).filter((y) => (d.xd || []).includes(y.k)&&hxExtraEligible(y,a,ch,d))) { if(x.hxGroup){if(hxGroups.has(x.hxGroup))continue;hxGroups.add(x.hxGroup);} if (!XD_MULTI.has(x.k)) { if (onceUsed(ch, 'xd_' + hxExtraKey(x))) continue; once.push('xd_' + hxExtraKey(x)); } if (x.res) { const r = c.res.find((y) => y.k === x.res); const used = +P.res[x.res] || 0; if (!r || used >= r.max) continue; P.res[x.res] = used + 1; smiteNote += ' · ' + r.n + ' verbraucht'; } if (x.n) parts.push({ n: x.n, s: x.s, hxFloor2:x.hxGroup==='hxexec'&&c.lv('hxexec')>=15&&x.k!=='hx_exec_full', tag: x.label.replace(/ \(.*\)$/, '') + (x.note ? ' (' + x.note + ')' : '') }); if (x.flat) flat += x.flat; }
   if (d.smite) {
-    const inF = inFight(ch); const sb = inF && rule('strict') && (tLeft(ch, 'b') <= 0 || canAct(ch)); const sl = inF && rule('strict') && turnTrack() && d.smite !== 'free' && turnSt(ch).slotSpell && !offTurn();
-    if (sb || sl) { smiteNote += ' · Niederstrecken nicht möglich (' + (sb ? 'keine Bonusaktion' : 'schon ein Zauberplatz in diesem Zug') + ')'; d.smite = 0; }
+    const inF = inFight(ch); const so = inF && rule('strict') && offTurn(); const sb = inF && rule('strict') && (tLeft(ch, 'b') <= 0 || canAct(ch)); const sl = inF && rule('strict') && turnTrack() && d.smite !== 'free' && turnSt(ch).slotSpell && !offTurn();
+    if (so || sb || sl) { smiteNote += ' · Niederstrecken nicht möglich (' + (so ? 'nicht dein Zug – Bonusaktion nur im eigenen Zug' : sb ? 'keine Bonusaktion' : 'schon ein Zauberplatz in diesem Zug') + ')'; d.smite = 0; }
   }
   if (d.smite) {
     let lvl = 1;
@@ -379,7 +385,11 @@ function saHit() {
   saNext();
 }
 function rollDmg(expr, label) { const r = rollExpr(expr); const m = /W(\d+)/.exec(String(expr)); const g = /\[([\d,]+)\]/.exec(r.detail); pushLog({ label, groups: r.groups, total: r.total, detail: r.detail, sides: m ? +m[1] : 0, nat: g ? g[1].split(',').reduce((a, b) => a + +b, 0) : r.total }); }
-function pushLog(e) { if (S.echtSum && Date.now() - S.echtSum < 3000 && e.sides !== 20) { e.sides = 0; e.groups = null; e.pair = null; e.real = true; } S.echtSum = 0; e.t = Date.now(); if (S.secret) e.secret = true; if (e.sides && !e.dset && typeof d3setOf === 'function') e.dset = d3setOf(cur()); const d3on = typeof d3ok === 'function' && d3ok(e.sides); if (!d3on && e.sides === 20 && (e.nat === 20 || e.nat === 1) && typeof themeBurst === 'function') { const k = e.nat === 1 ? 'fumble' : 'crit'; setTimeout(() => themeBurst(k), 820); } /* nur ohne 3D-Würfel; themeBurst prüft selbst die Einstellung */ S.log.unshift(e); S.log = S.log.slice(0, 30); if (typeof histAdd === 'function') histAdd(e); showToast(e); const l = $('#log'); if (l) l.innerHTML = logHtml(); if ((e.sides || e.share) && !e.preview) shareRoll(e); }
+/* Veröffentlichung eines eigenen Eintrags wird beim Entstehen festgehalten und nie umklassifiziert (GK-02): Raum, Modus, Held.
+   Die Angaben liegen nur hier (WeakMap), nicht im Eintrag selbst: Kopien, Importe und fremde Würfe haben keine und gelten als privat. */
+const LOG_PUB = new WeakMap();
+function pushLog(e) { if (S.echtSum && Date.now() - S.echtSum < 3000 && e.sides !== 20) { e.sides = 0; e.groups = null; e.pair = null; e.real = true; } S.echtSum = 0; e.t = Date.now(); if (S.secret) e.secret = true;
+  LOG_PUB.set(e, S.camp && S.share ? { room: S.camp, mode: S.secret ? 'secret' : 'public', ch: S.cur } : { room: '', mode: 'private', ch: S.cur }); if (e.sides && !e.dset && typeof d3setOf === 'function') e.dset = d3setOf(cur()); const d3on = typeof d3ok === 'function' && d3ok(e.sides); if (!d3on && e.sides === 20 && (e.nat === 20 || e.nat === 1) && typeof themeBurst === 'function') { const k = e.nat === 1 ? 'fumble' : 'crit'; setTimeout(() => themeBurst(k), 820); } /* nur ohne 3D-Würfel; themeBurst prüft selbst die Einstellung */ S.log.unshift(e); S.log = S.log.slice(0, 30); if (typeof histAdd === 'function') histAdd(e); showToast(e); const l = $('#log'); if (l) l.innerHTML = logHtml(); if ((e.sides || e.share) && !e.preview) shareRoll(e); }
 /* ---------- Würfelschale: viele Würfel über den Bildschirm ---------- */
 function showMulti(e, flat, seq) {
   const t = $('#toast'); const tray = $('#tray'); if (seq === undefined) seq = showToast.seq = (showToast.seq || 0) + 1; showToast.hs = showToast.hs || [];
@@ -559,11 +569,11 @@ function renderTop() {
 
 /* ---------- Heldenauswahl ---------- */
 function renderHeroes() {
-  const ids = Object.keys(S.chars).sort((a, b) => (S.chars[b].updated || 0) - (S.chars[a].updated || 0));
+  const ids = Object.keys(S.chars).sort((a, b) => (S.chars[b].updated || 0) - (S.chars[a].updated || 0)); const failed = [];
   let h = '<div class="hero-intro banner' + (ids.length ? ' hintro' : '') + '" style="' + bannerStyle('paladin') + '"><h1>Deine Helden</h1><p>Wähle einen Helden zum Spielen, erschaffe einen neuen oder lade einen gesicherten Helden aus einer Datei.</p></div>' + backupLine(ids.length) + '<div class="heroes">';
   h += '<button class="newhero" data-act="newChar"><span class="plus">+</span><b>Neuen Helden erschaffen</b><span>Schritt für Schritt, alles wird für dich berechnet.</span></button>';
   for (const id of ids) {
-    const ch = S.chars[id]; let c; try { c = derive(ch, S.hb); } catch (e) { continue; }
+    const ch = S.chars[id]; let c; try { c = derive(ch, S.hb); } catch (e) { failed.push({ id, name: typeof ch.name === 'string' ? ch.name : 'Held', why: String(e && e.message || e).slice(0, 80) }); continue; }
     const conf = S.confirm === 'del:' + id;
     h += '<article class="hero' + (id === S.cur ? ' cur' : '') + '">' + (id === S.cur ? '<span class="curlbl">Aktiv</span>' : '') + sigil(ch) +
       '<div><h3>' + esc(ch.name) + '</h3><p>' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' · ' + esc(c.subName) : '') + '<br class="hbr"><span class="hdot"> · </span>' + c.sp.name + ' · ' + esc(c.bg.name) + '</p></div>' +
@@ -573,7 +583,7 @@ function renderHeroes() {
       '<div class="acts2"><button data-act="exportOne" data-arg="' + esc(id) + '">Exportieren</button><button data-act="dupChar" data-arg="' + esc(id) + '">Duplizieren</button>' +
       (conf ? '<button class="del" data-act="delChar" data-arg="' + esc(id) + '">Wirklich löschen?</button><button data-act="noDel">Nein</button>' : '<button class="del" data-act="askDel" data-arg="' + esc(id) + '">Löschen</button>') + '</div></article>';
   }
-  h += '</div>' + (isApp() ? transferHtml() : '') + '<div class="herobar"><label class="btn ghost filebtn" title="Heldenbuch-Datei (.json) oder Charakterbogen-PDF aus D&amp;D Beyond">Helden aus Datei laden<input type="file" id="importFile" accept=".json,application/json,.pdf,application/pdf"></label><button class="btn ghost" data-act="importText">Text einfügen</button>' + (ids.length ? '<button class="btn ghost" data-act="exportAll" title="Helden, Hausregeln, eigene Monster, Begegnungen und SL-Notizen in einer Datei">Alles sichern</button>' : '') + '</div>';
+  h += '</div>' + brokenHtml(failed) + (isApp() ? transferHtml() : '') + '<div class="herobar"><label class="btn ghost filebtn" title="Heldenbuch-Datei (.json) oder Charakterbogen-PDF aus D&amp;D Beyond">Helden aus Datei laden<input type="file" id="importFile" accept=".json,application/json,.pdf,application/pdf"></label><button class="btn ghost" data-act="importText">Text einfügen</button>' + (ids.length ? '<button class="btn ghost" data-act="exportAll" title="Helden, Hausregeln, eigene Monster, Begegnungen und SL-Notizen in einer Datei">Alles sichern</button>' : '') + '</div>';
   return h;
 }
 
@@ -617,23 +627,52 @@ async function doExport(list, fname, full) {
   catch (e) { if (e && e.code === 'declined') return; openModal('export', data); }
 }
 function fileName(ch) { return (ch.name || 'held').replace(/^Beispiel:\s*/, '').replace(/[^\wäöüÄÖÜss -]/g, '').trim().replace(/\s+/g, '_') + '_Heldenbuch.json'; }
-function importJson(text) {
+/* Import in zwei Schritten (GK-03): erst den ganzen Plan prüfen, ohne etwas zu verändern, dann übernehmen.
+   Kein Teilimport: ein ungültiger Held, eine ungültige Hausregel oder ein ungültiger Zusatzteil verhindert alles. */
+const IMPORT_MAX = 60e6, IMPORT_CHARS = 500;
+const EXTRA_SHAPE = { player: 'string', mobs: 'list', enc: 'list', dmNotes: 'obj', chr: 'obj', kb: 'obj', stand: 'obj', adv: 'list', advSt: 'obj' };
+function extraErrors(x) {
+  if (x === undefined || x === null) return []; if (!nvPlain(x)) return ['extra: erwartet ein Objekt'];
+  const E = jsonShapeErrors(x, 'extra', 2e6); if (E.length) return E;
+  for (const [k, t] of Object.entries(EXTRA_SHAPE)) { const v = x[k]; if (v === undefined) continue; if (t === 'string' ? typeof v !== 'string' : t === 'list' ? !Array.isArray(v) : !nvPlain(v)) E.push('extra.' + k + ': erwartet ' + (t === 'string' ? 'Text' : t === 'list' ? 'eine Liste' : 'ein Objekt')); }
+  return E;
+}
+function importPlan(text) {
+  if (typeof text !== 'string') throw new Error('Kein gültiger Heldentext.');
+  if (text.length > IMPORT_MAX) throw new Error('Nicht geladen – die Datei ist zu gross (höchstens 60 MB).');
   let d; try { d = JSON.parse(text); } catch (e) { throw new Error('Kein gültiger Heldentext (JSON fehlerhaft).'); }
-  if (!d || typeof d !== 'object') throw new Error('Im Text wurde kein Held gefunden.');
-  const list = Array.isArray(d.chars) ? d.chars : (d && d.id && d.cls ? [d] : []);
-  if (!list.length && !(d && d.extra)) throw new Error('Im Text wurde kein Held gefunden.');
-  const errs = []; list.forEach((c, i) => { const e = validateChar(c); if (e.length) errs.push((c && c.name ? '„' + c.name + '“' : 'Held ' + (i + 1)) + ': ' + e.join(' ')); });
-  if (errs.length) throw new Error('Nicht geladen – bestehende Helden bleiben unverändert. ' + errs.join(' | '));
-  if (d.hb !== undefined && !Array.isArray(d.hb)) throw new Error('Hausregeln im Text sind ungültig.');
-  /* Erst alles prüfen, dann übernehmen: ein Fehler darf nichts halb geladen zurücklassen */
-  const hbErrs = []; (d.hb || []).forEach((h, i) => { const e = validHb(h); if (e) hbErrs.push('Hausregel ' + (i + 1) + (h && typeof h.name === 'string' && h.name.trim() ? ' „' + h.name.trim().slice(0, 40) + '“' : '') + ': ' + e); });
-  if (hbErrs.length) throw new Error('Nicht geladen – bestehende Helden und Hausregeln bleiben unverändert. ' + hbErrs.join(' | '));
-  (d.hb || []).forEach((h) => { S.hb[h.id] = h; persist('h', h.id); });
+  if (!nvPlain(d)) throw new Error('Im Text wurde kein Held gefunden.');
+  if (d.chars !== undefined && !Array.isArray(d.chars)) throw new Error('Nicht geladen – chars: erwartet eine Liste.');
+  const list = Array.isArray(d.chars) ? d.chars : (d.id && d.cls ? [d] : []);
+  if (!list.length && !d.extra) throw new Error('Im Text wurde kein Held gefunden.');
+  if (list.length > IMPORT_CHARS) throw new Error('Nicht geladen – zu viele Helden in einer Datei (höchstens ' + IMPORT_CHARS + ').');
+  const who = (c, i) => (c && typeof c.name === 'string' && c.name.trim() ? '„' + c.name.trim().slice(0, 40) + '“ ' : '') + '(chars[' + i + '])';
+  /* Meldung mit Feldpfad, z. B. «chars[0].play.res: erwartet ein Objekt» */
+  const at = (i, m) => { const b = 'chars[' + i + ']'; return /^Held[.[]/.test(m) ? m.replace(/^Held/, b) : /^[A-Za-z]+[.[:]/.test(m) ? b + '.' + m : b + ': ' + m; };
+  const errs = []; list.forEach((c, i) => { const e = validateChar(c); if (e.length) errs.push((c && typeof c.name === 'string' && c.name.trim() ? '„' + c.name.trim().slice(0, 40) + '“: ' : '') + e.slice(0, 5).map((m) => at(i, m)).join(' · ')); });
+  if (errs.length) throw new Error('Nicht geladen – bestehende Helden bleiben unverändert. ' + errs.slice(0, 4).join(' | '));
+  if (d.hb !== undefined && !Array.isArray(d.hb)) throw new Error('Nicht geladen – hb: erwartet eine Liste.');
+  const hbErrs = []; (d.hb || []).forEach((h, i) => { const e = validHb(h); if (e) hbErrs.push('Hausregel ' + (i + 1) + (h && typeof h.name === 'string' && h.name.trim() ? ' „' + h.name.trim().slice(0, 40) + '“' : '') + ' (hb[' + i + ']): ' + e); });
+  if (hbErrs.length) throw new Error('Nicht geladen – bestehende Helden und Hausregeln bleiben unverändert. ' + hbErrs.slice(0, 4).join(' | '));
+  const exErrs = extraErrors(d.extra); if (exErrs.length) throw new Error('Nicht geladen – Zusatzdaten ungültig: ' + exErrs.slice(0, 4).join(' | '));
+  /* Mitgelieferte Hausregeln zuerst nur hier verfügbar machen, damit Verweise darauf gelten */
+  const hbStage = Object.assign({}, S.hb); for (const h of d.hb || []) hbStage[h.id] = h;
+  const notes = []; const chars = list.map((c, i) => { const n = normChar(JSON.parse(JSON.stringify(c))); notes.push(...cleanRefs(n, hbStage));
+    try { derive(n, hbStage); } catch (e) { throw new Error('Nicht geladen – ' + who(c, i) + ': Werte lassen sich nicht berechnen (' + String(e && e.message || e).slice(0, 120) + ').'); }
+    return n; });
+  return { chars, hb: d.hb || [], extra: d.extra, notes };
+}
+function importJson(text) {
+  const P = importPlan(text);
+  P.hb.forEach((h) => { S.hb[h.id] = h; persist('h', h.id); });
   let last = null;
-  const notes = []; list.forEach((c) => { const n = normChar(JSON.parse(JSON.stringify(c))); notes.push(...cleanRefs(n)); if (typeof n.id !== 'string' || !/^[A-Za-z0-9_-]{1,60}$/.test(n.id) || S.chars[n.id]) n.id = freshId(); S.chars[n.id] = n; persist('c', n.id); last = n.id; }); if (notes.length) bannerToast('Beim Laden bereinigt', notes.join(' · '));
-  const ex = restoreExtras(d.extra);
+  P.chars.forEach((n) => { if (typeof n.id !== 'string' || !/^[A-Za-z0-9_-]{1,60}$/.test(n.id) || nvProto(n.id) || S.chars[n.id] || (S.broken && S.broken.has(n.id))) n.id = freshId(); S.chars[n.id] = n; persist('c', n.id); last = n.id; });
+  if (P.notes.length) bannerToast('Beim Laden bereinigt', P.notes.join(' · '));
+  const ex = restoreExtras(P.extra); const d = { extra: P.extra }; const list = P.chars;
   const advOnly = !list.length && d.extra && Array.isArray(d.extra.adv) && d.extra.adv.some((a) => typeof advGet === 'function' && a && advGet(a.id));
   if (last) S.cur = last; S.view = advOnly ? 'adv' : 'heroes'; if (advOnly) S.adv = d.extra.adv.find((a) => a && advGet(a.id)).id; S.modal = null; render();
+  /* Speicherfehler nie als Erfolg melden */
+  if (S.saveErr) { pushLog({ label: 'Geladen, aber nicht gespeichert', total: '⚠', detail: 'Der Browserspeicher ist voll oder gesperrt. Die Helden sind nur bis zum Schliessen geöffnet – jetzt über „Exportieren“ sichern.' }); return; }
   pushLog({ label: 'Geladen', total: list.length || '✓', detail: !list.length ? 'Geladen: ' + (ex.join(', ') || 'nichts Neues') : (list.length === 1 ? '„' + list[0].name + '“ ist jetzt in deinen Helden' : list.length + ' Helden importiert') + (ex.length ? ' · dazu ' + ex.join(', ') : '') });
 }
 function openModal(kind, data) {
@@ -1104,7 +1143,7 @@ function castSpell(ch, id, lvl, mode, resKey) {
   if (id === 'shield') { commit(); pushLog({ label: s.name, total: '+5 RK', detail: (used ? used + ' verbraucht · ' : '') + 'RK +5 bis zum Beginn deines nächsten Zuges, auch gegen den auslösenden Angriff. Magisches Geschoss trifft dich nicht.', share: true }); return; }
   if (id === 'hunters-mark') P.fx.hmTgt = S.tgt || null; if (id === 'hex') P.fx.hexTgt = S.tgt || null;
   if (id === 'produce-flame') { fxSet(P, 'flame', true); pushLog({ label: s.name, total: '✦', detail: 'Eine Flamme in deiner Hand (10 Minuten). Werfen: „Flamme werfen“ in der Zugleiste (Magieaktion, Zauberangriff).', share: true }); commit(); return; }
-  if (id === 'true-strike') { const ctxT = spellCtx(c, id); const ws = c.attacks.filter((x) => x.idx !== undefined && x.prof && !x.ws); commit(); if (!ws.length) { pushLog({ label: s.name, total: '✗', detail: 'Keine Waffe mit Übung ausgerüstet.' }); return; } S.tsPend = { ab: ctxT.ability, mod: ctxT.mod }; orbPrompt('<div class="pr"><b>Wahrer Schlag: Waffe wählen</b><p>Angriff und Schaden mit ' + AB_K[ctxT.ability] + ' ' + sgn(ctxT.mod) + '; der Schaden darf gleissend sein.' + (c.level >= 5 ? ' Zusätzlich ' + spellDice(s, 0, c, ctxT.mod) + ' gleissend.' : '') + '</p><div class="chips">' + c.attacks.map((x, i) => (x.idx !== undefined && x.prof && !x.ws ? '<button class="btn sm" data-act="tsGo" data-arg="' + esc(i) + '">' + esc(x.name) + '</button>' : '')).join('') + '<button class="btn sm ghost" data-act="mastNo">Abbrechen</button></div></div>'); return; }
+  if (id === 'true-strike') { const ctxT = spellCtx(c, id); const ws = c.attacks.filter((x) => x.idx !== undefined && x.prof && !x.ws); commit(); if (!ws.length) { pushLog({ label: s.name, total: '✗', detail: 'Keine Waffe mit Übung ausgerüstet.' }); return; } S.tsPend = { ab: ctxT.ability, mod: ctxT.mod, cid: ch.id }; orbPrompt('<div class="pr"><b>Wahrer Schlag: Waffe wählen</b><p>Angriff und Schaden mit ' + AB_K[ctxT.ability] + ' ' + sgn(ctxT.mod) + '; der Schaden darf gleissend sein.' + (c.level >= 5 ? ' Zusätzlich ' + spellDice(s, 0, c, ctxT.mod) + ' gleissend.' : '') + '</p><div class="chips">' + c.attacks.map((x, i) => (x.idx !== undefined && x.prof && !x.ws ? '<button class="btn sm" data-act="tsGo" data-arg="' + esc(i) + '">' + esc(x.name) + '</button>' : '')).join('') + '<button class="btn sm ghost" data-act="mastNo">Abbrechen</button></div></div>'); return; }
   const ctxS = spellCtx(c, id); const ex = ctxS.extra ? c.extraSpells.find((e) => e.id === id) : null;
   const abMod = ctxS.mod;
   const dice = spellDice(s, lvl || s.lvl, c, abMod, { noSlot: s.lvl > 0 && !slotUsed });
@@ -1254,7 +1293,8 @@ const campSlug = (v) => String(v).toLowerCase().normalize('NFD').replace(/[̀-ͯ
 /* Ehrlich bleiben: «nur bei der SL» blendet aus, ist aber kein Schutz vor Mitspielern mit eigener Technik */
 const SECRET_NOTE = () => (S.share && S.secret ? '<p class="hint secnote">Die Apps der Mitspieler zeigen diese Würfe nicht an. Wer den Raumcode kennt, kann sie mit eigener Technik trotzdem lesen. Für echte Geheimnisse: verdeckt würfeln und das Ergebnis der Spielleitung sagen.</p>' : '');
 function saveCampPref() { try { localStorage.setItem('heldenbuch_camp', JSON.stringify({ code: S.camp, share: S.share, secret: !!S.secret })); } catch (e) {} }
-function myRolls() { return S.log.filter((e) => (e.sides || e.share) && !e.preview).slice(0, 30).map((e) => ({ label: e.label, total: e.total, detail: e.detail, crit: !!e.crit, fumble: !!e.fumble, t: e.t, secret: !!e.secret, sides: e.sides || 0, nat: e.nat || 0, dset: e.dset || '' })); }
+/* Nur ausdrücklich für genau diesen Raum und diesen Helden freigegebene eigene Würfe; ohne Angaben: nicht teilbar (fail closed) */
+function myRolls() { const room = S.camp, ch = S.cur; return S.log.filter((e) => { const m = LOG_PUB.get(e); return !!m && m.mode !== 'private' && m.room === room && m.ch === ch && (e.sides || e.share) && !e.preview; }).slice(0, 30).map((e) => ({ label: e.label, total: e.total, detail: e.detail, crit: !!e.crit, fumble: !!e.fumble, t: e.t, secret: LOG_PUB.get(e).mode === 'secret' || !!e.secret, sides: e.sides || 0, nat: e.nat || 0, dset: e.dset || '' })); }
 function meDoc() {
   const ch = cur(); let c = null; try { c = derive(ch, S.hb); } catch (e) {}
   return { char: ch.name.replace(/^Beispiel:\s*/, ''), pl: typeof myName === 'function' ? myName() : '', cls: ch.cls, pas: c ? [c.passive, 10 + c.skills.ins.val, 10 + c.skills.inv.val] : null, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: c ? Math.min(ch.play.hp ?? c.hpMax, c.hpMax) : (ch.play.hp ?? 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0, dodge: !!(ch.play.fx || {}).dodge,
@@ -1272,24 +1312,33 @@ async function writeMe() {
 function shareRoll() { queueMe(); }
 /* Spielerdokument vom Tisch: Typen und Mengen prüfen, Unlesbares verwerfen statt die ganze Aktualisierung abzubrechen */
 function playerDoc(v) {
-  if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
-  const p = Object.assign({}, v); const str = (x, n) => (typeof x === 'string' ? x.slice(0, n) : '');
+  if (!nvPlain(v)) return null;
+  /* Ausdrückliche Feldliste (wie meDoc sie schreibt): Unbekanntes wird nicht übernommen, ein unlesbares Feld fällt einzeln weg */
+  const p = {}; const take = (k, s) => { if (!nvOwn(v, k) || v[k] === undefined) return; try { const y = s(v[k], k); if (y !== undefined) p[k] = y; } catch (e) { if (!(e instanceof NvErr)) throw e; } };
+  const str = (x, n) => (typeof x === 'string' ? x.slice(0, n) : '');
   p.char = str(v.char, 60) || '?'; p.pl = str(v.pl, 40); p.cls = str(v.cls, 20); p.clsName = str(v.clsName, 80); p.portrait = str(v.portrait, 40); p.pimg = safeImg(v.pimg);
-  p.rolls = (Array.isArray(v.rolls) ? v.rolls : []).filter((r) => r && typeof r === 'object' && Number.isFinite(r.t)).slice(-40).map((r) => Object.assign({}, r, { label: str(r.label, 200), detail: str(r.detail, 400), total: typeof r.total === 'number' ? r.total : typeof r.total === 'string' ? r.total.slice(0, 20) : '?', sides: Number.isInteger(r.sides) && r.sides >= 0 && r.sides <= 100 ? r.sides : 0, nat: Number.isFinite(r.nat) ? r.nat : undefined, dset: typeof r.dset === 'string' && typeof D3_SETS !== 'undefined' && ownKey(D3_SETS, r.dset) ? r.dset : '' }));
-  for (const k of ['hp', 'hpMax', 'temp', 'ac', 'dex', 'level']) if (v[k] != null && !Number.isFinite(+v[k])) delete p[k];
-  if (v.cond != null && !Array.isArray(v.cond)) delete p.cond; else if (Array.isArray(v.cond)) p.cond = v.cond.filter((x) => typeof x === 'string').slice(0, 30);
-  if (v.init != null && (typeof v.init !== 'object' || Array.isArray(v.init))) delete p.init;
+  p.rolls = (Array.isArray(v.rolls) ? v.rolls : []).filter((r) => nvPlain(r) && Number.isFinite(r.t)).slice(-40).map((r) => ({ label: str(r.label, 200), detail: str(r.detail, 400), total: typeof r.total === 'number' && Number.isFinite(r.total) ? r.total : typeof r.total === 'string' ? r.total.slice(0, 20) : '?', crit: r.crit === true, fumble: r.fumble === true, t: r.t, secret: r.secret === true, sides: Number.isInteger(r.sides) && r.sides >= 0 && r.sides <= 100 ? r.sides : 0, nat: Number.isFinite(r.nat) ? r.nat : undefined, dset: typeof r.dset === 'string' && typeof D3_SETS !== 'undefined' && ownKey(D3_SETS, r.dset) ? r.dset : '' }));
+  for (const k of ['hp', 'hpMax', 'temp', 'ac', 'dex', 'level']) take(k, NV.num(-1e6, 1e6));
+  take('cond', (x, q) => NV.arr(NV.text(60), 60)(x, q).slice(0, 30));
+  take('init', NV.nul(NV.obj({ v: NV_N(-1000, 1000), cid: (x, q) => (x === '' ? '' : NV_I(x, q)), away: NV.bool }, [], false)));
+  take('pas', NV.nul(NV.arr(NV.num(-100, 100), 3)));
+  take('ans', (x, q) => NV.arr(NV.obj({ id: NV_I, t: NV_T, x: NV.text(400) }, ['id'], false), 20)(x, q).slice(-10));
+  for (const k of ['dead', 'deathFinal', 'dodge']) take(k, NV.bool);
+  for (const k of ['deadAt', 'diceAt', 't']) take(k, NV_T);
+  take('species', NV.text(80));
+  take('dice', (x, q) => { const d = NV.str(40, /^[A-Za-z0-9_-]*$/)(x, q); return d && (nvProto(d) || (typeof D3_SETS !== 'undefined' && !ownKey(D3_SETS, d))) ? '' : d; });
   return p;
 }
 function joinCamp(v, silent) {
   const code = campSlug(v); if (!code) return;
   if (isApp() && typeof HB_NOCRYPTO !== 'undefined' && HB_NOCRYPTO) { bannerToast('Online-Tisch nicht verfügbar', 'Ohne sichere Verschlüsselung (WebCrypto) verbindet sich das Heldenbuch nicht. Öffne die App über https oder installiert.'); return; }
   if (campUnsub) { try { campUnsub(); } catch (e) {} campUnsub = null; }
+  if (S.camp !== code) { S.combat = null; S.combatRemote = null; S.combatPend = null; S.myInit = null; S.meta = { dm: null, mercy: {} }; } /* neuer Raum: nichts vom alten zeigen */
   S.camp = code; S.table = {}; S.campErr = ''; campJoinedAt = Date.now(); seen.clear(); saveCampPref();
   if (!DB) { S.campErr = 'nodb'; if (!silent) render(); return; }
-  campUnsub = DB.collection('camp/' + code + '/players').onSnapshot((snap) => {
+  campUnsub = DB.collection('camp/' + code + '/players').onSnapshot((snap) => { if (S.camp !== code) return;
     const table = {};
-    snap.docs.forEach((d) => { try { const v = playerDoc(d.data()); if (v && /^[A-Za-z0-9_.:@-]{1,80}$/.test(d.id)) table[d.id] = v; } catch (e) {} });
+    snap.docs.forEach((d) => { try { const v = playerDoc(d.data()); if (v && typeof d.id === 'string' && NV_UID.test(d.id) && !nvProto(d.id)) table[d.id] = v; } catch (e) {} });
     setTimeout(() => { if (typeof d3conflict === 'function') try { d3conflict(); } catch (e) {} }, 0);
     for (const [uid, p] of Object.entries(table)) for (const r of p.rolls) { try { const k = uid + ':' + r.t; if (!seen.has(k)) { seen.add(k); if (uid !== UID && r.t > campJoinedAt && (!r.secret || isDM())) { miniToast(p, r); if (typeof histAdd === 'function') histAdd(r, p.char, true); } } } catch (e) {} }
     S.table = table; paintCamp();
@@ -1310,7 +1359,8 @@ function sendHello(force) {
 function subHello() {
   if (helloUnsub) { try { helloUnsub(); } catch (e) {} helloUnsub = null; } clearTimeout(helloReplyTm); helloReplyTm = 0;
   if (!DB || !S.camp) return; const r = helloRef(); if (typeof r.ping !== 'function') return;
-  try { helloUnsub = r.onSnapshot((d) => { const v = d && d.exists ? d.data() : null;
+  const camp0 = S.camp;
+  try { helloUnsub = r.onSnapshot((d) => { if (S.camp !== camp0) return; const v = d && d.exists ? d.data() : null;
     if (!v || typeof v !== 'object' || v.from === UID || typeof v.id !== 'string' || helloSeen.has(v.id) || Math.abs(Date.now() - (+v.t || 0)) > 120000) return;
     helloSeen.add(v.id); while (helloSeen.size > 200) helloSeen.delete(helloSeen.values().next().value); /* Speicher begrenzen */
     if (helloReplyTm) return; /* viele Anfragen kurz nacheinander: eine gemeinsame Antwort */
@@ -1325,7 +1375,7 @@ function leaveCamp() {
   if (DB && S.camp && UID) DB.collection('camp/' + S.camp + '/players').doc(UID).delete().catch(() => {});
   if (combatUnsub) { try { combatUnsub(); } catch (e) {} combatUnsub = null; }
   if (metaUnsub) { try { metaUnsub(); } catch (e) {} metaUnsub = null; }
-  S.meta = { dm: null, mercy: {} }; S.camp = ''; S.table = {}; S.campErr = ''; S.combat = null; S.myInit = null; saveCampPref(); document.body.classList.remove('myturn');
+  S.meta = { dm: null, mercy: {} }; S.camp = ''; S.table = {}; S.campErr = ''; S.combat = null; S.combatRemote = null; S.combatPend = null; S.myInit = null; saveCampPref(); document.body.classList.remove('myturn');
 }
 function tableRolls() {
   const all = [];
@@ -1414,7 +1464,10 @@ function fall(P) { if (P.dead) return; if (P.conc) endConc(P); P.dead = true; P.
 function subMeta() {
   if (metaUnsub) { try { metaUnsub(); } catch (e) {} metaUnsub = null; }
   if (!DB || !S.camp) return;
-  try { metaUnsub = metaRef().onSnapshot((snap) => { const d = snap.exists ? snap.data() : {}; S.meta = Object.assign({ dm: null, mercy: {} }, d); applyMercy(); applyMeta(); paintCamp(); }, () => {}); } catch (e) { metaUnsub = null; }
+  const camp = S.camp;
+  try { metaUnsub = metaRef().onSnapshot((snap) => { if (S.camp !== camp) return;
+    const chk = validateMetaDoc(!!(snap && snap.exists), snap && snap.exists ? snap.data() : null); if (!chk.ok) { nvWarn('Rundenstand'); return; }
+    S.meta = Object.assign({ dm: null, mercy: {} }, chk.doc || {}); applyMercy(); applyMeta(); paintCamp(); }, () => {}); } catch (e) { metaUnsub = null; }
 }
 async function saveMeta(patch) {
   const next = Object.assign({}, S.meta, patch); if (next.dm === undefined) next.dm = null; if (!next.mercy) next.mercy = {};
@@ -1435,7 +1488,7 @@ function checkMercy() {
   const m = $('#modal');
   if (q.length && (m.hidden || S.modal === 'mercy')) {
     const uid = q[0], p = S.table[uid]; S.modal = 'mercy';
-    m.innerHTML = '<div class="dlg mercy" role="alertdialog" aria-modal="true" aria-labelledby="mercyT">' + psig(p) + '<h2 id="mercyT">Show mercy?</h2><p><b>' + esc(p.char) + '</b> (' + esc(p.clsName) + ' ' + esc(p.level) + ') hat den dritten Todesrettungswurf verfehlt und ist gefallen.</p><p class="hint">Zeigst du Gnade, kehrt der Held mit 1 TP zurück. Sonst bleibt sein Bogen gesperrt – du kannst ihn später in der Gruppenübersicht trotzdem noch zurückholen.</p><div class="chips"><button class="btn ghost" data-act="doom" data-arg="' + esc(uid) + '">Der Tod ist endgültig</button><button class="btn big" data-act="mercy" data-arg="' + esc(uid) + '">Gnade zeigen</button></div></div>';
+    m.innerHTML = '<div class="dlg mercy" role="alertdialog" aria-modal="true" aria-labelledby="mercyT">' + psig(p) + '<h2 id="mercyT">Gnade zeigen?</h2><p><b>' + esc(p.char) + '</b> (' + esc(p.clsName) + ' ' + esc(p.level) + ') hat den dritten Todesrettungswurf verfehlt und ist gefallen.</p><p class="hint">Zeigst du Gnade, kehrt der Held mit 1 TP zurück. Sonst bleibt sein Bogen gesperrt – du kannst ihn später in der Gruppenübersicht trotzdem noch zurückholen.</p><div class="chips"><button class="btn ghost" data-act="doom" data-arg="' + esc(uid) + '">Der Tod ist endgültig</button><button class="btn big" data-act="mercy" data-arg="' + esc(uid) + '">Gnade zeigen</button></div></div>';
     m.hidden = false;
   } else if (!q.length && S.modal === 'mercy') { m.hidden = true; S.modal = null; }
 }
@@ -1461,8 +1514,11 @@ const combatSig = (c) => { const x = Object.assign({}, c); delete x.rev; delete 
 const combatRef = () => DB.doc('camp/' + S.camp + '/state/combat');
 function subCombat() {
   if (combatUnsub) { try { combatUnsub(); } catch (e) {} combatUnsub = null; }
-  if (!DB || !S.camp) return;
-  try { combatUnsub = combatRef().onSnapshot((snap) => { const prev = S.combat; const d = snap.exists ? snap.data() : null; S.combatRemote = d;
+  if (!DB || !S.camp) return; const camp = S.camp;
+  try { combatUnsub = combatRef().onSnapshot((snap) => { if (S.camp !== camp) return; /* verspäteter Aufruf aus einem früheren Raum */
+    /* Fremder Stand wird vor jeder Übernahme geprüft; Ungültiges ändert nichts (kein Merge, kein Speichern), gelöscht bleibt gelöscht */
+    const chk = validateCombatDoc(!!(snap && snap.exists), snap && snap.exists ? snap.data() : null); if (!chk.ok) { nvWarn('Kampfstand'); return; }
+    const prev = S.combat; const d = chk.doc; S.combatRemote = d;
     const pend = S.combatPend; if (pend && d && d.w && d.w !== UID && (+d.rev || 0) <= (+pend.ours.rev || 0) && Date.now() - pend.at < 15000) { S.combatPend = null; const merged = mergeCombat(pend.base, pend.ours, d); if (combatSig(merged) !== combatSig(d)) { S.combat = d; saveCombat(merged); return; } }
     if (pend && Date.now() - pend.at >= 15000) S.combatPend = null;
     S.combat = d; if (typeof hitCheck === 'function') setTimeout(hitCheck, 0);
@@ -1477,7 +1533,7 @@ async function saveCombat(c) {
 function setMyInit(v) { S.myInit = { v: +v, cid: S.combat.id }; if (S.modal === 'initcall') { S.modal = null; const m = $('#modal'); if (m) m.hidden = true; } queueMe(); setTimeout(paintCamp, 50); }
 /* Helden in der Initiative: TP auf einen Blick (wie bei den Gegnern) */
 function pcBits(x) {
-  if (!x.hpMax) return ''; const pct = Math.max(0, Math.min(100, (x.hp / x.hpMax) * 100));
+  if (!x.hpMax) return ''; const pct = Math.max(0, Math.min(100, (+x.hp / +x.hpMax) * 100)) || 0;
   const p = (S.table || {})[x.key.slice(2)] || {}; const cond = (p.cond || []).map((n) => '<span class="ncond">' + esc(n) + '</span>').join('');
   return '<span class="pchp' + (x.hp <= 0 ? ' down' : pct <= 25 ? ' crit' : pct <= 50 ? ' low' : '') + '"><i style="width:' + pct + '%"></i></span><span class="nhp">TP ' + esc(x.hp) + '/' + esc(x.hpMax) + (p.ac ? ' · RK ' + esc(p.ac) : '') + '</span>' + cond;
 }
@@ -1515,11 +1571,11 @@ function fightHtml() {
   const lead = !S.meta.dm || isDM();
   if (!c || !c.active) return '<div class="fhead"><div><h2>Kampf</h2><p class="hint" style="margin:0">' + (lead ? 'Starte einen Kampf: Alle würfeln Initiative, die App sortiert die Reihenfolge und zeigt, wer am Zug ist.' : 'Die Spielleitung startet den Kampf. Dann würfelst du hier oder auf dem Bogen deine Initiative.') + '</p></div>' + (lead && typeof fightDoneBox === 'function' ? fightDoneBox() : '') + (lead ? '<div class="chips"><button class="btn big" data-act="fightStart">Kampf beginnen</button>' + (players().length > 1 ? '<button class="btn ghost sm" data-act="fightPick">Nur einige …</button>' : '') + '</div>' : '') + '</div>';
   const o = order(), w = waiting(), cur = curEntry(); const mine = cur && cur.key === 'p:' + UID;
-  let h = '<div class="fhead"><div><h2>Kampf · Runde ' + (c.round || 1) + '</h2><p class="hint" style="margin:0">' + (c.turn ? (cur ? 'Am Zug: <b>' + esc(cur.name) + '</b>' : '') : 'Alle würfeln Initiative (auf dem Bogen oder hier). Dann „Ersten Zug starten“.') + '</p></div><div class="chips">' +
+  let h = '<div class="fhead"><div><h2>Kampf · Runde ' + esc(c.round || 1) + '</h2><p class="hint" style="margin:0">' + (c.turn ? (cur ? 'Am Zug: <b>' + esc(cur.name) + '</b>' : '') : 'Alle würfeln Initiative (auf dem Bogen oder hier). Dann „Ersten Zug starten“.') + '</p></div><div class="chips">' +
     (!c.turn && lead ? '<button class="btn" data-act="fightGo"' + (o.length ? '' : ' disabled') + '>Ersten Zug starten</button>' : '') +
     (lead && c.turn ? '<button class="btn ghost sm" data-act="fightReset" data-confirm="Neue Begegnung? Alle würfeln neu Initiative, Runde, Zug und Effekte werden zurückgesetzt. Besiegte Gegner verschwinden, die übrigen bleiben." title="Neuer Kampf mit denselben Teilnehmern – alle würfeln neu Initiative">Neue Begegnung</button>' : '') + (lead ? '<button class="btn ghost sm" data-act="fightEnd" data-confirm="Kampf beenden? Initiative, Gegner und Effekte werden für alle gelöscht.">Kampf beenden</button>' : '') + '</div></div>';
   if (lead && cur && cur.npc && typeof npcTurnBox === 'function') h += npcTurnBox(c, cur);
-  h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + x.v + '</span>' + (x.npc ? ((typeof mobPic === 'function' && mobPic(x.mid, 'sigil npc pic')) || '<span class="sigil npc" aria-hidden="true">⚔</span>') : sigil({ name: x.name, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : pcBits(x)) + (typeof effBadges === 'function' ? effBadges(x.key, lead) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
+  h += '<ol class="order">' + (o.length ? o.map((x) => '<li class="' + (x.key === c.turn ? 'now' : '') + (x.me ? ' me' : '') + (x.npc ? ' npc' : '') + '"><span class="iv">' + esc(x.v) + '</span>' + (x.npc ? ((typeof mobPic === 'function' && mobPic(x.mid, 'sigil npc pic')) || '<span class="sigil npc" aria-hidden="true">⚔</span>') : sigil({ name: x.name, cls: x.cls, portrait: x.portrait, portraitImg: x.pimg })) + '<span class="on">' + esc(x.name) + (x.me ? ' <small>(du)</small>' : '') + (x.npc ? ' <small>' + (x.ally ? 'Begleiter' : 'Gegner') + '</small>' : '') + '</span>' + (x.npc ? npcBits(x) : pcBits(x)) + (typeof effBadges === 'function' ? effBadges(x.key, lead) : '') + (x.key === c.turn ? '<span class="tag now">am Zug</span>' : '') + '</li>').join('') : '<li class="empty">Noch keine Initiative gewürfelt.</li>') + '</ol>';
   if (c.log && c.log.length) h += '<details class="clog"><summary>Verlauf <small>' + c.log.length + '</small></summary><ul>' + c.log.slice().reverse().slice(0, 12).map((e) => '<li><span>' + new Date(e.t).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) + '</span>' + esc(e.x) + '</li>').join('') + '</ul></details>';
   if (w.length) h += '<p class="hint">Würfelt noch: ' + w.map((x) => esc(x.name) + (x.me ? ' (du)' : '')).join(', ') + '</p>';
   if (lead && !c.turn && players().length) h += '<div class="fgrp"><b>Überrascht? <small>Nachteil auf den Initiativewurf</small></b><div class="chips">' + players().map(([u, p]) => chip((c.surp || []).includes(u), esc(p.char || '?'), 'data-act="surpTog" data-arg="' + esc(u) + '"')).join('') + '</div><p class="hint">Gegner überrascht: beim Hinzufügen „überrascht“ ankreuzen.</p></div>';
@@ -1540,7 +1596,7 @@ function paintTurn() {
   const o = order(), cur = curEntry(); const mine = cur && cur.key === 'p:' + UID;
   let next = null; if (cur) { const i = o.findIndex((x) => x.key === cur.key); next = o[(i + 1) % o.length]; }
   const meWaiting = waiting().some((x) => x.me); const meAway = (S.myInit && S.myInit.away && S.myInit.cid === c.id) || (notIn(UID, S.table[UID]) && !(S.myInit && S.myInit.cid === c.id && !S.myInit.away));
-  el.innerHTML = '<div class="wrap tb' + (mine ? ' mine' : '') + '"><span class="tbr">Runde ' + (c.round || 1) + '</span>' +
+  el.innerHTML = '<div class="wrap tb' + (mine ? ' mine' : '') + '"><span class="tbr">Runde ' + esc(c.round || 1) + '</span>' +
     (mine ? '<b class="tbme">Du bist am Zug!</b>' : cur ? '<span>Am Zug: <b>' + esc(cur.name) + '</b>' + (next ? (next.key === 'p:' + UID ? ' · <b class="tbnext">danach du</b>' : ' · danach ' + esc(next.name)) : '') + '</span>' : '<span>Kampf beginnt – Initiative würfeln</span>') +
     '<span class="tbsp"></span>' + (meAway ? '<span class="tbaway">Du bist noch nicht im Kampf</span><button class="btn sm" data-act="initRoll">Eingreifen</button>' : meWaiting ? '<button class="btn sm" data-act="initRoll">Initiative würfeln</button><button class="btn sm ghost" data-act="initAway">Noch nicht dabei</button>' : '') + (mine ? '<button class="btn sm glowbtn" data-act="turnEnd">Zug beenden</button>' : cur && (!S.meta.dm || isDM()) ? '<button class="btn sm ghost" data-act="turnEnd" title="Gegner oder abwesende Spieler: weiter zum Nächsten">Weiter ▸</button>' : '') + (S.view !== 'camp' ? '<button class="link" data-act="view" data-arg="camp">Reihenfolge</button>' : '') + '</div>';
   document.body.classList.toggle('myturn', !!mine);
@@ -1554,7 +1610,7 @@ function paintTurn() {
    solange die Zugleiste oben weggescrollt ist. Über dem Würfelfenster nie: dort steht das Ergebnis. */
 function turnCall(round) {
   document.querySelectorAll('.turncall').forEach((x) => x.remove()); const ch = S.chars[S.cur]; const el = document.createElement('div'); el.className = 'turncall'; el.setAttribute('role', 'status');
-  el.innerHTML = '<small>Runde ' + round + '</small><b>Du bist am Zug!</b>' + (ch ? '<span>' + esc(ch.name) + '</span>' : ''); document.body.appendChild(el); setTimeout(() => el.remove(), 1900);
+  el.innerHTML = '<small>Runde ' + esc(round) + '</small><b>Du bist am Zug!</b>' + (ch ? '<span>' + esc(ch.name) + '</span>' : ''); document.body.appendChild(el); setTimeout(() => el.remove(), 1900);
 }
 function turnPill(mine) {
   let p = $('#turnpill'); if (!mine) { if (p) p.remove(); return; }
@@ -1602,7 +1658,7 @@ function goWarn(c, w) {
 /* ---------- Render ---------- */
 let rendering = false;
 /* Reihenfolge: erst alles einfügen (Hilfe-Knöpfe), dann einmal messen (Seitenlayout) – so rechnet der Browser das Layout nur einmal */
-function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } }
+function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } { const fa = document.querySelector('.foot.srdattr'); if (fa) fa.hidden = S.view === 'help'; } /* Lizenztext nur einmal: in der Hilfe steht er schon */ if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } }
 /* Lange Listen (Zauber, Bestiarium) zeichnet der Browser nur, soweit sie sichtbar sind (content-visibility). Damit beim
    Neuzeichnen nichts springt, bekommen die neuen Einträge die Höhen der alten mit – die Seite liegt danach exakt gleich. */
 const cvKey = (el) => { const b = el.querySelector('summary b'); return b ? b.textContent : ''; };
@@ -1686,7 +1742,7 @@ document.addEventListener('click', (ev) => {
     importText: () => openModal('import'),
     closeModal: () => { S.modal = null; $('#modal').hidden = true; },
     copyEx: async () => { const ta = $('#exText'); try { await navigator.clipboard.writeText(ta.value); t.textContent = 'Kopiert ✓'; } catch (e) { ta.focus(); ta.select(); t.textContent = 'Markiert – jetzt kopieren'; } },
-    doImport: () => { try { importJson($('#imText').value); $('#modal').hidden = true; } catch (e) { const er = $('#imErr'); er.hidden = false; er.textContent = 'Das sieht nicht nach einem exportierten Helden aus. Bitte den ganzen Text einfügen.'; } },
+    doImport: () => { try { importJson($('#imText').value); $('#modal').hidden = true; } catch (e) { const er = $('#imErr'); er.hidden = false; er.textContent = (e && e.message ? e.message : 'Das sieht nicht nach einem exportierten Helden aus.') + ' Bitte den ganzen Text einfügen.'; } },
     setCls: () => { if (ch.cls !== arg) { ch.multi = (ch.multi || []).filter((m) => m.cls !== arg); ch.sub = ''; ch.opts = []; ch.cls = arg; ch.classSkills = []; ch.expertise = []; ch.order = ''; ch.cantrips = []; ch.spells = []; ch.styles = []; ch.invocations = []; } commit(); },
     setSpecies: () => { if (ch.species !== arg) { ch.species = arg; ch.speciesChoice = SPECIES[arg].choice ? Object.keys(SPECIES[arg].choice.opts)[0] : ''; ch.speciesSkill = ''; } commit(); },
     bgFeatReset: () => { ch.bgFeat = ''; commit(); },
@@ -1811,7 +1867,7 @@ document.addEventListener('change', (ev) => {
   if (t.id === 'sl') { S.sf.lvl = t.value; render(); return; }
   if (t.id === 'sc') { S.sf.cls = t.value; render(); return; }
   if (t.id === 'importFile' && t.files[0] && typeof ddbImportFile === 'function' && (/\.pdf$/i.test(t.files[0].name || '') || t.files[0].type === 'application/pdf')) { ddbImportFile(t.files[0]); t.value = ''; return; }
-  if (t.id === 'importFile' && t.files[0]) { const r = new FileReader(); r.onload = () => { try { importJson(r.result); } catch (e) { pushLog({ label: 'Datei laden', total: '✗', detail: 'Die Datei ist keine Heldenbuch-Datei.' }); } }; r.readAsText(t.files[0]); t.value = ''; return; }
+  if (t.id === 'importFile' && t.files[0]) { const r = new FileReader(); r.onload = () => { try { importJson(r.result); } catch (e) { pushLog({ label: 'Datei laden', total: '✗', detail: (e && e.message) || 'Die Datei ist keine Heldenbuch-Datei.' }); } }; r.readAsText(t.files[0]); t.value = ''; return; }
   if (t.dataset && t.dataset.bind && !(t.tagName === 'TEXTAREA' || t.type === 'text')) onBind(ev);
   else if (t.dataset && t.dataset.bind && t.type === 'text' && !t.dataset.bind.startsWith('hbe.')) { commit(true); }
 });
@@ -1821,10 +1877,32 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#mod
 document.addEventListener('click', (e) => { if (e.target.id === 'modal' && S.modal !== 'welcome') { e.target.hidden = true; S.modal = null; } });
 function embers() { applyTheme(); if (!FX) startFx(); }
 
+/* ---------- Beschädigte gespeicherte Helden (GK-03) ----------
+   Nicht öffnen, nicht stillschweigend löschen oder überschreiben: sie bleiben gespeichert, bis sie exportiert oder entfernt werden. */
+S.broken = new Map();
+function charSafe(id, c, src) {
+  if (typeof id !== 'string' || nvProto(id)) return null;
+  const e = nvPlain(c) ? charShapeErrors(c) : ['Held: kein Heldenobjekt'];
+  if (!e.length) { try { return normChar(c); } catch (x) { e.push('Held: lässt sich nicht einlesen (' + String(x.message).slice(0, 80) + ')'); } }
+  S.broken.set(id, { c, err: e, src }); return null;
+}
+function charsSafe(map, src) { const out = {}; if (!nvPlain(map)) return out; for (const [id, c] of Object.entries(map)) { const n = charSafe(id, c, src); if (n) out[id] = n; } return out; }
+function brokenHtml(failed) {
+  const L = [...S.broken.entries()].map(([id, b]) => ({ id, name: nvPlain(b.c) && typeof b.c.name === 'string' ? b.c.name : 'Unbenannter Held', why: b.err[0] || '', act: 'brokenExport', del: 'brokenDel' }))
+    .concat(failed.map((x) => ({ id: x.id, name: x.name, why: 'Werte lassen sich nicht berechnen: ' + x.why, act: 'exportOne', del: 'delChar' })));
+  if (!L.length) return '';
+  return '<section class="panel brokenp"><h2>Beschädigte Helden</h2><p class="hint">Diese Helden sind fehlerhaft gespeichert und werden nicht geöffnet. Sie bleiben unverändert erhalten. Exportiere sie zur Rettung oder entferne sie.</p><ul>' +
+    L.map((x) => '<li><b>' + esc(x.name) + '</b> <small>' + esc(x.why) + '</small> <button class="btn sm ghost" data-act="' + x.act + '" data-arg="' + esc(x.id) + '">Exportieren</button> <button class="btn sm ghost" data-act="' + x.del + '" data-arg="' + esc(x.id) + '"' + ' data-confirm="Beschädigten Helden «' + esc(x.name) + '» endgültig entfernen? Exportiere ihn vorher, wenn du ihn retten willst.">Entfernen</button></li>').join('') + '</ul></section>';
+}
+Object.assign(XA, {
+  brokenExport: (t, a) => { const b = S.broken.get(a); if (!b) return; doExport([b.c], 'Beschaedigt_' + fileName(nvPlain(b.c) ? b.c : {})); },
+  brokenDel: (t, a) => { if (!S.broken.has(a)) return; S.broken.delete(a); persist('c', a); render(); }
+});
 /* ---------- Start ---------- */
 (function boot() {
   const l = lsGet();
-  if (l && l.chars) { S.chars = l.chars; S.hb = l.hb || {}; S.cur = l.cur; Object.values(S.chars).forEach(normChar); }
+  if (l && l.chars) { S.chars = charsSafe(l.chars, 'Gerät'); S.hb = nvPlain(l.hb) ? l.hb : {}; S.cur = l.cur; }
+  if (S.broken.size || S.lsDefekt) setTimeout(() => bannerToast('Beschädigte Daten gefunden', S.lsDefekt === 'voll' ? 'Der gespeicherte Stand ist unlesbar und der Speicher voll. Bitte nichts ändern und Hilfe holen.' : S.broken.size ? S.broken.size + ' Held(en) sind beschädigt und werden nicht geöffnet. Sie bleiben gespeichert – unter «Helden» exportieren oder entfernen.' : 'Der gespeicherte Stand war unlesbar. Eine Kopie liegt unter «heldenbuch_defekt» im Browser.'), 600);
   if (!S.chars[S.cur]) S.cur = Object.keys(S.chars)[0] || null;
   try { const cp = JSON.parse(localStorage.getItem('heldenbuch_camp') || 'null'); if (cp) { S.camp = cp.code || ''; S.share = cp.share !== false; S.secret = !!cp.secret; } } catch (e) {}
   render();

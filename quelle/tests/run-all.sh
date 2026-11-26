@@ -85,6 +85,14 @@ run "Erweiterung: 6 Klassen, 9 Völker, erweiterte Auswahl (erweiterung.test.js)
 run "Prüfberichte 25.11.: Würfelanzeige, Schild, Tisch-Anfragen, Audit HB-01–HB-15 (pruefbericht.test.js)" node tests/pruefbericht.test.js
 run "Tischhilfen: eigene Würfel, Zugleiste, Ladungen, Regeln der Runde, Vorbereiten (tischhilfen.test.js)" node tests/tischhilfen.test.js
 run "Sicherheit: fremder Text wirkt nie als HTML (sicherheit.test.js)" node tests/sicherheit.test.js
+run "GK-01/GK-07 Vertrauensgrenze am Tisch: fremde Kampf-, Runden- und Spielerdaten (gk-netz.test.js)" node tests/gk-netz.test.js
+run "GK-02 Verdeckte Würfe werden nie nachträglich geteilt (gk-wuerfe.test.js)" node tests/gk-wuerfe.test.js
+run "GK-03 Import und gespeicherter Bestand: Prüfung mit Feldpfad, keine Teilübernahme, Isolation (gk-import.test.js)" node tests/gk-import.test.js
+run "GK-04/05/06 Aktionsökonomie: fremder Zug, Folgeangriffe, Vorbereiten (gk-zug.test.js)" node tests/gk-zug.test.js
+run "GK-08 Grosse verschlüsselte Nachrichten (gk-b64.test.js)" node tests/gk-b64.test.js
+run "GK-11 Gnaden-Dialog auf Deutsch (gk-gnade.test.js)" node tests/gk-gnade.test.js
+run "GK-09 Prüfpaket: beide Fassungen und Manifest (gk-paket.test.js)" node tests/gk-paket.test.js
+run "GK-10 SRD-5.2.1-Attribution wortgetreu (gk-lizenz.test.js)" node tests/gk-lizenz.test.js
 run "Begleiter und Reittiere: Werte, TP, Initiative, eigene Würfel (begleiter.test.js)" node tests/begleiter.test.js
 run "Bedienung mit Tastatur und im Querformat (bedienung.test.js)" node tests/bedienung.test.js
 run "Zufallsspieler: 3 Minuten zufällige Bedienung ohne Fehler (zufallsspieler.test.js)" node tests/zufallsspieler.test.js --min=3

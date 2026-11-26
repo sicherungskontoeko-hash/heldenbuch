@@ -20,16 +20,19 @@ function turnReset(ch, keepReaction) {
 const tMagicOk = (ch) => { const t = turnSt(ch); if (t.a >= t.aMax) return false; if (!t.aSurge) return true; return (t.aPre || 0) + (t.aMagicPost || 0) < t.aMax - t.aSurge; }; /* vor Tatendrang verbrauchte Aktionen belegen normale Aktionen */
 const tMagicUse = (ch) => { const t = turnSt(ch); t.aMagic = (t.aMagic || 0) + 1; if (t.aSurge) t.aMagicPost = (t.aMagicPost || 0) + 1; };
 const tLeft = (ch, k) => { if (typeof turnTrack === 'function' && !turnTrack()) return 1; const t = turnSt(ch); return k === 'a' ? t.aMax - t.a : k === 'b' ? 1 - t.b : k === 'r' ? 1 - t.r : 1; };
+/* Ausserhalb des eigenen Zugs am Tisch gibt es nur Reaktionen und freie Handlungen: neue Aktionen, Bonusaktionen und
+   weitere Teilangriffe sind im strengen Modus gesperrt, im lockeren Modus mit Hinweis erlaubt (GK-04/05). Rückgabe true = erlaubt. */
+function offTurnGate(label) {
+  if (typeof offTurn !== 'function' || !offTurn()) return true;
+  if (rule('strict')) { bannerToast('Nicht dein Zug', label + ': Aktion und Bonusaktion gehen nur im eigenen Zug. Jetzt höchstens eine Reaktion.'); return false; }
+  bannerToast('Nicht dein Zug', label + ' wurde trotzdem ausgeführt (Regeln locker).'); return true;
+}
 /* Verbucht Aktion/Bonusaktion/Reaktion. Rückgabe false = blockiert (strenger Modus im Kampf), dann wurde nichts verändert. */
 function tSpend(ch, k, label, force) {
   if (k === 'f') return true;
   if (!force) {
     const why = canAct(ch); if (why && !ruleGate(ch, label + ': ' + why, label + ' nicht möglich', true)) return false;
-    /* Ausserhalb des eigenen Zugs am Tisch gibt es nur Reaktionen und freie Handlungen */
-    if ((k === 'a' || k === 'b') && typeof offTurn === 'function' && offTurn()) {
-      if (rule('strict')) { bannerToast('Nicht dein Zug', label + ': Aktion und Bonusaktion gehen nur im eigenen Zug. Jetzt höchstens eine Reaktion.'); return false; }
-      bannerToast('Nicht dein Zug', label + ' wurde trotzdem ausgeführt (Regeln locker).');
-    }
+    if ((k === 'a' || k === 'b') && !offTurnGate(label)) return false;
     if (tLeft(ch, k) <= 0) {
       if (inFight(ch) && rule('strict')) { bannerToast(COST_DE[k] + ' schon verbraucht', label + ' ist in diesem Zug nicht mehr möglich. Neuer Zug: „Neuer Zug“ oder Zugwechsel am Tisch.'); return false; }
       if (inFight(ch)) bannerToast(COST_DE[k] + ' schon verbraucht', label + ' wurde trotzdem ausgeführt (Regeln locker).');
@@ -43,10 +46,11 @@ function tRefresh() { setTimeout(() => { const ch = cur(); if (!ch) return; try 
 /* Wird von weaponAttack aufgerufen – zählt Angriffe der Angriffsaktion */
 function tCountAttack(ch, c, how, src) {
   const t = turnSt(ch);
-  if (how === 'bonus') { if (t.bonusAtk > 0) { const why = canAct(ch); if (why && !ruleGate(ch, why, null, true)) return false; t.bonusAtk--; tRefresh(); return true; } return tSpend(ch, 'b', src || 'Bonusangriff'); }
-  if (how === 'nick') { const why = canAct(ch); if (why && !ruleGate(ch, why, null, true)) return false; tRefresh(); return true; }
+  /* bereits bezahlte Teilangriffe: kein neuer Verbrauch, aber nur im eigenen Zug (GK-05); Gelegenheitsangriffe bleiben Reaktionen */
+  if (how === 'bonus') { if (t.bonusAtk > 0) { const why = canAct(ch); if (why && !ruleGate(ch, why, null, true)) return false; if (!offTurnGate(src || 'Bonusangriff')) return false; t.bonusAtk--; tRefresh(); return true; } return tSpend(ch, 'b', src || 'Bonusangriff'); }
+  if (how === 'nick') { const why = canAct(ch); if (why && !ruleGate(ch, why, null, true)) return false; if (!offTurnGate(src || 'Zusatzangriff (Kerbe)')) return false; tRefresh(); return true; }
   if (how === 'reaction') return tSpend(ch, 'r', src || 'Gelegenheitsangriff');
-  if (t.atk > 0 && t.atk < c.attacksPer) { const why = canAct(ch); if (why && !ruleGate(ch, why, null, true)) return false; t.atk++; tRefresh(); return true; }
+  if (t.atk > 0 && t.atk < c.attacksPer) { const why = canAct(ch); if (why && !ruleGate(ch, why, null, true)) return false; if (!offTurnGate(src || 'Angriff')) return false; t.atk++; tRefresh(); return true; }
   if (!tSpend(ch, 'a', 'Angriff')) return false; t.atk = 1; return true;
 }
 /* Wird von castSpell aufgerufen – Zauber nach Zeitaufwand verbuchen (Prüfung vorher in spellCheck) */
@@ -205,11 +209,19 @@ function stdRun(ch, c, id) {
   else if (id === 'hide') d20(c.skills.ste.val, 'Verstecken (Heimlichkeit)', { kind: 'check:dex:ste:' + c.skills.ste.prof });
   else if (id === 'search') d20(c.skills.prc.val, 'Suchen (Wahrnehmung)', { kind: 'check:wis:prc:' + c.skills.prc.prof });
   else if (id === 'study') d20(c.skills.inv.val, 'Studieren (Nachforschungen)', { kind: 'check:int:inv:' + c.skills.inv.prof });
-  else if (id === 'ready') readyAsk();
+  else if (id === 'ready') readyAsk(ch);
   else { const s = STD_ACTIONS.find((x) => x[0] === id); tLog(s[1], s[3] || ''); }
 }
 /* Vorbereiten: Auslöser in eigenen Worten; tritt er ein, kostet die vorbereitete Handlung deine Reaktion. Gilt bis zum Beginn deines nächsten Zugs. */
-function readyAsk() {
+/* Würde «Vorbereiten» jetzt im strengen Modus scheitern? Ohne Nebenwirkung; im lockeren Modus öffnet das Fenster immer. */
+function readyBlock(ch) {
+  if (!rule('strict')) return null; const why = canAct(ch); if (why) return ['Vorbereiten nicht möglich', 'Vorbereiten: ' + why];
+  if (typeof offTurn === 'function' && offTurn()) return ['Nicht dein Zug', 'Vorbereiten: Aktion und Bonusaktion gehen nur im eigenen Zug. Jetzt höchstens eine Reaktion.'];
+  if (inFight(ch) && tLeft(ch, 'a') <= 0) return [COST_DE.a + ' schon verbraucht', 'Vorbereiten ist in diesem Zug nicht mehr möglich. Neuer Zug: „Neuer Zug“ oder Zugwechsel am Tisch.'];
+  return null;
+}
+function readyAsk(ch) {
+  S.readyCtx = ch ? { id: ch.id, turn: turnKeyNow(ch), fight: (S.combat && S.combat.id) || '' } : null; /* das Fenster gehört zu diesem Held, Kampf und Zug */
   orbPrompt('<div class="pr"><b>Vorbereiten</b><p>Wann handelst du, und was tust du dann? Tritt der Auslöser ein, tippst du «Auslösen»: Das kostet deine Reaktion.</p>' +
     '<label class="fld"><span>Auslöser</span><input type="text" id="readyTrig" maxlength="80" placeholder="z. B. Sobald die Tür aufgeht"></label>' +
     '<label class="fld"><span>Handlung</span><input type="text" id="readyWhat" maxlength="80" placeholder="z. B. Angriff mit dem Bogen"></label>' +
@@ -282,6 +294,8 @@ function turnRun(ch, id) {
   if (kind === 'ush') { const nm = a1 === 'grapple' ? 'Packen' : 'Stossen'; if (!tCountAttack(ch, c, '', nm)) return; const dc = 8 + c.mod.str + c.pb;
     if (typeof saveCond === 'function') { commit(); return saveCond({ label: nm + ' (waffenloser Schlag)', ab: 'STÄ oder GES', dc, conds: a1 === 'grapple' ? ['grappled'] : [], fx: a1 === 'grapple' ? 'Bewegungsrate 0 – du brauchst eine freie Hand' : '1,5 m weggestossen oder liegend (du wählst)', okFx: 'nichts passiert' }); }
     tLog(nm + ' (waffenloser Schlag)', 'Das Ziel (höchstens eine Grösse grösser) macht einen STÄ- oder GES-Rettungswurf (es wählt) gegen SG ' + dc + '. Misslingt er: ' + (a1 === 'grapple' ? 'gepackt (Bewegungsrate 0). Du brauchst eine freie Hand.' : '1,5 m weggestossen oder liegend (du wählst).') + ' ' + (typeof slTag === 'function' ? 'SL entscheidet.' : '')); commit(); return; }
+  /* Vorbereiten: Öffnen ist nur eine Vorschau, die Aktion kostet erst «Vorbereiten» im Fenster (GK-06) */
+  if (kind === 'std' && a1 === 'ready') { const why = readyBlock(ch); if (why) { bannerToast(why[0], why[1]); return; } return readyAsk(ch); }
   if (kind === 'std') { const s = STD_ACTIONS.find((x) => x[0] === a1); if (!tSpend(ch, s[2], s[1])) return; stdRun(ch, c, a1); commit(); }
 }
 function tLohPrompt(ch, c) {
@@ -374,12 +388,19 @@ function openTurnPicker(k) {
 }
 Object.assign(XA, {
   tPick: (t, a) => openTurnPicker(a),
-  tUse: (t, a, p, ch) => { if (S.modal === 'turn') { S.modal = null; $('#modal').hidden = true; } if (a.startsWith('bfl:')) { const st = turnSt(ch); st.bonusAtk = Math.max(0, st.bonusAtk - 1); weaponAttack(ch, 0, { bonusPaid: true }); commit(); return; } turnRun(ch, a); },
+  tUse: (t, a, p, ch) => { if (S.modal === 'turn') { S.modal = null; $('#modal').hidden = true; } if (a.startsWith('bfl:')) { const st = turnSt(ch); /* bezahlter Schlaghagel: nur im eigenen Zug und nur, solange ein Schlag übrig ist (GK-05) */
+      if (!(st.bonusAtk > 0) && inFight(ch) && rule('strict')) { bannerToast('Kein Schlag übrig', 'Schlaghagel: Alle bezahlten Schläge sind schon ausgeführt.'); return; }
+      { const why = canAct(ch); if (why && !ruleGate(ch, why, null, true)) return; } if (!offTurnGate('Schlaghagel')) return;
+      st.bonusAtk = Math.max(0, st.bonusAtk - 1); weaponAttack(ch, 0, { bonusPaid: true }); commit(); return; } turnRun(ch, a); },
   tFav: (t, a, p, ch) => { ch.favs = ch.favs || []; const i = ch.favs.indexOf(a); if (i >= 0) ch.favs.splice(i, 1); else ch.favs.push(a); commit(); const k = turnOpts(derive(ch, S.hb)).find((o) => o.id === a); if (S.modal === 'turn' && k) openTurnPicker(k.cost === 'f' ? 'b' : k.cost); },
   tToggle: (t, a, p, ch) => { const st = turnSt(ch); if (a === 'a') st.a = st.a >= st.aMax ? 0 : st.aMax; else st[a] = st[a] ? 0 : 1; commit(); openTurnPicker(a); },
   tNew: (t, a, p, ch) => { turnReset(ch); commit(); },
-  readyGo: (t, a, p, ch) => { const tr = (($('#readyTrig') || {}).value || '').trim(); const wh = (($('#readyWhat') || {}).value || '').trim(); if (!tr) { const el = $('#readyTrig'); if (el) { el.focus(); el.setAttribute('aria-invalid', 'true'); } return; } ch.play.ready = { trig: tr.slice(0, 80), what: wh.slice(0, 80), t: Date.now() }; orbPrompt(''); tLog('Vorbereitet', 'Auslöser: ' + tr + (wh ? ' · Handlung: ' + wh : '') + ' · kostet beim Auslösen die Reaktion'); commit(); },
-  readyNo: () => orbPrompt(''),
+  readyGo: (t, a, p, ch) => { const ctx = S.readyCtx; if (!ctx) return; /* schon bestätigt (Doppelklick) oder Fenster veraltet */
+    if (!ch || ctx.id !== ch.id || ctx.turn !== turnKeyNow(ch) || ctx.fight !== ((S.combat && S.combat.id) || '')) { S.readyCtx = null; orbPrompt(''); bannerToast('Vorbereiten abgebrochen', 'Held, Kampf oder Zug haben inzwischen gewechselt. Nichts wurde verbraucht.'); return; }
+    const tr = (($('#readyTrig') || {}).value || '').trim(); const wh = (($('#readyWhat') || {}).value || '').trim(); if (!tr) { const el = $('#readyTrig'); if (el) { el.focus(); el.setAttribute('aria-invalid', 'true'); } return; }
+    if (!tSpend(ch, 'a', 'Vorbereiten')) return; /* normale Zugprüfung erst jetzt; blockiert bleibt das Fenster offen, nichts verbraucht */
+    S.readyCtx = null; ch.play.ready = { trig: tr.slice(0, 80), what: wh.slice(0, 80), t: Date.now() }; orbPrompt(''); tLog('Vorbereitet', 'Auslöser: ' + tr + (wh ? ' · Handlung: ' + wh : '') + ' · kostet beim Auslösen die Reaktion'); commit(); },
+  readyNo: () => { S.readyCtx = null; orbPrompt(''); },
   readyFire: (t, a, p, ch) => { const rd = ch.play.ready; if (!rd) return; if (!tSpend(ch, 'r', 'Vorbereitete Handlung')) return; delete ch.play.ready; tLog('Vorbereitete Handlung ausgelöst', rd.trig + (rd.what ? ' → ' + rd.what : '') + ' · Reaktion verbraucht'); commit(); },
   readyDrop: (t, a, p, ch) => { if (!ch.play.ready) return; delete ch.play.ready; tLog('Vorbereitung aufgegeben', ''); commit(); },
   tTime: (t, a, p, ch) => { timePass(ch, +a); commit(); },

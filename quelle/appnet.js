@@ -12,7 +12,10 @@ const HB_PREFIX = 'heldenbuch-v2/';
    und AES-GCM-verschlüsselte Daten (Schlüssel per PBKDF2 aus dem Raumcode). Unverschlüsselte Fremdnachrichten werden verworfen. */
 const HB_ROOM = new Map();
 var HB_NOCRYPTO = !(typeof crypto !== 'undefined' && crypto.subtle && crypto.getRandomValues);
-const hbB64 = (u) => btoa(String.fromCharCode(...u)); const hbUb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+/* Base64 ohne Spread-Argumente (GK-08): String.fromCharCode(...u) scheitert ab rund 100 KB am Argumentlimit.
+   Bytes blockweise in Zeichen umwandeln, dann EINMAL kodieren – einzeln kodierte Blöcke ergäben falsches Padding. */
+function hbB64(u) { let s = ''; for (let i = 0; i < u.length; i += 0x4000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x4000)); return btoa(s); }
+function hbUb64(s) { const b = atob(s); const u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
 function hbRoomOf(path) { const m = /^(camp|transfer)\/([^/]+)(\/.*)?$/.exec(path); return m ? { kind: m[1], code: m[2], rest: m[3] || '' } : { kind: 'x', code: path, rest: '' }; }
 function hbRoomKey(code) {
   if (HB_ROOM.has(code)) return HB_ROOM.get(code);
@@ -28,7 +31,10 @@ function hbRoomKey(code) {
   HB_ROOM.set(code, p); return p;
 }
 async function hbTopic(path) { const r = hbRoomOf(path); const k = await hbRoomKey(r.code); return { topic: HB_PREFIX + r.kind + '/' + k.tb + r.rest, key: k.key }; }
-async function hbSeal(key, obj) { const s = JSON.stringify(obj); if (!key) throw new Error('nocrypto'); const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(s)); return JSON.stringify({ e: 1, iv: hbB64(iv), ct: hbB64(new Uint8Array(ct)) }); }
+async function hbSeal(key, obj) { const s = JSON.stringify(obj); if (!key) throw new Error('nocrypto'); const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(s)); const env = JSON.stringify({ e: 1, iv: hbB64(iv), ct: hbB64(new Uint8Array(ct)) });
+  /* Was die Empfänger ohnehin verwerfen (HB_MAX_MSG), gar nicht erst senden – nie unverschlüsselt ausweichen */
+  if (env.length > HB_MAX_MSG) { if (typeof bannerToast === 'function' && Date.now() - (hbSeal.warned || 0) > 60000) hbSeal.warned = Date.now(), bannerToast('Nicht gesendet', 'Die Daten sind zu gross für den Online-Tisch (höchstens ' + (HB_MAX_MSG / 1e6) + ' MB verschlüsselt). Ein kleineres Porträt hilft.'); throw Object.assign(new Error('Nachricht zu gross'), { code: 'too_large' }); }
+  return env; }
 /* Obergrenzen für Empfangenes: ein Dokument (mit Porträt) bleibt weit darunter */
 const HB_MAX_MSG = 3e6, HB_MAX_PKT = 4e6, HB_DOC_ID = /^[A-Za-z0-9_.:@-]{1,80}$/;
 async function hbOpen(key, msg) {
@@ -43,7 +49,7 @@ function hbServer() { const k = hbLs.get('hb_server', 'hivemq'); if (k === 'cust
 
 /* ---------- Kleiner MQTT-3.1.1-Client (QoS 0, retained) ---------- */
 class HbMqtt {
-  constructor() { this.subs = new Map(); this.queue = new Map(); this.state = 'offline'; this.listeners = new Set(); this.buf = new Uint8Array(0); this.pid = 1; this.retry = 0; this.want = false; }
+  constructor() { this.subs = new Map(); this.unsubT = new Map(); this.queue = new Map(); this.state = 'offline'; this.listeners = new Set(); this.buf = new Uint8Array(0); this.pid = 1; this.retry = 0; this.want = false; }
   onState(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
   setState(s) { if (this.state === s) return; this.state = s; this.listeners.forEach((f) => { try { f(s); } catch (e) {} }); }
   start() { this.want = true; if (this.ws && (this.state === 'online' || this.state === 'verbinde')) return; this.open(); }
@@ -81,8 +87,10 @@ class HbMqtt {
   match(filter, topic) { const f = filter.split('/'), t = topic.split('/'); for (let i = 0; i < f.length; i++) { if (f[i] === '#') return true; if (f[i] !== '+' && f[i] !== t[i]) return false; } return f.length === t.length; }
   dispatch(topic, msg) { for (const [f, fns] of this.subs) if (this.match(f, topic)) fns.forEach((fn) => { try { fn(topic, msg); } catch (e) {} }); }
   sub(topic) { const id = this.pid++ & 0xffff || 1; this.send(this.pkt(0x82, [[id >> 8, id & 255]], [this.str(topic), [0]])); }
-  subscribe(topic, fn) { let s = this.subs.get(topic); if (!s) { s = new Set(); this.subs.set(topic, s); if (this.state === 'online') this.sub(topic); } s.add(fn); this.start();
-    return () => { const set = this.subs.get(topic); if (!set) return; set.delete(fn); if (!set.size) { this.subs.delete(topic); const id = this.pid++ & 0xffff || 1; this.send(this.pkt(0xA2, [[id >> 8, id & 255]], [this.str(topic)])); } }; }
+  subscribe(topic, fn) { let s = this.subs.get(topic); if (!s) { s = new Set(); this.subs.set(topic, s); const u = this.unsubT.get(topic); if (u) { clearTimeout(u); this.unsubT.delete(topic); } if (this.state === 'online') this.sub(topic); } s.add(fn); this.start();
+    /* Abmelden verzögert senden: Wer denselben Raum sofort neu betritt, abonniert erneut, bevor das Abmelden beim Server ist.
+       Sonst kann der Server Abmelden und Anmelden in falscher Reihenfolge verarbeiten, und das Gerät bekäme nichts mehr (im Test mit aedes belegt). */
+    return () => { const set = this.subs.get(topic); if (!set) return; set.delete(fn); if (!set.size) { this.subs.delete(topic); clearTimeout(this.unsubT.get(topic)); this.unsubT.set(topic, setTimeout(() => { this.unsubT.delete(topic); if (this.subs.has(topic)) return; const id = this.pid++ & 0xffff || 1; this.send(this.pkt(0xA2, [[id >> 8, id & 255]], [this.str(topic)])); }, 1500)); } }; }
   pub(topic, payload, retain) { const u = new TextEncoder().encode(payload); return this.send(this.pkt(0x30 | (retain ? 1 : 0), [this.str(topic)], [Array.from(u)])); }
   publish(topic, payload, retain) { this.start(); if (this.state !== 'online' || !this.pub(topic, payload, retain)) this.queue.set(topic, [payload, retain]); }
 }

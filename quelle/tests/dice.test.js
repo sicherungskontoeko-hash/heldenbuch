@@ -36,7 +36,8 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     T(dev.n + ': Set wird an den Tisch übertragen', await p.evaluate(() => meDoc().dice === 'weltenhain'));
     await p.evaluate(() => { S.camp = ''; S.table = {}; S.modal = null; $('#modal').hidden = true; });
     /* Würfe */
-    await p.evaluate(() => { localStorage.setItem('hb_dice_fx', 'voll'); pushLog({ label: 'Test', total: 14, detail: 'W20 [14]', sides: 20, nat: 14 }); });
+    /* Geteilt wird nur, was in einem Raum mit Freigabe gewürfelt wurde (GK-02): darum für die Würfe einen Raum setzen */
+    await p.evaluate(() => { S.camp = 'testraum'; S.share = true; S.secret = false; localStorage.setItem('hb_dice_fx', 'voll'); pushLog({ label: 'Test', total: 14, detail: 'W20 [14]', sides: 20, nat: 14 }); });
     await p.waitForTimeout(300); T(dev.n + ': Wurf läuft animiert (voll)', await p.evaluate(() => !!document.querySelector('#toast .die.d3.rolling3 svg, #toast .die.d3.rolling3 canvas')));
     await p.locator('#toast').click({ force: true }); await p.waitForTimeout(80); T(dev.n + ': Antippen überspringt', await p.evaluate(() => !!document.querySelector('#toast .die.d3.land') && !document.querySelector('#toast .rolling3')));
     T(dev.n + ': Wurf trägt das Set und wird mit Set geteilt', await p.evaluate(() => S.log[0].dset === 'weltenhain' && myRolls()[0].dset === 'weltenhain' && myRolls()[0].nat === 14));
@@ -57,7 +58,8 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     await p.evaluate(() => { localStorage.setItem('hb_dice_fx', 'voll'); pushLog({ label: '8W6', total: 28, detail: '8W6', groups: [{ sides: 6, rolls: [6, 3, 4, 1, 5, 2, 6, 1], sign: 1 }] }); }); await p.waitForTimeout(1600);
     T(dev.n + ': viele Würfel: alle im Design gelandet', await p.evaluate(() => document.querySelectorAll('#tray .die.d3.land').length === 8));
     await p.evaluate(() => { const n = S.log.length; XA.diceTry(null, 'n20'); window.__n = n; });
-    T(dev.n + ': Probewurf wird nicht an den Tisch geteilt', await p.evaluate(() => S.log[0].preview === true && !myRolls().some((r) => r.label === 'Probewurf')));
+    T(dev.n + ': Probewurf wird nicht an den Tisch geteilt', await p.evaluate(() => S.log[0].preview === true && !myRolls().some((r) => r.label === 'Probewurf') && myRolls().length > 0));
+    await p.evaluate(() => { S.camp = ''; });
     await p.evaluate(() => { localStorage.setItem('hb_dice_snd', '1'); d3snd('roll', 2); d3snd('land'); d3snd('n20'); d3snd('n1'); });
     T(dev.n + ': Geräusche ohne Fehler', true);
     await p.evaluate(() => localStorage.setItem('hb_dice_snd', '0'));
