@@ -33,14 +33,17 @@ shell = re.sub(r'<link rel="stylesheet" href="https://fonts.googleapis.com[^>]*>
 shell = shell.replace('<meta name="claude:viewport-fit-sides" content="cover">\n', '')
 fav = 'data:image/png;base64,' + b64(os.path.join(ROOT, 'app/assets/favicon-32.png'))
 head_extra = ('<link rel="icon" href="%s">\n<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="mobile-web-app-capable" content="yes">\n'
-              '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n<meta name="apple-mobile-web-app-title" content="Heldenbuch">\n'
-              '<meta name="description" content="Deutsches D&amp;D-Heldenbuch: Charaktere erschaffen, Bogen, Würfel und gemeinsamer Tisch.">\n'
+              '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n<meta name="apple-mobile-web-app-title" content="Fablecrown">\n'
+              '<meta name="description" content="Fablecrown – deutschsprachiger Begleiter fürs Rollenspiel am Tisch: Charaktere erschaffen, Bogen, Würfel und gemeinsamer Tisch.">\n'
               # Vorschau beim Teilen des Links (WhatsApp, Signal, Teams): Bild liegt in www/teilen.jpg auf GitHub Pages
-              '<meta property="og:type" content="website">\n<meta property="og:site_name" content="Heldenbuch">\n<meta property="og:title" content="Heldenbuch">\n'
+              '<meta property="og:type" content="website">\n<meta property="og:site_name" content="Fablecrown">\n<meta property="og:title" content="Fablecrown">\n'
               '<meta property="og:description" content="Charakterbogen, Würfel und Spieltisch für D&amp;D auf Deutsch.">\n'
               '<meta property="og:image" content="https://sicherungskontoeko-hash.github.io/heldenbuch/teilen.jpg">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n'
               '<meta name="twitter:card" content="summary_large_image">\n') % fav
-shell = shell.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n' + head_extra, 1)
+# Ersetzungsanker: der Titel aus shell.html (beim Umbenennen beide Stellen gemeinsam ändern)
+TITLE = '<title>Fablecrown</title>'
+assert shell.count(TITLE) == 1, 'Titel-Anker fehlt in shell.html: ' + TITLE
+shell = shell.replace(TITLE, TITLE + '\n' + head_extra, 1)
 
 scripts = ['appnet.js', 'data.js', 'spells.js', 'spells2.js', 'spelldata.js', 'calc.js', 'hbclasses.js', 'subs.js', 'subs2.js', 'flavor.js', 'pics.js', 'subpics.js', 'assets.js', 'crests.js', 'extra.js', 'vfx.js', 'vfxspiel.js', 'items2.js', 'scenes.js', 'theme.js', 'theme-fx.js', 'turn.js', 'effects.js', 'rules.js', 'search.js', 'encounter.js', 'monsters2.js', 'randenc.js', 'mobfx.js', 'mobedit.js', 'loot.js', 'explain.js', 'ux.js', 'help.js', 'hilfe.js', 'verlauf.js', 'spellflav.js', 'info.js', 'dice3d.js', 'wuerfel3d.js', 'vfxton.js', 'vfxui.js', 'levelup.js', 'savedmg.js', 'mechanics.js', 'welcome.js', 'mobsaves.js', 'mobpics.js', 'initcall.js', 'adv-machtader.js', 'adv-krug.js', 'adventure.js', 'slhelfer.js', 'chronik.js', 'kbuch.js', 'claudebr.js', 'stand.js', 'pflege.js', 'ddbimport.js', 'app.js']
 # Reine Bilddateien als eigene <script>-Blöcke zuerst (nur Latin-1-Zeichen: der Browser liest sie platzsparend, der Programmcode wird schneller übersetzt)
@@ -53,7 +56,9 @@ m = re.search(r'<meta charset="[^"]*">', shell, re.I)
 assert m, 'meta charset fehlt'
 shell = shell[:m.end()] + '\n<script>\n' + boot + '</script>' + shell[m.end():]
 single = shell + asset_js + '<script>\n' + js + '\n</script>\n<!--HB_END-->\n'
-pwa = single.replace('<title>Heldenbuch</title>', '<title>Heldenbuch</title>\n<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">', 1)
+assert single.count(TITLE) == 1, 'Titel-Anker fehlt'
+pwa = single.replace(TITLE, TITLE + '\n<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">', 1)
+assert 'rel="manifest"' in pwa and 'rel="icon"' in single, 'Manifest- oder Favicon-Verweis fehlt'
 
 if os.path.exists(OUT):
     shutil.rmtree(OUT)
@@ -65,7 +70,7 @@ with open(os.path.join(ROOT, 'app', 'Heldenbuch.html'), 'w', encoding='utf-8') a
 for n in ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'favicon-32.png']:
     shutil.copy(os.path.join(ROOT, 'app/assets', n), os.path.join(OUT, 'icons', n))
 manifest = {
-    'name': 'Heldenbuch – D&D auf Deutsch', 'short_name': 'Heldenbuch', 'lang': 'de', 'start_url': './', 'scope': './',
+    'name': 'Fablecrown – Tabletop RPG Companion', 'short_name': 'Fablecrown', 'lang': 'de', 'start_url': './', 'scope': './',
     'display': 'standalone', 'orientation': 'any', 'background_color': '#130E0A', 'theme_color': '#130E0A',
     'description': 'Charaktere erschaffen, Charakterbogen, Würfel, Kampagnen-Tisch für Handy und PC.',
     'icons': [{'src': 'icons/icon-192.png', 'sizes': '192x192', 'type': 'image/png'},

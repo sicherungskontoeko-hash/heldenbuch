@@ -30,7 +30,7 @@ function slSceneText(C, Sc, max) {
 }
 function slLage(q) {
   const L = []; const d = new Date();
-  L.push(SL_ROLE, '', '# Lage am Spieltisch (Heldenbuch, ' + d.toLocaleString('de-CH', { weekday: 'short', hour: '2-digit', minute: '2-digit' }) + ')');
+  L.push(SL_ROLE, '', '# Lage am Spieltisch (Fablecrown, ' + d.toLocaleString('de-CH', { weekday: 'short', hour: '2-digit', minute: '2-digit' }) + ')');
   /* Abenteuer */
   try {
     const db = typeof advDb === 'function' ? advDb() : null; const A = db && db.last && advGet(db.last);

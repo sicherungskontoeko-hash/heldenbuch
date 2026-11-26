@@ -273,9 +273,9 @@ function advOverview(A, st, X) {
   h += '<div class="chips advgo"><button class="btn" data-act="advTab" data-arg="ch:' + esc((A.chapters.find((c) => c.id === st.ch) || A.chapters[0]).id) + '">' + (st.ch ? 'Weiterlesen' : 'Beginnen: ' + esc(A.chapters[0].kicker)) + ' ›</button></div>';
   if (advItemCount(A)) h += advOnRow(A, st.on);
   if ((A.flags || []).length) h += advBox('wahl', '⚑', 'Entscheidungen der Gruppe', advFlagChips(A, st, A.flags.map((f) => f.id)) + '<p class="hint">Sie verändern spätere Kapitel. Die Kästen „Merke dir“ und „Entscheidung“ tragen sie automatisch ein.</p>');
-  h += advBox('dm', '◆', 'So leitest du mit dem Heldenbuch', advItems([
+  h += advBox('dm', '◆', 'So leitest du mit Fablecrown', advItems([
     '- **Vorlesetext** liest du vor. Mit „Als Handout teilen“ landet er bei allen am Tisch.',
-    '- **Kampf beginnen** setzt die Gegner mit Initiative in den Kampf am Tisch. Werte, Aufladung und legendäre Aktionen kennt das Heldenbuch.',
+    '- **Kampf beginnen** setzt die Gegner mit Initiative in den Kampf am Tisch. Werte, Aufladung und legendäre Aktionen kennt Fablecrown.',
     '- **Ins Beute-Formular** füllt „Beute und Erfahrung verteilen“ vor. Gold rechnet es auf die Helden am Tisch um.',
     '- Kämpfe und Handouts brauchen einen Tisch, an dem du die Spielleitung hast.',
   ]));

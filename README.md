@@ -1,12 +1,14 @@
-# Heldenbuch
+# Fablecrown
+
+*Tabletop RPG Companion – bisher «Heldenbuch»*
 
 **Herunterladen:** https://sicherungskontoeko-hash.github.io/heldenbuch/download.html (Android, iPhone, Windows, Mac, Linux, Browser)
 
-Deutsches D&D-Charakterbuch (SRD 5.2.1) mit Charaktererstellung, Bogen, Würfeln und gemeinsamem Online-Tisch.
+Deutschsprachiger Begleiter fürs Rollenspiel am Tisch (Regeln nach SRD 5.2.1) mit Charaktererstellung, Bogen, Würfeln und gemeinsamem Online-Tisch. Gespielt wird am Tisch, Fablecrown hilft dabei.
 
 Dieses Repository baut automatisch (siehe *Actions*):
 
-- **Android-App** (`Heldenbuch.apk`)
+- **Android-App** (Datei vorerst weiterhin `Heldenbuch.apk`)
 - **Windows** (Installer und portable EXE), **macOS** (DMG), **Linux** (AppImage)
 - **Web-App** auf GitHub Pages – für iPhone/iPad über „Zum Home-Bildschirm“
 
@@ -14,6 +16,11 @@ Dieses Repository baut automatisch (siehe *Actions*):
 **Downloads:** https://github.com/sicherungskontoeko-hash/heldenbuch/releases/latest
 
 Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUNG.md`.
+
+## Neuer Name: Fablecrown
+- Die App heisst jetzt **Fablecrown** und hat ein neues Symbol (Krone mit Feder). Sprache, Regeln und Bedienung bleiben gleich.
+- Helden, Sicherungen, Einstellungen und Online-Räume bleiben erhalten: Speicher, Raumcodes, Verschlüsselung, App-Kennung, Web-Adresse und die Dateinamen der Downloads (`Heldenbuch.apk`, `Heldenbuch-Setup.exe` usw.) sind unverändert. Alte und neue Geräte spielen weiter am selben Tisch.
+- Exporte heissen neu `<Held>_Fablecrown.json` und `Fablecrown_Sicherung.json`; ältere Heldenbuch-Dateien lassen sich weiterhin laden.
 
 ## Neu in Version 1.9
 - **Helden aus D&D Beyond übernehmen:** Unter **Helden → Helden aus Datei laden** das Charakterbogen-PDF aus D&D Beyond wählen. Die App liest Klasse(n), Unterklasse, Spezies, Hintergrund, Attribute, Fertigkeiten mit Expertise, Rüstung, Waffen mit Meisterschaft, Zauber, Talente, Ausrüstung, Münzen, TP und die Texte zur Figur und gleicht RK, TP, Initiative und Bewegung an das PDF an. Was nicht im SRD steht (z. B. Oath of Vengeance, Heavy Armor Master, Zauber aus Erweiterungen, Homebrew-Schutzherren), legt der Import als **Hausregel nur auf deinem Gerät** an, mit dem Text aus deinem PDF – die öffentliche App bleibt beim freien SRD. Das PDF wird nur auf dem Gerät gelesen.

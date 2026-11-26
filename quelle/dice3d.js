@@ -2,7 +2,7 @@
    Leistung: pro Würfel höchstens 20 Flächen, nur sichtbare werden gezeichnet; Animation ≤ 1 s mit requestAnimationFrame;
    Leuchten über Farbverläufe statt Filter; Partikel sind wenige CSS-animierte Elemente. */
 const D3_SETS = {
-  klassik: { name: 'Heldenbuch', desc: 'Dunkles Holz mit Goldkanten – der Würfel, mit dem alles begann.', face: ['#2a1d12', '#7a5634'], edge: '#e2ae52', num: '#ffe2a0', glow: 'rgba(226,174,82,.55)', pat: null, free: true,
+  klassik: { name: 'Fablecrown', desc: 'Dunkles Holz mit Goldkanten – der Würfel, mit dem alles begann.', face: ['#2a1d12', '#7a5634'], edge: '#e2ae52', num: '#ffe2a0', glow: 'rgba(226,174,82,.55)', pat: null, free: true,
     fx20: { big: 'sparks', col: ['#ffe08a', '#fff6d6'], shape: 'spark', move: 'burst', n: 14, ray: '#ffd36b' }, fx1: { crack: '#ff9b7a', tint: '#5a1418', extra: 'dim' } },
   koenigsgold: { name: 'Königsgold', desc: 'Tiefschwarzer Obsidian mit polierten Goldkanten, eingravierten Zahlen und filigranen königlichen Ornamenten.', face: ['#030303', '#2a2622'], edge: '#f2c85b', num: '#ffd77a', glow: 'rgba(242,200,91,.55)', pat: 'ornate', patOp: 0.85, style: '', extras: ['crown'], gloss: 1,
     roll: { col: ['#ffd36b', '#fff3c4'], shape: 'spark' },
@@ -419,7 +419,7 @@ const d3ok = (sides) => [4, 6, 8, 10, 12, 20, 100].includes(+sides);
 function d3taken() { const m = {}; if (!S.camp || !S.table) return m; for (const [uid, p] of Object.entries(S.table)) if (uid !== UID && p && p.dice && D3_SETS[p.dice] && !D3_SETS[p.dice].free) { const o = m[p.dice]; if (!o || (p.diceAt || 0) < o.at) m[p.dice] = { name: p.char || 'jemand', at: p.diceAt || 0, uid }; } return m; }
 function d3conflict() { /* gleichzeitig gewählt: früher gewählt gewinnt */
   const ch = cur(); if (!ch || !ch.dice || !S.camp) return; const t = d3taken()[ch.dice]; if (!t) return;
-  if (t.at < (ch.diceAt || 0) || (t.at === (ch.diceAt || 0) && t.uid < UID)) { const nm = D3_SETS[ch.dice].name; ch.dice = ''; ch.diceAt = 0; persist('c', ch.id); if (typeof queueMe === 'function') queueMe(); bannerToast('Würfel-Set vergeben', '„' + nm + '“ hat ' + t.name + ' schon gewählt. Du würfelst wieder mit dem Heldenbuch-Set – wähle ein anderes.'); }
+  if (t.at < (ch.diceAt || 0) || (t.at === (ch.diceAt || 0) && t.uid < UID)) { const nm = D3_SETS[ch.dice].name; ch.dice = ''; ch.diceAt = 0; persist('c', ch.id); if (typeof queueMe === 'function') queueMe(); bannerToast('Würfel-Set vergeben', '„' + nm + '“ hat ' + t.name + ' schon gewählt. Du würfelst wieder mit dem Fablecrown-Set – wähle ein anderes.'); }
 }
 function diceModal() {
   const ch = cur(); if (!ch) return; const taken = d3taken(); const vs = vfxLoad(); const mine = ch.dice || 'klassik';

@@ -178,7 +178,7 @@ if (typeof window !== 'undefined' && window.hbDesk) {
 function brDeskBox() {
   if (typeof window === 'undefined' || !window.hbDesk) return '';
   const r = S.brRes; const ago = S.brLast ? Math.max(0, Math.round((Date.now() - S.brLast) / 60000)) : null;
-  return '<details class="fgrp brdesk"' + (S.brOpen || r ? ' open' : '') + '><summary><b>Claude Desktop</b> <small>' + (ago == null ? 'Heldenbuch direkt aus Claude steuern' : 'Claude war ' + (ago < 1 ? 'eben' : 'vor ' + ago + ' Min.') + ' da (' + S.brN + ' Aufrufe)') + '</small></summary>' +
+  return '<details class="fgrp brdesk"' + (S.brOpen || r ? ' open' : '') + '><summary><b>Claude Desktop</b> <small>' + (ago == null ? 'Fablecrown direkt aus Claude steuern' : 'Claude war ' + (ago < 1 ? 'eben' : 'vor ' + ago + ' Min.') + ' da (' + S.brN + ' Aufrufe)') + '</small></summary>' +
     '<p class="hint">Claude Desktop liest den Tisch selbst (Lage, Kampf, Chronik, Personen) und kann für dich Gegner würfeln, Notizen und Handouts schreiben. Läuft über dein Claude-Abo, ohne Zusatzkosten. Die PC-App muss dabei offen sein.</p>' +
     (r ? '<p class="' + (r.ok ? 'okc' : 'badc') + '">' + esc(r.msg) + '</p>' + (r.snippet ? '<details><summary>Eintrag zum Kopieren (falls nötig)</summary><pre class="brsn">' + esc(r.snippet) + '</pre><button class="btn ghost sm" data-act="brCopy">Kopieren</button></details>' : '') : '') +
     '<div class="chips"><button class="btn sm" data-act="brConnect">' + (r && r.ok ? 'Erneut eintragen' : 'Mit Claude Desktop verbinden') + '</button></div>' +

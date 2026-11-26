@@ -1,10 +1,10 @@
-# Heldenbuch als App – Anleitung
+# Fablecrown als App – Anleitung
 
-Das Heldenbuch gibt es in drei Formen. Alle drei können miteinander spielen, sobald sie im selben **Raum** sind.
+Fablecrown (bisher «Heldenbuch») gibt es in drei Formen. Die Dateinamen der Downloads heissen vorerst weiter «Heldenbuch …», damit Links und Aktualisierungen funktionieren. Alle drei können miteinander spielen, sobald sie im selben **Raum** sind.
 
 | Form | Für wen | Aufwand |
 |---|---|---|
-| **Heldenbuch.html** | PC und Mac, sofort | Doppelklick |
+| **Heldenbuch.html** (Fablecrown als Einzeldatei) | PC und Mac, sofort | Doppelklick |
 | **Web-App** (Link) | iPhone, iPad, Android, PC – „Zum Home-Bildschirm“ | einmal GitHub einrichten |
 | **Android-App (APK)** und **PC-Programme** (Windows, Mac, Linux) | wer eine echte App installieren möchte | einmal GitHub einrichten |
 
@@ -20,7 +20,7 @@ Das Heldenbuch gibt es in drei Formen. Alle drei können miteinander spielen, so
 
 > Tipp: Exportiere deine Helden ab und zu (Bogen → **Exportieren**). So hast du eine Sicherung.
 
-> Helden aus **D&D Beyond**: dort beim Charakter «Export PDF» wählen, dann im Heldenbuch unter **Helden → Helden aus Datei laden** das PDF öffnen. Vor dem Anlegen siehst du, was übernommen wird. Inhalte ausserhalb des freien SRD (z. B. Oath of Vengeance) legt die App als Hausregel nur auf deinem Gerät an.
+> Helden aus **D&D Beyond**: dort beim Charakter «Export PDF» wählen, dann in Fablecrown unter **Helden → Helden aus Datei laden** das PDF öffnen. Vor dem Anlegen siehst du, was übernommen wird. Inhalte ausserhalb des freien SRD (z. B. Oath of Vengeance) legt die App als Hausregel nur auf deinem Gerät an.
 
 ---
 
@@ -49,9 +49,9 @@ Danach findest du:
 ### Installieren
 
 - **Android:** `Heldenbuch.apk` auf dem Handy herunterladen und öffnen. Beim ersten Mal fragt Android, ob Installationen aus dieser Quelle erlaubt sind – erlauben. (Alternativ: Web-App-Link in Chrome öffnen → Menü ⋮ → **App installieren**.)
-- **iPhone/iPad:** Web-App-Link in **Safari** öffnen → Teilen-Symbol → **Zum Home-Bildschirm**. Das Heldenbuch erscheint wie eine App und läuft auch offline.
+- **iPhone/iPad:** Web-App-Link in **Safari** öffnen → Teilen-Symbol → **Zum Home-Bildschirm**. Fablecrown erscheint wie eine App und läuft auch offline.
 - **Windows:** Setup-Datei starten. Meldet Windows „Der Computer wurde geschützt“: **Weitere Informationen → Trotzdem ausführen** (die App ist nicht kostenpflichtig signiert).
-- **Mac:** DMG öffnen, Heldenbuch in **Programme** ziehen. Beim ersten Start **Rechtsklick → Öffnen**.
+- **Mac:** DMG öffnen, die App (Programmname vorerst «Heldenbuch») in **Programme** ziehen. Beim ersten Start **Rechtsklick → Öffnen**.
 
 Neue Version? Einfach geänderte Dateien wieder hochladen – GitHub baut alles neu.
 
@@ -78,7 +78,7 @@ Gut zu wissen:
 Claude Desktop kann den Tisch direkt lesen und für die Spielleitung handeln: Lage abfragen, für Gegner würfeln, Personen und Aufträge eintragen, in die Chronik schreiben, Handouts schicken. Das läuft über dein Claude-Abo (auch Pro), ohne Zusatzkosten.
 
 1. Claude Desktop installieren (claude.ai/download) und einmal starten.
-2. In der Heldenbuch-PC-App: **✦ Claude fragen › Claude Desktop › Mit Claude Desktop verbinden**. Die App trägt sich selbst in die Einstellungen von Claude Desktop ein (mit Sicherungskopie der alten Datei).
+2. In der Fablecrown-PC-App: **✦ Claude fragen › Claude Desktop › Mit Claude Desktop verbinden**. Die App trägt sich selbst in die Einstellungen von Claude Desktop ein (mit Sicherungskopie der alten Datei).
 3. Claude Desktop ganz beenden (auch im Infobereich) und neu starten.
 4. Im Chat zum Beispiel: «Wie ist die Lage am Tisch?», «Der Goblin-Krieger 1 greift Ilva an», «Trag Prunella als Verbündete ein, die Spieler wissen davon».
 
