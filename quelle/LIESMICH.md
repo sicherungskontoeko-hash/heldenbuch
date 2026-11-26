@@ -94,6 +94,7 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/gk-zug.test.js | GK-04/05/06: Zauber und Folgeangriffe im fremden Zug, Vorbereiten erst bei Bestätigung |
 | tests/gk-b64.test.js | GK-08: grosse verschlüsselte Nachrichten, Grenzen, Wiederverbindung (braucht `python3 build_app.py`) |
 | tests/gk-paket.test.js | GK-09: Prüfpaket mit beiden Fassungen und Manifest |
+| tests/gk-lizenz.test.js | GK-10: SRD-5.2.1-Attribution wortgetreu in Hilfe, Fusszeile, README, Anleitung, Download-Seite (mit SRD_PDF=… direkt gegen die PDF) |
 | tests/gk-gnade.test.js | GK-11: Gnaden-Dialog auf Deutsch |
 | tests/boot.test.js | Selbst-Update der Android-App: neue Version laden, Helden behalten, kaputte Version verwerfen, offline (braucht `python3 build_app.py`) |
 | tests/balance.js | erzeugt tests/BALANCE.md (Referenz-Builds) |

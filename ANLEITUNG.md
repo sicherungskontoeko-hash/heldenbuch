@@ -91,5 +91,6 @@ Die PC-App muss dabei offen sein. In Claude Desktop lässt sich pro Werkzeug ein
 ## Hinweise
 
 - Die Claude-Version (Artifact) und die App sind getrennte Welten: Ein Tisch in Claude und ein Raum in der App sind nicht verbunden. Helden kannst du per **Exportieren/Laden** hin- und herschieben.
-- Regeln nach dem SRD 5.2 (CC-BY-4.0) in eigener deutscher Zusammenfassung. Mit ✦ markierte Inhalte sind eigene Erfindungen.
+- Regeln nach dem SRD 5.2.1 in eigener deutscher Zusammenfassung. Mit ✦ markierte Inhalte sind eigene Erfindungen.
+- This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.
 - Schriften: Cinzel und Alegreya Sans (SIL Open Font License).

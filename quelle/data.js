@@ -2,6 +2,9 @@
 const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }; const ESC_RE = /[&<>"]/g;
 const esc = (s) => { s = String(s ?? ''); return ESC_RE.test(s) ? (ESC_RE.lastIndex = 0, s.replace(ESC_RE, (m) => ESC_MAP[m])) : s; };
 /* ==== Regeldaten: basiert auf dem SRD 5.2.1 (CC-BY-4.0), deutsch in eigenen Worten zusammengefasst ==== */
+/* Pflicht-Attribution, wortgetreu aus SRD_CC_v5.2.1.pdf, Seite 1 «Legal Information» (6 031 375 Bytes,
+   SHA-256 8974902d109d6e63672d7c490bde9ccf052410503d9cfa768237154fbc5e3d87). Nicht übersetzen, nicht kürzen. */
+const SRD_ATTRIBUTION = 'This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.';
 /* Würfelzufall: kryptografischer Zufall des Geräts (fairer als Math.random) */
 const NATIVE_RANDOM = Math.random;
 /* Deutsche Sortierung: ein Collator für alles (gleiche Reihenfolge wie localeCompare(…, 'de'), aber viel schneller) */

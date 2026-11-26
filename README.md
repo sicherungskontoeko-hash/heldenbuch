@@ -120,4 +120,8 @@ Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUN
 - Online-Tisch Ende-zu-Ende verschlüsselt; Spielstände mit Versionsmigration und automatischer Sicherung
 - Automatisierte Tests im Ordner `quelle/tests` (`bash tests/run-all.sh`)
 
-Regeln nach dem System Reference Document 5.2 von Wizards of the Coast, lizenziert unter CC-BY-4.0. Kein offizielles Produkt von Wizards of the Coast.
+### Lizenz der Regeltexte
+
+This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.
+
+Deutsche Kurzfassungen in eigenen Worten; mit ✦ markierte Inhalte sind eigene Erfindungen. Kein offizielles Produkt von Wizards of the Coast.
