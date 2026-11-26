@@ -43,7 +43,7 @@ function hbServer() { const k = hbLs.get('hb_server', 'hivemq'); if (k === 'cust
 
 /* ---------- Kleiner MQTT-3.1.1-Client (QoS 0, retained) ---------- */
 class HbMqtt {
-  constructor() { this.subs = new Map(); this.queue = new Map(); this.state = 'offline'; this.listeners = new Set(); this.buf = new Uint8Array(0); this.pid = 1; this.retry = 0; this.want = false; }
+  constructor() { this.subs = new Map(); this.unsubT = new Map(); this.queue = new Map(); this.state = 'offline'; this.listeners = new Set(); this.buf = new Uint8Array(0); this.pid = 1; this.retry = 0; this.want = false; }
   onState(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
   setState(s) { if (this.state === s) return; this.state = s; this.listeners.forEach((f) => { try { f(s); } catch (e) {} }); }
   start() { this.want = true; if (this.ws && (this.state === 'online' || this.state === 'verbinde')) return; this.open(); }
@@ -81,8 +81,10 @@ class HbMqtt {
   match(filter, topic) { const f = filter.split('/'), t = topic.split('/'); for (let i = 0; i < f.length; i++) { if (f[i] === '#') return true; if (f[i] !== '+' && f[i] !== t[i]) return false; } return f.length === t.length; }
   dispatch(topic, msg) { for (const [f, fns] of this.subs) if (this.match(f, topic)) fns.forEach((fn) => { try { fn(topic, msg); } catch (e) {} }); }
   sub(topic) { const id = this.pid++ & 0xffff || 1; this.send(this.pkt(0x82, [[id >> 8, id & 255]], [this.str(topic), [0]])); }
-  subscribe(topic, fn) { let s = this.subs.get(topic); if (!s) { s = new Set(); this.subs.set(topic, s); if (this.state === 'online') this.sub(topic); } s.add(fn); this.start();
-    return () => { const set = this.subs.get(topic); if (!set) return; set.delete(fn); if (!set.size) { this.subs.delete(topic); const id = this.pid++ & 0xffff || 1; this.send(this.pkt(0xA2, [[id >> 8, id & 255]], [this.str(topic)])); } }; }
+  subscribe(topic, fn) { let s = this.subs.get(topic); if (!s) { s = new Set(); this.subs.set(topic, s); const u = this.unsubT.get(topic); if (u) { clearTimeout(u); this.unsubT.delete(topic); } if (this.state === 'online') this.sub(topic); } s.add(fn); this.start();
+    /* Abmelden verzögert senden: Wer denselben Raum sofort neu betritt, abonniert erneut, bevor das Abmelden beim Server ist.
+       Sonst kann der Server Abmelden und Anmelden in falscher Reihenfolge verarbeiten, und das Gerät bekäme nichts mehr (im Test mit aedes belegt). */
+    return () => { const set = this.subs.get(topic); if (!set) return; set.delete(fn); if (!set.size) { this.subs.delete(topic); clearTimeout(this.unsubT.get(topic)); this.unsubT.set(topic, setTimeout(() => { this.unsubT.delete(topic); if (this.subs.has(topic)) return; const id = this.pid++ & 0xffff || 1; this.send(this.pkt(0xA2, [[id >> 8, id & 255]], [this.str(topic)])); }, 1500)); } }; }
   pub(topic, payload, retain) { const u = new TextEncoder().encode(payload); return this.send(this.pkt(0x30 | (retain ? 1 : 0), [this.str(topic)], [Array.from(u)])); }
   publish(topic, payload, retain) { this.start(); if (this.state !== 'online' || !this.pub(topic, payload, retain)) this.queue.set(topic, [payload, retain]); }
 }
