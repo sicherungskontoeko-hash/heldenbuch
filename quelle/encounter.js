@@ -213,3 +213,48 @@ XA.reqRoll = (t, a) => { const c = S.combat; const r = c && (c.reqs || []).find(
   if (r.amount) { const amt = ev ? (ok ? 0 : Math.floor(r.amount / 2)) : ok ? (r.half ? Math.floor(r.amount / 2) : 0) : r.amount; if (ev) setTimeout(() => bannerToast('Entrinnen', ok ? 'Geschafft – gar kein Schaden.' : 'Misslungen – nur die Hälfte.'), 400); if (amt > 0) setTimeout(() => hitPrompt({ by: r.by + (ev ? ' (Entrinnen – halber Schaden)' : ok ? ' (geschafft – halber Schaden)' : ''), amount: amt, dtype: r.dtype, crit: false, after, t: Date.now() }), dl); else if (after) setTimeout(() => condAsk(ch, after.conds, after.fx, after.by), dl); else bannerToast('Geschafft!', 'Kein Schaden durch ' + r.by + '.'); }
   setTimeout(reqCheck, 1500); };
 const _hitCheck0 = hitCheck; hitCheck = function () { _hitCheck0(); reqCheck(); };
+
+/* ---------- FC-11/12: Fertigkeitsproben anfordern und verdeckte SL-Würfe ----------
+   Anfrage liegt im Rundenstand (S.meta.chk, nur die letzten 5, 15 Minuten gültig). Ein verborgener SG bleibt nur auf dem
+   Gerät der SL (localStorage), nie in der Nachricht. Antwort steht im eigenen Spielerdokument (chk), wie bei Rettungswürfen.
+   Verdeckter SL-Wurf: nur lokal, kein Log, keine Nachricht; Modifikator aus passivem Wert oder Eingabe, nie stillschweigend 0. */
+const CHK_TTL = 15 * 60 * 1000;
+const chkDcMap = () => { try { const m = JSON.parse(localStorage.getItem('hb_chkdc') || '{}'); return nvPlain(m) ? m : {}; } catch (e) { return {}; } };
+const chkMine = () => { if (!S.camp) return []; if (!S.myChk) { try { S.myChk = JSON.parse(localStorage.getItem('hb_chk_' + S.camp) || '[]'); } catch (e) {} if (!Array.isArray(S.myChk)) S.myChk = []; } return S.myChk.slice(-5); };
+const chkLive = () => (Array.isArray(S.meta && S.meta.chk) ? S.meta.chk : []).filter((r) => r && Date.now() - r.t < CHK_TTL);
+function chkSection() {
+  if (!isDM() || !S.camp) return ''; const ps = players(); const F = S.chkF || {}; const reqs = chkLive().slice(-3).reverse(); const dcs = chkDcMap();
+  const skillSel = (id) => '<select id="' + id + '">' + ALL_SKILLS.map((s) => '<option value="' + s + '"' + (F.sk === s ? ' selected' : '') + '>' + esc(SKILLS[s][0]) + '</option>').join('') + '</select>';
+  let h = '<section class="blk dmtools chkreq"><h2>Proben</h2><details class="fgrp"' + (S.chkOpen ? ' open' : '') + '><summary><b>Probe anfordern</b> <small>z. B. Wahrnehmung für alle</small></summary>' +
+    '<div class="row">' + field('Fertigkeit', skillSel('chkSk')) + field('SG (optional)', '<input type="number" id="chkDc" min="1" max="40" placeholder="—"' + (F.dc ? ' value="' + esc(F.dc) + '"' : '') + '>') + '</div>' +
+    '<label class="chk"><input type="checkbox" id="chkHide"' + (F.hide ? ' checked' : '') + '> SG nur bei mir</label>' +
+    '<div class="chips"><span class="hint">Wer?</span>' + ps.map(([u, p]) => chip((S.chkTo || []).includes(u), esc(p.char || '?'), 'data-act="chkTo" data-arg="' + esc(u) + '"')).join('') + chip(false, 'alle', 'data-act="chkTo" data-arg="*"') + '</div>' +
+    '<div class="chips end"><button class="btn sm" data-act="chkSend">Anfordern</button></div>';
+  if (reqs.length) h += '<div class="srres">' + reqs.map((r) => { const dc = r.dc || dcs[r.id]; return '<p><b>' + esc((SKILLS[r.sk] || [r.sk])[0]) + '</b>' + (dc ? ' SG ' + esc(dc) + (r.dc ? '' : ' (verborgen)') : '') + ': ' + (Array.isArray(r.to) ? r.to : []).map((u) => { const a = ((S.table[u] || {}).chk || []).find((x) => x && x.id === r.id); const nm = esc((S.table[u] || {}).char || '?'); return a ? nm + ' ' + esc(a.total) + (dc ? (a.total >= dc ? ' ✓' : ' ✗') : '') : nm + ' …'; }).join(', ') + ' <button class="link" data-act="chkClose" data-arg="' + esc(r.id) + '">schliessen</button></p>'; }).join('') + '</div>';
+  h += '</details><details class="fgrp"><summary><b>Verdeckt würfeln</b> <small>nur auf deinem Gerät</small></summary><div class="row">' + field('Held', '<select id="chsWho">' + ps.map(([u, p]) => '<option value="' + esc(u) + '">' + esc(p.char || '?') + '</option>').join('') + '</select>') + field('Fertigkeit', skillSel('chsSk')) + field('Modifikator', '<input type="number" id="chsMod" min="-10" max="30" placeholder="z. B. +5">') + '</div>' +
+    '<p class="hint">Wahrnehmung, Motiv erkennen und Nachforschungen kennt die App aus den passiven Werten. Andere Modifikatoren bitte eingeben (oder beim Spieler erfragen).</p><div class="chips end"><button class="btn sm" data-act="chsRoll">Verdeckt würfeln</button></div>' + (S.chsOut ? '<p class="okc"><b>' + esc(S.chsOut) + '</b></p>' : '') + '</details></section>';
+  return h;
+}
+const chkGrab = () => { S.chkF = { sk: ($('#chkSk') || {}).value, dc: ($('#chkDc') || {}).value, hide: ($('#chkHide') || {}).checked }; S.chkOpen = true; };
+XA.chkTo = (t, a) => { chkGrab(); const all = players().map(([u]) => u); let to = (S.chkTo || []).slice(); if (a === '*') to = to.length === all.length ? [] : all; else { const i = to.indexOf(a); if (i >= 0) to.splice(i, 1); else to.push(a); } S.chkTo = to; paintCamp(); };
+XA.chkSend = () => { chkGrab(); const to = (S.chkTo || []).filter((u) => S.table[u]); if (!to.length) { bannerToast('Wer soll würfeln?', 'Wähle mindestens einen Helden.'); return; }
+  const sk = S.chkF.sk; if (!nvOwn(SKILLS, sk)) return; const dc = Math.max(0, Math.min(40, +S.chkF.dc || 0)); const r = { id: uidX(), sk, to, t: Date.now() };
+  if (dc && !S.chkF.hide) r.dc = dc; if (dc && S.chkF.hide) { const m = chkDcMap(); m[r.id] = dc; const keep = Object.keys(m).slice(-20); try { localStorage.setItem('hb_chkdc', JSON.stringify(Object.fromEntries(keep.map((k) => [k, m[k]])))); } catch (e) {} }
+  saveMeta({ chk: chkLive().concat([r]).slice(-5) }); S.chkTo = []; S.chkF = { sk }; S.chkOpen = true; paintCamp(); };
+XA.chkClose = (t, a) => { saveMeta({ chk: chkLive().filter((r) => r.id !== a) }); };
+XA.chsRoll = () => { const u = ($('#chsWho') || {}).value, sk = ($('#chsSk') || {}).value; const p = S.table[u]; if (!p || !nvOwn(SKILLS, sk)) return;
+  let mod = ($('#chsMod') || {}).value; const pasI = { prc: 0, ins: 1, inv: 2 }[sk];
+  if (mod === '' && pasI !== undefined && Array.isArray(p.pas)) mod = p.pas[pasI] - 10;
+  if (mod === '' || !Number.isFinite(+mod)) { S.chsOut = 'Modifikator fehlt – bitte eingeben (kein Wurf mit unbekanntem Wert).'; paintCamp(); return; }
+  const r = 1 + Math.floor(rnd() * 20); S.chsOut = (p.char || '?') + ' · ' + SKILLS[sk][0] + ': ' + (r + +mod) + ' (W20 ' + r + ' ' + sgn(+mod) + ')'; paintCamp(); };
+function chkCheck() { const ch = cur(); if (!ch || !S.camp || isDM() || promptOpen() || S.chkPend) return; const me = String(UID); const done = chkMine().map((x) => x.id);
+  const r = chkLive().find((x) => Array.isArray(x.to) && x.to.includes(me) && !done.includes(x.id)); if (!r || !nvOwn(SKILLS, r.sk)) return; S.chkPend = r.id;
+  const c = derive(ch, S.hb); const sv = c.skills[r.sk];
+  orbPrompt('<div class="pr"><b>Probe: ' + esc(SKILLS[r.sk][0]) + (r.dc ? ' (SG ' + esc(r.dc) + ')' : '') + '</b><p>Die Spielleitung verlangt eine Probe von ' + esc(ch.name) + ' (' + sgn(sv.val) + ').</p><div class="chips end"><button class="btn ghost" data-act="chkSkip" data-arg="' + esc(r.id) + '">Nicht jetzt</button><button class="btn" data-act="chkRoll" data-arg="' + esc(r.id) + '">Würfeln</button></div></div>'); }
+const chkStore = (a) => { S.myChk = chkMine().concat([a]).slice(-5); try { localStorage.setItem('hb_chk_' + S.camp, JSON.stringify(S.myChk)); } catch (e) {} };
+XA.chkRoll = (t, a) => { S.chkPend = null; orbPrompt(''); const r = chkLive().find((x) => x.id === a); const ch = cur(); if (!r || !ch || chkMine().some((x) => x.id === a)) return;
+  const c = derive(ch, S.hb); const sv = c.skills[r.sk]; const total = d20(sv.val, 'Probe ' + SKILLS[r.sk][0] + ' (SL)', { kind: 'check:' + SKILLS[r.sk][1] + ':' + r.sk + ':' + sv.prof });
+  if (typeof total !== 'number') return; chkStore({ id: a, total, t: Date.now() }); queueMe(); setTimeout(chkCheck, 400); };
+XA.chkSkip = (t, a) => { S.chkPend = null; orbPrompt(''); chkStore({ id: a, total: '–', t: Date.now() }); queueMe(); };
+if (typeof dmTools === 'function') { const _dmChk0 = dmTools; dmTools = function () { const h = _dmChk0.apply(this, arguments); return h + chkSection(); }; }
+if (typeof applyMeta === 'function') { const _amChk0 = applyMeta; applyMeta = function () { _amChk0.apply(this, arguments); setTimeout(chkCheck, 200); }; }

@@ -822,7 +822,9 @@ function renderBuild(c) {
     body += '<div class="finish"><h3>' + (c.warn.length ? 'Fast geschafft' : 'Dein Held ist bereit') + '</h3><p class="hint" style="margin:0">' + (c.warn.length ? 'Es sind noch ' + c.warn.length + ' Auswahl(en) offen (⚠ antippen). Du kannst trotzdem schon sichern.' : 'Sichere ihn als Datei, damit du ihn jederzeit wieder laden oder weitergeben kannst.') + '</p><div class="chips"><button class="btn big" data-act="exportOne" data-arg="' + esc(ch.id) + '">Helden exportieren</button><button class="btn big ghost" data-act="view" data-arg="sheet">Zum Charakterbogen</button></div></div>';
   }
   const nav = '<div class="stepnav">' + (st > 0 ? '<button class="btn ghost" data-act="step" data-arg="' + (st - 1) + '">← ' + STEPS[st - 1] + '</button>' : '<span></span>') + (st < STEPS.length - 1 ? '<button class="btn" data-act="step" data-arg="' + (st + 1) + '">' + STEPS[st + 1] + ' →</button>' : '<button class="btn" data-act="view" data-arg="sheet">Losspielen →</button>') + '</div>';
-  return '<div class="build"><ol class="steps" aria-label="Schritte">' + STEPS.map((s, i) => '<li><button class="' + (i === st ? 'on' : '') + '" data-act="step" data-arg="' + esc(i) + '"' + (i === st ? ' aria-current="step"' : '') + ' title="' + esc(s) + '"><span>' + (i + 1) + '</span><em>' + s + '</em></button></li>').join('') + '</ol><section class="panel">' + body + nav + '</section>' + summary(c) + '</div>';
+  /* FC-22 Charaktereditor: bestehender Held, direkt zur Kategorie springen; Verwerfen stellt nur die Konfiguration wieder her */
+  const edBar = S.edit && S.edit.id === ch.id ? '<div class="box edbar"><b>Bearbeiten: ' + esc(ch.name) + '</b><p class="hint">Springe direkt zu dem, was du ändern willst. TP, Inventar, Notizen und Spielstand bleiben unberührt.</p><div class="chips">' + STEPS.map((s, i) => '<button class="btn sm' + (i === st ? '' : ' ghost') + '" data-act="step" data-arg="' + esc(i) + '">' + esc(i === STEPS.length - 1 ? 'Name, Bild, Übersicht' : s) + '</button>').join('') + '</div><div class="chips end"><button class="btn sm ghost" data-act="editDrop">Änderungen verwerfen</button><button class="btn sm" data-act="editDone">Fertig</button></div></div>' : '';
+  return edBar + '<div class="build"><ol class="steps" aria-label="Schritte">' + STEPS.map((s, i) => '<li><button class="' + (i === st ? 'on' : '') + '" data-act="step" data-arg="' + esc(i) + '"' + (i === st ? ' aria-current="step"' : '') + ' title="' + esc(s) + '"><span>' + (i + 1) + '</span><em>' + s + '</em></button></li>').join('') + '</ol><section class="panel">' + body + nav + '</section>' + summary(c) + '</div>';
 }
 function bonusText(h) { const b = []; if (+h.ac) b.push('RK ' + sgn(+h.ac)); if (+h.save) b.push('RW ' + sgn(+h.save)); if (+h.atk) b.push('Zauberangriff ' + sgn(+h.atk)); if (+h.dc) b.push('SG ' + sgn(+h.dc)); if (+h.hpPerLevel) b.push('+' + h.hpPerLevel + ' TP/Stufe'); if (+h.init) b.push('Init ' + sgn(+h.init)); if (+h.speed) b.push('+' + h.speed + ' m'); if (+h.uses) b.push(h.uses + '× pro ' + RESET_DE[h.reset || 'long']); return b.length ? ' · ' + b.join(', ') : ''; }
 function miPicker(c, slot) {
@@ -1296,10 +1298,15 @@ const SECRET_NOTE = () => (S.share && S.secret ? '<p class="hint secnote">Die Ap
 function saveCampPref() { try { localStorage.setItem('heldenbuch_camp', JSON.stringify({ code: S.camp, share: S.share, secret: !!S.secret })); } catch (e) {} }
 /* Nur ausdrücklich für genau diesen Raum und diesen Helden freigegebene eigene Würfe; ohne Angaben: nicht teilbar (fail closed) */
 function myRolls() { const room = S.camp, ch = S.cur; return S.log.filter((e) => { const m = LOG_PUB.get(e); return !!m && m.mode !== 'private' && m.room === room && m.ch === ch && (e.sides || e.share) && !e.preview; }).slice(0, 30).map((e) => ({ label: e.label, total: e.total, detail: e.detail, crit: !!e.crit, fumble: !!e.fumble, t: e.t, secret: LOG_PUB.get(e).mode === 'secret' || !!e.secret, sides: e.sides || 0, nat: e.nat || 0, dset: e.dset || '' })); }
+/* FC-29: verbleibende Ressourcen kompakt (keine Inventare, Notizen oder Rohdaten), nur Zahlen und Ressourcennamen */
+function resSummary(c, P) { const o = {}; const left = (m, u) => Math.max(0, m - (+u || 0)); const sl = (c.spell && c.spell.slots) || [];
+  if (sl.length) o.s = sl.map((m, i) => [i + 1, left(m, (P.slots || {})[i + 1]), m]).filter((x) => x[2] > 0);
+  const pc = c.spell && c.spell.pact; if (pc && pc.n) o.p = [left(pc.n, P.pact), pc.n, pc.lvl];
+  o.r = (c.res || []).filter((r) => r.max > 0 && r.max < 100 && !r.pool).slice(0, 8).map((r) => [String(r.n).slice(0, 40), left(r.max, (P.res || {})[r.k]), r.max]); return o; }
 function meDoc() {
   const ch = cur(); let c = null; try { c = derive(ch, S.hb); } catch (e) {}
-  return { char: ch.name.replace(/^Beispiel:\s*/, ''), pl: typeof myName === 'function' ? myName() : '', cls: ch.cls, pas: c ? [c.passive, 10 + c.skills.ins.val, 10 + c.skills.inv.val] : null, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: c ? Math.min(ch.play.hp ?? c.hpMax, c.hpMax) : (ch.play.hp ?? 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0, dodge: !!(ch.play.fx || {}).dodge,
-    cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], ans: typeof ansMine === 'function' ? ansMine() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, dice: ch.dice || '', diceAt: ch.diceAt || 0, t: Date.now() };
+  return { char: ch.name.replace(/^Beispiel:\s*/, ''), pl: typeof myName === 'function' ? myName() : '', cls: ch.cls, pas: c ? [c.passive, 10 + c.skills.ins.val, 10 + c.skills.inv.val] : null, dv: c && +c.dv > 0 ? +c.dv : 0, rs: c ? resSummary(c, ch.play) : null, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: c ? Math.min(ch.play.hp ?? c.hpMax, c.hpMax) : (ch.play.hp ?? 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0, dodge: !!(ch.play.fx || {}).dodge,
+    cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], ans: typeof ansMine === 'function' ? ansMine() : [], chk: typeof chkMine === 'function' ? chkMine() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, dice: ch.dice || '', diceAt: ch.diceAt || 0, t: Date.now() };
 }
 function queueMe() { if (!S.camp || !DB || !cur()) return; clearTimeout(meTimer); meTimer = setTimeout(writeMe, 250); }
 async function writeMe() {
@@ -1323,6 +1330,11 @@ function playerDoc(v) {
   take('cond', (x, q) => NV.arr(NV.text(60), 60)(x, q).slice(0, 30));
   take('init', NV.nul(NV.obj({ v: NV_N(-1000, 1000), cid: (x, q) => (x === '' ? '' : NV_I(x, q)), away: NV.bool }, [], false)));
   take('pas', NV.nul(NV.arr(NV.num(-100, 100), 3)));
+  take('dv', NV.num(0, 1000));
+  take('rs', (x) => { if (!nvPlain(x)) return undefined; const n = (v, a, b) => (typeof v === 'number' && Number.isFinite(v) && v >= a && v <= b ? v : null); const tri = (L, f) => (Array.isArray(L) ? L.slice(0, 12).map(f).filter(Boolean) : undefined);
+    const o = { s: tri(x.s, (e) => (Array.isArray(e) && n(e[0], 1, 9) != null && n(e[1], 0, 99) != null && n(e[2], 0, 99) != null ? [e[0], e[1], e[2]] : null)), r: tri(x.r, (e) => (Array.isArray(e) && typeof e[0] === 'string' && n(e[1], 0, 999) != null && n(e[2], 0, 999) != null ? [e[0].slice(0, 40), e[1], e[2]] : null)) };
+    if (Array.isArray(x.p) && n(x.p[0], 0, 9) != null && n(x.p[1], 0, 9) != null && n(x.p[2], 1, 9) != null) o.p = [x.p[0], x.p[1], x.p[2]]; return o; });
+  take('chk', (x, q) => NV.arr(NV.obj({ id: NV_I, total: (v, p) => (v === '–' ? v : NV.num(-100, 200)(v, p)), t: NV_T }, ['id'], false), 10)(x, q).slice(-5));
   take('ans', (x, q) => NV.arr(NV.obj({ id: NV_I, t: NV_T, x: NV.text(400) }, ['id'], false), 20)(x, q).slice(-10));
   for (const k of ['dead', 'deathFinal', 'dodge']) take(k, NV.bool);
   for (const k of ['deadAt', 'diceAt', 't']) take(k, NV_T);
@@ -1405,7 +1417,7 @@ function partyHtml() {
   if (!ps.length) return dmLine + '<p class="empty">Noch niemand am Tisch.</p>';
   return dmLine + '<div class="party">' + ps.map(([uid, p]) => { const pct = p.hpMax ? Math.max(0, Math.min(100, (p.hp / p.hpMax) * 100)) : 0;
     return '<div class="pm' + (uid === UID ? ' me' : '') + '">' + psig(p) + '<div class="pmb"><b>' + esc(p.char) + plLabel(p) + (uid === UID ? ' <small>(du)</small>' : '') + '</b><small>' + esc(p.clsName) + ' ' + esc(p.level) + ' · ' + esc(p.species) + '</small>' +
-      (p.pas && (isDM() || !S.meta.dm) ? '<small class="pmpas" title="Passive Werte">Wahrn. <b>' + esc(p.pas[0]) + '</b> · Motiv <b>' + esc(p.pas[1]) + '</b> · Nachf. <b>' + esc(p.pas[2]) + '</b></small>' : '') + '<div class="pmhp"><span>TP ' + esc(p.hp) + '/' + esc(p.hpMax) + (p.temp ? ' +' + esc(p.temp) : '') + '</span><span>RK ' + esc(p.ac) + '</span></div><div class="hpbar"><i style="width:' + pct + '%"></i></div>' +
+      (p.pas && (isDM() || !S.meta.dm) ? '<small class="pmpas" title="Passive Werte">Wahrn. <b>' + esc(p.pas[0]) + '</b> · Motiv <b>' + esc(p.pas[1]) + '</b> · Nachf. <b>' + esc(p.pas[2]) + '</b>' + (p.dv ? ' · Dunkelsicht <b>' + esc(p.dv) + ' m</b>' : '') + '</small>' + (isDM() && p.rs && ((p.rs.s || []).length || p.rs.p || (p.rs.r || []).length) ? '<details class="pmrs"><summary>Ressourcen</summary><small>' + [(p.rs.s || []).length ? 'Plätze ' + p.rs.s.map((e) => esc(e[0]) + ': ' + esc(e[1]) + '/' + esc(e[2])).join(' · ') : '', p.rs.p ? 'Pakt (Grad ' + esc(p.rs.p[2]) + '): ' + esc(p.rs.p[0]) + '/' + esc(p.rs.p[1]) : '', (p.rs.r || []).map((e) => esc(e[0]) + ' ' + esc(e[1]) + '/' + esc(e[2])).join(' · ')].filter(Boolean).join('<br>') + '</small></details>' : '') : '') + '<div class="pmhp"><span>TP ' + esc(p.hp) + '/' + esc(p.hpMax) + (p.temp ? ' +' + esc(p.temp) : '') + '</span><span>RK ' + esc(p.ac) + '</span></div><div class="hpbar"><i style="width:' + pct + '%"></i></div>' +
       (p.cond && p.cond.length ? '<div class="pmc">' + p.cond.map((c) => '<span>' + esc(c) + '</span>').join('') + '</div>' : '') +
       (uid === S.meta.dm ? '<div class="pmc dm"><span>Spielleitung</span></div>' : '') +
       (p.dead ? '<div class="pmdead"><b>Gefallen' + (p.deathFinal ? ' – Tod bestätigt' : ' – wartet auf Gnade') + '</b>' + (isDM() ? '<div class="chips"><button class="btn sm" data-act="mercy" data-arg="' + esc(uid) + '">Gnade zeigen</button>' + (p.deathFinal ? '' : '<button class="btn sm ghost" data-act="doom" data-arg="' + esc(uid) + '">Tod bestätigen</button>') + '</div>' : '') + '</div>' : '') + '</div></div>'; }).join('') + '</div>';
@@ -1659,7 +1671,14 @@ function goWarn(c, w) {
 /* ---------- Render ---------- */
 let rendering = false;
 /* Reihenfolge: erst alles einfügen (Hilfe-Knöpfe), dann einmal messen (Seitenlayout) – so rechnet der Browser das Layout nur einmal */
-function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } { const fa = document.querySelector('.foot.srdattr'); if (fa) fa.hidden = S.view === 'help'; } /* Lizenztext nur einmal: in der Hilfe steht er schon */ if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } }
+/* FC-31 Wiederaufnahme: letzte Hauptansicht (Held, Bogen-Reiter, Abenteuer) gerätelokal merken; nie Dialoge oder halbe Abläufe */
+const RESUME_VIEWS = ['sheet', 'camp', 'adv', 'spells', 'mobs', 'hb', 'help', 'heroes']; let RESUME_LAST = '';
+function resumeSave() { if (!RESUME_VIEWS.includes(S.view)) return; const v = JSON.stringify({ v: S.view, c: S.cur || '', mg: S.mg || '', adv: S.adv || '' }); if (v === RESUME_LAST) return; RESUME_LAST = v; try { localStorage.setItem('hb_resume', v); } catch (e) {} }
+function resumeLoad() { let r = null; try { r = JSON.parse(localStorage.getItem('hb_resume') || 'null'); } catch (e) {} if (!nvPlain(r) || !RESUME_VIEWS.includes(r.v)) return;
+  if (r.v === 'sheet' && !(typeof r.c === 'string' && nvOwn(S.chars, r.c))) return; if (typeof r.c === 'string' && nvOwn(S.chars, r.c)) S.cur = r.c;
+  if (r.v === 'adv' && r.adv && !(typeof advGet === 'function' && advGet(r.adv))) r.adv = ''; S.view = r.v; if (r.v === 'adv') S.adv = r.adv || null;
+  if (typeof r.mg === 'string' && /^[a-z]{2,10}$/.test(r.mg)) S.mg = r.mg; }
+function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } resumeSave(); { const fa = document.querySelector('.foot.srdattr'); if (fa) fa.hidden = S.view === 'help'; } /* Lizenztext nur einmal: in der Hilfe steht er schon */ if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } }
 /* Lange Listen (Zauber, Bestiarium) zeichnet der Browser nur, soweit sie sichtbar sind (content-visibility). Damit beim
    Neuzeichnen nichts springt, bekommen die neuen Einträge die Höhen der alten mit – die Seite liegt danach exakt gleich. */
 const cvKey = (el) => { const b = el.querySelector('summary b'); return b ? b.textContent : ''; };
@@ -1737,7 +1756,9 @@ document.addEventListener('click', (ev) => {
     delChar: () => { delete S.chars[arg]; persist('c', arg); if (S.cur === arg) S.cur = Object.keys(S.chars)[0] || null; S.confirm = null; try { localStorage.setItem('hb_sample_done', '1'); } catch (e) {} if (!S.cur && (S.view === 'sheet' || S.view === 'build')) S.view = 'heroes'; render(); },
     loadSample: () => { const s = sampleChar(); S.chars[s.id] = s; S.cur = s.id; persist('c', s.id); S.view = 'sheet'; render(); },
     play: () => { S.cur = arg; S.view = 'sheet'; S.confirm = null; lsSet([]); render(); window.scrollTo(0, 0); },
-    edit: () => { S.cur = arg; S.view = 'build'; S.step = 0; S.confirm = null; lsSet([]); render(); window.scrollTo(0, 0); },
+    edit: () => { S.cur = arg; const c0 = S.chars[arg]; S.edit = c0 ? { id: arg, snap: JSON.parse(JSON.stringify(c0)) } : null; S.view = 'build'; S.step = c0 ? STEPS.length - 1 : 0; S.confirm = null; lsSet([]); render(); window.scrollTo(0, 0); },
+    editDone: () => { S.edit = null; S.view = 'sheet'; render(); window.scrollTo(0, 0); },
+    editDrop: () => { const e = S.edit; const c0 = e && S.chars[e.id]; if (!c0) { S.edit = null; return; } const KEEP = ['id', 'play', 'items', 'inv', 'coins', 'comps', 'xp', 'notes', 'updated']; for (const k of Object.keys(c0)) if (!KEEP.includes(k)) delete c0[k]; for (const [k, v] of Object.entries(e.snap)) if (!KEEP.includes(k)) c0[k] = v; S.edit = null; S.cur = c0.id; S.view = 'sheet'; commit(); window.scrollTo(0, 0); bannerToast('Änderungen verworfen', 'Werte wie vor dem Bearbeiten; TP, Inventar und Notizen bleiben aktuell.'); },
     exportOne: () => { const c = S.chars[arg] || ch; doExport([c], fileName(c)); },
     exportAll: () => doExport(Object.values(S.chars), 'Fablecrown_Sicherung.json', true),
     importText: () => openModal('import'),
@@ -1905,6 +1926,7 @@ Object.assign(XA, {
   if (l && l.chars) { S.chars = charsSafe(l.chars, 'Gerät'); S.hb = nvPlain(l.hb) ? l.hb : {}; S.cur = l.cur; }
   if (S.broken.size || S.lsDefekt) setTimeout(() => bannerToast('Beschädigte Daten gefunden', S.lsDefekt === 'voll' ? 'Der gespeicherte Stand ist unlesbar und der Speicher voll. Bitte nichts ändern und Hilfe holen.' : S.broken.size ? S.broken.size + ' Held(en) sind beschädigt und werden nicht geöffnet. Sie bleiben gespeichert – unter «Helden» exportieren oder entfernen.' : 'Der gespeicherte Stand war unlesbar. Eine Kopie liegt unter «heldenbuch_defekt» im Browser.'), 600);
   if (!S.chars[S.cur]) S.cur = Object.keys(S.chars)[0] || null;
+  try { resumeLoad(); } catch (e) {}
   try { const cp = JSON.parse(localStorage.getItem('heldenbuch_camp') || 'null'); if (cp) { S.camp = cp.code || ''; S.share = cp.share !== false; S.secret = !!cp.secret; } } catch (e) {}
   render();
   if (typeof welcomeNeeded === 'function' && welcomeNeeded()) welcomeOpen();
