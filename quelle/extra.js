@@ -179,7 +179,7 @@ function compBlock(c) {
 }
 function rawD20(mod, label, isAtk, opt) {
   let r1 = 1 + Math.floor(rnd() * 20), r2 = 1 + Math.floor(rnd() * 20); const m = S.mode;
-  /* Eigene Würfel (Feld «Wurf»); Würfe der Claude-Brücke würfelt immer die App */
+  /* Eigene Würfel; die Claude-Brücke würfelt selbst */
   const ev = opt && opt.app ? null : typeof echtTake === 'function' ? echtTake(20) : null; if (ev) { r1 = ev[0]; if (ev.length > 1) r2 = ev[1]; }
   const use = m === 'adv' ? Math.max(r1, r2) : m === 'dis' ? Math.min(r1, r2) : r1;
   pushLog({ label, total: use + mod, detail: (m === 'normal' ? 'W20 ' + use : (m === 'adv' ? 'Vorteil ' : 'Nachteil ') + r1 + '/' + r2) + ' ' + sgn(mod) + (ev ? ' · echter Würfel' + (m !== 'normal' && ev.length < 2 ? ', zweiter W20 von der App' : '') : ''), crit: isAtk && use === 20, fumble: use === 1, sides: 20, nat: use, pair: m !== 'normal' ? [r1, r2] : null, keep: use === r1 ? 0 : 1, adv: m === 'adv' });

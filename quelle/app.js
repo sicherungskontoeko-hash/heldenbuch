@@ -1832,17 +1832,10 @@ function embers() { applyTheme(); if (!FX) startFx(); }
   embers();
   connectDb();
 })();
-/* Leerlauf: Bilder von Bestiarium und Bannern schon vorbereiten (Blob-Adressen wie beim ersten Öffnen), damit das erste
-   Öffnen nicht stockt. Ergebnis identisch, nur früher; kleine Portionen, nur wenn der Browser nichts zu tun hat. */
+/* Leerlauf: Monsterbilder vorab in Blob-Adressen umwandeln, damit das erste Öffnen des Bestiariums nicht stockt */
 (function imgWarm() {
-  const ric = (f) => (typeof requestIdleCallback === 'function' ? requestIdleCallback(f, { timeout: 5000 }) : setTimeout(() => f(null), 60));
-  let list = null, i = 0;
-  const step = (dl) => {
-    if (!BLOB_OK) return; if (document.hidden) return ric(step);
-    if (!list) list = [].concat(typeof BANNER !== 'undefined' ? Object.values(BANNER) : [], typeof MOB_PIC !== 'undefined' ? Object.values(MOB_PIC) : []).filter((d) => typeof d === 'string' && d.length >= 3000 && !BLOB_URL.has(d));
-    const end = performance.now() + 6; let n = 0;
-    while (i < list.length && (n++ === 0 || (dl && !dl.didTimeout ? dl.timeRemaining() > 3 : performance.now() < end))) imgUrl(list[i++]);
-    if (i < list.length) ric(step);
-  };
+  const ric = (f) => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 5000 }) : setTimeout(f, 60)); let L = null, i = 0;
+  const step = (dl) => { if (!BLOB_OK) return; if (document.hidden) return ric(step); L = L || Object.values(MOB_PIC).filter((d) => d.length >= 3000 && !BLOB_URL.has(d));
+    const end = performance.now() + 6; let n = 0; while (i < L.length && (!n++ || (dl && !dl.didTimeout ? dl.timeRemaining() > 3 : performance.now() < end))) imgUrl(L[i++]); if (i < L.length) ric(step); };
   setTimeout(() => ric(step), 4000);
 })();
