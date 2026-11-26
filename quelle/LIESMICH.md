@@ -9,6 +9,7 @@ Sprache: Schweizer Hochdeutsch (ss statt ß).
 ```
 bash build.sh          # erzeugt index.html (prüft Vollständigkeit und Syntax, bricht bei Fehlern ab)
 python3 build_app.py   # optional: App-Version (PWA) in app/www
+python3 pruefpaket.py <Ziel>   # Prüfpaket: Artifact- und Standalone-Fassung, PWA-Ordner, MANIFEST.json (SHA-256)
 ```
 `build.sh` läuft aus jedem Verzeichnis, nutzt nur relative Pfade und braucht `node` für die Syntaxprüfung.
 
@@ -87,6 +88,13 @@ bash tests/run-all.sh       # alle Suiten, Protokoll in tests/RESULTS.md
 | tests/bogen.test.js | aufgeräumter Bogen: Kopfleiste mit Kernwerten, Kampfseite ohne Reiterwechsel, Heldenliste |
 | tests/hilfe.test.js | Hilfe-Stufen: was sichtbar ist, Regelprüfung ohne Zugleiste, Dialog, Willkommen |
 | tests/net.test.js | Online-Tisch mit lokalem Broker: Verschlüsselung, Fremdzugriff, Manipulation, Wiederverbindung (braucht `python3 build_app.py`) |
+| tests/gk-netz.test.js | GK-01/07: fremde Kampf-, Runden- und Spielerdaten prüfen, nie als HTML; zwei Geräte am lokalen Broker (braucht `python3 build_app.py`) |
+| tests/gk-wuerfe.test.js | GK-02: verdeckte Würfe nie nachträglich geteilt (ausgehende Dokumente, Raumwechsel, zweites Gerät) |
+| tests/gk-import.test.js | GK-03: Import mit Feldpfad-Meldung, keine Teilübernahme, Speicher voll, beschädigter Bestand isoliert |
+| tests/gk-zug.test.js | GK-04/05/06: Zauber und Folgeangriffe im fremden Zug, Vorbereiten erst bei Bestätigung |
+| tests/gk-b64.test.js | GK-08: grosse verschlüsselte Nachrichten, Grenzen, Wiederverbindung (braucht `python3 build_app.py`) |
+| tests/gk-paket.test.js | GK-09: Prüfpaket mit beiden Fassungen und Manifest |
+| tests/gk-gnade.test.js | GK-11: Gnaden-Dialog auf Deutsch |
 | tests/boot.test.js | Selbst-Update der Android-App: neue Version laden, Helden behalten, kaputte Version verwerfen, offline (braucht `python3 build_app.py`) |
 | tests/balance.js | erzeugt tests/BALANCE.md (Referenz-Builds) |
 
