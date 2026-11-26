@@ -9,7 +9,8 @@ function turnSt(ch) {
 }
 function turnReset(ch, keepReaction) {
   const t = turnSt(ch); const r = t.r;
-  if(!keepReaction)delete ch.play.hxForms;
+  /* Wandelgestalt: bis Stufe 6 endet sie zu Beginn des eigenen Zugs, ab Stufe 7 bleibt sie (Gefestigte Form, Balance C01b) */
+  if(!keepReaction){let keepForm=false;try{keepForm=derive(ch,S.hb).lv('hxform')>=7;}catch(e){}if(!keepForm)delete ch.play.hxForms;}
   if (!keepReaction) delete ch.play.ready; /* Vorbereitete Handlung verfällt zu Beginn des nächsten eigenen Zugs */
   ch.play.turn = { a: 0, aMax: 1, b: 0, r: keepReaction ? r : 0, atk: 0, mv: 0, mvMax: 0, bonusAtk: 0, bSpell: false, slotSpell: false, lightIdx: null, aMagic: 0, aSurge: 0 };
   const fx = ch.play.fx || {}; delete fx.reckless; delete fx.aim; if (!keepReaction) delete fx.dodge; ch.play.fx = fx;
@@ -413,29 +414,36 @@ Object.assign(XA, {
 /* HX actions: use existing turn tracking, rolls and resource counters. Target-specific conditions remain SL-confirmed. */
 /* Hinweis unter dem ersten Impuls: Zusatznutzen und Unterklasse mit den aktuellen Werten (am Tisch anwenden) */
 function hxPulseTail(c,cid){const l=c.lv(cid),sub=l>=3?c.subOf(cid):null,dc=8+c.pb+c.mod.int,w=(a,b,d)=>'1W'+(l>=18?d:l>=(cid==='hxmind'?10:14)?b:a);
- if(cid==='hxmind'){const push='Gedankenstoss: STÄ-RW SG '+dc+', bei Misserfolg '+(sub==='kinetic'&&l>=10?'3':'1,5')+' m '+(sub==='kinetic'?'wegstossen oder zu dir ziehen':'wegstossen');
+ if(cid==='hxmind'){const push='Gedankenstoss: STÄ-RW SG '+dc+', bei Misserfolg '+(sub==='kinetic'?(l>=10?'6':'3'):'1,5')+' m '+(sub==='kinetic'?'wegstossen oder zu dir ziehen':'wegstossen');
   const head='Einmal pro Magieaktion bei einem Treffer wählbar: ';
-  return sub==='dominion'?head+push+' oder Ablenkung (WEI-RW SG '+dc+', bei Misserfolg keine Gelegenheitsangriffe bis zu deinem nächsten Zug'+(l>=18?'; Ablenkung gegen zwei getroffene Ziele':'')+').':sub==='fracture'?head+push+'. Stattdessen einmal pro Zug: Geistesbruch +'+w(4,6,8)+' psychisch.':head+push+'.';}
- const net=l>=7?' Fadennetz: einmal pro Aktion '+(sub==='threads'&&l>=14?'3':'1,5')+' m zum Ursprung ziehen (STÄ-RW SG '+dc+').':'';
- return 'Ursprung je Angriff: du oder dein Träger, Ziel in 9 m davon.'+net+(sub==='marionette'?' Marionettenhieb: einmal pro Aktion +'+w(4,6,8)+' Hieb, wenn das Ziel höchstens 1,5 m vom Träger steht.':sub==='swarm'?' Schwarmstich: einmal pro Aktion '+w(4,6,8)+' Stich an einen zweiten Feind in '+(l>=18?3:1.5)+' m um das Ziel.':'');}
+  const psi=l>=2?' Geistespunkte: Telekinetischer Stoss (1, statt Gedankenstoss, bis 6 m)'+(l>=5?', Mentale Fessel (1)':'')+(l>=9?', Gedankenbruch (2)':'')+'; höchstens eine pro Zug.':'';
+  return (sub==='dominion'?head+push+' oder Ablenkung (WEI-RW SG '+dc+', bei Misserfolg keine Gelegenheitsangriffe'+(l>=10?' und Nachteil auf den nächsten Angriff':'')+' bis zu deinem nächsten Zug'+(l>=18?'; Ablenkung gegen zwei getroffene Ziele':'')+').':sub==='fracture'?head+push+'. Stattdessen einmal pro Zug: Geistesbruch +'+(l>=18?'2W6':l>=10?'1W8':'1W6')+' psychisch.':head+push+'.')+psi;}
+ const net=l>=7?' Fadennetz: einmal pro Aktion bis '+(sub==='threads'&&l>=14?'6':'3')+' m zum Ursprung ziehen (STÄ-RW SG '+dc+').':'';
+ return 'Ursprung je Angriff: du oder dein Träger, Ziel in 9 m davon.'+net+(sub==='marionette'?' Marionettenhieb: einmal pro Aktion +'+w(6,8,10)+' Hieb, wenn das Ziel höchstens 1,5 m vom Träger steht.':sub==='swarm'?(l>=18?' Breiter Schwarm: einmal pro Aktion je 1W8 Stich an bis zu zwei andere Feinde in 3 m um das Ziel.':' Schwarmstich: einmal pro Aktion '+(l>=14?'1W8':'1W6')+' Stich an einen zweiten Feind in 1,5 m um das Ziel.'):'')+(l>=20?' Vom Träger aus: halbe Deckung ignoriert.':'');}
 (function(){
  const add=(o)=>{const old=o.check;o.check=(ch,c)=>!o.when(c)?'Merkmal aktuell nicht verfügbar.':old?old(ch,c):null;FEAT_ACTIONS.push(o);};
  const note=(id,n,cost,when,detail,res)=>add({id,n,cost,when,res,sub:typeof detail==='function'?detail:()=>detail,run:(ch,c)=>tLog(n,typeof detail==='function'?detail(c):detail)});
- const forms=['Klinge','Panzer','Greifer','Sehne'];
- for(let mask=1;mask<16;mask++){
+ const forms=['Klinge','Panzer','Greifer','Sehne','Flügel'];
+ for(let mask=1;mask<32;mask++){
   const chosen=forms.filter((f,i)=>mask&(1<<i)); if(chosen.length>3)continue;
   for(const epic of [false,true]){
    if(!epic&&chosen.length===3)continue; if(epic&&chosen.length<2)continue;
-   add({id:'hx_form_'+mask+(epic?'e':''),active:true,n:'Wandel: '+chosen.join(' + '),cost:epic?'f':'b',when:c=>{let l=c.lv('hxform');return epic?l>=20&&chosen.length>=2&&!onceUsed(c.char,'hx_form') :l>0&&l<20&&chosen.length===(l>=11?2:1)&&!onceUsed(c.char,'hx_form');},run:(ch,c)=>{ch.play.hxForms=chosen.slice();onceMark(ch,'hx_form');tLog('Wandelgestalt',chosen.join(' + ')+' bis Beginn deines nächsten Zuges. Greifer-Reichweite und bedingte Effekte: SL beachten.');}});
+   add({id:'hx_form_'+mask+(epic?'e':''),active:true,n:'Wandel: '+chosen.join(' + '),cost:epic?'f':'b',when:c=>{let l=c.lv('hxform');if(chosen.includes('Flügel')&&l<17)return false;return epic?l>=20&&chosen.length>=2&&!onceUsed(c.char,'hx_form') :l>0&&l<20&&chosen.length===(l>=11?2:1)&&!onceUsed(c.char,'hx_form');},run:(ch,c)=>{ch.play.hxForms=chosen.slice();onceMark(ch,'hx_form');tLog('Wandelgestalt',chosen.join(' + ')+(c.lv('hxform')>=7?' bleibt aktiv, bis du wechselst oder beendest, kampfunfähig wirst oder eine Rast endet.':' bis Beginn deines nächsten Zuges.')+' Greifer-Reichweite und bedingte Effekte: SL beachten.');}});
   }
  }
- add({id:'hx_form_panzer',n:'Wandelpanzer – Schaden mindern',cost:'r',when:c=>c.lv('hxform')>0&&(Array.isArray(c.char.play.hxForms)?c.char.play.hxForms:[]).includes('Panzer'),run:(ch,c)=>tRoll('1W'+HX_DIE(c.lv('hxform'))+(c.lv('hxform')>=18&&c.subOf('hxform')==='horror'?'+'+Math.max(1,c.mod.con):''),'Wandelpanzer (Schaden manuell reduzieren)')});
+ add({id:'hx_form_panzer',n:'Wandelpanzer – Schaden mindern',cost:'r',when:c=>c.lv('hxform')>0&&(Array.isArray(c.char.play.hxForms)?c.char.play.hxForms:[]).includes('Panzer'),run:(ch,c)=>tRoll((c.lv('hxform')>=18&&c.subOf('hxform')==='horror'?'2':'1')+'W'+HX_DIE(c.lv('hxform'))+(c.mod.con?sgn(c.mod.con).replace('−','-'):''),'Wandelpanzer (Schaden manuell reduzieren, mindestens 0)')});
  for(const [id,cid,n,dmg,range] of [['hx_mind','hxmind','Geistimpuls','Psychisch','18 m'],['hx_mind_force','hxmind','Geistimpuls (Energie)','Energie','18 m'],['hx_thread','hxthread','Fadenschlag','Hieb','9 m vom Ursprung'],['hx_thread_force','hxthread','Fadenschlag (Energie)','Energie','9 m vom Ursprung']]){
   add({id,n,cost:'a',magic:true,when:c=>c.lv(cid)>=(id==='hx_mind_force'?7:id==='hx_thread_force'?20:1),check:()=>S.sa||S.dp?'Schliesse zuerst den laufenden Angriffs-/Schadensdialog ab.':null,sub:c=>HX_PULSE(c.lv(cid))+' Angriffe · 1W8 '+sgn(c.mod.int)+' · '+dmg+' · '+(cid==='hxmind'?(c.lv(cid)>=9?'27 m':'18 m'):'9 m vom Ursprung'),run:(ch,c)=>{turnSt(ch).atk=0;spellAttack(ch,{name:n,id},HX_PULSE(c.lv(cid)),'1W8'+sgn(c.mod.int).replace('−','-'),hxPulseTail(c,cid),dmg,c.pb+c.mod.int+(+ch.misc.atk||0));}});
  }
  note('hx_hand','Geisteshand','a',c=>c.lv('hxmind')>=2,'Unbeaufsichtigtes Objekt bewegen; kein Angriff oder magischer Gegenstand.');
- note('hx_thread_place','Fadenträger erzeugen / bewegen','b',c=>c.lv('hxthread')>0,c=>'SL: Träger innerhalb '+(c.lv('hxthread')>=9?18:12)+' m, Verschiebung bis '+(c.lv('hxthread')>=20?9:6)+' m; keine eigene Kreatur. Position am Tisch markieren.');
- note('hx_thread_move','Fadenträger – freie Bewegung','f',c=>c.lv('hxthread')>=15&&!onceUsed(c.char,'hx_thread_move'),'SL: einmal pro eigenem Zug bis 3 m.');
+ /* Geistesenergie (Balance C04): Kosten beim Einsatz, Wirkung und Rettungswurf am Tisch */
+ const psiDc=c=>'SG '+(8+c.pb+c.mod.int);
+ for(const [id,n,cost,lv,k,txt] of [['hx_psi_barrier','Mentale Barriere','r',2,1,c=>'Schaden dieser Instanz um 2W6 '+sgn(c.mod.int)+' senken (mindestens 0; nicht bei geopferten TP).'],['hx_psi_wave','Psionische Welle','a',11,2,c=>'Feinde deiner Wahl in 6 m: STÄ-RW '+psiDc(c)+'; Misserfolg 5W8 psychisch und 3 m weg, Erfolg halber Schaden. Kein Geistimpuls in dieser Aktion.'],['hx_psi_dom','Mentale Dominanz','a',17,3,c=>'Eine sichtbare Kreatur in 18 m: WEI-RW '+psiDc(c)+'; Misserfolg gelähmt bis Ende ihres nächsten Zuges. Kein Geistimpuls in dieser Aktion.']])
+  add({id,n,cost,magic:cost==='a',res:'hxm_psi',resN:k,when:c=>c.lv('hxmind')>=lv&&(cost==='r'||!onceUsed(c.char,'hx_psi')),sub:txt,run:(ch,c)=>{if(cost!=='r')onceMark(ch,'hx_psi');if(id==='hx_psi_barrier')tRoll('2W6'+sgn(c.mod.int).replace('−','-'),'Mentale Barriere (Schaden manuell senken)');else tLog(n,txt(c));}});
+ for(const [id,n,lv,k,txt] of [['hx_psi_push','Telekinetischer Stoss',2,1,c=>'Nach einem eigenen Geistimpuls-Treffer statt Gedankenstoss: STÄ-RW '+psiDc(c)+', bei Misserfolg bis 6 m wegstossen.'],['hx_psi_bind','Mentale Fessel',5,1,c=>'Nach einem Geistimpuls-Treffer: WEI-RW '+psiDc(c)+', bei Misserfolg Bewegungsrate 0 bis zu deinem nächsten Zug.'],['hx_psi_break','Gedankenbruch',9,2,c=>'Nach einem Geistimpuls-Treffer: WEI-RW '+psiDc(c)+', bei Misserfolg Nachteil auf Angriffe bis zu deinem nächsten Zug.']])
+  add({id,n,cost:'f',res:'hxm_psi',resN:k,when:c=>c.lv('hxmind')>=lv&&!onceUsed(c.char,'hx_psi'),sub:txt,run:(ch,c)=>{onceMark(ch,'hx_psi');tLog(n,txt(c));}});
+ note('hx_thread_place','Fadenträger erzeugen / bewegen','b',c=>c.lv('hxthread')>0,c=>'SL: Träger innerhalb '+(c.lv('hxthread')>=9?27:18)+' m, Verschiebung bis '+(c.lv('hxthread')>=20?12:c.lv('hxthread')>=9?9:6)+' m; keine eigene Kreatur. Position am Tisch markieren.');
+ note('hx_thread_move','Fadenträger – freie Bewegung','f',c=>c.lv('hxthread')>=15&&!onceUsed(c.char,'hx_thread_move'),'SL: einmal pro eigenem Zug bis 6 m.');
  // Enforce once-per-turn on free movement.
  const mv=FEAT_ACTIONS.find(x=>x.id==='hx_thread_move');const old=mv.run;mv.run=(ch,c)=>{onceMark(ch,'hx_thread_move');old(ch,c);};
  note('hx_challenge','Herausforderung','b',c=>c.lv('hxguard')>0,c=>'SL: '+(c.lv('hxguard')>=11?'bis zu zwei Kreaturen':'eine Kreatur')+' in '+(c.lv('hxguard')>=9?'9':'6')+' m: WEI-RW SG '+(8+c.pb+c.mod.con)+'. Bei Misserfolg: Erster Einzelziel-Angriff im eigenen Zug gegen dich, falls möglich; weitere Angriffe gegen andere mit Nachteil. Bis Beginn deines nächsten Zuges. Keine erzwungene Bewegung oder Angriffsaktion.');
