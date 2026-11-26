@@ -40,6 +40,11 @@ SUITES=(
   "overlap.test.js|Überdeckungen, 9 Grössen|1"
   "gross.test.js --schnell|Alle Ansichten|1"
   "klick.test.js --schnell|Jeder Knopf|1"
+  "gk-netz.test.js|GK-01/07 Vertrauensgrenze am Tisch"
+  "gk-wuerfe.test.js|GK-02 Verdeckte Würfe"
+  "gk-import.test.js|GK-03 Import und Bestand"
+  "gk-zug.test.js|GK-04/05/06 Aktionsökonomie"
+  "gk-b64.test.js|GK-08 Grosse verschlüsselte Nachrichten"
 )
 SUM="${GITHUB_STEP_SUMMARY:-/dev/null}"
 echo "### Engine: $ENG" >> "$SUM"; echo "" >> "$SUM"; echo "| Suite | Ergebnis | Zeit |" >> "$SUM"; echo "|---|---|---|" >> "$SUM"

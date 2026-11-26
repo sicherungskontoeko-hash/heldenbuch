@@ -89,6 +89,7 @@ run "GK-01/GK-07 Vertrauensgrenze am Tisch: fremde Kampf-, Runden- und Spielerda
 run "GK-02 Verdeckte Würfe werden nie nachträglich geteilt (gk-wuerfe.test.js)" node tests/gk-wuerfe.test.js
 run "GK-03 Import und gespeicherter Bestand: Prüfung mit Feldpfad, keine Teilübernahme, Isolation (gk-import.test.js)" node tests/gk-import.test.js
 run "GK-04/05/06 Aktionsökonomie: fremder Zug, Folgeangriffe, Vorbereiten (gk-zug.test.js)" node tests/gk-zug.test.js
+run "GK-08 Grosse verschlüsselte Nachrichten (gk-b64.test.js)" node tests/gk-b64.test.js
 run "Begleiter und Reittiere: Werte, TP, Initiative, eigene Würfel (begleiter.test.js)" node tests/begleiter.test.js
 run "Bedienung mit Tastatur und im Querformat (bedienung.test.js)" node tests/bedienung.test.js
 run "Zufallsspieler: 3 Minuten zufällige Bedienung ohne Fehler (zufallsspieler.test.js)" node tests/zufallsspieler.test.js --min=3
