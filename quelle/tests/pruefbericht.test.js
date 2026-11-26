@@ -37,7 +37,7 @@ const W = (ms) => new Promise((r) => setTimeout(r, ms));
   const fw = await p.evaluate(() => { const ch = normChar(newChar({ name: 'F', cls: 'hxform', level: 20 })); S.chars = { [ch.id]: ch }; S.cur = ch.id; ch.play.localFight = true; turnReset(ch); const c = derive(ch, S.hb);
     const o = turnOpts(c).filter((x) => /^f:hx_form_\d+e$/.test(x.id)); const sizes = [...new Set(o.map((x) => x.n.split('+').length))].sort(); turnRun(ch, o.find((x) => x.n.split('+').length === 2).id); const t = turnSt(ch);
     return { n: o.length, sizes, forms: ch.play.hxForms.length, b: t.b, again: turnOpts(derive(ch, S.hb)).filter((x) => /^f:hx_form_\d+e?$/.test(x.id)).length }; });
-  T('Freier Wandel (Stufe 20): Zweier- und Dreierkombinationen, ohne Aktion, einmal pro Zug', fw.n === 10 && fw.sizes.join() === '2,3' && fw.forms === 2 && fw.b === 0 && fw.again === 0, fw);
+  T('Freier Wandel (Stufe 20): Zweier- und Dreierkombinationen aus fünf Anpassungen (Flügel ab 17, Balance C01f), ohne Aktion, einmal pro Zug', fw.n === 20 && fw.sizes.join() === '2,3' && fw.forms === 2 && fw.b === 0 && fw.again === 0, fw);
   const hel = await p.evaluate(async () => { let n = 0; const ow = writeMe; writeMe = () => { n++; }; let cb = null; const fakeRef = { ping: () => Promise.resolve(), onSnapshot: (f) => { cb = f; return () => {}; } };
     const oDB = DB, oCamp = S.camp; DB = { doc: () => fakeRef }; S.camp = 'testraum'; subHello();
     for (let i = 0; i < 20; i++) cb({ exists: true, data: () => ({ from: 'u' + i, id: 'id' + i + Math.random(), t: Date.now() }) });
