@@ -8,7 +8,7 @@ Deutschsprachiger Begleiter fürs Rollenspiel am Tisch (Regeln nach SRD 5.2.1) m
 
 Dieses Repository baut automatisch (siehe *Actions*):
 
-- **Android-App** (Datei vorerst weiterhin `Heldenbuch.apk`)
+- **Android-App** (`Fablecrown.apk`)
 - **Windows** (Installer und portable EXE), **macOS** (DMG), **Linux** (AppImage)
 - **Web-App** auf GitHub Pages – für iPhone/iPad über „Zum Home-Bildschirm“
 
@@ -19,7 +19,7 @@ Die fertigen Dateien liegen unter **Releases**. Die Anleitung steht in `ANLEITUN
 
 ## Neuer Name: Fablecrown
 - Die App heisst jetzt **Fablecrown** und hat ein neues Symbol (Krone mit Feder). Sprache, Regeln und Bedienung bleiben gleich.
-- Helden, Sicherungen, Einstellungen und Online-Räume bleiben erhalten: Speicher, Raumcodes, Verschlüsselung, App-Kennung, Web-Adresse und die Dateinamen der Downloads (`Heldenbuch.apk`, `Heldenbuch-Setup.exe` usw.) sind unverändert. Alte und neue Geräte spielen weiter am selben Tisch.
+- Helden, Sicherungen, Einstellungen und Online-Räume bleiben erhalten: Speicher, Raumcodes, Verschlüsselung, App-Kennung, Web-Adresse und der Datenordner der PC-App sind unverändert. Die Downloads heissen jetzt `Fablecrown.apk`, `Fablecrown-Setup.exe` usw.; für alte Links liegen sie übergangsweise auch unter den alten Namen bei. Auf dem Mac heisst das Programm neu «Fablecrown» (alte «Heldenbuch»-App danach löschen). Alte und neue Geräte spielen weiter am selben Tisch.
 - Exporte heissen neu `<Held>_Fablecrown.json` und `Fablecrown_Sicherung.json`; ältere Heldenbuch-Dateien lassen sich weiterhin laden.
 
 ## Neu in Version 1.9
