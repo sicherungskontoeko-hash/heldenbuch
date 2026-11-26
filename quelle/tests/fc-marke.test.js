@@ -38,7 +38,7 @@ const rd = (f) => fs.readFileSync(f, 'utf8');
   /* B14: jede verbleibende Altbezeichnung in den App-Quellen ist klassifiziert (technisch, Kommentar oder Altdatei-Hinweis) */
   const allow = [/heldenbuch_[a-z0-9_]+/, /'heldenbuch'/, /heldenbuch: 1/, /heldenbuchMonster/, /heldenbuch-(v2\/|raum:|e2e-v2)/, /github\.io\/heldenbuch\//, /&quot;heldenbuch&quot;: 1/, /^\s*(\/\*|\/\/|\*)/, /Fablecrown- oder Heldenbuch-Datei/, /«heldenbuch_defekt»/];
   const leftovers = [];
-  for (const f of fs.readdirSync(Q).filter((x) => /\.(js|html)$/.test(x) && x !== 'index.html')) rd(path.join(Q, f)).split('\n').forEach((l, i) => { if (!/heldenbuch/i.test(l)) return; const rest = allow.reduce((s, re) => s.replace(new RegExp(re.source, 'g'), ''), l); if (/heldenbuch/i.test(rest) && !/^\s*(\/\*|\/\/|\*)/.test(l) && !/\/\*[^*]*[Hh]eldenbuch[^*]*\*\//.test(l)) leftovers.push(f + ':' + (i + 1) + ' ' + l.trim().slice(0, 100)); });
+  for (const f of fs.readdirSync(Q).filter((x) => /\.(js|html)$/.test(x) && x !== 'index.html')) rd(path.join(Q, f)).replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' ')).split('\n').forEach((l, i) => { if (!/heldenbuch/i.test(l)) return; const rest = allow.reduce((s, re) => s.replace(new RegExp(re.source, 'g'), ''), l); if (/heldenbuch/i.test(rest) && !/^\s*(\/\*|\/\/|\*)/.test(l) && !/\/\*[^*]*[Hh]eldenbuch[^*]*\*\//.test(l)) leftovers.push(f + ':' + (i + 1) + ' ' + l.trim().slice(0, 100)); });
   T('B14 Keine unklassifizierte Altbezeichnung im Programmcode', leftovers.length === 0, leftovers.slice(0, 8));
 
   /* ---------- im Browser: beide Fassungen ---------- */
@@ -48,7 +48,7 @@ const rd = (f) => fs.readFileSync(f, 'utf8');
   for (const [name, url] of files) {
     const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }); const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(name + ': ' + e.message));
     const ext = []; p.on('request', (r) => { const u = r.url(); if (!/^(file:|data:|blob:|about:)/.test(u) && !/^https:\/\/fonts\.(googleapis|gstatic)\.com\//.test(u)) ext.push(u); });
-    await p.addInitScript(() => { try { if (!sessionStorage.getItem('fcinit')) { localStorage.clear(); sessionStorage.setItem('fcinit', '1'); } } catch (e) {} });
+    await p.addInitScript(() => { window.__hbWelcomeTest = true; try { if (!sessionStorage.getItem('fcinit')) { localStorage.clear(); sessionStorage.setItem('fcinit', '1'); } } catch (e) {} });
     await p.goto(url); await p.waitForTimeout(900);
     const w = await p.evaluate(() => { const m = $('#modal'); const t = !m.hidden ? m.textContent : ''; return { welcome: /Willkommen bei Fablecrown/.test(t) && !/Heldenbuch/.test(t) }; });
     T('B01 ' + name + ': Willkommen bei Fablecrown', w.welcome, w);
