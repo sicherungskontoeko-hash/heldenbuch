@@ -4,7 +4,7 @@
 const { chromium } = require('playwright');
 const http = require('http'); const fs = require('fs'); const path = require('path');
 const src = fs.readFileSync(path.join(__dirname, '..', 'app', 'www', 'index.html'), 'utf8');
-const variant = (b, t) => src.replace(/var BUILD = \d+/, 'var BUILD = ' + b).replace('<title>Heldenbuch</title>', '<title>' + t + '</title>');
+const variant = (b, t) => src.replace(/var BUILD = \d+/, 'var BUILD = ' + b).replace('<title>Fablecrown</title>', '<title>' + t + '</title>');
 const files = { app: variant(1000, 'Heldenbuch A'), remote: variant(2000, 'Heldenbuch B'), ver: JSON.stringify({ version: '9.9.9', build: 2000 }) };
 let remoteUp = true;
 const srv = (port, fn) => new Promise((res) => { const s = http.createServer((q, r) => { const o = fn(q.url.split('?')[0]); if (!o) { r.writeHead(404); return r.end(); } r.writeHead(200, { 'Content-Type': o[0], 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' }); r.end(o[1]); }).listen(port, '127.0.0.1', () => res(s)); });

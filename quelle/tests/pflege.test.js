@@ -53,7 +53,7 @@ const target = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index
     T(d + 'Leer: nichts gespeichert', await p.evaluate(() => stLoad().length === 0));
     await p.fill('#stX', 'Knopf für Bardische Inspiration nicht gefunden'); await p.press('#stX', 'Enter'); await p.waitForTimeout(100);
     T(d + 'Mit Enter festgehalten, mit Ort und Zeit', await p.evaluate(() => { const L = stLoad(); return L.length === 1 && /Inspiration/.test(L[0].x) && /Reiter Werte/.test(L[0].w) && L[0].t > Date.now() - 60000 && document.querySelectorAll('.stl li').length === 1 && $('#stX').value === ''; }));
-    T(d + 'Kopiertext für Claude enthält Eintrag und Version', await p.evaluate(() => { const t = stText(); return /Stolpersteine aus dem Heldenbuch \((App|Browser)/.test(t) && /Bardische Inspiration/.test(t) && /Reiter Werte/.test(t); }));
+    T(d + 'Kopiertext für Claude enthält Eintrag und Version', await p.evaluate(() => { const t = stText(); return /Stolpersteine aus Fablecrown \((App|Browser)/.test(t) && /Bardische Inspiration/.test(t) && /Reiter Werte/.test(t); }));
     T(d + 'Kein Querscrollen', await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     await p.evaluate(() => { S.modal = null; $('#modal').hidden = true; });
     await p.reload(); await p.waitForTimeout(450);
