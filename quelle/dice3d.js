@@ -361,7 +361,7 @@ function d3stage1(dieEl, level, set) {
     /* Hauptriss in drei Stücken: innen breit, aussen fein; jedes Stück startet, wenn das vorige ankommt */
     const t3 = Math.ceil(pts.length / 3); for (let j = 0; j < 3; j++) { const part = pts.slice(Math.max(0, j * t3), Math.min(pts.length, (j + 1) * t3 + 1)); if (part.length < 2) continue;
       segs.push(['M' + part.map((p) => P(p[0]) + ' ' + P(p[1])).join(' L'), (strong ? 2.6 : 1.9) - j * (strong ? 0.75 : 0.55), j * 110]); } }
-  const st = document.createElement('div'); st.className = 'd3stage full n1stage n1-' + f1.extra + (strong ? '' : ' soft'); st.setAttribute('aria-hidden', 'true'); st.style.cssText = '--x:' + x + 'px;--y:' + y + 'px;--tc:' + f1.tint + ';--kc:' + f1.crack;
+  const st = document.createElement('div'); st.className = 'd3stage full n1stage n1-' + f1.extra + (strong ? '' : ' soft'); st.setAttribute('aria-hidden', 'true'); st.style.cssText = '--x:' + x + 'px;--y:' + y + 'px;--tc:' + f1.tint;
   let extra = '';
   const puff = (cls, k, col) => { let h = ''; for (let i = 0; i < k; i++) { const a = -Math.PI / 2 + (vrand() - 0.5) * 1.6; const dist = 30 + vrand() * 40; h += '<span class="d3p sg ' + cls + '" style="--dx:' + (Math.cos(a) * dist).toFixed(0) + 'px;--dy:' + (Math.sin(a) * dist + (cls === 'n1leaf' || cls === 'n1shard' ? 70 : 0)).toFixed(0) + 'px;--c:' + col + ';--d:' + (vrand() * 150).toFixed(0) + 'ms;--r:' + ((vrand() - 0.5) * 300).toFixed(0) + 'deg;--sz:' + (0.8 + vrand() * 0.6).toFixed(2) + '"><i></i></span>'; } return h; };
   const k = strong ? 6 : 3;
