@@ -86,6 +86,7 @@ run "Prüfberichte 25.11.: Würfelanzeige, Schild, Tisch-Anfragen, Audit HB-01�
 run "Tischhilfen: eigene Würfel, Zugleiste, Ladungen, Regeln der Runde, Vorbereiten (tischhilfen.test.js)" node tests/tischhilfen.test.js
 run "Sicherheit: fremder Text wirkt nie als HTML (sicherheit.test.js)" node tests/sicherheit.test.js
 run "GK-01/GK-07 Vertrauensgrenze am Tisch: fremde Kampf-, Runden- und Spielerdaten (gk-netz.test.js)" node tests/gk-netz.test.js
+run "GK-02 Verdeckte Würfe werden nie nachträglich geteilt (gk-wuerfe.test.js)" node tests/gk-wuerfe.test.js
 run "Begleiter und Reittiere: Werte, TP, Initiative, eigene Würfel (begleiter.test.js)" node tests/begleiter.test.js
 run "Bedienung mit Tastatur und im Querformat (bedienung.test.js)" node tests/bedienung.test.js
 run "Zufallsspieler: 3 Minuten zufällige Bedienung ohne Fehler (zufallsspieler.test.js)" node tests/zufallsspieler.test.js --min=3
