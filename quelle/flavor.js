@@ -30,7 +30,7 @@ const SPECIES_FLAVOR = {
   halfelf: 'Zwischen zwei Welten aufgewachsen: elfische Anmut, menschlicher Ehrgeiz. Halbelfen sind vielseitig, sehen im Dämmerlicht und lassen sich kaum bezaubern. (SRD 5.1)',
   halforc: 'Orkische Kraft und menschliche Entschlossenheit. Halborks schüchtern ein, stehen nach einem tödlichen Treffer wieder auf und schlagen bei Volltreffern besonders hart zu. (SRD 5.1)',
   mykori: '✦ Pilzwesen aus den feuchten Tiefen. Mykori sind durch ein feines Sporennetz miteinander verbunden, fühlen sich im Dunkeln wohl und können eine giftige Sporenwolke ausstossen.',
-  vesperkin: '✦ Kinder der Dämmerung, halb aus Schatten gewebt. Vesperkin sehen durch Dunkelheit, verschmelzen mit ihr und springen von einem Schatten in den nächsten.',
+  vesperkin: '✦ Kinder der Dämmerung, halb aus Schatten gewebt. Dämmerlinge sehen durch Dunkelheit, verschmelzen mit ihr und springen von einem Schatten in den nächsten.',
   steinblut: '✦ In ihren Adern fliesst Mineral statt nur Blut. Steinblütige sind schwer, geduldig und hart wie Fels – und können ihre Haut für einen Augenblick zu Stein werden lassen.'
 };
 const BG_FLAVOR = {

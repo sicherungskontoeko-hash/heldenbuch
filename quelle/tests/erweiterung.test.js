@@ -52,7 +52,7 @@ const HXS = ['hxferrali', 'hxsilk', 'hxgolem', 'hxrift', 'hxleaf', 'hxoculi', 'h
   T('Standard-Sicht: bestehender Held mit eigener Klasse, Volk und Mehrklasse wird voll angezeigt', keep.sheet && keep.lv === 6 && keep.mc === 'hxthread4,rk2', keep);
   const mcSel = await p.evaluate(() => { S.view = 'build'; for (let st = 0; st < 7; st++) { S.step = st; render(); const s = document.getElementById('addMc'); if (s) return [...s.options].map((o) => o.value).filter(Boolean); } return null; });
   T('Mehrklassen-Auswahl folgt der Sicht (Standard: keine eigenen Klassen)', mcSel && mcSel.length > 5 && !mcSel.some((k) => homeC.includes(k)), mcSel);
-  const srch = await p.evaluate(() => { SRCH_HOME = null; const a = srchAll().filter((e) => /Formwandler|Ferrali/.test(e.name)).length; S.rules.homeview = true; SRCH_HOME = null; const b = srchAll().filter((e) => /Formwandler|Ferrali/.test(e.name)).length; S.rules.homeview = false; SRCH_HOME = null; return { a, b }; });
+  const srch = await p.evaluate(() => { SRCH_HOME = null; const a = srchAll().filter((e) => /Formwandler|Brachar/.test(e.name)).length; S.rules.homeview = true; SRCH_HOME = null; const b = srchAll().filter((e) => /Formwandler|Brachar/.test(e.name)).length; S.rules.homeview = false; SRCH_HOME = null; return { a, b }; });
   T('Suche: eigene Inhalte nur in der erweiterten Sicht', srch.a === 0 && srch.b >= 2, srch);
 
   /* ---------- Alle Klassen, Unterklassen, Stufen ---------- */
@@ -106,7 +106,7 @@ const HXS = ['hxferrali', 'hxsilk', 'hxgolem', 'hxrift', 'hxleaf', 'hxoculi', 'h
     return out; }, HXC);
   T('Kurze Rast füllt nur Kurzrast-Ressourcen, lange Rast alle', rest.length === 0, rest);
   const leaf = await p.evaluate(() => { const ch = normChar(newChar({ name: 'L', cls: 'fig', level: 5, species: 'hxleaf' })); S.chars = { [ch.id]: ch }; S.cur = ch.id; const c = derive(ch, S.hb); ch.play.hp = 1; S.sr = { id: ch.id, want: { 10: 1 } }; XA.srDone(null, '', '', ch); const l = (S.log || []).find((x) => x.label === 'Trefferwürfel'); return l ? l.detail : ''; });
-  T('Laubgeborene: Lichternte +ÜB bei kurzer Rast mit Trefferwürfel (im Protokoll)', /Lichternte \+3/.test(leaf), leaf);
+  T('Hainhüter: Lichternte +ÜB bei kurzer Rast mit Trefferwürfel (im Protokoll)', /Lichternte \+3/.test(leaf), leaf);
 
   /* ---------- Multiclassing ---------- */
   const mc = await p.evaluate(() => { const mk = (cls, lvl, multi, abil) => { const ch = normChar(newChar({ name: 'M', cls, level: lvl, multi, base: abil || { str: 15, dex: 14, con: 15, int: 13, wis: 10, cha: 8 } })); return derive(ch, S.hb); };
@@ -125,9 +125,9 @@ const HXS = ['hxferrali', 'hxsilk', 'hxgolem', 'hxrift', 'hxleaf', 'hxoculi', 'h
     const gol = ['clay', 'ceramic', 'forged'].map((v) => { const g = mk({ cls: 'fig', species: 'hxgolem', speciesChoice: v }); const cc = derive(g, S.hb); return v + ':' + cc.res.filter((r) => /^hxsp_/.test(r.k)).map((r) => r.k + '/' + r.reset).join() + ':' + turnOpts(cc).filter((o) => /^f:hx_(naht|ton|gefu)$/.test(o.id)).map((o) => o.id + o.cost).join(); });
     ch = mk({ cls: 'fig', species: 'hxgolem', speciesChoice: 'ceramic' }); ch.play.hp = 5; turnRun(ch, 'f:hx_naht'); const healed = ch.play.hp > 5 && turnSt(ch).b === 1;
     return { bone, monk, fer, gol, healed }; });
-  T('Ossari: Knochenklinge Hieb/Stich 1W6 + STÄ, Kampfrausch zählt', spc.bone.length === 2 && spc.bone.every((x) => /\/true\/true$/.test(x)) && /Hieb/.test(spc.bone[0]) && /Stich/.test(spc.bone[1]), spc.bone);
-  T('Ossari-Mönch: Kampfkunstwürfel statt 1W6, GES erlaubt (nicht addiert)', spc.monk.join() === '1W10+3/dex,1W10+3/dex', spc.monk);
-  T('Ferrali: vier Arme geben keinen zusätzlichen Angriff und keine Zusatzaktion', spc.fer.atk === 2 && spc.fer.opts === 0, spc.fer);
+  T('Gratling: Knochenklinge Hieb/Stich 1W6 + STÄ, Kampfrausch zählt', spc.bone.length === 2 && spc.bone.every((x) => /\/true\/true$/.test(x)) && /Hieb/.test(spc.bone[0]) && /Stich/.test(spc.bone[1]), spc.bone);
+  T('Gratling-Mönch: Kampfkunstwürfel statt 1W6, GES erlaubt (nicht addiert)', spc.monk.join() === '1W10+3/dex,1W10+3/dex', spc.monk);
+  T('Brachar: vier Arme geben keinen zusätzlichen Angriff und keine Zusatzaktion', spc.fer.atk === 2 && spc.fer.opts === 0, spc.fer);
   T('Golem: Bauart bestimmt Fähigkeit, Kosten und Rast', spc.gol.join(' | ') === 'clay:hxsp_ton/short:f:hx_tonb | ceramic:hxsp_naht/long:f:hx_nahtb | forged:hxsp_gefu/long:f:hx_gefur', spc.gol);
   T('Goldene Naht heilt als Bonusaktion', spc.healed, spc);
 
