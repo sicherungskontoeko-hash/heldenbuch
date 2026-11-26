@@ -56,6 +56,9 @@ async function startBridge() {
 
 Menu.setApplicationMenu(null);
 /* Nur ein Heldenbuch-Fenster: ein zweiter Start holt das vorhandene nach vorne (die Brücke kennt nur eine App) */
+/* Fablecrown hiess bis 1.9.64 «Heldenbuch»: Der Programmname bestimmt den Datenordner. Damit Helden, Einstellungen
+   und Räume erhalten bleiben, bleibt der alte Ordner …/Heldenbuch der Datenordner (vor allem anderen setzen). */
+app.setPath('userData', path.join(app.getPath('appData'), 'Heldenbuch'));
 if (!app.requestSingleInstanceLock()) app.quit();
 app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
 app.whenReady().then(() => {

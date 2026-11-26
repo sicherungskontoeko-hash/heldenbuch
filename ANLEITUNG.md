@@ -1,6 +1,6 @@
 # Fablecrown als App – Anleitung
 
-Fablecrown (bisher «Heldenbuch») gibt es in drei Formen. Die Dateinamen der Downloads heissen vorerst weiter «Heldenbuch …», damit Links und Aktualisierungen funktionieren. Alle drei können miteinander spielen, sobald sie im selben **Raum** sind.
+Fablecrown (bisher «Heldenbuch») gibt es in drei Formen. Alle drei können miteinander spielen, sobald sie im selben **Raum** sind.
 
 | Form | Für wen | Aufwand |
 |---|---|---|
@@ -51,7 +51,7 @@ Danach findest du:
 - **Android:** `Heldenbuch.apk` auf dem Handy herunterladen und öffnen. Beim ersten Mal fragt Android, ob Installationen aus dieser Quelle erlaubt sind – erlauben. (Alternativ: Web-App-Link in Chrome öffnen → Menü ⋮ → **App installieren**.)
 - **iPhone/iPad:** Web-App-Link in **Safari** öffnen → Teilen-Symbol → **Zum Home-Bildschirm**. Fablecrown erscheint wie eine App und läuft auch offline.
 - **Windows:** Setup-Datei starten. Meldet Windows „Der Computer wurde geschützt“: **Weitere Informationen → Trotzdem ausführen** (die App ist nicht kostenpflichtig signiert).
-- **Mac:** DMG öffnen, die App (Programmname vorerst «Heldenbuch») in **Programme** ziehen. Beim ersten Start **Rechtsklick → Öffnen**.
+- **Mac:** DMG öffnen, Fablecrown in **Programme** ziehen (eine ältere «Heldenbuch»-App danach löschen; die Helden bleiben erhalten). Beim ersten Start **Rechtsklick → Öffnen**.
 
 Neue Version? Einfach geänderte Dateien wieder hochladen – GitHub baut alles neu.
 

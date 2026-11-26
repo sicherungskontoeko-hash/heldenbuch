@@ -11,7 +11,7 @@ const page0 = path.resolve(__dirname, '..', '..', 'www', 'download.html');
   const b = await chromium.launch();
   const REL = 'https://github.com/sicherungskontoeko-hash/heldenbuch/releases/latest/download/';
   const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'package.json'), 'utf8')).build;
-  const names = { apk: 'Heldenbuch.apk', setup: pkg.nsis.artifactName.replace('${ext}', 'exe'), port: pkg.portable.artifactName.replace('${ext}', 'exe'), dmg: pkg.dmg.artifactName.replace('${ext}', 'dmg'), app: pkg.linux.artifactName.replace('${ext}', 'AppImage') };
+  const names = { apk: 'Fablecrown.apk', setup: pkg.nsis.artifactName.replace('${ext}', 'exe'), port: pkg.portable.artifactName.replace('${ext}', 'exe'), dmg: pkg.dmg.artifactName.replace('${ext}', 'dmg'), app: pkg.linux.artifactName.replace('${ext}', 'AppImage') };
   for (const [nm, dev, os] of [['Android', devices['Pixel 7'], 'android'], ['iPhone', devices['iPhone 13'], 'ios'], ['Windows', { viewport: { width: 1366, height: 768 }, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130 Safari/537.36' }, 'windows'], ['Mac', { viewport: { width: 1440, height: 900 }, userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 Version/17.5 Safari/605.1.15' }, 'mac']]) {
     const ctx = await b.newContext(dev); const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(e.message));
     await p.goto('http://127.0.0.1:8897/download.html'); await p.waitForTimeout(300);

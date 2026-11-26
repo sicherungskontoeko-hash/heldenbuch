@@ -3,7 +3,7 @@
   "version": "1.9.0",
   "description": "Fablecrown (bisher Heldenbuch) – deutschsprachiger Begleiter fürs Rollenspiel am Tisch (Handy und PC)",
   "main": "electron/main.js",
-  "author": "Heldenbuch",
+  "author": "Fablecrown",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -22,7 +22,7 @@
   },
   "build": {
     "appId": "ch.heldenbuch.app",
-    "productName": "Heldenbuch",
+    "productName": "Fablecrown",
     "directories": {
       "output": "dist",
       "buildResources": "build"
@@ -52,10 +52,10 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "Heldenbuch-Setup.${ext}"
+      "artifactName": "Fablecrown-Setup.${ext}"
     },
     "portable": {
-      "artifactName": "Heldenbuch-Portable.${ext}"
+      "artifactName": "Fablecrown-Portable.${ext}"
     },
     "mac": {
       "target": [
@@ -68,7 +68,7 @@
       ],
       "icon": "build/icon.png",
       "category": "public.app-category.games",
-      "artifactName": "Heldenbuch-${version}.dmg"
+      "artifactName": "Fablecrown-${version}.dmg"
     },
     "linux": {
       "target": [
@@ -76,10 +76,10 @@
       ],
       "icon": "build/icon.png",
       "category": "Game",
-      "artifactName": "Heldenbuch.${ext}"
+      "artifactName": "Fablecrown.${ext}"
     },
     "dmg": {
-      "artifactName": "Heldenbuch.${ext}"
+      "artifactName": "Fablecrown.${ext}"
     }
   }
 }

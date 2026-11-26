@@ -78,11 +78,11 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
       - name: APK umbenennen
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Heldenbuch.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Fablecrown.apk
       - uses: actions/upload-artifact@v4
         with:
           name: Heldenbuch-Android
-          path: Heldenbuch.apk
+          path: Fablecrown.apk
 
   desktop:
     name: PC-App (${{ matrix.os }})
@@ -169,6 +169,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: dl
+      - name: Übergang – Kopien unter den alten Namen (Heldenbuch …) für bestehende Links
+        run: |
+          for f in $(find dl -type f -name 'Fablecrown*'); do cp "$f" "$(dirname "$f")/$(basename "$f" | sed 's/^Fablecrown/Heldenbuch/')"; done
+          find dl -type f | sort
           pattern: Heldenbuch-*
           merge-multiple: true
       - uses: softprops/action-gh-release@v2
@@ -182,14 +186,14 @@ jobs:
 
             | Gerät | Datei | Hinweis |
             | --- | --- | --- |
-            | Android | [Heldenbuch.apk](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch.apk) | Öffnen, Installation aus dieser Quelle erlauben. Danach aktualisiert sich die App selbst – bereits installiert? Nicht neu laden (sonst vorher «Alles sichern»). |
-            | Windows | [Heldenbuch-Setup.exe](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch-Setup.exe) | Installer (empfohlen, nötig für Claude Desktop). Bei der Windows-Warnung: «Weitere Informationen» › «Trotzdem ausführen». |
-            | Windows ohne Installation | [Heldenbuch-Portable.exe](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch-Portable.exe) | Startet direkt, etwas langsamer. |
-            | Mac (Intel und Apple) | [Heldenbuch.dmg](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch.dmg) | Wird einige Minuten nach den anderen nachgeliefert. App in «Programme» ziehen; beim ersten Start Systemeinstellungen › Datenschutz und Sicherheit › «Trotzdem öffnen». |
-            | Linux | [Heldenbuch.AppImage](https://github.com/${{ github.repository }}/releases/latest/download/Heldenbuch.AppImage) | Ausführbar machen und starten. |
+            | Android | [Fablecrown.apk](https://github.com/${{ github.repository }}/releases/latest/download/Fablecrown.apk) | Öffnen, Installation aus dieser Quelle erlauben. Danach aktualisiert sich die App selbst – bereits installiert? Nicht neu laden (sonst vorher «Alles sichern»). |
+            | Windows | [Fablecrown-Setup.exe](https://github.com/${{ github.repository }}/releases/latest/download/Fablecrown-Setup.exe) | Installer (empfohlen, nötig für Claude Desktop). Bei der Windows-Warnung: «Weitere Informationen» › «Trotzdem ausführen». |
+            | Windows ohne Installation | [Fablecrown-Portable.exe](https://github.com/${{ github.repository }}/releases/latest/download/Fablecrown-Portable.exe) | Startet direkt, etwas langsamer. |
+            | Mac (Intel und Apple) | [Fablecrown.dmg](https://github.com/${{ github.repository }}/releases/latest/download/Fablecrown.dmg) | Wird einige Minuten nach den anderen nachgeliefert. App in «Programme» ziehen; beim ersten Start Systemeinstellungen › Datenschutz und Sicherheit › «Trotzdem öffnen». |
+            | Linux | [Fablecrown.AppImage](https://github.com/${{ github.repository }}/releases/latest/download/Fablecrown.AppImage) | Ausführbar machen und starten. |
             | iPhone, iPad, Browser | [Web-App](${{ env.PAGES_URL }}) | In Safari öffnen › Teilen › «Zum Home-Bildschirm». |
 
-            Fablecrown (bisher Heldenbuch): Die Dateinamen bleiben vorerst gleich, damit Links und Aktualisierungen funktionieren.
+            Fablecrown (bisher Heldenbuch): Die Dateien heissen jetzt «Fablecrown …». Für alte Links liegen sie in dieser Übergangszeit zusätzlich unter den alten Namen «Heldenbuch …» bei. Helden und Einstellungen bleiben erhalten (Android: gleiche App; PC: gleicher Datenordner). Auf dem Mac erscheint die App neu als «Fablecrown» – die alte «Heldenbuch»-App danach einfach löschen.
 
             Version ${{ steps.ver.outputs.tag }}. Die App ist nicht von Apple oder Microsoft signiert; deshalb die Warnungen beim ersten Start.
           files: dl/**/*
@@ -219,6 +223,8 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
       - name: Zum Release hinzufügen
-        run: gh release upload "${{ needs.release.outputs.tag }}" dist/*.dmg --clobber
+        run: |
+          for f in dist/Fablecrown*.dmg; do cp "$f" "${f/Fablecrown/Heldenbuch}"; done
+          gh release upload "${{ needs.release.outputs.tag }}" dist/*.dmg --clobber
         env:
           GH_TOKEN: ${{ github.token }}
