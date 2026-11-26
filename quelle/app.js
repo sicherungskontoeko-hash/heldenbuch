@@ -1832,3 +1832,10 @@ function embers() { applyTheme(); if (!FX) startFx(); }
   embers();
   connectDb();
 })();
+/* Leerlauf: Monsterbilder vorab in Blob-Adressen umwandeln, damit das erste Öffnen des Bestiariums nicht stockt */
+(function imgWarm() {
+  const ric = (f) => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 5000 }) : setTimeout(f, 60)); let L = null, i = 0;
+  const step = (dl) => { if (!BLOB_OK) return; if (document.hidden) return ric(step); L = L || Object.values(MOB_PIC).filter((d) => d.length >= 3000 && !BLOB_URL.has(d));
+    const end = performance.now() + 6; let n = 0; while (i < L.length && (!n++ || (dl && !dl.didTimeout ? dl.timeRemaining() > 3 : performance.now() < end))) imgUrl(L[i++]); if (i < L.length) ric(step); };
+  setTimeout(() => ric(step), 4000);
+})();
