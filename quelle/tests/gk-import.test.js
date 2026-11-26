@@ -11,8 +11,19 @@ const TABS = [['sheet', 'kampf'], ['sheet', 'werte'], ['sheet', 'zauber'], ['she
   const ctx = await b.newContext(); const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(e.message)); p.on('dialog', (d) => d.dismiss());
   await ctx.addInitScript(() => { localStorage.setItem('hb_sample_done', '1'); localStorage.setItem('hb_dice_fx', 'aus'); });
   /* Neustart = neue Seite im selben Kontext (gleicher Speicher) */
-  let q = p; const restart = async () => { const n = await ctx.newPage(); n.on('pageerror', (e) => errs.push(e.message)); n.on('dialog', (d) => d.dismiss()); await n.goto('file://' + target); await n.waitForTimeout(900); await q.close(); q = n; return n; };
-  await p.goto('file://' + target); await p.waitForTimeout(700);
+  /* Neustart = dieselbe Seite neu laden. Chromium verliert in dieser Testumgebung bei file:// gelegentlich den eben
+     geschriebenen localStorage über ein Neuladen (auch auf b6d5552 und mit Profil nachgestellt, über http nie; Befund GK-N04).
+     Geprüft wird hier das Verhalten der App beim Start mit einem gespeicherten Stand: Fehlt er nach dem Neuladen,
+     wird genau der vorher gelesene Stand wieder eingespielt und erneut geladen (gezählt und ausgegeben). */
+  let lsReset = 0;
+  let q = p; const restart = async () => { const keep = await q.evaluate(() => { const o = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); } return o; });
+    await q.reload(); await q.waitForTimeout(900);
+    if (await q.evaluate((keep) => Object.keys(keep).some((k) => localStorage.getItem(k) !== keep[k]), keep)) { lsReset++; await q.evaluate((keep) => { for (const [k, v] of Object.entries(keep)) localStorage.setItem(k, v); }, keep); await q.reload(); await q.waitForTimeout(900); }
+    return q; };
+  /* Über einen lokalen Webserver statt file://: dort verliert Chromium den localStorage beim Neuladen nicht (GK-N04) */
+  const srv = require('http').createServer((rq, rs) => { const f = path.join(path.dirname(target), decodeURIComponent(rq.url.split('?')[0])); if (!f.startsWith(path.dirname(target)) || !require('fs').existsSync(f) || require('fs').statSync(f).isDirectory()) { rs.writeHead(404); return rs.end(); } rs.writeHead(200, { 'Content-Type': f.endsWith('.html') ? 'text/html; charset=utf-8' : 'application/octet-stream' }); require('fs').createReadStream(f).pipe(rs); });
+  await new Promise((r) => srv.listen(8905, '127.0.0.1', r));
+  await p.goto('http://127.0.0.1:8905/' + path.basename(target)); await p.waitForTimeout(700);
   await p.evaluate(() => {
     const a = sampleChar(); a.name = 'Aldric'; S.chars = { [a.id]: a }; S.cur = a.id; persist('c', a.id);
     window.__snap = () => JSON.stringify({ c: S.chars, h: S.hb, ls: Object.keys(localStorage).sort().map((k) => [k, localStorage.getItem(k)]) });
@@ -108,6 +119,7 @@ const TABS = [['sheet', 'kampf'], ['sheet', 'werte'], ['sheet', 'zauber'], ['she
   r = await q.evaluate(() => { const copy = localStorage.getItem('heldenbuch_defekt'); const c = sampleChar(); S.chars[c.id] = c; persist('c', c.id); return { copy: copy === '{"v":2,"chars":{"a":', still: localStorage.getItem('heldenbuch_defekt') === '{"v":2,"chars":{"a":', flag: S.lsDefekt === true }; });
   T('GK03-T12 Unlesbarer Gesamtstand: Rohtext bleibt als «heldenbuch_defekt» erhalten', r.copy && r.still && r.flag, r);
   T('Keine JavaScript-Fehler', errs.length === 0, errs.slice(0, 5));
+  console.log(lsReset ? '(Hinweis: ' + lsReset + '× Speicher nach Neuladen von Chromium verloren, Stand neu eingespielt – GK-N04)' : '');
   console.log('\n' + pass + ' / ' + (pass + fail) + ' bestanden');
-  await b.close(); process.exit(fail ? 1 : 0);
+  await b.close(); srv.close(); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
