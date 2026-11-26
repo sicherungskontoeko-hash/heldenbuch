@@ -68,6 +68,7 @@ Gut zu wissen:
 
 - Es braucht **kein Konto** und **keinen eigenen Server**. Die Geräte verbinden sich über einen kostenlosen öffentlichen Vermittlungsserver (MQTT).
 - Wer den Raumcode kennt, kann mitlesen. Teile ihn nur mit deiner Gruppe. Gespeichert werden am Tisch nur Name, Klasse, TP, RK, Zustände und Würfe – nicht deine ganzen Helden.
+- Der Online-Tisch ist für vertraute Runden gedacht: Wer im Raum ist, gilt als vertrauenswürdig. Eine absichtlich veränderte App könnte sich zum Beispiel als Spielleitung ausgeben. Für öffentliche Runden mit Unbekannten ist der Tisch nicht ausgelegt.
 - Klappt die Verbindung nicht (z. B. Firmen-WLAN), wählt **alle** unter **Tisch → Verbindung** denselben anderen Server.
 - **Helden aufs andere Gerät:** **Helden → Aktiven Helden senden** auf dem alten Gerät, auf dem neuen Gerät den Code bei **Empfangen** eingeben.
 

@@ -8,23 +8,32 @@ const VAULT_URL = (() => { try { const d = localStorage.getItem('hb_vault_dev') 
 let VLT = null, VLT_APPLY = false, VLT_REC = null, VLT_PAIR = null, VLT_HIST = null, VLT_MSG = '', VLT_CONF_SEEN = 0;
 const VLT_TXT = { gesichert: 'Gesichert', wartet: 'Synchronisierung ausstehend', offline: 'Offline – lokale Änderungen', später: 'Synchronisierung ausstehend', gesperrt: 'Fehler – Gerät nicht mehr verbunden', konflikt: 'Konflikt', fehler: 'Fehler', bereit: 'Verbunden', aus: '' };
 function vaultApi(base) { return async (m, path, x) => { x = x || {}; const h = { 'content-type': 'application/json' }; if (x.auth) h.authorization = 'FCV ' + x.auth.did + ':' + x.auth.tok;
-  const r = await fetch(base + path, { method: m, headers: h, cache: 'no-store', referrerPolicy: 'no-referrer', body: m === 'GET' || m === 'DELETE' ? undefined : JSON.stringify(x.body || {}) });
+  /* FC68-10: keine hängende Anfrage – nach 20 s abbrechen (gilt als offline; Wiederholung sendet dieselbe Version) */
+  const ac = typeof AbortController === 'function' ? new AbortController() : null; const to = ac ? setTimeout(() => ac.abort(), 20000) : 0;
+  let r; try { r = await fetch(base + path, { method: m, headers: h, cache: 'no-store', referrerPolicy: 'no-referrer', signal: ac ? ac.signal : undefined, body: m === 'GET' || m === 'DELETE' ? undefined : JSON.stringify(x.body || {}) }); } finally { clearTimeout(to); }
   let body = null; try { body = await r.json(); } catch (e) {} return { status: r.status, body }; }; }
-function vaultStore() { return { load: () => { try { return JSON.parse(localStorage.getItem('hb_vault') || 'null'); } catch (e) { return null; } }, save: (s) => { try { if (s) localStorage.setItem('hb_vault', JSON.stringify(s)); else localStorage.removeItem('hb_vault'); } catch (e) {} } }; }
+function vaultStore() { return { load: () => { try { return JSON.parse(localStorage.getItem('hb_vault') || 'null'); } catch (e) { return null; } }, save: (s) => { const v = s ? JSON.stringify(s) : null; if (v) localStorage.setItem('hb_vault', v); else localStorage.removeItem('hb_vault'); if (localStorage.getItem('hb_vault') !== v) throw new Error('Vault-Zustand liess sich auf diesem Gerät nicht speichern (Speicher voll?).'); } }; } /* FC68-04: Fehler werden gemeldet, nicht verschluckt */
 function vaultRead(kind, id) { if (kind === 'c') return S.broken && S.broken.has(id) ? undefined : S.chars[id]; if (kind === 'h') return S.hb[id]; return undefined; }
 function vaultValidate(kind, d) { try { if (kind === 'c') { if (!nvPlain(d)) return 'kein Heldenobjekt'; const e = charShapeErrors(d).concat(validateChar(d)); return e.length ? String(e[0]) : null; } if (kind === 'h') return validHb(d) || null; } catch (e) { return 'nicht lesbar'; } return 'unbekannte Art'; }
 function vaultApply(kind, id, d) {
   if (typeof id !== 'string' || nvProto(id)) return false; VLT_APPLY = true;
+  const had = kind === 'c' ? Object.prototype.hasOwnProperty.call(S.chars, id) : Object.prototype.hasOwnProperty.call(S.hb, id); const prev = kind === 'c' ? S.chars[id] : S.hb[id];
   try {
     if (kind === 'c') { if (d === null) { delete S.chars[id]; if (S.cur === id) { S.cur = Object.keys(S.chars)[0] || null; if (!S.cur && (S.view === 'sheet' || S.view === 'build')) S.view = 'heroes'; } }
       else { if (vaultValidate('c', d)) return false; let n; try { n = normChar(JSON.parse(JSON.stringify(d))); } catch (e) { return false; } n.id = id; S.chars[id] = n; } persist('c', id); }
     else if (kind === 'h') { if (d === null) delete S.hb[id]; else { if (validHb(d)) return false; S.hb[id] = JSON.parse(JSON.stringify(d)); } persist('h', id); }
     else return false;
+    /* FC68-04: nur als übernommen melden, wenn der lokale Speicher es dauerhaft hat; sonst alten Stand zurück */
+    if (S.saveErr) { const box = kind === 'c' ? S.chars : S.hb; if (had) box[id] = prev; else delete box[id]; return false; }
   } finally { VLT_APPLY = false; }
   later('vaultRender', 120, () => { const a = document.activeElement; if (!(a && (a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && !/^(button|checkbox|radio|range|file)$/.test(a.type))))) render(); });
   return true;
 }
-function vaultCopy(kind, d) { if (kind !== 'c' || vaultValidate('c', d)) return; const n = normChar(JSON.parse(JSON.stringify(d))); n.id = freshId(); n.name = String(n.name || 'Held').slice(0, 50) + ' (anderes Gerät)'; S.chars[n.id] = n; persist('c', n.id); }
+/* FC68-09: «Beide behalten» für Helden und Hausregeln; true nur bei dauerhaft gespeicherter Kopie */
+function vaultCopy(kind, d) { if (vaultValidate(kind, d)) return false;
+  if (kind === 'c') { const n = normChar(JSON.parse(JSON.stringify(d))); n.id = freshId(); n.name = String(n.name || 'Held').slice(0, 50) + ' (anderes Gerät)'; S.chars[n.id] = n; persist('c', n.id); if (S.saveErr) { delete S.chars[n.id]; return false; } return true; }
+  if (kind === 'h') { const h = JSON.parse(JSON.stringify(d)); let nid; do { nid = 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); } while (S.hb[nid]); h.id = nid; h.name = String(h.name || 'Hausregel').slice(0, 45) + ' (anderes Gerät)'; if (validHb(h)) return false; S.hb[nid] = h; persist('h', nid); if (S.saveErr) { delete S.hb[nid]; return false; } return true; }
+  return false; }
 function vaultList() { return Object.keys(S.chars).filter((i) => !(S.broken && S.broken.has(i))).map((i) => ['c', i]).concat(Object.keys(S.hb).map((i) => ['h', i])); }
 function vaultInit() {
   if (!VAULT_URL || VLT || typeof FcVault === 'undefined' || !FcVault.Vault) return;
@@ -35,7 +44,7 @@ function vaultInit() {
   document.addEventListener('visibilitychange', () => { if (VLT && VLT.on && document.visibilityState === 'visible') vaultSync(); });
 }
 async function vaultSync() { if (!VLT || !VLT.on) return; try { await VLT.sync(); } catch (e) { VLT.set('fehler'); } vaultPaint(); }
-function vaultMark(kind, id) { if (!VLT || VLT_APPLY || !VLT.on) return; VLT.mark(kind, id); }
+function vaultMark(kind, id) { if (!VLT || VLT_APPLY || !VLT.on) return; try { VLT.mark(kind, id); } catch (e) { VLT.set('fehler'); } }
 function vaultOn() { return !!(VLT && VLT.on); }
 function vaultLabel() { if (!vaultOn()) return ''; const s = VLT.status; return s === 'offline' && !VLT.st.dirty.length ? 'Offline' : VLT_TXT[s] || s; }
 function vaultSaveTxt() { return vaultOn() ? ' · Vault: ' + vaultLabel() : ''; }
@@ -75,7 +84,7 @@ function vaultModal(keep) {
   if (VLT_PAIR) h += '<p><b>Kopplungscode</b> (einmal verwendbar, gültig bis ' + esc(vTime(VLT_PAIR.exp)) + '):</p><p class="vkey" translate="no">' + esc(VLT_PAIR.code) + '</p><p class="hint">Auf dem anderen Gerät: Deine Helden › Vault › «Schon einen Vault?» und den Code eingeben.</p>';
   if (st.conf.length) h += '<h3>Konflikte</h3>' + st.conf.map((c) => '<div class="vconf"><p><b>' + esc((c.mine && c.mine.name) || (c.theirs && c.theirs.name) || 'Held') + '</b> wurde auf zwei Geräten verschieden geändert (' + esc(vTime(c.at)) + ').</p><p class="hint">Dieses Gerät: ' + vSum(c.mine) + '<br>Anderes Gerät: ' + vSum(c.theirs) + '</p><div class="chips">' +
     '<button class="btn sm" data-act="vRes" data-arg="' + esc(c.oid) + '|mine">Dieses Gerät gilt</button><button class="btn sm ghost" data-act="vRes" data-arg="' + esc(c.oid) + '|theirs" data-confirm="Stand des anderen Geräts übernehmen? Der Stand auf diesem Gerät wird ersetzt.">Anderes Gerät gilt</button>' +
-    (c.theirs && c.mine ? '<button class="btn sm ghost" data-act="vRes" data-arg="' + esc(c.oid) + '|both">Beide behalten</button>' : '') + '</div></div>').join('');
+    (c.theirs && c.mine && (c.kind === 'c' || c.kind === 'h') ? '<button class="btn sm ghost" data-act="vRes" data-arg="' + esc(c.oid) + '|both">Beide behalten</button>' : '') + '</div></div>').join('');
   if (VLT.bad.length) h += '<p class="hint warn">' + VLT.bad.length + ' Eintrag/Einträge beim Dienst nicht übernommen (beschädigt, zu gross oder ungültig). Deine lokalen Daten sind unverändert.</p>';
   const ids = Object.keys(S.chars);
   if (ids.length) h += '<h3>Frühere Stände</h3><div class="chips">' + ids.map((i) => '<button class="btn sm ghost" data-act="vHist" data-arg="' + esc(i) + '">' + esc(S.chars[i].name || 'Held') + '</button>').join('') + '</div>' +

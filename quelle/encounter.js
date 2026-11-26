@@ -151,18 +151,20 @@ XA.npcAtk = (t, a) => {
 XA.npcCover = (t, a) => { if (!S.npcA) return; S.npcA.cover = +a; npcPrompt(); };
 XA.npcTgt = (t, a) => { if (!S.npcA) return; S.npcA.tgt = S.npcA.tgt === a ? '' : a; npcPrompt(); };
 XA.npcMiss = () => { const o = S.npcA; if (!o) return; pushLog({ label: o.name, total: 'verfehlt', detail: 'kein Schaden', share: true }); S.npcA = { tgt: o.tgt }; orbPrompt(''); hitFlush(); };
-function hitFlush() { const q = S.hitQ || []; if (!q.length) return; S.hitQ = []; const sum = q.reduce((a2, x) => a2 + x.amount, 0); setTimeout(() => hitPrompt(q.length > 1 ? { by: q.map((x) => x.by).join(', '), amount: sum, dtype: 'mehrere Treffer', crit: q.some((x) => x.crit), t: Date.now() } : q[0]), 150); }
+/* MA68-12: Treffer einzeln nacheinander (eigene Schadensart, Kritisch, Zusatzeffekt), nie zu einem Sammeltreffer verschmolzen */
+function hitFlush() { const q = S.hitQ || []; if (!q.length) return; const h = q.shift(); S.hitQ = q; setTimeout(() => hitPrompt(h), 150); }
 XA.npcHit = () => { const o = S.npcA; if (!o) return; const crit = o.nat === 20 || !!o.forceCrit; orbPrompt(''); rollDmg(crit ? critExpr(o.dmg) : o.dmg, o.name + (crit ? ' · kritisch' : '') + ' (' + o.dtype + ')'); S.npcA = { tgt: o.tgt };
   const amt = +S.log[0].total || 0; if (!o.tgt || !amt) return; const h = { by: o.name, amount: amt, dtype: o.dtype, crit, atk: o.total, nat: o.nat, rider: o.riderOn ? o.rider : null, t: Date.now() };
   const uid = o.tgt === 'me' ? UID : o.tgt.slice(2);
-  if (uid === UID) { setTimeout(() => hitPrompt(h), typeof d3fx === 'function' && d3fx() === 'voll' ? 1100 : 200); hitFlush(); return; }
+  if (uid === UID) { h.cid = S.cur; setTimeout(() => hitPrompt(h), typeof d3fx === 'function' && d3fx() === 'voll' ? 1100 : 200); hitFlush(); return; }
   const c = S.combat; if (!c) return; saveCombat(Object.assign({}, c, { hits: ((c.hits || []).concat([Object.assign({ to: uid }, h)])).slice(-20), t: Date.now(), log: clog(c, o.name + ' trifft ' + ((S.table[uid] || {}).char || 'einen Helden') + ': ' + amt + ' ' + o.dtype) }));
   bannerToast('Schaden zugestellt', ((S.table[uid] || {}).char || 'Der Held') + ' bekommt ' + amt + ' Schaden zum Eintragen angezeigt.'); hitFlush(); };
 /* Treffer an meinen Helden: anzeigen und auf Wunsch eintragen (Resistenz usw. wählt der Spieler) */
-function hitPrompt(h) { const ch = cur(); if (!ch) return; if ((S.npcA && S.npcA.name) || (promptOpen() && S.hitPend !== h)) { S.hitQ = (S.hitQ || []).concat([h]); return; } S.hitPend = h;
+/* MA68-01: Treffer gehört dem Helden, der beim Eintreffen am Tisch war – nicht dem gerade geöffneten */
+function hitPrompt(h) { if (!h.cid) h.cid = S.cur; const ch = S.chars[h.cid]; if (!ch) return; if ((S.npcA && S.npcA.name) || (promptOpen() && S.hitPend !== h)) { S.hitQ = (S.hitQ || []).concat([h]); return; } S.hitPend = h;
   const hx = typeof hitExtras === 'function' ? hitExtras(h, ch) : { html: '', half: '' };
   orbPrompt('<div class="pr' + (h.crit ? ' crit' : '') + '"><b>' + esc(h.by) + ' trifft ' + esc(ch.name) + ': ' + esc(h.amount) + ' Schaden</b><p>' + esc(h.dtype || '') + (h.crit ? ' · kritischer Treffer' : '') + (h.atk != null ? ' · Angriff ' + esc(h.atk) : '') + '. Eintragen?' + (hx.half ? ' <b class="okc">' + esc(hx.half) + '.</b>' : '') + '</p>' + hx.html + '<div class="chips end"><button class="btn ghost" data-act="hitApply" data-arg="0">Nicht eintragen</button><button class="btn' + (hx.half ? ' rec' : ' ghost') + '" data-act="hitApply" data-arg="0.5">Halb (' + esc(Math.floor(h.amount / 2)) + ')</button><button class="btn' + (hx.half ? ' ghost' : '') + '" data-act="hitApply" data-arg="1">Voll (' + esc(h.amount) + ')</button></div></div>'); }
-XA.hitApply = (t, a) => { const h = S.hitPend; S.hitPend = null; orbPrompt(''); const ch = cur(); if (!h || !ch) return;
+XA.hitApply = (t, a) => { const h = S.hitPend; S.hitPend = null; orbPrompt(''); const ch = h && S.chars[h.cid]; if (!h || !ch) return;
   const unc = t && t.dataset && t.dataset.uncanny; if (unc && typeof tSpend === 'function' && !tSpend(ch, 'r', 'Unglaubliches Ausweichen')) { S.hitPend = h; return hitPrompt(h); }
   const n = Math.floor(h.amount * +a); if (n > 0) { if (typeof vfxHint === 'function') vfxHint({ dtype: h.dtype }); hpChange(ch, 'dmg', n, h.crit); pushLog({ label: 'Schaden erhalten', total: n, detail: h.by + ' · ' + (h.dtype || '') + (unc ? ' (Unglaubliches Ausweichen)' : +a < 1 ? ' (halbiert)' : ''), share: true }); if (unc) commit(); }
   const dl = typeof d3fx === 'function' && d3fx() === 'voll' ? 600 : 150;
@@ -170,7 +172,7 @@ XA.hitApply = (t, a) => { const h = S.hitPend; S.hitPend = null; orbPrompt(''); 
   else if (h.rider && +a !== 0 && !(ch.play.hp <= 0) && typeof riderPrompt === 'function') setTimeout(() => riderPrompt(h), dl); };
 function hitCheck() { const c = S.combat; if (!c || !c.hits) return; let seen = 0; try { seen = +sessionStorage.getItem('hb_hit_' + c.id) || 0; } catch (e) {}
   const mine = c.hits.filter((h) => h.to === UID && h.t > seen); if (!mine.length) return; const h = mine[mine.length - 1]; try { sessionStorage.setItem('hb_hit_' + c.id, String(h.t)); } catch (e) {}
-  if (mine.length > 1) { const sum = mine.reduce((s2, x) => s2 + x.amount, 0); hitPrompt({ by: mine.map((x) => x.by).join(', '), amount: sum, dtype: 'mehrere Treffer', crit: mine.some((x) => x.crit), t: h.t }); } else hitPrompt(h); }
+  mine.forEach((x) => { x.cid = S.cur; }); hitPrompt(mine[0]); if (mine.length > 1) S.hitQ = (S.hitQ || []).concat(mine.slice(1)); }
 
 /* Verstärkung: bereitgehaltene Gegner treten bei – neue Initiative, werden einsortiert */
 XA.npcJoin = (t, a) => { const c = S.combat; if (!c) return; const grp = t.dataset.grp; const ids = (c.npcs || []).filter((x) => x.reserve && (grp ? x.grp === grp : x.id === a)).map((x) => x.id); if (!ids.length) return;

@@ -52,8 +52,11 @@ function effSyncMine() {
   const want = [...new Set(eff.filter((e) => e.tgt === me).flatMap(effConds))];
   const had = P.effCond || [];
   P.cond = P.cond || [];
-  for (const k of want) if (!P.cond.includes(k)) { P.cond.push(k); (COND[k].adds || []).forEach((a) => { if (!P.cond.includes(a)) P.cond.push(a); }); changed = true; }
-  for (const k of had) if (!want.includes(k)) { const keepAdds = new Set(want.flatMap((w) => COND[w].adds || [])); P.cond = P.cond.filter((x) => x !== k && !((COND[k].adds || []).includes(x) && !keepAdds.has(x) && !want.includes(x))); changed = true; bannerToast('Effekt endet', COND[k].name + ' ist vorbei.'); }
+  /* MA68-11: Herkunft merken – entfernt wird nur, was ein Effekt selbst gesetzt hat; ein unabhängig bestehender Zustand bleibt */
+  const own = new Set((P.effOwn || had).filter((k) => P.cond.includes(k))); const own0 = JSON.stringify([...own].sort());
+  for (const k of want) { if (!P.cond.includes(k)) { P.cond.push(k); own.add(k); changed = true; } (COND[k].adds || []).forEach((a) => { if (!P.cond.includes(a)) { P.cond.push(a); own.add(a); changed = true; } }); }
+  for (const k of had) if (!want.includes(k)) { const keep = new Set(want.flatMap((w) => [w].concat(COND[w].adds || []))); for (const x of [k].concat(COND[k].adds || [])) if (own.has(x) && !keep.has(x)) { P.cond = P.cond.filter((y) => y !== x); own.delete(x); } changed = true; bannerToast('Effekt endet', COND[k].name + (P.cond.includes(k) ? ' aus dem Effekt ist vorbei – der Zustand besteht aus anderem Grund weiter.' : ' ist vorbei.')); }
+  if ((!P.effOwn && (own.size || want.length)) || (P.effOwn && JSON.stringify([...own].sort()) !== own0)) { P.effOwn = [...own]; changed = true; }
   if (JSON.stringify(had) !== JSON.stringify(want)) { P.effCond = want; changed = true; }
   if (P.conc && P.concEff && S.combat && S.combat.active && !eff.some((e) => e.id === P.concEff)) { const nm = P.conc.name; P.concEff = null; endConc(P); bannerToast('Dauer abgelaufen', nm + ' endet.'); changed = true; }
   const mine = remList().filter((r) => r.tgt === me);

@@ -1,7 +1,7 @@
 # Testprotokoll
 
-- Zeitpunkt: 2026-11-25T18:53:38+01:00
-- Revision (SHA-256 von index.html, gekürzt): 6dc9738b79886323
+- Zeitpunkt: 2026-11-26T20:07:10+01:00
+- Revision (SHA-256 von index.html, gekürzt): 43d889a1aa6e2659
 - Node: v22.23.5 · Playwright: 1.63.0
 - Browser: Chromium 157.0.8103.78
 - System: Linux 6.18.44-fc-v880
@@ -9,9 +9,9 @@
 | Suite | Exit-Code | Ergebnis |
 |---|---|---|
 | Regeltests (rules.test.js) | 0 | ✔ Import bereinigt unbekannte Zauber 48 / 48 Tests bestanden  |
-| Regressionen HB-01–HB-11 (hb.test.js) | 0 | ✔ HB-11 Bewusstlos ausserhalb des Kampfes: kein Zauber 27 / 27 bestanden · /home/claude/hb-main/quelle/index.html  |
+| Regressionen HB-01–HB-11 (hb.test.js) | 0 | ✔ HB-11 Bewusstlos ausserhalb des Kampfes: kein Zauber 27 / 27 bestanden · /home/claude/hb-fc/quelle/index.html  |
 | Robustheit & Sonderfälle (cases.test.js) | 0 | ✔ HB-26 Fluchklinge: zweite Bonusaktion blockiert, keine Ressource verbraucht 23 / 23 bestanden  |
-| Kritischer Audit A01–A06 (audit2.test.js) | 0 | ✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/hb-main/quelle/index.html  |
+| Kritischer Audit A01–A06 (audit2.test.js) | 0 | ✔ A06 Negativ: Beenden über den Schalter beendet auch die Konzentration 21 / 21 bestanden · /home/claude/hb-fc/quelle/index.html  |
 | Erklärkarten ⓘ (info.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 53 / 53 bestanden  |
 | Layout: ⚠ offene Punkte, Menüs (layout.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 29 / 29 bestanden  |
 | Würfel-Designs (dice.test.js) | 0 | ✔ handy: keine waagrechte Scrollleiste 50 / 50 bestanden  |
@@ -66,7 +66,24 @@
 | Ressourcen: Erklärungen zum Aufklappen (ressourcen.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
 | Kampf am Tisch: eigener Zug gut sichtbar (zug.test.js) | 0 | ✔ Keine Skriptfehler 20 / 20 bestanden  |
 | Erweiterung: 6 Klassen, 9 Völker, erweiterte Auswahl (erweiterung.test.js) | 0 | ✔ Keine Skriptfehler 39 / 39 bestanden  |
-| Prüfberichte 25.11.: Würfelanzeige, Schild, Tisch-Anfragen, Audit HB-01–HB-15 (pruefbericht.test.js) | 0 | ✔ Keine Skriptfehler 36 / 36 bestanden  |
+| Prüfberichte 25.11.: Würfelanzeige, Schild, Tisch-Anfragen, Audit HB-01–HB-15 (pruefbericht.test.js) | 0 | ✔ Keine Skriptfehler 37 / 37 bestanden  |
+| Tischhilfen: eigene Würfel, Zugleiste, Ladungen, Regeln der Runde, Vorbereiten (tischhilfen.test.js) | 0 | ✔ keine Seitenfehler 43 bestanden, 0 fehlgeschlagen  |
+| Sicherheit: fremder Text wirkt nie als HTML (sicherheit.test.js) | 0 | ✔ keine Seitenfehler, keine Dialoge 26 bestanden, 0 fehlgeschlagen  |
+| GK-01/GK-07 Vertrauensgrenze am Tisch: fremde Kampf-, Runden- und Spielerdaten (gk-netz.test.js) | 0 | ✔ Keine JavaScript-Fehler (Teil 2) 37 / 37 bestanden  |
+| GK-02 Verdeckte Würfe werden nie nachträglich geteilt (gk-wuerfe.test.js) | 0 | ✔ Keine JavaScript-Fehler (Teil 2) 21 / 21 bestanden  |
+| GK-03 Import und gespeicherter Bestand: Prüfung mit Feldpfad, keine Teilübernahme, Isolation (gk-import.test.js) | 0 | ✔ Keine JavaScript-Fehler 20 / 20 bestanden  |
+| GK-04/05/06 Aktionsökonomie: fremder Zug, Folgeangriffe, Vorbereiten (gk-zug.test.js) | 1 | ✔ GK06-T10 Fremder Zug: Vorbereiten öffnet nicht; neuer eigener Zug: Vorbereitung verfallen, Reaktion frei ✔ GK06-T11 Einzelspiel und lockere Regeln: Vorbereiten wie bisher möglich  |
+| GK-08 Grosse verschlüsselte Nachrichten (gk-b64.test.js) | 0 | ✔ Keine JavaScript-Fehler 12 / 12 bestanden (chromium)  |
+| GK-11 Gnaden-Dialog auf Deutsch (gk-gnade.test.js) | 0 | ✔ Keine JavaScript-Fehler 7 / 7 bestanden  |
+| GK-09 Prüfpaket: beide Fassungen und Manifest (gk-paket.test.js) | 0 | ✔ Keine JavaScript-Fehler 11 / 11 bestanden  |
+| GK-10 SRD-5.2.1-Attribution wortgetreu (gk-lizenz.test.js) | 0 | ✔ Keine JavaScript-Fehler 17 / 17 bestanden  |
+| Fablecrown: Name, Bildmarke, Kompatibilität B01–B15 (fc-marke.test.js) | 0 | ✔ Keine JavaScript-Fehler 37 / 37 bestanden  |
+| Fablecrown Vault V2: Kern, zwei Geräte, Kopplung, Konflikte, Verlauf (vault.test.js) | 0 | ✔ FC68-09 «Beide behalten» ohne gelungene Kopie: Konflikt bleibt offen; mit Kopie (Hausregel): beide Stände überall 42 / 42 bestanden  |
+| Fablecrown Vault V2 in der App: zwei Browserprofile gegen Prüfserver (vault-app.test.js) | 0 | ✔ Keine Skriptfehler 14 / 14 bestanden  |
+| Unabhängige Prüfung 1.9.68: Mehrtab, Wandelgestalt, Hausregel-Import, Würfel (audit68.test.js) | 0 | ✔ Keine Skriptfehler 8 / 8 bestanden  |
+| Begleiter und Reittiere: Werte, TP, Initiative, eigene Würfel (begleiter.test.js) | 0 | ✔ keine Seitenfehler 12 bestanden, 0 fehlgeschlagen  |
+| Bedienung mit Tastatur und im Querformat (bedienung.test.js) | 0 | ✔ keine Seitenfehler 15 bestanden, 0 fehlgeschlagen  |
+| Zufallsspieler: 3 Minuten zufällige Bedienung ohne Fehler (zufallsspieler.test.js) | 0 | ✔ keine Seiten- oder Konsolenfehler 2 bestanden, 0 fehlgeschlagen  |
 | Langsames Handy: CPU 4× gedrosselt (handy.test.js app) | 0 | ✔ Keine Skriptfehler  ([]) 17 / 17 bestanden  |
 | Abgleich mit dem SRD 5.2: Zauber und Monster (srd.test.js) | 0 | ✔ 339 Zauber und 164 Monster mit dem SRD 5.2 abgeglichen, 0 Abweichungen (8 begründete Ausnahmen)  |
 | Online-Tisch mit drei Geräten, lokal (echt.test.js --lokal) | 0 | ✔ Keine Skriptfehler auf den Geräten 12 / 12 bestanden (Server: lokal)  |
@@ -75,32 +92,3 @@
 | Tischhilfen: passive Werte, Rast für alle, EP nach dem Kampf (tablehelp.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
 | Gegenstände: SRD-Liste, Flüche, Ausrüstung (items.test.js) | 0 | ✔ Keine Skriptfehler 12 / 12 bestanden  |
 | Rettungswürfe der Monster (mobsaves.test.js) | 0 | ✔ Keine Skriptfehler 7 / 7 bestanden  |
-| Leistung: Zwischenspeicher, ruhige Listen, Spieltisch, Effekte (perf.test.js) | 0 | ✔ Keine Skriptfehler 18 / 18 bestanden  |
-| Gesinnung: neun Gesinnungen mit Erklärung (align.test.js) | 0 | ✔ Keine Skriptfehler 9 / 9 bestanden  |
-| Abenteuer: Machtader, Kampf auf Knopfdruck, Entscheidungen, Laden (adventure.test.js) | 0 | ✔ Keine Seitenfehler 38/38 Prüfungen bestanden  |
-| Abenteuer: Wirtshaus zum letzten Krug (krug.test.js) | 0 | ✔ Keine Seitenfehler 44/44 Prüfungen bestanden  |
-| Klicktest kurz (ui.test.js) | 0 | ✔ Keine Skriptfehler 15 / 15 bestanden  |
-| Abnahme-Klicktest (ui-full.test.js) | 0 | ✔ Chromium Desktop 1280: 212/212 Prüfungen ✔ Chromium Handy 390 (Touch): 212/212 Prüfungen  |
-| Kombinationen Klasse×Unterklasse×Stufe (combos.test.js) | 0 | checked 1640 bad 0  |
-| Zugleisten-Fuzz bar | 0 | ran 218 bad 0  |
-| Zugleisten-Fuzz brd | 0 | ran 324 bad 0  |
-| Zugleisten-Fuzz cle | 0 | ran 400 bad 0  |
-| Zugleisten-Fuzz dru | 0 | ran 344 bad 0  |
-| Zugleisten-Fuzz fig | 0 | ran 218 bad 0  |
-| Zugleisten-Fuzz mon | 0 | ran 254 bad 0  |
-| Zugleisten-Fuzz pal | 0 | ran 376 bad 0  |
-| Zugleisten-Fuzz ran | 0 | ran 321 bad 0  |
-| Zugleisten-Fuzz rog | 0 | ran 242 bad 0  |
-| Zugleisten-Fuzz sor | 0 | ran 396 bad 0  |
-| Zugleisten-Fuzz wlk | 0 | ran 388 bad 0  |
-| Zugleisten-Fuzz wiz | 0 | ran 294 bad 0  |
-| Zugleisten-Fuzz rk | 0 | ran 282 bad 0  |
-| Zugleisten-Fuzz bw | 0 | ran 258 bad 0  |
-| Zugleisten-Fuzz fk | 0 | ran 218 bad 0  |
-| Zugleisten-Fuzz ma | 0 | ran 292 bad 0  |
-| Online-Tisch (net.test.js) | 0 | ✔ Nach Verbindungsabbruch: Spieler verbindet neu, Würfe kommen an 7 / 7 bestanden  |
-| Selbst-Update Android-App (boot.test.js) | 0 | ✔ Im normalen Browser: keine Update-Logik 16 / 16 bestanden  |
-| Mehrgeräte-Test: SL + 2 Spieler, gleichzeitig, Abbruch, Kampfablauf (multi.test.js) | 0 | ✔ Handy: kein Querscrollen bei den Spielern 18 / 18 bestanden  |
-| Spielabend mit Abenteuer: SL + 2 Spieler (sitzung.test.js) | 0 | ✔ Laptop der SL: kein Querscrollen (Tisch, Abenteuer) 54 / 54 bestanden  |
-
-Gesamtergebnis: alle Suiten bestanden

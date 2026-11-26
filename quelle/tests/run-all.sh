@@ -96,6 +96,7 @@ run "GK-10 SRD-5.2.1-Attribution wortgetreu (gk-lizenz.test.js)" node tests/gk-l
 run "Fablecrown: Name, Bildmarke, Kompatibilität B01–B15 (fc-marke.test.js)" node tests/fc-marke.test.js
 run "Fablecrown Vault V2: Kern, zwei Geräte, Kopplung, Konflikte, Verlauf (vault.test.js)" node tests/vault.test.js
 run "Fablecrown Vault V2 in der App: zwei Browserprofile gegen Prüfserver (vault-app.test.js)" node tests/vault-app.test.js
+run "Unabhängige Prüfung 1.9.68: Mehrtab, Wandelgestalt, Hausregel-Import, Würfel (audit68.test.js)" node tests/audit68.test.js
 run "Begleiter und Reittiere: Werte, TP, Initiative, eigene Würfel (begleiter.test.js)" node tests/begleiter.test.js
 run "Bedienung mit Tastatur und im Querformat (bedienung.test.js)" node tests/bedienung.test.js
 run "Zufallsspieler: 3 Minuten zufällige Bedienung ohne Fehler (zufallsspieler.test.js)" node tests/zufallsspieler.test.js --min=3

@@ -16,7 +16,28 @@ let DB = null, UID = null; const timers = {};
 let LS_LAST = null;
 function lsGet() { let raw = null; try { raw = localStorage.getItem('heldenbuch'); LS_LAST = raw; if (raw && typeof backupOnce === 'function' && /"v":\s*2/.test(raw) === false) backupOnce(raw); const d = JSON.parse(raw || 'null'); if (raw && (!d || typeof d !== 'object' || (d.chars != null && !nvPlain(d.chars)))) throw new Error('form'); return d; }
   catch (e) { /* Unlesbarer Gesamtstand: Rohtext aufbewahren, bevor ihn ein Speichern überschreibt (GK-03) */ if (raw) { try { if (localStorage.getItem('heldenbuch_defekt') !== raw) localStorage.setItem('heldenbuch_defekt', raw); S.lsDefekt = true; } catch (x) { S.lsDefekt = 'voll'; } } return null; } }
+/* FC68-01: Änderungen eines anderen Tabs am gerade bearbeiteten Helden werden nicht verworfen, sondern beim nächsten
+   Speichern feldweise zusammengeführt (Drei-Wege: gemeinsamer Stand, hier, dort). Echter Widerspruch im selben Feld:
+   hier gilt, der Stand des anderen Tabs bleibt als Kopie erhalten. */
+const EXT_HOLD = {};
+function merge3(b, m, t) {
+  const J = (x) => JSON.stringify(x); if (J(m) === J(t) || J(b) === J(t)) return { v: m, clash: false }; if (J(b) === J(m)) return { v: t, clash: false };
+  const obj = (x) => !!x && typeof x === 'object' && !Array.isArray(x);
+  if (obj(b) && obj(m) && obj(t)) { const out = {}; let clash = false; for (const k of new Set([...Object.keys(b), ...Object.keys(m), ...Object.keys(t)])) { if (nvProto(k)) continue; const r = merge3(b[k], m[k], t[k]); if (r.v !== undefined) out[k] = r.v; clash = clash || r.clash; } return { v: out, clash }; }
+  return { v: m, clash: true };
+}
+function extMerge(i) {
+  const h = EXT_HOLD[i]; delete EXT_HOLD[i]; const mine = S.chars[i]; if (!h || !mine) return [];
+  if (h.theirs === undefined) { if (JSON.stringify(h.base) === JSON.stringify(mine)) { delete S.chars[i]; return ['c_' + i]; } bannerToast('In einem anderen Tab gelöscht', '„' + (mine.name || 'Held') + '“ wurde hier noch bearbeitet und bleibt deshalb erhalten.'); return ['c_' + i]; }
+  const r = merge3(h.base, mine, h.theirs); let n = null; try { if (nvPlain(r.v) && !charShapeErrors(r.v).length) n = normChar(r.v); } catch (e) {}
+  const keys = ['c_' + i];
+  if (n) S.chars[i] = n;
+  if (!n || r.clash) { try { const k = normChar(JSON.parse(JSON.stringify(h.theirs))); k.id = freshId(); k.name = String(k.name || 'Held').slice(0, 50) + ' (anderer Tab)'; S.chars[k.id] = k; keys.push('c_' + k.id); } catch (e) {}
+    bannerToast('Gleichzeitig in zwei Tabs geändert', '„' + (mine.name || 'Held') + '“: Der Stand aus dem anderen Tab liegt als Kopie in deinen Helden.'); }
+  return keys;
+}
 function lsSet(keys) {
+  if (keys) for (const i of Object.keys(EXT_HOLD)) keys = keys.concat(extMerge(i));
   let chars = S.chars, hb = S.hb;
   if (keys && !S.saveErr) {
     try {
@@ -41,10 +62,12 @@ function lsExternal(e) {
   const a = document.activeElement, typing = !!a && (a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && !/^(button|checkbox|radio|range|file)$/.test(a.type)));
   const keep = (kind, i) => typing && kind === 'c' && i === S.cur;
   let changed = false;
+  let base0 = null; const baseOf = (i) => { if (base0 === null) { try { base0 = (JSON.parse(LS_LAST || '{}') || {}).chars || {}; } catch (x) { base0 = {}; } } return base0[i]; };
+  const hold = (i, v) => { const old = EXT_HOLD[i]; EXT_HOLD[i] = { base: old ? old.base : baseOf(i), theirs: v }; };
   for (const [kind, src, dst] of [['c', d.chars, S.chars], ['h', d.hb && typeof d.hb === 'object' ? d.hb : {}, S.hb]]) {
-    for (const i of Object.keys(dst)) if (!(i in src) && !keep(kind, i)) { delete dst[i]; changed = true; }
+    for (const i of Object.keys(dst)) if (!(i in src)) { if (keep(kind, i)) hold(i, undefined); else { delete dst[i]; changed = true; } }
     if (kind === 'c' && S.broken) for (const i of [...S.broken.keys()]) if (!(i in src)) S.broken.delete(i);
-    for (const [i, v] of Object.entries(src)) { if (!v || typeof v !== 'object' || keep(kind, i) || nvProto(i)) continue; if (JSON.stringify(dst[i]) !== JSON.stringify(v)) { const n = kind === 'c' ? charSafe(i, v, 'anderer Tab') : v; if (!n) continue; dst[i] = n; changed = true; } }
+    for (const [i, v] of Object.entries(src)) { if (!v || typeof v !== 'object' || nvProto(i)) continue; if (keep(kind, i)) { if (JSON.stringify(dst[i]) !== JSON.stringify(v)) hold(i, v); continue; } if (JSON.stringify(dst[i]) !== JSON.stringify(v)) { const n = kind === 'c' ? charSafe(i, v, 'anderer Tab') : v; if (!n) continue; dst[i] = n; changed = true; } }
   }
   LS_LAST = e.newValue;
   if (!changed) return;
@@ -78,6 +101,8 @@ function persist(kind, id) {
 }
 if (typeof window !== 'undefined' && window.addEventListener) {
   window.addEventListener('storage', lsExternal);
+  /* Tippen beendet: zurückgehaltene Änderungen aus anderem Tab sofort zusammenführen */
+  document.addEventListener('focusout', () => setTimeout(() => { const a = document.activeElement; if (!Object.keys(EXT_HOLD).length || (a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT'))) return; Object.keys(EXT_HOLD).forEach((i) => persist('c', i)); render(); }, 0));
   window.addEventListener('pagehide', flushLater);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushLater(); });
 }
@@ -121,7 +146,14 @@ async function connectDb() {
   } catch (e) { DB = null; S.store = 'local'; paintSave(); }
 }
 
-function normChar(c) { if (c && typeof migrateChar === 'function') migrateChar(c); const d = newChar(); for (const k of Object.keys(d)) if (c[k] === undefined) c[k] = d[k]; c.play = Object.assign(d.play, (c.play && typeof c.play === 'object') ? c.play : {}); c.misc = Object.assign(d.misc, (c.misc && typeof c.misc === 'object') ? c.misc : {}); if (!Array.isArray(c.play.cond)) c.play.cond = []; if (c.play.hxForms !== undefined && !Array.isArray(c.play.hxForms)) delete c.play.hxForms; /* Wandelgestalt ist nur ein Zug-Zustand */ if (!Array.isArray(c.play.ds)) c.play.ds = [0, 0]; if (c.alignment && typeof alignKey === 'function') { const ak = alignKey(c.alignment); if (ak) c.alignment = ALIGN[ak].name; } return c; }
+/* FC68-06: nur erlaubte Formen, ohne Doppel, Anzahl nach Formwandler-Stufe (1 / ab 11: 2 / auf 20: 3), Flügel ab 17 */
+function hxFormsClean(c) {
+  if (!c || !c.play || !Array.isArray(c.play.hxForms)) return;
+  const l = c.cls === 'hxform' ? Math.max(1, +c.level || 1) : (+((Array.isArray(c.multi) ? c.multi : []).find((m) => m && m.cls === 'hxform') || {}).level || 0);
+  let f = [...new Set(c.play.hxForms.filter((x) => ['Klinge', 'Panzer', 'Greifer', 'Sehne', 'Flügel'].includes(x)))]; if (l < 17) f = f.filter((x) => x !== 'Flügel');
+  f = f.slice(0, l >= 20 ? 3 : l >= 11 ? 2 : l > 0 ? 1 : 0); if (f.length) c.play.hxForms = f; else delete c.play.hxForms;
+}
+function normChar(c) { if (c && typeof migrateChar === 'function') migrateChar(c); const d = newChar(); for (const k of Object.keys(d)) if (c[k] === undefined) c[k] = d[k]; c.play = Object.assign(d.play, (c.play && typeof c.play === 'object') ? c.play : {}); c.misc = Object.assign(d.misc, (c.misc && typeof c.misc === 'object') ? c.misc : {}); if (!Array.isArray(c.play.cond)) c.play.cond = []; if (c.play.hxForms !== undefined && !Array.isArray(c.play.hxForms)) delete c.play.hxForms; /* Wandelgestalt ist nur ein Zug-Zustand */ hxFormsClean(c); if (!Array.isArray(c.play.ds)) c.play.ds = [0, 0]; if (c.alignment && typeof alignKey === 'function') { const ak = alignKey(c.alignment); if (ak) c.alignment = ALIGN[ak].name; } return c; }
 /* ---------- Beispiel ---------- */
 function sampleChar() {
   return newChar({ name: 'Beispiel: Brann Eisenfaust', cls: 'pal', level: 3, sub: 'devotion', species: 'dwarf', bg: 'soldier', bgPlus: { str: 2, con: 1 },
@@ -646,7 +678,13 @@ function importPlan(text) {
   let d; try { d = JSON.parse(text); } catch (e) { throw new Error('Kein gültiger Heldentext (JSON fehlerhaft).'); }
   if (!nvPlain(d)) throw new Error('Im Text wurde kein Held gefunden.');
   if (d.chars !== undefined && !Array.isArray(d.chars)) throw new Error('Nicht geladen – chars: erwartet eine Liste.');
-  const list = Array.isArray(d.chars) ? d.chars : (d.id && d.cls ? [d] : []);
+  let list = Array.isArray(d.chars) ? d.chars : (d.id && d.cls ? [d] : []);
+  /* FC68-07: Hausregel mit vorhandener ID: gleich → nicht nochmals, abweichend → als Kopie mit neuer ID, Verweise der mitgelieferten Helden umgestellt */
+  const hbMap = {}, hbNotes = [];
+  if (Array.isArray(d.hb)) d.hb = d.hb.map((h) => { if (!nvPlain(h) || typeof h.id !== 'string' || !Object.prototype.hasOwnProperty.call(S.hb, h.id)) return h; if (JSON.stringify(S.hb[h.id]) === JSON.stringify(h)) return null;
+    let nid; do { nid = h.id.slice(0, 50) + '_' + Math.random().toString(36).slice(2, 7); } while (S.hb[nid] || hbMap[nid]); hbMap[h.id] = nid; const nm = String(h.name || 'Hausregel').slice(0, 45) + ' (importiert)'; hbNotes.push('Hausregel „' + String(h.name || h.id).slice(0, 40) + '“ gab es schon anders – als „' + nm + '“ übernommen');
+    return Object.assign({}, h, { id: nid, name: nm }); }).filter(Boolean);
+  if (Object.keys(hbMap).length) list = list.map((c) => { let t = JSON.stringify(c); for (const [o, n] of Object.entries(hbMap)) t = t.split(JSON.stringify(o)).join(JSON.stringify(n)); return JSON.parse(t); });
   if (!list.length && !d.extra) throw new Error('Im Text wurde kein Held gefunden.');
   if (list.length > IMPORT_CHARS) throw new Error('Nicht geladen – zu viele Helden in einer Datei (höchstens ' + IMPORT_CHARS + ').');
   const who = (c, i) => (c && typeof c.name === 'string' && c.name.trim() ? '„' + c.name.trim().slice(0, 40) + '“ ' : '') + '(chars[' + i + '])';
@@ -663,7 +701,7 @@ function importPlan(text) {
   const notes = []; const chars = list.map((c, i) => { const n = normChar(JSON.parse(JSON.stringify(c))); notes.push(...cleanRefs(n, hbStage));
     try { derive(n, hbStage); } catch (e) { throw new Error('Nicht geladen – ' + who(c, i) + ': Werte lassen sich nicht berechnen (' + String(e && e.message || e).slice(0, 120) + ').'); }
     return n; });
-  return { chars, hb: d.hb || [], extra: d.extra, notes };
+  return { chars, hb: d.hb || [], extra: d.extra, notes: hbNotes.concat(notes) };
 }
 function importJson(text) {
   const P = importPlan(text);
@@ -1173,8 +1211,12 @@ function castSpell(ch, id, lvl, mode, resKey) {
   const saveNote = sv ? ' · Ziele: ' + sv[1] + '-Rettungswurf gegen SG ' + ctxS.dc + (sdat && sdat.half ? ', bei Erfolg halber Schaden' : '') + (sdat && sdat.type ? ' · ' + sdat.type : '') + ' · Rettungswurf und Anwendung: Spielleitung' : '';
 
   const tail = (used ? used + ' verbraucht' : 'Zaubertrick') + concNote + saveNote + (s.matUsed ? ' · Material verbraucht: ' + s.mat : '');
+  /* MA68-15: Heilung (Heal) – feste 70 TP, +10 je Grad über 6, Jünger des Lebens dazu; beendet blind, taub, vergiftet */
+  if (id === 'heal') { const life = c.lv('cle') >= 3 && c.subOf('cle') === 'life' && slotUsed ? 2 + L2 : 0; const amt = 70 + 10 * Math.max(0, L2 - 6) + life; pushLog({ label, total: amt, detail: amt + ' TP Heilung' + (life ? ' (inkl. Jünger des Lebens +' + life + ')' : '') + ' · beendet beim Ziel blind, taub und vergiftet · ' + tail, share: true }); commit(); return healPrompt(ch, amt, s.name, false); }
+  /* MA68-16: Falsches Leben – temporäre TP (2W4 + 4, +5 je höherem Grad), ersetzen nur geringere temporäre TP */
+  if (id === 'false-life') { const r = rollExpr('2W4+' + (4 + 5 * Math.max(0, L2 - 1))); const old = +P.temp || 0; if (r.total > old) P.temp = r.total; pushLog({ label, groups: r.groups, total: r.total, detail: r.detail + ' · ' + (r.total > old ? 'temporäre TP jetzt ' + r.total : 'du behältst deine ' + old + ' temporären TP (temporäre TP addieren sich nicht)') + ' · ' + tail, sides: 4, nat: r.total, share: true }); commit(); return; }
   if (dice && sv && !HEAL_SPELLS.has(id) && typeof saveDmg === 'function') { commit(); return saveDmg({ label, expr: dice, ab: sv[1], dc: ctxS.dc, half: sdat ? !!sdat.half : /Hälfte|halbe[nr]? Schaden/.test(s.text), type: (sdat && sdat.type) || '', tail: (used ? used + ' verbraucht' : (s.lvl ? '' : 'Zaubertrick')) + concNote + (s.matUsed ? ' · Material verbraucht: ' + s.mat : '') }); }
-  if (dice) { const r = rollExpr(dice); const mm = /W(\d+)/.exec(dice); const g = /\[([\d,]+)\]/.exec(r.detail); pushLog({ label, groups: r.groups, total: r.total, detail: r.detail + ' · ' + tail, sides: mm ? +mm[1] : 0, nat: g ? g[1].split(',').reduce((a, b) => a + +b, 0) : r.total }); if (HEAL_SPELLS.has(id)) { commit(); return healPrompt(ch, r.total, s.name, /mass|prayer/.test(id)); } }
+  if (dice) { const r = rollExpr(dice); const mm = /W(\d+)/.exec(dice); const g = /\[([\d,]+)\]/.exec(r.detail); pushLog({ label, groups: r.groups, total: r.total, detail: r.detail + ' · ' + tail, sides: mm ? +mm[1] : 0, nat: g ? g[1].split(',').reduce((a, b) => a + +b, 0) : r.total }); if (HEAL_SPELLS.has(id)) { commit(); return healPrompt(ch, r.total, s.name, id === 'prayer-of-healing' ? 5 : /mass/.test(id) ? 6 : false); } }
   else pushLog({ label, total: '✦', detail: tail, share: true });
   commit();
 }

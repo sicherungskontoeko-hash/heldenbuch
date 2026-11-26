@@ -52,7 +52,7 @@
     constructor(o) { this.o = o; this.api = o.api; this.st = null; this.K = null; this.status = 'aus'; this.wait = 0; this.t = null; this.debounce = o.debounce == null ? 8000 : o.debounce; this.now = o.now || (() => Date.now()); this.gen = new Map(); this.bad = []; }
     get on() { return !!(this.st && this.st.vid); }
     load() { const s = this.o.store.load(); this.st = s && s.v === 2 && s.vid ? s : null; return this.st; }
-    save() { if (this.st) this.o.store.save(this.st); }
+    save() { if (this.st) this.o.store.save(this.st); } /* wirft, wenn das Gerät nicht dauerhaft speichern kann (FC68-04) */
     set(s) { if (this.status !== s) { this.status = s; if (this.o.onStatus) try { this.o.onStatus(s); } catch (e) {} } }
     auth() { return { did: this.st.did, tok: this.st.tok }; }
     async ready() { if (!this.st) this.load(); if (!this.st) throw vErr('init', 'Vault nicht eingerichtet.'); if (!this.K) this.K = await useKeys(this.st); return this; }
@@ -90,6 +90,7 @@
     async sync() { if (root.navigator && root.navigator.locks) return root.navigator.locks.request('fablecrown-vault', () => this.sync0()); return this.sync0(); }
     async sync0() {
       this.load(); await this.ready(); const S = this.st; this.bad = [];
+      await this.scan();
       const r = await this.req('GET', '/meta'); if (!r) return this.fail('offline'); if (r.status !== 200) return this.fail(r);
       for (const [oid, rev] of Object.entries(r.body || {})) {
         if (rev <= (S.base[oid] || 0)) continue;
@@ -101,13 +102,21 @@
         if (h === lh) { S.base[oid] = g.rev; S.hash[oid] = h; delete S.fly[oid]; this.undirty(key); continue; }
         const f = S.fly[oid]; if (f && f.rev === g.rev && f.h === h) { S.base[oid] = g.rev; S.hash[oid] = h; delete S.fly[oid]; continue; } /* eigene, schon angekommene Version */
         /* Nie überfahren: lokaler Stand, der nicht genau dem zuletzt abgeglichenen entspricht (auch beim ersten Verbinden) */
-        const dirty = S.dirty.includes(key); const mine = local !== undefined ? dirty || lh !== S.hash[oid] : dirty && !!S.base[oid];
+        const dirty = S.dirty.includes(key); const mine = local !== undefined ? dirty || lh !== S.hash[oid] : !!S.base[oid];
         if (mine || S.conf.some((c) => c.oid === oid)) { this.conflict(key, oid, local, theirs, g.rev); continue; }
         if (this.o.apply(kind, id, theirs) === false) { this.bad.push({ oid, kind, id, why: 'nicht übernommen' }); continue; }
         S.base[oid] = g.rev; S.hash[oid] = h; this.undirty(key);
       }
       this.save(); return this.flush0();
     }
+    /* FC68-02/03: Abweichungen ohne Änderungsmarke finden (z. B. Abbruch zwischen Speichern und Markieren):
+       jedes lokale Objekt mit dem zuletzt abgeglichenen Stand vergleichen, bekannte Objekte, die lokal fehlen, als Löschung führen */
+    async scan() { const S = this.st; const seen = new Set(); let n = 0;
+      for (const [kind, id] of this.o.list()) { const key = kind + KEYSEP + id; const oid = await this.K.oid(kind, id); S.map[oid] = key; seen.add(oid);
+        if (S.dirty.includes(key)) continue; const h = await sha(JSON.stringify(this.plain(kind, id, this.o.read(kind, id)))); if (h !== S.hash[oid]) { S.dirty.push(key); n++; } }
+      for (const [oid, key] of Object.entries(S.map)) { if (seen.has(oid) || !S.base[oid] || S.dirty.includes(key)) continue; const [kind, id] = key.split(KEYSEP); if (this.o.read(kind, id) !== undefined) continue;
+        if ((await sha(JSON.stringify(this.plain(kind, id, null)))) !== S.hash[oid]) { S.dirty.push(key); n++; } }
+      if (n) this.save(); return n; }
     undirty(key) { const i = this.st.dirty.indexOf(key); if (i >= 0) this.st.dirty.splice(i, 1); }
     conflict(key, oid, mine, theirs, rev) { const S = this.st; S.conf = S.conf.filter((c) => c.oid !== oid); const [kind, id] = key.split(KEYSEP);
       S.conf.push({ oid, kind, id, mine: mine === undefined ? null : mine, theirs, rev, at: this.now() }); this.undirty(key); delete S.fly[oid]; }
@@ -141,7 +150,7 @@
     /* Konflikt entscheiden: 'mine' (dieses Gerät gilt), 'theirs' (anderes Gerät gilt), 'both' (fremder Stand als Kopie dazu) */
     async resolve(oid, how) { await this.ready(); const S = this.st; const c = S.conf.find((x) => x.oid === oid); if (!c) return false;
       if (how === 'theirs') { if (this.o.apply(c.kind, c.id, c.theirs) === false) return false; S.base[oid] = c.rev; S.hash[oid] = await sha(JSON.stringify(this.plain(c.kind, c.id, c.theirs))); }
-      else { if (how === 'both' && c.theirs && this.o.copy) this.o.copy(c.kind, c.theirs); S.base[oid] = c.rev; delete S.hash[oid]; const key = c.kind + KEYSEP + c.id; if (!S.dirty.includes(key)) S.dirty.push(key); }
+      else { if (how === 'both') { if (!c.theirs || !this.o.copy || this.o.copy(c.kind, c.theirs) !== true) return false; } S.base[oid] = c.rev; delete S.hash[oid]; const key = c.kind + KEYSEP + c.id; if (!S.dirty.includes(key)) S.dirty.push(key); }
       S.conf = S.conf.filter((x) => x.oid !== oid); this.save(); await this.flush(); return true; }
     /* Verlauf: frühere Stände (Server hält begrenzt viele), Rückkehr als NEUE Revision */
     async history(kind, id) { await this.ready(); const oid = await this.K.oid(kind, id); const r = await this.req('GET', '/obj/' + oid + '/hist'); if (!r || r.status !== 200) return null;

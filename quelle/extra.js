@@ -366,6 +366,7 @@ function doRest(ch, kind, silent, fromDialog) {
   if (P.dead) return;
   if (!fromDialog && typeof restGate === 'function' && !restGate(ch, kind)) return;
   delete P.hxForms; /* Wandelgestalt (Erweiterung) endet mit jeder Rast */
+  delete P.runeUse; /* Runenaktivierungen je Rune (MA68-09) */
   if (kind === 'long') { P.hp = c.hpMax; P.temp = 0; P.hdUsed = 0; P.hdBy = {}; P.relRage = 0; P.stable = false; P.ws = null; P.fxDur = {}; P.fxSrc = {}; P.localFight = false; P.slots = {}; P.pact = 0; P.res = {}; c.res.forEach((r) => { if (r.build) P.res[r.k] = r.max; }); /* Aufbauressourcen verfallen */ P.ds = [0, 0]; P.exh = Math.max(0, (+P.exh || 0) - 1); P.raging = false; P.conc = null; P.fx = {}; if (ch.species === 'human') P.insp = true; (ch.comps || []).forEach((x) => { x.hp = compStat(c, x).hpMax; }); pushLog({ label: 'Lange Rast', total: '✓', detail: 'TP, Trefferwürfel, Zauberplätze und Ressourcen zurückgesetzt' }); }
   else { P.pact = 0; P.relRage = 0; c.res.forEach((r) => { if (r.build) P.res[r.k] = r.max; else if (r.reset === 'short') P.res[r.k] = 0; else if (r.note && P.res[r.k]) P.res[r.k] = Math.max(0, P.res[r.k] - 1); }); const tired = c.lv('ran') >= 10 && (+P.exh || 0) > 0; if (tired) P.exh = P.exh - 1; pushLog({ label: 'Kurze Rast', total: '✓', detail: 'Ressourcen der kurzen Rast (und Paktplätze) sind zurück.' + (tired ? ' Unermüdlich: Erschöpfung −1.' : '') }); }
   if (ch === cur() && typeof vfxRest === 'function') vfxRest(kind);
@@ -385,11 +386,11 @@ function optCost(key, text) {
   const m = /(\d+)\s+(?:Blutladung|Blutladungen|Zelle|Zellen)/.exec(text); return m ? +m[1] : 0;
 }
 function optDice(key, text, c, lvl) {
-  const die = RW_DIE(lvl); const out = []; const abK = { INT: 'int', KON: 'con', CHA: 'cha' };
+  const die = RW_DIE(lvl); const out = []; const abK = { INT: 'int', KON: 'con', CHA: 'cha' }; /* MA68-08: auch «+ ÜB»; «sinkt um …» ist Schadensminderung */
   let t = text; if (key === 'runes') { const i = t.indexOf('Aktivierung'); if (i < 0) return []; t = t.slice(i); }
-  const modOf = (k) => (k ? (c.mod[abK[k]] >= 0 ? '+' : '') + c.mod[abK[k]] : '');
-  const kind = (i) => /TP|heil|temporäre/.test(t.slice(i, i + 70)) ? 'TP' : /Schaden|schaden/.test(t.slice(i, i + 70)) ? 'Schaden' : 'Wurf';
-  const re = /(\d+)\s+(?:Runen|Blut|Fluch)würfel(?:\s*\+\s*(INT|KON|CHA)-Mod)?|(\d+W\d+)(?:\s*\+\s*(INT|KON|CHA)-Mod)?/g; let m;
+  const modOf = (k) => (!k ? '' : k === 'ÜB' ? '+' + c.pb : (c.mod[abK[k.slice(0, 3)]] >= 0 ? '+' : '') + c.mod[abK[k.slice(0, 3)]]);
+  const kind = (i) => /sinkt um\s*$/.test(t.slice(Math.max(0, i - 25), i)) ? 'Schadensminderung' : /TP|heil|temporäre/.test(t.slice(i, i + 70)) ? 'TP' : /Schaden|schaden/.test(t.slice(i, i + 70)) ? 'Schaden' : 'Wurf';
+  const re = /(\d+)\s+(?:Runen|Blut|Fluch)würfel(?:\s*\+\s*(INT-Mod|KON-Mod|CHA-Mod|ÜB))?|(\d+W\d+)(?:\s*\+\s*(INT-Mod|KON-Mod|CHA-Mod|ÜB))?/g; let m;
   while ((m = re.exec(t))) {
     if (t[m.index - 1] === '+' || /^\s*pro zusätzlich/.test(t.slice(m.index + m[0].length))) continue;
     if (/^\s*(?:von|abzieh)/.test(t.slice(m.index + m[0].length)) ) { out.push({ expr: (m[1] ? m[1] + die : m[3]), what: 'Abzug' }); continue; }
@@ -407,14 +408,28 @@ function optBlock(c) {
       return '<div class="ou"><div><b>' + esc(it.name) + '</b><small>' + esc(it.text) + '</small></div><div class="chips">' + (cost || dice.length ? '<button class="btn sm"' + (r && cost > left ? ' disabled' : '') + ' data-act="optUse" data-set="' + esc(o.key) + '" data-arg="' + esc(k) + '">' + (cost ? 'Einsetzen (' + cost + ')' : 'Würfeln') + '</button>' : '<span class="hint" style="margin:0">dauerhaft aktiv</span>') + '</div></div>'; }).join('') + '</div>';
   }).join('') + '</section>';
 }
-function optUse(ch, key, k) {
-  const c = derive(ch, S.hb); const o = (c.optSets || []).find((x) => x.key === key); if (!o) return; const it = o.items.find((x) => x.k === k); if (!it) return;
-  const rk = OPT_RES[key]; const cost = optCost(key, it.text); const P = ch.play;
-  if (rk && cost) { const r = c.res.find((x) => x.k === rk); const used = +P.res[rk] || 0; if (!r || used + cost > r.max) { pushLog({ label: it.name, total: '✗', detail: 'Nicht genug ' + (r ? r.n : 'Ressourcen') }); return; } P.res[rk] = used + cost; }
+/* Aktionsart einer Option aus ihrer Aktivierungsklausel (nicht aus dem ganzen Text – MA68-10) */
+function optAct(key, text) {
+  if (key === 'runes') { const m = /Aktivierung\s*(\([^)]*\))?/.exec(text); return m && m[1] ? featureCost(m[1]) : 'f'; }
+  const m = /(?:^|[.:]\s*)([^.:]*\d+\s+(?:Blutladung|Blutladungen|Zelle|Zellen)[^:.]*):/.exec(text); if (m) return featureCost(m[1]);
+  return featureCost(text.replace(/^[^:]*(?:Solange|Immer) aktiv:[^.]*\./, ''));
+}
+/* Ein Weg für Knopf und Zugleiste (MA68-05/06/07/09): nur gewählte, freigeschaltete Optionen; erst alles prüfen,
+   dann Aktion und Ressource verbuchen; jede Rune einzeln einmal pro kurzer Rast (ab Stufe 20 zweimal) */
+function optUse(ch, key, k, paid) {
+  const c = derive(ch, S.hb); const o = (c.optSets || []).find((x) => x.key === key); if (!o) return false; const it = o.items.find((x) => x.k === k); if (!it) return false;
+  const no = (why) => { pushLog({ label: it.name, total: '✗', detail: why }); return false; };
+  if (!(o.use || o.chosen).includes(k) || (+it.min || 0) > o.lvl) return no('Nicht gewählt oder noch nicht freigeschaltet.');
+  const rk = OPT_RES[key]; const cost = optCost(key, it.text); const P = ch.play; let r = null;
+  if (rk && cost) { r = c.res.find((x) => x.k === rk); if (!r || (+P.res[rk] || 0) + cost > r.max) return no('Nicht genug ' + (r ? r.n : 'Ressourcen') + '.'); }
+  if (key === 'runes' && cost) { const per = o.lvl >= 20 ? 2 : 1; if (((P.runeUse || {})[k] || 0) >= per) return no('Diese Rune ist bis zur nächsten kurzen Rast schon ' + (per > 1 ? 'zweimal ' : '') + 'aktiviert.'); }
+  if (!paid && typeof tSpend === 'function' && !tSpend(ch, optAct(key, it.text), it.name)) return false;
+  if (r) P.res[rk] = (+P.res[rk] || 0) + cost;
+  if (key === 'runes' && cost) { P.runeUse = Object.assign({}, P.runeUse); P.runeUse[k] = (P.runeUse[k] || 0) + 1; }
   const dice = optDice(key, it.text, c, o.lvl);
   pushLog({ label: it.name + ' eingesetzt', total: '✦', detail: (cost ? cost + ' ' + (rk === 'rune' ? 'Aktivierung' : rk === 'blood' ? 'Blutladung(en)' : 'Zelle(n)') + ' verbraucht · ' : '') + it.text.replace(/^[^:]+:\s*/, '').slice(0, 140), share: true });
   dice.forEach((d, i) => setTimeout(() => rollDmg(d.expr, it.name + ': ' + d.what), 500 + i * 400));
-  commit();
+  commit(); return true;
 }
 
 /* ---------- WhatsApp-Einladung ---------- */
@@ -436,7 +451,8 @@ const XA = {
     if (d > 0) pushLog({ label: itemDef(x).name + (x.label ? ' (' + x.label + ')' : '') + ': Ladung eingesetzt', total: (mx - u) + ' / ' + mx, detail: (mx - u) ? 'Noch ' + (mx - u) + (mx - u === 1 ? ' Ladung.' : ' Ladungen.') : 'Keine Ladung mehr. Was beim Verbrauch der letzten Ladung passiert, steht beim Gegenstand.', share: true }); },
   itQty: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; x.qty = Math.max(0, (+x.qty || 1) + +t.dataset.d); if (!x.qty) ch.items = ch.items.filter((i) => i !== x); commit(); },
   itUse: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; pushLog({ label: itemDef(x).name, total: '✦', detail: itemDef(x).text, share: true }); XA.itQty({ dataset: { d: -1 } }, a, p, ch); },
-  itDrink: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; const d = itemDef(x); const r = rollExpr(d.drink); const c = derive(ch, S.hb); const P = ch.play; if (P.hp <= 0) { P.ds = [0, 0]; wakeUp(P); } P.hp = Math.min(c.hpMax, P.hp + r.total); pushLog({ label: d.name, total: r.total, detail: r.detail + ' · TP jetzt ' + P.hp + '/' + c.hpMax, groups: r.groups, sides: 4, nat: r.total }); XA.itQty({ dataset: { d: -1 } }, a, p, ch); },
+  /* MA68-03/04: ein Weg für alle Knöpfe – Bonusaktion und Handlungsfähigkeit werden geprüft (über die Zugleiste schon bezahlt: t.paid) */
+  itDrink: (t, a, p, ch) => { const x = itemList(ch).find((i) => i.uid === a); if (!x) return; const d = itemDef(x); if (!(t && t.paid) && typeof tSpend === 'function' && !tSpend(ch, 'b', d.name)) return; const r = rollExpr(d.drink); const c = derive(ch, S.hb); const P = ch.play; if (P.hp <= 0) { P.ds = [0, 0]; wakeUp(P); } P.hp = Math.min(c.hpMax, P.hp + r.total); pushLog({ label: d.name, total: r.total, detail: r.detail + ' · TP jetzt ' + P.hp + '/' + c.hpMax, groups: r.groups, sides: 4, nat: r.total }); XA.itQty({ dataset: { d: -1 } }, a, p, ch); },
   invQty: (t, a, p, ch) => { const g = ch.inv[+a]; if (!g) return; g.qty = Math.max(0, (+g.qty || 0) + +t.dataset.d); commit(); },
   invDel: (t, a, p, ch) => { ch.inv.splice(+a, 1); commit(); },
   invNew: (t, a, p, ch) => { ch.inv = ch.inv || []; ch.inv.push({ n: 'Neuer Gegenstand', qty: 1, kg: 0 }); commit(); },

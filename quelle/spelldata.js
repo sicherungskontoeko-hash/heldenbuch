@@ -60,6 +60,7 @@ const SPELL_DATA = {
   'chain-lightning': {n:10,s:8,save:'dex',half:1,type:'Blitz'},
   'disintegrate': {n:10,s:6,flat:40,up:3,save:'dex',type:'Energie'},
   'fire-storm': {n:7,s:10,save:'dex',half:1,type:'Feuer'},
+  'meteor-swarm': {n:40,s:6,save:'dex',half:1,type:'20W6 Feuer und 20W6 Wucht'}, /* MA68-13 */
   'sunburst': {n:12,s:6,save:'con',half:1,type:'gleissend'},
   'power-word-kill': {n:12,s:12,type:'psychisch'},
   'blade-ward': {n:1,s:4},

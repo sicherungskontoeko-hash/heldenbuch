@@ -540,7 +540,7 @@ XA.tsGo = (t, a, p, ch) => { orbPrompt(''); const ts = S.tsPend; S.tsPend = null
 
 /* ---------- Heilung auf ein Ziel anwenden ---------- */
 function healPrompt(ch, amount, name, multi) {
-  S.healPend = { amount, name, multi, done: [] };
+  S.healPend = { amount, name, multi, done: [], cid: ch && ch.id, max: typeof multi === 'number' ? multi : 6 };
   const tg = onlineFight() ? order().filter((x) => x.key !== 'p:' + UID && x.npc) : [];
   const pl = S.camp ? players().filter(([u]) => u !== UID) : [];
   orbPrompt('<div class="pr"><b>' + esc(name) + ': ' + amount + ' TP Heilung</b><p>Auf wen' + (multi ? ' (mehrere möglich)' : '') + '? Trefferpunkte steigen höchstens bis zum Maximum.</p><div class="chips"><button class="btn sm" data-act="healGo" data-arg="me">Auf mich</button>' +
@@ -551,10 +551,12 @@ function healPrompt(ch, amount, name, multi) {
 XA.healGo = (t, a, p, ch) => {
   const h = S.healPend; if (!h) return orbPrompt('');
   if (a === 'x') { S.healPend = null; return orbPrompt(''); }
+  /* MA68-02: jedes Ziel höchstens einmal, höchstens so viele Ziele wie der Zauber erlaubt; Heilung gehört dem wirkenden Helden */
+  if (h.done.includes(a)) return; if (h.cid && S.chars[h.cid]) ch = S.chars[h.cid];
   if (a === 'me') { const c = derive(ch, S.hb); const P = ch.play; if (P.dead) return; if (P.hp == null) P.hp = c.hpMax; if (P.hp <= 0) { P.ds = [0, 0]; P.stable = false; wakeUp(P); } const old = P.hp; P.hp = Math.min(c.hpMax, P.hp + h.amount); pushLog({ label: h.name + ' → ' + ch.name, total: P.hp - old, detail: 'TP jetzt ' + P.hp + '/' + c.hpMax, share: true }); commit(false); }
   else if (a.startsWith('n:')) { const c = S.combat; const id = a.slice(2); const n = (c.npcs || []).find((x) => x.id === id); if (n) { const max = +n.hpMax || 0; const nh = max ? Math.min(max, (+n.hp || 0) + h.amount) : (+n.hp || 0) + h.amount; saveCombat(Object.assign({}, c, { npcs: c.npcs.map((x) => x.id === id ? Object.assign({}, x, { hp: nh }) : x), t: Date.now(), log: clog(c, n.name + ' wird um ' + h.amount + ' TP geheilt') })); } }
   else if (a.startsWith('u:')) { const pl = S.table[a.slice(2)]; pushLog({ label: h.name + ' → ' + (pl ? pl.char : 'Mitspieler'), total: h.amount, detail: 'Heilung für ' + (pl ? pl.char : 'Mitspieler') + ' – bitte auf dem eigenen Bogen eintragen', share: true }); }
-  if (!h.multi) { S.healPend = null; orbPrompt(''); } else { h.done.push(a); render(); }
+  if (!h.multi) { S.healPend = null; orbPrompt(''); } else { h.done.push(a); if (t && t.tagName === 'BUTTON') { t.disabled = true; t.textContent += ' ✓'; } if (h.done.length >= h.max) { S.healPend = null; orbPrompt(''); } else render(); }
 };
 
 /* ---------- Andauernde Zauber mit Folgeaktion in späteren Zügen ---------- */
@@ -563,7 +565,7 @@ const FOLLOW = {
   'call-lightning': { cost: 'a', n: 'Blitz herbeirufen: neuer Blitz', save: 'GES', expr: (L) => (3 + Math.max(0, L - 3)) + 'W10' },
   'heat-metal': { cost: 'b', n: 'Metall erhitzen: erneut Schaden', save: null, expr: (L) => (2 + Math.max(0, L - 2)) + 'W8' },
   'flaming-sphere': { cost: 'b', n: 'Flammende Kugel bewegen', save: 'GES', expr: (L) => (2 + Math.max(0, L - 2)) + 'W6' },
-  'witch-bolt': { cost: 'b', n: 'Hexenblitz: erneut Schaden', save: null, expr: (L) => (1 + Math.max(0, L - 1)) + 'W12' },
+  'witch-bolt': { cost: 'b', n: 'Hexenblitz: erneut Schaden', save: null, expr: () => '1W12' }, /* MA68-14: nur der erste Schaden steigt mit dem Grad */
   'vampiric-touch': { cost: 'a', n: 'Vampirgriff: erneut angreifen', atk: true, expr: (L) => (3 + Math.max(0, L - 3)) + 'W6' }
 };
 for (const [id, f] of Object.entries(FOLLOW)) {

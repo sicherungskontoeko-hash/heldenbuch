@@ -165,7 +165,7 @@ const SPELL_RAW = {
  'power-word-stun':['Machtwort Betäuben','Power Word Stun',8,'enc','brd sor wlk wiz','Aktion','18 m','V','Sofort','Ein Ziel mit höchstens 150 TP ist betäubt (KON-Rettungswurf am Zugende).'],
  'sunburst':['Sonnenexplosion','Sunburst',8,'evo','cle dru sor wiz','Aktion','45 m','V, G, M','Sofort','18-m-Kugel: KON-Rettungswurf gegen 12W6 gleissenden Schaden; Betroffene sind blind.'],
  'mass-heal':['Massenheilung','Mass Heal',9,'abj','cle','Aktion','18 m','V, G','Sofort','Verteilt bis zu 700 TP Heilung auf beliebig viele Kreaturen.'],
- 'meteor-swarm':['Meteoritenschwarm','Meteor Swarm',9,'evo','sor wiz','Aktion','1,5 km','V, G','Sofort','Vier 12-m-Kugeln: GES-Rettungswurf gegen 20W6 Feuerschaden + 20W6 Wuchtschaden.'],
+ 'meteor-swarm':['Meteoritenschwarm','Meteor Swarm',9,'evo','sor wiz','Aktion','1,5 km','V, G','Sofort','Vier 12-m-Kugeln: GES-Rettungswurf gegen 20W6 Feuerschaden und 20W6 Wuchtschaden, bei Erfolg die Hälfte. Eine Kreatur im Bereich mehrerer Kugeln ist nur einmal betroffen.'],
  'power-word-heal':['Machtwort Heilen','Power Word Heal',9,'enc','brd cle','Aktion','18 m','V','Sofort','Heilt alle TP und beendet bezaubert, verängstigt, gelähmt, vergiftet und betäubt.'],
  'power-word-kill':['Machtwort Töten','Power Word Kill',9,'enc','brd sor wlk wiz','Aktion','18 m','V','Sofort','Eine Kreatur mit höchstens 100 TP stirbt sofort, sonst erleidet sie 12W12 psychischen Schaden.'],
  'true-resurrection':['Wahre Auferstehung','True Resurrection',9,'nec','cle dru','1 Stunde','Berührung','V, G, M (Diamanten 25 000 GM)','Sofort','Belebt eine bis zu 200 Jahre tote Kreatur, auch ohne Körper.'],

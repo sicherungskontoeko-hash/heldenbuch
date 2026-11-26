@@ -14,7 +14,7 @@ function Device(name, M, o = {}) {
     apply: (k, id, x) => { if (x === null) delete data[k][id]; else data[k][id] = J(x); return true; },
     validate: (k, x) => (k === 'c' ? (x && typeof x.name === 'string' && x.play && typeof x.play.hp === 'number' && x.play.hp >= 0 ? null : 'Heldenformat ungültig') : k === 'h' ? (x && typeof x.name === 'string' ? null : 'Hausregel ungültig') : 'unbekannte Art'),
     list: () => [...Object.keys(data.c).map((i) => ['c', i]), ...Object.keys(data.h).map((i) => ['h', i])],
-    copy: (k, x) => { const id = x.id + '_k'; data[k][id] = Object.assign(J(x), { id, name: x.name + ' (anderes Gerät)' }); d.v.mark(k, id, true); } }); return d.v; };
+    copy: (k, x) => { const id = x.id + '_k'; data[k][id] = Object.assign(J(x), { id, name: x.name + ' (anderes Gerät)' }); d.v.mark(k, id, true); return true; } }); return d.v; };
   d.make(); d.store = () => store;
   d.set = (k, id, x) => { data[k][id] = J(x); d.v.mark(k, id, true); };
   d.edit = (id, fn) => { fn(data.c[id]); d.v.mark('c', id, true); };
@@ -167,5 +167,18 @@ const held = (id, name, hp, hbRef) => ({ id, name, cls: 'wiz', level: 5, play: {
   M.fault = null; const keepTab = JSON.stringify(tab.data); const vidT = tab.v.st.vid; const ok22 = await tab.v.destroy().catch(() => false);
   const r22 = await M.handle('POST', '/v1/vault/' + vidT + '/dev', { body: { rauth: (await V.rootKeys(rec)).rauth, dev: { did: 'a'.repeat(32), tok: 'b'.repeat(64) } } });
   T('V-22 Löschen: Vault beim Dienst weg (auch mit Schlüssel nicht mehr erreichbar), lokale Daten unverändert', ok22 === true && !M.db[vidT] && r22.status === 401 && JSON.stringify(tab.data) === keepTab && !tab.v.on, { ok22, r22: r22.status });
+  /* Befunde der unabhängigen Prüfung 1.9.68 (FC68-02/03/09): Änderungen ohne Marke, Löschung ohne Marke, Kopie von Hausregeln */
+  { const Mx = createMock({ now }); const a = Device('A', Mx), b2 = Device('B', Mx); a.data.c.x = held('x', 'Xaver', 10); const rk = await a.v.create('A'); await a.v.sync(); await b2.v.connect(rk, 'B');
+    a.data.c.x.play.hp = 88; await a.v.sync(); await b2.v.sync();
+    T('FC68-02 Lokale Änderung ohne Änderungsmarke: wird erkannt und hochgeladen, nicht fälschlich «gesichert»', a.v.status === 'gesichert' && b2.data.c.x.play.hp === 88, { st: a.v.status, b: b2.data.c.x.play.hp });
+    delete b2.data.c.x; a.edit('x', (c) => { c.play.hp = 22; }); await a.v.sync(); await b2.v.sync();
+    T('FC68-03 Löschung ohne Änderungsmarke gegen neuere Änderung: Konflikt, kein stilles Wiederbeleben', !b2.data.c.x && b2.v.st.conf.length === 1 && b2.v.st.conf[0].mine === null && b2.v.status === 'konflikt', { has: !!b2.data.c.x, conf: b2.v.st.conf.length });
+    await b2.v.resolve(b2.v.st.conf[0].oid, 'mine'); await a.v.sync();
+    T('FC68-03 Löschung bestätigt («dieses Gerät gilt»): auch auf dem anderen Gerät entfernt', !a.data.c.x && a.v.status === 'gesichert');
+    a.data.h.r1 = { id: 'r1', name: 'Regel' }; a.v.mark('h', 'r1', true); await a.v.sync(); await b2.v.sync();
+    Mx.down = true; a.set('h', 'r1', { id: 'r1', name: 'Regel A' }); b2.set('h', 'r1', { id: 'r1', name: 'Regel B' }); await a.v.sync(); await b2.v.sync(); Mx.down = false; await a.v.sync(); await b2.v.sync();
+    const ho = b2.v.st.conf[0]; b2.v.o.copy = () => false; const okBad = await b2.v.resolve(ho.oid, 'both'); const stillOpen = b2.v.st.conf.length;
+    b2.v.o.copy = (k, x) => { b2.data.h[x.id + '_k'] = Object.assign(J(x), { id: x.id + '_k' }); b2.v.mark(k, x.id + '_k', true); return true; }; const okGood = await b2.v.resolve(ho.oid, 'both'); await a.v.sync();
+    T('FC68-09 «Beide behalten» ohne gelungene Kopie: Konflikt bleibt offen; mit Kopie (Hausregel): beide Stände überall', okBad === false && stillOpen === 1 && okGood === true && a.data.h.r1.name === 'Regel B' && a.data.h.r1_k && a.data.h.r1_k.name === 'Regel A', { okBad, stillOpen, okGood, h: a.data.h }); }
   console.log('\n' + pass + ' / ' + (pass + fail) + ' bestanden'); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.log('ABBRUCH ' + e.stack); process.exit(1); });
