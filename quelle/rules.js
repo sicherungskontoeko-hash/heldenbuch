@@ -361,9 +361,9 @@ const nvMeta = NV.obj({
   rules: NV.nul(NV.rec(NV_FIELD, NV.bool, 60)), rulesAt: NV_T,
   rest: NV.nul(NV.obj({ id: NV_I, kind: NV.en(['short', 'long']), t: NV_T }, ['id', 'kind'], false)),
   handouts: NV.arr(NV.obj({ id: NV_I, title: NV.text(300), text: NV.text(20000), t: NV_T }, ['id'], false), 60, 'id'),
-  gifts: NV.arr(NV.obj({ id: NV_I, to: NV_U, from: NV.nul(NV_U), xp: NV.num(-1e7, 1e7), gm: NV.num(-1e9, 1e9), item: (v, p) => (v === '' ? '' : NV_R(v, p)), text: NV.text(500), t: NV_T }, ['id', 'to'], false), 100, 'id'),
+  gifts: NV.arr(NV.obj({ id: NV_I, to: NV_U, from: NV.nul(NV_U), xp: NV.num(-1e7, 1e7), gm: NV.num(-1e9, 1e9), item: (v, p) => (v === '' ? '' : NV_R(v, p)), text: NV.text(500), insp: NV.bool, t: NV_T }, ['id', 'to'], false), 100, 'id'),
   kb: NV.arr(NV.obj({ id: NV_I, typ: NV.en(['p', 'o', 'a']), n: NV.text(200), d: NV.text(400), st: NV.text(40) }, ['id', 'typ'], false), 200, 'id'),
-  theme: (v, p) => { const k = NV.str(40, /^[a-z][a-z0-9_-]{0,39}$/)(v, p); return typeof THEMES !== 'undefined' && !nvOwn(THEMES, k) ? undefined : k; }, /* unbekannte Stimmung: Feld entfällt */ ansSeen: NV.arr(NV_I, 500)
+  theme: (v, p) => { const k = NV.str(40, /^[a-z][a-z0-9_-]{0,39}$/)(v, p); return typeof THEMES !== 'undefined' && !nvOwn(THEMES, k) ? undefined : k; }, /* unbekannte Stimmung: Feld entfällt */ ansSeen: NV.arr(NV_I, 500), chk: NV.arr(NV.obj({ id: NV_I, sk: NV.str(4, /^[a-z]{3}$/), to: NV.arr(NV_U, 20), dc: NV.num(1, 40), t: NV_T }, ['id', 'sk', 'to', 't'], false), 10)
 }, [], true);
 /* Ergebnis: { ok: true, doc } gültig · { ok: true, doc: null, gone: true } gelöscht/nicht vorhanden · { ok: false, err } ungültig.
    Seiteneffektfrei: das Eingangsobjekt bleibt unverändert, das Ergebnis ist eine neue Kopie. */

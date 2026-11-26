@@ -1298,8 +1298,8 @@ function saveCampPref() { try { localStorage.setItem('heldenbuch_camp', JSON.str
 function myRolls() { const room = S.camp, ch = S.cur; return S.log.filter((e) => { const m = LOG_PUB.get(e); return !!m && m.mode !== 'private' && m.room === room && m.ch === ch && (e.sides || e.share) && !e.preview; }).slice(0, 30).map((e) => ({ label: e.label, total: e.total, detail: e.detail, crit: !!e.crit, fumble: !!e.fumble, t: e.t, secret: LOG_PUB.get(e).mode === 'secret' || !!e.secret, sides: e.sides || 0, nat: e.nat || 0, dset: e.dset || '' })); }
 function meDoc() {
   const ch = cur(); let c = null; try { c = derive(ch, S.hb); } catch (e) {}
-  return { char: ch.name.replace(/^Beispiel:\s*/, ''), pl: typeof myName === 'function' ? myName() : '', cls: ch.cls, pas: c ? [c.passive, 10 + c.skills.ins.val, 10 + c.skills.inv.val] : null, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: c ? Math.min(ch.play.hp ?? c.hpMax, c.hpMax) : (ch.play.hp ?? 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0, dodge: !!(ch.play.fx || {}).dodge,
-    cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], ans: typeof ansMine === 'function' ? ansMine() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, dice: ch.dice || '', diceAt: ch.diceAt || 0, t: Date.now() };
+  return { char: ch.name.replace(/^Beispiel:\s*/, ''), pl: typeof myName === 'function' ? myName() : '', cls: ch.cls, pas: c ? [c.passive, 10 + c.skills.ins.val, 10 + c.skills.inv.val] : null, dv: c && +c.dv > 0 ? +c.dv : 0, portrait: ch.portrait || '', pimg: ch.portrait === 'img' ? (ch.portraitImg || '') : '', clsName: c ? (c.multi ? c.classLabel.replace(/ \d+/g, '') : c.cls.name) : '', level: c ? c.level : ch.level, species: c ? c.sp.name : '', hp: c ? Math.min(ch.play.hp ?? c.hpMax, c.hpMax) : (ch.play.hp ?? 0), hpMax: c ? c.hpMax : 0, temp: ch.play.temp || 0, ac: c ? c.ac : 0, dodge: !!(ch.play.fx || {}).dodge,
+    cond: (ch.play.cond || []).filter((k) => COND[k]).map((k) => COND[k].name), rolls: S.share ? myRolls() : [], ans: typeof ansMine === 'function' ? ansMine() : [], chk: typeof chkMine === 'function' ? chkMine() : [], init: S.myInit, dex: c ? c.mod.dex : 0, dead: !!ch.play.dead, deadAt: ch.play.deadAt || 0, deathFinal: !!ch.play.deathFinal, dice: ch.dice || '', diceAt: ch.diceAt || 0, t: Date.now() };
 }
 function queueMe() { if (!S.camp || !DB || !cur()) return; clearTimeout(meTimer); meTimer = setTimeout(writeMe, 250); }
 async function writeMe() {
@@ -1323,6 +1323,8 @@ function playerDoc(v) {
   take('cond', (x, q) => NV.arr(NV.text(60), 60)(x, q).slice(0, 30));
   take('init', NV.nul(NV.obj({ v: NV_N(-1000, 1000), cid: (x, q) => (x === '' ? '' : NV_I(x, q)), away: NV.bool }, [], false)));
   take('pas', NV.nul(NV.arr(NV.num(-100, 100), 3)));
+  take('dv', NV.num(0, 1000));
+  take('chk', (x, q) => NV.arr(NV.obj({ id: NV_I, total: (v, p) => (v === '–' ? v : NV.num(-100, 200)(v, p)), t: NV_T }, ['id'], false), 10)(x, q).slice(-5));
   take('ans', (x, q) => NV.arr(NV.obj({ id: NV_I, t: NV_T, x: NV.text(400) }, ['id'], false), 20)(x, q).slice(-10));
   for (const k of ['dead', 'deathFinal', 'dodge']) take(k, NV.bool);
   for (const k of ['deadAt', 'diceAt', 't']) take(k, NV_T);
@@ -1405,7 +1407,7 @@ function partyHtml() {
   if (!ps.length) return dmLine + '<p class="empty">Noch niemand am Tisch.</p>';
   return dmLine + '<div class="party">' + ps.map(([uid, p]) => { const pct = p.hpMax ? Math.max(0, Math.min(100, (p.hp / p.hpMax) * 100)) : 0;
     return '<div class="pm' + (uid === UID ? ' me' : '') + '">' + psig(p) + '<div class="pmb"><b>' + esc(p.char) + plLabel(p) + (uid === UID ? ' <small>(du)</small>' : '') + '</b><small>' + esc(p.clsName) + ' ' + esc(p.level) + ' · ' + esc(p.species) + '</small>' +
-      (p.pas && (isDM() || !S.meta.dm) ? '<small class="pmpas" title="Passive Werte">Wahrn. <b>' + esc(p.pas[0]) + '</b> · Motiv <b>' + esc(p.pas[1]) + '</b> · Nachf. <b>' + esc(p.pas[2]) + '</b></small>' : '') + '<div class="pmhp"><span>TP ' + esc(p.hp) + '/' + esc(p.hpMax) + (p.temp ? ' +' + esc(p.temp) : '') + '</span><span>RK ' + esc(p.ac) + '</span></div><div class="hpbar"><i style="width:' + pct + '%"></i></div>' +
+      (p.pas && (isDM() || !S.meta.dm) ? '<small class="pmpas" title="Passive Werte">Wahrn. <b>' + esc(p.pas[0]) + '</b> · Motiv <b>' + esc(p.pas[1]) + '</b> · Nachf. <b>' + esc(p.pas[2]) + '</b>' + (p.dv ? ' · Dunkelsicht <b>' + esc(p.dv) + ' m</b>' : '') + '</small>' : '') + '<div class="pmhp"><span>TP ' + esc(p.hp) + '/' + esc(p.hpMax) + (p.temp ? ' +' + esc(p.temp) : '') + '</span><span>RK ' + esc(p.ac) + '</span></div><div class="hpbar"><i style="width:' + pct + '%"></i></div>' +
       (p.cond && p.cond.length ? '<div class="pmc">' + p.cond.map((c) => '<span>' + esc(c) + '</span>').join('') + '</div>' : '') +
       (uid === S.meta.dm ? '<div class="pmc dm"><span>Spielleitung</span></div>' : '') +
       (p.dead ? '<div class="pmdead"><b>Gefallen' + (p.deathFinal ? ' – Tod bestätigt' : ' – wartet auf Gnade') + '</b>' + (isDM() ? '<div class="chips"><button class="btn sm" data-act="mercy" data-arg="' + esc(uid) + '">Gnade zeigen</button>' + (p.deathFinal ? '' : '<button class="btn sm ghost" data-act="doom" data-arg="' + esc(uid) + '">Tod bestätigen</button>') + '</div>' : '') + '</div>' : '') + '</div></div>'; }).join('') + '</div>';
@@ -1659,7 +1661,14 @@ function goWarn(c, w) {
 /* ---------- Render ---------- */
 let rendering = false;
 /* Reihenfolge: erst alles einfügen (Hilfe-Knöpfe), dann einmal messen (Seitenlayout) – so rechnet der Browser das Layout nur einmal */
-function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } { const fa = document.querySelector('.foot.srdattr'); if (fa) fa.hidden = S.view === 'help'; } /* Lizenztext nur einmal: in der Hilfe steht er schon */ if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } }
+/* FC-31 Wiederaufnahme: letzte Hauptansicht (Held, Bogen-Reiter, Abenteuer) gerätelokal merken; nie Dialoge oder halbe Abläufe */
+const RESUME_VIEWS = ['sheet', 'camp', 'adv', 'spells', 'mobs', 'hb', 'help', 'heroes']; let RESUME_LAST = '';
+function resumeSave() { if (!RESUME_VIEWS.includes(S.view)) return; const v = JSON.stringify({ v: S.view, c: S.cur || '', mg: S.mg || '', adv: S.adv || '' }); if (v === RESUME_LAST) return; RESUME_LAST = v; try { localStorage.setItem('hb_resume', v); } catch (e) {} }
+function resumeLoad() { let r = null; try { r = JSON.parse(localStorage.getItem('hb_resume') || 'null'); } catch (e) {} if (!nvPlain(r) || !RESUME_VIEWS.includes(r.v)) return;
+  if (r.v === 'sheet' && !(typeof r.c === 'string' && nvOwn(S.chars, r.c))) return; if (typeof r.c === 'string' && nvOwn(S.chars, r.c)) S.cur = r.c;
+  if (r.v === 'adv' && r.adv && !(typeof advGet === 'function' && advGet(r.adv))) r.adv = ''; S.view = r.v; if (r.v === 'adv') S.adv = r.adv || null;
+  if (typeof r.mg === 'string' && /^[a-z]{2,10}$/.test(r.mg)) S.mg = r.mg; }
+function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } resumeSave(); { const fa = document.querySelector('.foot.srdattr'); if (fa) fa.hidden = S.view === 'help'; } /* Lizenztext nur einmal: in der Hilfe steht er schon */ if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } }
 /* Lange Listen (Zauber, Bestiarium) zeichnet der Browser nur, soweit sie sichtbar sind (content-visibility). Damit beim
    Neuzeichnen nichts springt, bekommen die neuen Einträge die Höhen der alten mit – die Seite liegt danach exakt gleich. */
 const cvKey = (el) => { const b = el.querySelector('summary b'); return b ? b.textContent : ''; };
@@ -1905,6 +1914,7 @@ Object.assign(XA, {
   if (l && l.chars) { S.chars = charsSafe(l.chars, 'Gerät'); S.hb = nvPlain(l.hb) ? l.hb : {}; S.cur = l.cur; }
   if (S.broken.size || S.lsDefekt) setTimeout(() => bannerToast('Beschädigte Daten gefunden', S.lsDefekt === 'voll' ? 'Der gespeicherte Stand ist unlesbar und der Speicher voll. Bitte nichts ändern und Hilfe holen.' : S.broken.size ? S.broken.size + ' Held(en) sind beschädigt und werden nicht geöffnet. Sie bleiben gespeichert – unter «Helden» exportieren oder entfernen.' : 'Der gespeicherte Stand war unlesbar. Eine Kopie liegt unter «heldenbuch_defekt» im Browser.'), 600);
   if (!S.chars[S.cur]) S.cur = Object.keys(S.chars)[0] || null;
+  try { resumeLoad(); } catch (e) {}
   try { const cp = JSON.parse(localStorage.getItem('heldenbuch_camp') || 'null'); if (cp) { S.camp = cp.code || ''; S.share = cp.share !== false; S.secret = !!cp.secret; } } catch (e) {}
   render();
   if (typeof welcomeNeeded === 'function' && welcomeNeeded()) welcomeOpen();
