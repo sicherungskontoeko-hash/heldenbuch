@@ -149,6 +149,8 @@ function spellCheck(ch, c, s, lvl, mode) {
   if (c.armorNonProf) fatal.push('Rüstung ohne Übung: Du kannst keine Zauber wirken.');
   if (!spellAccess(ch, c, s, mode)) fatal.push(mode === 'ritual' ? s.name + ' steht weder in deinem Zauberbuch noch ist er vorbereitet.' : s.name + ' ist weder vorbereitet noch bekannt.');
   const slot = s.lvl > 0 && (mode === 'pact' || !mode || mode === 'slot');
+  /* Fremder Zug am Tisch: Aktions- und Bonusaktionszauber (auch Zaubertricks) nur im eigenen Zug, unabhängig von der Zugleiste (GK-04) */
+  if ((cost === 'a' || cost === 'b') && mode !== 'ritual' && offTurn()) turn.push('Nicht dein Zug: ' + (cost === 'a' ? 'Aktion' : 'Bonusaktion') + ' geht nur im eigenen Zug. Jetzt höchstens eine Reaktion.');
   if (inFight(ch)) {
     const t = turnSt(ch);
     if (turnTrack() && cost && mode !== 'ritual' && tLeft(ch, cost) <= 0) turn.push(COST_DE[cost] + ' schon verbraucht.');
@@ -534,7 +536,7 @@ function grazeMiss(ch) {
 }
 
 /* ---------- Wahrer Schlag ---------- */
-XA.tsGo = (t, a, p, ch) => { orbPrompt(''); const ts = S.tsPend; S.tsPend = null; if (ts) weaponAttack(ch, +a, { bonusPaid: true, trueStrike: ts }); };
+XA.tsGo = (t, a, p, ch) => { orbPrompt(''); const ts = S.tsPend; S.tsPend = null; if (!ts) return; if (ts.cid && ch && ts.cid !== ch.id) { bannerToast('Wahrer Schlag verfallen', 'Der Zauber gehörte zu einem anderen Helden.'); return; } weaponAttack(ch, +a, { bonusPaid: true, trueStrike: ts }); }; /* Fortsetzung des schon gewirkten Zaubers */
 
 /* ---------- Heilung auf ein Ziel anwenden ---------- */
 function healPrompt(ch, amount, name, multi) {
