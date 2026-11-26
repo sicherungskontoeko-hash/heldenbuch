@@ -172,36 +172,93 @@ const SCHEMA = 2;
 /* Hausregel aus einer Sicherung prüfen; leerer Text = in Ordnung */
 function validHb(h) {
   if (!h || typeof h !== 'object' || Array.isArray(h)) return 'leerer oder ungültiger Eintrag';
-  if (typeof h.id !== 'string' || !/^[A-Za-z0-9_-]{1,60}$/.test(h.id)) return 'Kennung fehlt oder ist ungültig';
-  if (typeof HB_KIND === 'object' && !HB_KIND[h.kind]) return 'unbekannte Art';
+  if (typeof h.id !== 'string' || !/^[A-Za-z0-9_-]{1,60}$/.test(h.id) || nvProto(h.id)) return 'Kennung fehlt oder ist ungültig';
+  { const sh = jsonShapeErrors(h, 'Hausregel', 20000); if (sh.length) return sh[0]; }
+  if (typeof HB_KIND === 'object' && !nvOwn(HB_KIND, h.kind)) return 'unbekannte Art';
   if (typeof h.name !== 'string' || !h.name.trim() || h.name.length > 200) return 'Name fehlt';
   if (h.text != null && typeof h.text !== 'string') return 'Text ist ungültig';
   for (const f of ['classes', 'plus']) if (h[f] != null && !Array.isArray(h[f])) return 'Feld „' + f + '“ ist ungültig';
   return '';
 }
+/* Aufbau eines Helden tief prüfen (GK-03): Schlüssel, Grösse, Typen aller bekannten Felder. Meldung mit Feldpfad.
+   Unbekannte Felder bleiben erlaubt (ältere/neuere Versionen), solange sie keine gefährlichen Schlüssel enthalten.
+   Zahlen aus Auswahllisten speichert die App als Text («15»), darum gilt dort auch ein Zahlentext. */
+const CV_MAX_NODES = 300000, CV_MAX_DEPTH = 32;
+/* Gefährliche Schlüssel, Nicht-JSON-Werte, Tiefe und Grösse; gemeinsam für Helden, Hausregeln und Zusatzdaten */
+function jsonShapeErrors(o, root, maxNodes) {
+  const E = []; const bad = (p, m) => { if (E.length < 30) E.push(p + ': ' + m); }; const lim = maxNodes || CV_MAX_NODES;
+  let nodes = 0; const walk = (v, p, d) => {
+    if (E.length >= 30 || nodes > lim) return; if (++nodes > lim) return bad(root, 'zu gross (mehr als ' + lim + ' Werte)');
+    if (v === null || typeof v !== 'object') { if (typeof v === 'number' && !Number.isFinite(v)) bad(p, 'Zahl ungültig'); else if (typeof v === 'function' || typeof v === 'symbol' || typeof v === 'bigint') bad(p, 'unzulässiger Wert'); return; }
+    if (d > CV_MAX_DEPTH) return bad(p, 'zu tief verschachtelt'); if (!Array.isArray(v) && !nvPlain(v)) return bad(p, 'kein einfaches Objekt');
+    for (const k of Object.keys(v)) { if (NV_BAD.has(k)) bad(p + '.' + k, 'unzulässiger Schlüssel'); else walk(v[k], Array.isArray(v) ? p + '[' + k + ']' : p + '.' + k, d + 1); }
+  };
+  walk(o, root, 0); return E;
+}
+function charShapeErrors(o) {
+  const E = jsonShapeErrors(o, 'Held'); if (E.length) return E; const bad = (p, m) => { if (E.length < 30) E.push(p + ': ' + m); };
+  const rec = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+  const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
+  const isNumS = (v) => isNum(v) || (typeof v === 'string' && /^\s*[-+]?\d+(\.\d+)?\s*$/.test(v));
+  const has = (x, k) => x[k] !== undefined;
+  const R = (x, k, p) => { if (has(x, k) && !rec(x[k])) bad(p + k, 'erwartet ein Objekt'); return has(x, k) && rec(x[k]); };
+  const RN = (x, k, p) => { if (has(x, k) && x[k] !== null && !rec(x[k])) bad(p + k, 'erwartet ein Objekt oder leer'); };
+  const L = (x, k, p) => { if (has(x, k) && !Array.isArray(x[k])) bad(p + k, 'erwartet eine Liste'); return has(x, k) && Array.isArray(x[k]); };
+  const N = (x, k, p, nul) => { if (has(x, k) && !(isNumS(x[k]) || (nul && x[k] === null))) bad(p + k, 'erwartet eine Zahl' + (nul ? ' oder leer' : '')); };
+  const Str = (x, k, p) => { if (has(x, k) && typeof x[k] !== 'string') bad(p + k, 'erwartet Text'); };
+  const B = (x, k, p) => { if (has(x, k) && typeof x[k] !== 'boolean' && x[k] !== 0 && x[k] !== 1) bad(p + k, 'erwartet Ja/Nein'); };
+  const recOf = (x, k, p, test, what) => { if (R(x, k, p)) for (const [kk, v] of Object.entries(x[k])) if (!test(v)) bad(p + k + '.' + kk, 'erwartet ' + what); };
+  const listOf = (x, k, p, test, what) => { if (L(x, k, p)) x[k].forEach((v, i) => { if (!test(v)) bad(p + k + '[' + i + ']', 'erwartet ' + what); }); };
+  const prim = (v) => v === null || ['number', 'string', 'boolean'].includes(typeof v);
+  for (const k of ['player', 'order', 'land', 'speciesChoice', 'speciesSkill', 'speciesSpellAbility', 'bg', 'bgMode', 'method', 'humanFeat', 'armor', 'hpMode', 'inventory', 'notes', 'appearance', 'alignment', 'languages', 'portrait', 'portraitImg', 'dice', 'sub']) Str(o, k, '');
+  for (const k of ['armorBonus', 'shieldBonus', 'gold', 'xp', 'updated', 'diceAt', 'v']) N(o, k, '');
+  for (const k of ['shield', 'mageArmor']) B(o, k, '');
+  if (R(o, 'bgCustom', '')) { const b = o.bgCustom; Str(b, 'name', 'bgCustom.'); Str(b, 'feat', 'bgCustom.'); listOf(b, 'abil', 'bgCustom.', (v) => typeof v === 'string', 'Text'); listOf(b, 'skills', 'bgCustom.', (v) => typeof v === 'string', 'Text'); }
+  recOf(o, 'coins', '', isNumS, 'eine Zahl'); recOf(o, 'bgPlus', '', isNumS, 'eine Zahl'); recOf(o, 'misc', '', isNumS, 'eine Zahl'); recOf(o, 'hpRolls', '', isNumS, 'eine Zahl');
+  recOf(o, 'asi', '', rec, 'ein Objekt'); recOf(o, 'mi', '', rec, 'ein Objekt'); recOf(o, 'featOpt', '', rec, 'ein Objekt'); recOf(o, 'arcanum', '', prim, 'einen einfachen Wert');
+  if (rec(o.asi)) for (const [lv, a] of Object.entries(o.asi)) { if (rec(a)) { Str(a, 'feat', 'asi.' + lv + '.'); recOf(a, 'plus', 'asi.' + lv + '.', isNumS, 'eine Zahl'); } }
+  for (const k of ['classSkills', 'extraSkills', 'expertise', 'freeSkills', 'freeExp', 'styles', 'invocations', 'cantrips', 'spells', 'book', 'homebrew']) listOf(o, k, '', (v) => typeof v === 'string', 'Text');
+  listOf(o, 'bonusSpells', '', (v) => typeof v === 'string' || rec(v), 'Text oder Objekt');
+  for (const k of ['weapons', 'items', 'inv', 'comps', 'multi']) listOf(o, k, '', rec, 'ein Objekt');
+  (Array.isArray(o.weapons) ? o.weapons : []).forEach((w, i) => { if (rec(w)) { Str(w, 'w', 'weapons[' + i + '].'); N(w, 'bonus', 'weapons[' + i + '].'); } });
+  (Array.isArray(o.items) ? o.items : []).forEach((x, i) => { if (rec(x)) { N(x, 'qty', 'items[' + i + '].'); Str(x, 'id', 'items[' + i + '].'); Str(x, 'name', 'items[' + i + '].'); } });
+  (Array.isArray(o.inv) ? o.inv : []).forEach((x, i) => { if (rec(x)) { N(x, 'qty', 'inv[' + i + '].'); N(x, 'kg', 'inv[' + i + '].'); } });
+  (Array.isArray(o.comps) ? o.comps : []).forEach((x, i) => { if (rec(x)) { for (const k of ['hp', 'hpMax', 'ac', 'lvl']) N(x, k, 'comps[' + i + '].', true); } });
+  (Array.isArray(o.multi) ? o.multi : []).forEach((m, i) => { if (rec(m)) { listOf(m, 'cantrips', 'multi[' + i + '].', (v) => typeof v === 'string', 'Text'); listOf(m, 'spells', 'multi[' + i + '].', (v) => typeof v === 'string', 'Text'); R(m, 'arcanum', 'multi[' + i + '].'); } });
+  if (R(o, 'play', '')) {
+    const P = o.play, q = 'play.';
+    N(P, 'hp', q, true); N(P, 'rageLeft', q, true); for (const k of ['temp', 'hdUsed', 'pact', 'exh', 'deadAt', 'relRage']) N(P, k, q);
+    for (const k of ['insp', 'raging', 'rageKeep', 'dead', 'deathFinal', 'stable', 'localFight']) B(P, k, q);
+    listOf(P, 'ds', q, isNumS, 'eine Zahl'); listOf(P, 'cond', q, (v) => typeof v === 'string', 'Text'); listOf(P, 'gifts', q, (v) => typeof v === 'string', 'Text');
+    recOf(P, 'slots', q, isNumS, 'eine Zahl'); recOf(P, 'res', q, prim, 'einen einfachen Wert'); recOf(P, 'camps', q, isNumS, 'eine Zahl');
+    for (const k of ['fx', 'fxSrc', 'fxDur', 'turn']) R(P, k, q); for (const k of ['hdBy', 'conc', 'ready']) RN(P, k, q);
+  }
+  return E;
+}
 function validateChar(o) {
   const e = [];
   if (!o || typeof o !== 'object' || Array.isArray(o)) return ['Kein Heldenobjekt.'];
+  { const sh = charShapeErrors(o); if (sh.length) return sh; }
   if (typeof o.name !== 'string') e.push('Name fehlt oder ist kein Text.');
-  if (!CLASSES[o.cls]) e.push('Unbekannte Klasse „' + o.cls + '“.');
+  if (!nvOwn(CLASSES, o.cls)) e.push('Unbekannte Klasse „' + String(o.cls).slice(0, 40) + '“.');
   const L = +o.level; if (!Number.isInteger(L) || L < 1 || L > 30) e.push('Stufe ungültig (' + o.level + ').');
   if (o.base !== undefined) { if (typeof o.base !== 'object' || !o.base) e.push('Attributswerte fehlen.'); else for (const k of AB) { const v = +o.base[k]; if (o.base[k] !== undefined && (!Number.isFinite(v) || v < 1 || v > 30)) e.push('Attribut ' + AB_K[k] + ' ungültig (' + o.base[k] + ').'); } }
-  if (o.species !== undefined && !SPECIES[o.species]) e.push('Unbekannte Spezies „' + o.species + '“.');
+  if (o.species !== undefined && !nvOwn(SPECIES, o.species)) e.push('Unbekannte Spezies „' + String(o.species).slice(0, 40) + '“.');
   for (const k of ['multi', 'weapons', 'spells', 'book', 'cantrips', 'classSkills', 'extraSkills', 'expertise', 'freeSkills', 'freeExp', 'bonusSpells', 'invocations', 'styles', 'items', 'homebrew', 'comps']) if (o[k] !== undefined && !Array.isArray(o[k])) e.push('„' + k + '“ muss eine Liste sein.');
-  (Array.isArray(o.multi) ? o.multi : []).forEach((m, i) => { if (!m || !CLASSES[m.cls]) e.push('Multiclass ' + (i + 1) + ': unbekannte Klasse.'); else if (!Number.isInteger(+m.level) || +m.level < 1) e.push('Multiclass ' + (i + 1) + ': Stufe ungültig.'); });
-  (Array.isArray(o.weapons) ? o.weapons : []).forEach((w, i) => { if (!w || !WEAPONS[w.w]) e.push('Waffe ' + (i + 1) + ': unbekannt (' + (w && w.w) + ').'); });
+  (Array.isArray(o.multi) ? o.multi : []).forEach((m, i) => { if (!m || !nvOwn(CLASSES, m.cls)) e.push('Multiclass ' + (i + 1) + ': unbekannte Klasse.'); else if (!Number.isInteger(+m.level) || +m.level < 1) e.push('Multiclass ' + (i + 1) + ': Stufe ungültig.'); });
+  (Array.isArray(o.weapons) ? o.weapons : []).forEach((w, i) => { if (!w || !nvOwn(WEAPONS, w.w)) e.push('Waffe ' + (i + 1) + ': unbekannt (' + String(w && w.w).slice(0, 40) + ').'); });
   if (o.play !== undefined && (typeof o.play !== 'object' || !o.play)) e.push('Spielstand („play“) ist ungültig.');
   if (o.play && typeof o.play === 'object' && o.play.hxForms !== undefined && (!Array.isArray(o.play.hxForms) || o.play.hxForms.some((f) => !['Klinge', 'Panzer', 'Greifer', 'Sehne'].includes(f)))) e.push('Wandelgestalt („play.hxForms“) ist ungültig.');
   { const seen = new Set([o.cls]); (Array.isArray(o.multi) ? o.multi : []).forEach((m, i) => { if (m && CLASSES[m.cls]) { if (seen.has(m.cls)) e.push('Multiclass ' + (i + 1) + ': ' + CLASSES[m.cls].name + ' kommt doppelt vor.'); seen.add(m.cls); } }); }
   return e;
 }
 /* Bereinigt Verweise, die es nicht (mehr) gibt, statt den Helden abzulehnen */
-function cleanRefs(c) {
+function cleanRefs(c, hb) {
   const notes = [];
-  const sp = (id) => getSpell(id, S.hb);
+  const sp = (id) => getSpell(id, hb || S.hb); /* beim Import mit den mitgelieferten Hausregeln geprüft, noch bevor sie gespeichert sind */
   for (const k of ['spells', 'cantrips', 'book']) { const before = (c[k] || []).length; c[k] = (c[k] || []).filter((id) => sp(id)); if (c[k].length < before) notes.push((before - c[k].length) + ' unbekannte Zauber entfernt'); }
-  c.weapons = (c.weapons || []).filter((w) => w && WEAPONS[w.w]);
-  c.multi = (c.multi || []).filter((m) => m && CLASSES[m.cls] && m.cls !== c.cls);
+  { const n0 = (c.weapons || []).length; c.weapons = (c.weapons || []).filter((w) => w && nvOwn(WEAPONS, w.w)); if (c.weapons.length < n0) notes.push((n0 - c.weapons.length) + ' unbekannte Waffen entfernt'); }
+  { const n0 = (c.multi || []).length; c.multi = (c.multi || []).filter((m) => m && nvOwn(CLASSES, m.cls) && m.cls !== c.cls); if (c.multi.length < n0) notes.push((n0 - c.multi.length) + ' ungültige Multiclass-Einträge entfernt'); }
   return notes;
 }
 function migrateChar(c) {
@@ -535,9 +592,9 @@ function freshId() { let id; do { const u = new Uint32Array(2); try { crypto.get
 function backupInfo() { try { const raw = localStorage.getItem('heldenbuch_backup_v1'); if (!raw) return null; const d = JSON.parse(raw); return { n: Object.keys(d.chars || {}).length, raw }; } catch (e) { return null; } }
 XA.restoreBackup = () => {
   const b = backupInfo(); if (!b) return;
-  const d = JSON.parse(b.raw); let n = 0;
-  for (const c0 of Object.values(d.chars || {})) { if (validateChar(c0).length) continue; const c = normChar(JSON.parse(JSON.stringify(c0))); c.id = freshId(); c.name = (c.name || 'Held') + ' (Sicherung)'; S.chars[c.id] = c; persist('c', c.id); n++; }
-  S.modal = null; $('#modal').hidden = true; S.view = 'heroes'; render(); pushLog({ label: 'Sicherung', total: n, detail: n + ' Held(en) aus der automatischen Sicherung als Kopie hinzugefügt – bestehende Helden unverändert.' });
+  let d = null; try { d = JSON.parse(b.raw); } catch (e) {} let n = 0; const skip = [];
+  for (const c0 of Object.values(d && nvPlain(d.chars) ? d.chars : {})) { const er = validateChar(c0); if (er.length) { skip.push((c0 && typeof c0.name === 'string' ? '„' + c0.name.slice(0, 40) + '“' : 'Held') + ': ' + er[0]); continue; } const c = normChar(JSON.parse(JSON.stringify(c0))); cleanRefs(c); c.id = freshId(); c.name = (c.name || 'Held') + ' (Sicherung)'; S.chars[c.id] = c; persist('c', c.id); n++; }
+  S.modal = null; $('#modal').hidden = true; S.view = 'heroes'; render(); pushLog({ label: 'Sicherung', total: n, detail: n + ' Held(en) aus der automatischen Sicherung als Kopie hinzugefügt – bestehende Helden unverändert.' + (skip.length ? ' Nicht übernommen (beschädigt, bleibt in der Sicherung): ' + skip.slice(0, 3).join(' · ') : '') });
 };
 
 /* Zauberausbruch: Jede gewürfelte 8 lässt einen weiteren W8 explodieren (auch Folgewürfe), höchstens Zaubermodifikator zusätzliche Würfel */

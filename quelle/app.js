@@ -14,7 +14,8 @@ const STEPS = ['Klasse', 'Herkunft', 'Attribute', 'Fertigkeiten und Talente', 'Z
 let DB = null, UID = null; const timers = {};
 /* Gesamtstand im Browser. Je Aufruf werden nur die genannten Datensätze geschrieben, damit ein zweiter Tab nichts überschreibt. */
 let LS_LAST = null;
-function lsGet() { try { const raw = localStorage.getItem('heldenbuch'); LS_LAST = raw; if (raw && typeof backupOnce === 'function' && /"v":\s*2/.test(raw) === false) backupOnce(raw); return JSON.parse(raw || 'null'); } catch (e) { return null; } }
+function lsGet() { let raw = null; try { raw = localStorage.getItem('heldenbuch'); LS_LAST = raw; if (raw && typeof backupOnce === 'function' && /"v":\s*2/.test(raw) === false) backupOnce(raw); const d = JSON.parse(raw || 'null'); if (raw && (!d || typeof d !== 'object' || (d.chars != null && !nvPlain(d.chars)))) throw new Error('form'); return d; }
+  catch (e) { /* Unlesbarer Gesamtstand: Rohtext aufbewahren, bevor ihn ein Speichern überschreibt (GK-03) */ if (raw) { try { if (localStorage.getItem('heldenbuch_defekt') !== raw) localStorage.setItem('heldenbuch_defekt', raw); S.lsDefekt = true; } catch (x) { S.lsDefekt = 'voll'; } } return null; } }
 function lsSet(keys) {
   let chars = S.chars, hb = S.hb;
   if (keys && !S.saveErr) {
@@ -27,6 +28,7 @@ function lsSet(keys) {
         } }
     } catch (e) { chars = S.chars; hb = S.hb; }
   }
+  if (S.broken && S.broken.size) { chars = Object.assign({}, chars); for (const [i, b] of S.broken) if (!Object.prototype.hasOwnProperty.call(chars, i)) Object.defineProperty(chars, i, { value: b.c, enumerable: true, writable: true, configurable: true }); } /* beschädigte Helden bleiben gespeichert */
   const data = JSON.stringify({ v: 2, chars, hb, cur: S.cur });
   try { localStorage.setItem('heldenbuch', data); if (localStorage.getItem('heldenbuch') !== data) throw new Error('verify'); LS_LAST = data; if (S.saveErr) { S.saveErr = false; paintSave(); } }
   catch (e) { if (!S.saveErr) { S.saveErr = true; bannerToast('Speichern im Browser fehlgeschlagen', (e && /quota/i.test(e.name + e.message) ? 'Der Speicher ist voll. ' : '') + 'Sichere deine Helden jetzt über „Exportieren“.'); } paintSave(); }
@@ -41,7 +43,8 @@ function lsExternal(e) {
   let changed = false;
   for (const [kind, src, dst] of [['c', d.chars, S.chars], ['h', d.hb && typeof d.hb === 'object' ? d.hb : {}, S.hb]]) {
     for (const i of Object.keys(dst)) if (!(i in src) && !keep(kind, i)) { delete dst[i]; changed = true; }
-    for (const [i, v] of Object.entries(src)) { if (!v || typeof v !== 'object' || keep(kind, i)) continue; if (JSON.stringify(dst[i]) !== JSON.stringify(v)) { dst[i] = kind === 'c' ? normChar(v) : v; changed = true; } }
+    if (kind === 'c' && S.broken) for (const i of [...S.broken.keys()]) if (!(i in src)) S.broken.delete(i);
+    for (const [i, v] of Object.entries(src)) { if (!v || typeof v !== 'object' || keep(kind, i) || nvProto(i)) continue; if (JSON.stringify(dst[i]) !== JSON.stringify(v)) { const n = kind === 'c' ? charSafe(i, v, 'anderer Tab') : v; if (!n) continue; dst[i] = n; changed = true; } }
   }
   LS_LAST = e.newValue;
   if (!changed) return;
@@ -94,13 +97,16 @@ async function connectDb() {
     /* Je Datensatz zusammenführen: ausstehende lokale Änderungen (auch Löschungen) gewinnen, bei Helden sonst der neuere Stand.
        Nur lokal vorhandene Datensätze werden beim ersten Abgleich und bei leerer Kopie übernommen, später gelten sie als anderswo gelöscht. */
     const pend = pendKeys(); let first = true; try { first = !localStorage.getItem('hb_merge2'); } catch (e) {}
-    const dbC = {}, dbH = {};
+    const dbC = {}, dbH = {}, dbBad = new Map();
     snap.docs.forEach((d) => { const v = d.data(); try { const o = JSON.parse(v.json); if (v.kind === 'n') { try { if (o.camp && !localStorage.getItem('heldenbuch_dm_' + o.camp)) localStorage.setItem('heldenbuch_dm_' + o.camp, o.text || ''); } catch (x) {} return; }
-      if (!o || typeof o !== 'object' || typeof o.id !== 'string' || !o.id) return; if (v.kind === 'c') dbC[o.id] = normChar(o); else if (v.kind === 'h') dbH[o.id] = o; } catch (e) {} });
+      if (!o || typeof o !== 'object' || typeof o.id !== 'string' || !o.id || nvProto(o.id)) return;
+      if (v.kind === 'c') { const e = charShapeErrors(o); if (e.length) dbBad.set(o.id, { c: o, err: e, src: 'Konto' }); else dbC[o.id] = normChar(o); } else if (v.kind === 'h') dbH[o.id] = o; } catch (e) {} });
+    /* Beschädigte Kopie im Konto: gültige Kopie auf diesem Gerät behalten und neu hochladen, sonst abseits halten */
+    for (const [i, b] of dbBad) if (!S.chars[i]) S.broken.set(i, b);
     const push = new Set(pend);
     const pick = (kind, local, remote, union) => { const out = {};
       for (const [i, o] of Object.entries(remote)) { const k = kind + '_' + i; if (pend.has(k)) continue; const l = local[i]; if (kind === 'c' && l && (+l.updated || 0) > (+o.updated || 0)) { out[i] = l; push.add(k); } else out[i] = o; }
-      for (const [i, l] of Object.entries(local)) { const k = kind + '_' + i; if (pend.has(k) || (union && !(i in remote))) { out[i] = l; push.add(k); } }
+      for (const [i, l] of Object.entries(local)) { const k = kind + '_' + i; if (pend.has(k) || (union && !(i in remote)) || (kind === 'c' && dbBad.has(i))) { out[i] = l; push.add(k); } }
       return out; };
     S.chars = pick('c', S.chars, dbC, first || snap.empty || !Object.keys(dbC).length);
     S.hb = pick('h', S.hb, dbH, first || snap.empty);
@@ -563,11 +569,11 @@ function renderTop() {
 
 /* ---------- Heldenauswahl ---------- */
 function renderHeroes() {
-  const ids = Object.keys(S.chars).sort((a, b) => (S.chars[b].updated || 0) - (S.chars[a].updated || 0));
+  const ids = Object.keys(S.chars).sort((a, b) => (S.chars[b].updated || 0) - (S.chars[a].updated || 0)); const failed = [];
   let h = '<div class="hero-intro banner' + (ids.length ? ' hintro' : '') + '" style="' + bannerStyle('paladin') + '"><h1>Deine Helden</h1><p>Wähle einen Helden zum Spielen, erschaffe einen neuen oder lade einen gesicherten Helden aus einer Datei.</p></div>' + backupLine(ids.length) + '<div class="heroes">';
   h += '<button class="newhero" data-act="newChar"><span class="plus">+</span><b>Neuen Helden erschaffen</b><span>Schritt für Schritt, alles wird für dich berechnet.</span></button>';
   for (const id of ids) {
-    const ch = S.chars[id]; let c; try { c = derive(ch, S.hb); } catch (e) { continue; }
+    const ch = S.chars[id]; let c; try { c = derive(ch, S.hb); } catch (e) { failed.push({ id, name: typeof ch.name === 'string' ? ch.name : 'Held', why: String(e && e.message || e).slice(0, 80) }); continue; }
     const conf = S.confirm === 'del:' + id;
     h += '<article class="hero' + (id === S.cur ? ' cur' : '') + '">' + (id === S.cur ? '<span class="curlbl">Aktiv</span>' : '') + sigil(ch) +
       '<div><h3>' + esc(ch.name) + '</h3><p>' + c.classLabel + (c.hasSub && !c.multi && c.subName ? ' · ' + esc(c.subName) : '') + '<br class="hbr"><span class="hdot"> · </span>' + c.sp.name + ' · ' + esc(c.bg.name) + '</p></div>' +
@@ -577,7 +583,7 @@ function renderHeroes() {
       '<div class="acts2"><button data-act="exportOne" data-arg="' + esc(id) + '">Exportieren</button><button data-act="dupChar" data-arg="' + esc(id) + '">Duplizieren</button>' +
       (conf ? '<button class="del" data-act="delChar" data-arg="' + esc(id) + '">Wirklich löschen?</button><button data-act="noDel">Nein</button>' : '<button class="del" data-act="askDel" data-arg="' + esc(id) + '">Löschen</button>') + '</div></article>';
   }
-  h += '</div>' + (isApp() ? transferHtml() : '') + '<div class="herobar"><label class="btn ghost filebtn" title="Heldenbuch-Datei (.json) oder Charakterbogen-PDF aus D&amp;D Beyond">Helden aus Datei laden<input type="file" id="importFile" accept=".json,application/json,.pdf,application/pdf"></label><button class="btn ghost" data-act="importText">Text einfügen</button>' + (ids.length ? '<button class="btn ghost" data-act="exportAll" title="Helden, Hausregeln, eigene Monster, Begegnungen und SL-Notizen in einer Datei">Alles sichern</button>' : '') + '</div>';
+  h += '</div>' + brokenHtml(failed) + (isApp() ? transferHtml() : '') + '<div class="herobar"><label class="btn ghost filebtn" title="Heldenbuch-Datei (.json) oder Charakterbogen-PDF aus D&amp;D Beyond">Helden aus Datei laden<input type="file" id="importFile" accept=".json,application/json,.pdf,application/pdf"></label><button class="btn ghost" data-act="importText">Text einfügen</button>' + (ids.length ? '<button class="btn ghost" data-act="exportAll" title="Helden, Hausregeln, eigene Monster, Begegnungen und SL-Notizen in einer Datei">Alles sichern</button>' : '') + '</div>';
   return h;
 }
 
@@ -621,23 +627,52 @@ async function doExport(list, fname, full) {
   catch (e) { if (e && e.code === 'declined') return; openModal('export', data); }
 }
 function fileName(ch) { return (ch.name || 'held').replace(/^Beispiel:\s*/, '').replace(/[^\wäöüÄÖÜss -]/g, '').trim().replace(/\s+/g, '_') + '_Heldenbuch.json'; }
-function importJson(text) {
+/* Import in zwei Schritten (GK-03): erst den ganzen Plan prüfen, ohne etwas zu verändern, dann übernehmen.
+   Kein Teilimport: ein ungültiger Held, eine ungültige Hausregel oder ein ungültiger Zusatzteil verhindert alles. */
+const IMPORT_MAX = 60e6, IMPORT_CHARS = 500;
+const EXTRA_SHAPE = { player: 'string', mobs: 'list', enc: 'list', dmNotes: 'obj', chr: 'obj', kb: 'obj', stand: 'obj', adv: 'list', advSt: 'obj' };
+function extraErrors(x) {
+  if (x === undefined || x === null) return []; if (!nvPlain(x)) return ['extra: erwartet ein Objekt'];
+  const E = jsonShapeErrors(x, 'extra', 2e6); if (E.length) return E;
+  for (const [k, t] of Object.entries(EXTRA_SHAPE)) { const v = x[k]; if (v === undefined) continue; if (t === 'string' ? typeof v !== 'string' : t === 'list' ? !Array.isArray(v) : !nvPlain(v)) E.push('extra.' + k + ': erwartet ' + (t === 'string' ? 'Text' : t === 'list' ? 'eine Liste' : 'ein Objekt')); }
+  return E;
+}
+function importPlan(text) {
+  if (typeof text !== 'string') throw new Error('Kein gültiger Heldentext.');
+  if (text.length > IMPORT_MAX) throw new Error('Nicht geladen – die Datei ist zu gross (höchstens 60 MB).');
   let d; try { d = JSON.parse(text); } catch (e) { throw new Error('Kein gültiger Heldentext (JSON fehlerhaft).'); }
-  if (!d || typeof d !== 'object') throw new Error('Im Text wurde kein Held gefunden.');
-  const list = Array.isArray(d.chars) ? d.chars : (d && d.id && d.cls ? [d] : []);
-  if (!list.length && !(d && d.extra)) throw new Error('Im Text wurde kein Held gefunden.');
-  const errs = []; list.forEach((c, i) => { const e = validateChar(c); if (e.length) errs.push((c && c.name ? '„' + c.name + '“' : 'Held ' + (i + 1)) + ': ' + e.join(' ')); });
-  if (errs.length) throw new Error('Nicht geladen – bestehende Helden bleiben unverändert. ' + errs.join(' | '));
-  if (d.hb !== undefined && !Array.isArray(d.hb)) throw new Error('Hausregeln im Text sind ungültig.');
-  /* Erst alles prüfen, dann übernehmen: ein Fehler darf nichts halb geladen zurücklassen */
-  const hbErrs = []; (d.hb || []).forEach((h, i) => { const e = validHb(h); if (e) hbErrs.push('Hausregel ' + (i + 1) + (h && typeof h.name === 'string' && h.name.trim() ? ' „' + h.name.trim().slice(0, 40) + '“' : '') + ': ' + e); });
-  if (hbErrs.length) throw new Error('Nicht geladen – bestehende Helden und Hausregeln bleiben unverändert. ' + hbErrs.join(' | '));
-  (d.hb || []).forEach((h) => { S.hb[h.id] = h; persist('h', h.id); });
+  if (!nvPlain(d)) throw new Error('Im Text wurde kein Held gefunden.');
+  if (d.chars !== undefined && !Array.isArray(d.chars)) throw new Error('Nicht geladen – chars: erwartet eine Liste.');
+  const list = Array.isArray(d.chars) ? d.chars : (d.id && d.cls ? [d] : []);
+  if (!list.length && !d.extra) throw new Error('Im Text wurde kein Held gefunden.');
+  if (list.length > IMPORT_CHARS) throw new Error('Nicht geladen – zu viele Helden in einer Datei (höchstens ' + IMPORT_CHARS + ').');
+  const who = (c, i) => (c && typeof c.name === 'string' && c.name.trim() ? '„' + c.name.trim().slice(0, 40) + '“ ' : '') + '(chars[' + i + '])';
+  /* Meldung mit Feldpfad, z. B. «chars[0].play.res: erwartet ein Objekt» */
+  const at = (i, m) => { const b = 'chars[' + i + ']'; return /^Held[.[]/.test(m) ? m.replace(/^Held/, b) : /^[A-Za-z]+[.[:]/.test(m) ? b + '.' + m : b + ': ' + m; };
+  const errs = []; list.forEach((c, i) => { const e = validateChar(c); if (e.length) errs.push((c && typeof c.name === 'string' && c.name.trim() ? '„' + c.name.trim().slice(0, 40) + '“: ' : '') + e.slice(0, 5).map((m) => at(i, m)).join(' · ')); });
+  if (errs.length) throw new Error('Nicht geladen – bestehende Helden bleiben unverändert. ' + errs.slice(0, 4).join(' | '));
+  if (d.hb !== undefined && !Array.isArray(d.hb)) throw new Error('Nicht geladen – hb: erwartet eine Liste.');
+  const hbErrs = []; (d.hb || []).forEach((h, i) => { const e = validHb(h); if (e) hbErrs.push('Hausregel ' + (i + 1) + (h && typeof h.name === 'string' && h.name.trim() ? ' „' + h.name.trim().slice(0, 40) + '“' : '') + ' (hb[' + i + ']): ' + e); });
+  if (hbErrs.length) throw new Error('Nicht geladen – bestehende Helden und Hausregeln bleiben unverändert. ' + hbErrs.slice(0, 4).join(' | '));
+  const exErrs = extraErrors(d.extra); if (exErrs.length) throw new Error('Nicht geladen – Zusatzdaten ungültig: ' + exErrs.slice(0, 4).join(' | '));
+  /* Mitgelieferte Hausregeln zuerst nur hier verfügbar machen, damit Verweise darauf gelten */
+  const hbStage = Object.assign({}, S.hb); for (const h of d.hb || []) hbStage[h.id] = h;
+  const notes = []; const chars = list.map((c, i) => { const n = normChar(JSON.parse(JSON.stringify(c))); notes.push(...cleanRefs(n, hbStage));
+    try { derive(n, hbStage); } catch (e) { throw new Error('Nicht geladen – ' + who(c, i) + ': Werte lassen sich nicht berechnen (' + String(e && e.message || e).slice(0, 120) + ').'); }
+    return n; });
+  return { chars, hb: d.hb || [], extra: d.extra, notes };
+}
+function importJson(text) {
+  const P = importPlan(text);
+  P.hb.forEach((h) => { S.hb[h.id] = h; persist('h', h.id); });
   let last = null;
-  const notes = []; list.forEach((c) => { const n = normChar(JSON.parse(JSON.stringify(c))); notes.push(...cleanRefs(n)); if (typeof n.id !== 'string' || !/^[A-Za-z0-9_-]{1,60}$/.test(n.id) || S.chars[n.id]) n.id = freshId(); S.chars[n.id] = n; persist('c', n.id); last = n.id; }); if (notes.length) bannerToast('Beim Laden bereinigt', notes.join(' · '));
-  const ex = restoreExtras(d.extra);
+  P.chars.forEach((n) => { if (typeof n.id !== 'string' || !/^[A-Za-z0-9_-]{1,60}$/.test(n.id) || nvProto(n.id) || S.chars[n.id] || (S.broken && S.broken.has(n.id))) n.id = freshId(); S.chars[n.id] = n; persist('c', n.id); last = n.id; });
+  if (P.notes.length) bannerToast('Beim Laden bereinigt', P.notes.join(' · '));
+  const ex = restoreExtras(P.extra); const d = { extra: P.extra }; const list = P.chars;
   const advOnly = !list.length && d.extra && Array.isArray(d.extra.adv) && d.extra.adv.some((a) => typeof advGet === 'function' && a && advGet(a.id));
   if (last) S.cur = last; S.view = advOnly ? 'adv' : 'heroes'; if (advOnly) S.adv = d.extra.adv.find((a) => a && advGet(a.id)).id; S.modal = null; render();
+  /* Speicherfehler nie als Erfolg melden */
+  if (S.saveErr) { pushLog({ label: 'Geladen, aber nicht gespeichert', total: '⚠', detail: 'Der Browserspeicher ist voll oder gesperrt. Die Helden sind nur bis zum Schliessen geöffnet – jetzt über „Exportieren“ sichern.' }); return; }
   pushLog({ label: 'Geladen', total: list.length || '✓', detail: !list.length ? 'Geladen: ' + (ex.join(', ') || 'nichts Neues') : (list.length === 1 ? '„' + list[0].name + '“ ist jetzt in deinen Helden' : list.length + ' Helden importiert') + (ex.length ? ' · dazu ' + ex.join(', ') : '') });
 }
 function openModal(kind, data) {
@@ -1707,7 +1742,7 @@ document.addEventListener('click', (ev) => {
     importText: () => openModal('import'),
     closeModal: () => { S.modal = null; $('#modal').hidden = true; },
     copyEx: async () => { const ta = $('#exText'); try { await navigator.clipboard.writeText(ta.value); t.textContent = 'Kopiert ✓'; } catch (e) { ta.focus(); ta.select(); t.textContent = 'Markiert – jetzt kopieren'; } },
-    doImport: () => { try { importJson($('#imText').value); $('#modal').hidden = true; } catch (e) { const er = $('#imErr'); er.hidden = false; er.textContent = 'Das sieht nicht nach einem exportierten Helden aus. Bitte den ganzen Text einfügen.'; } },
+    doImport: () => { try { importJson($('#imText').value); $('#modal').hidden = true; } catch (e) { const er = $('#imErr'); er.hidden = false; er.textContent = (e && e.message ? e.message : 'Das sieht nicht nach einem exportierten Helden aus.') + ' Bitte den ganzen Text einfügen.'; } },
     setCls: () => { if (ch.cls !== arg) { ch.multi = (ch.multi || []).filter((m) => m.cls !== arg); ch.sub = ''; ch.opts = []; ch.cls = arg; ch.classSkills = []; ch.expertise = []; ch.order = ''; ch.cantrips = []; ch.spells = []; ch.styles = []; ch.invocations = []; } commit(); },
     setSpecies: () => { if (ch.species !== arg) { ch.species = arg; ch.speciesChoice = SPECIES[arg].choice ? Object.keys(SPECIES[arg].choice.opts)[0] : ''; ch.speciesSkill = ''; } commit(); },
     bgFeatReset: () => { ch.bgFeat = ''; commit(); },
@@ -1832,7 +1867,7 @@ document.addEventListener('change', (ev) => {
   if (t.id === 'sl') { S.sf.lvl = t.value; render(); return; }
   if (t.id === 'sc') { S.sf.cls = t.value; render(); return; }
   if (t.id === 'importFile' && t.files[0] && typeof ddbImportFile === 'function' && (/\.pdf$/i.test(t.files[0].name || '') || t.files[0].type === 'application/pdf')) { ddbImportFile(t.files[0]); t.value = ''; return; }
-  if (t.id === 'importFile' && t.files[0]) { const r = new FileReader(); r.onload = () => { try { importJson(r.result); } catch (e) { pushLog({ label: 'Datei laden', total: '✗', detail: 'Die Datei ist keine Heldenbuch-Datei.' }); } }; r.readAsText(t.files[0]); t.value = ''; return; }
+  if (t.id === 'importFile' && t.files[0]) { const r = new FileReader(); r.onload = () => { try { importJson(r.result); } catch (e) { pushLog({ label: 'Datei laden', total: '✗', detail: (e && e.message) || 'Die Datei ist keine Heldenbuch-Datei.' }); } }; r.readAsText(t.files[0]); t.value = ''; return; }
   if (t.dataset && t.dataset.bind && !(t.tagName === 'TEXTAREA' || t.type === 'text')) onBind(ev);
   else if (t.dataset && t.dataset.bind && t.type === 'text' && !t.dataset.bind.startsWith('hbe.')) { commit(true); }
 });
@@ -1842,10 +1877,32 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#mod
 document.addEventListener('click', (e) => { if (e.target.id === 'modal' && S.modal !== 'welcome') { e.target.hidden = true; S.modal = null; } });
 function embers() { applyTheme(); if (!FX) startFx(); }
 
+/* ---------- Beschädigte gespeicherte Helden (GK-03) ----------
+   Nicht öffnen, nicht stillschweigend löschen oder überschreiben: sie bleiben gespeichert, bis sie exportiert oder entfernt werden. */
+S.broken = new Map();
+function charSafe(id, c, src) {
+  if (typeof id !== 'string' || nvProto(id)) return null;
+  const e = nvPlain(c) ? charShapeErrors(c) : ['Held: kein Heldenobjekt'];
+  if (!e.length) { try { return normChar(c); } catch (x) { e.push('Held: lässt sich nicht einlesen (' + String(x.message).slice(0, 80) + ')'); } }
+  S.broken.set(id, { c, err: e, src }); return null;
+}
+function charsSafe(map, src) { const out = {}; if (!nvPlain(map)) return out; for (const [id, c] of Object.entries(map)) { const n = charSafe(id, c, src); if (n) out[id] = n; } return out; }
+function brokenHtml(failed) {
+  const L = [...S.broken.entries()].map(([id, b]) => ({ id, name: nvPlain(b.c) && typeof b.c.name === 'string' ? b.c.name : 'Unbenannter Held', why: b.err[0] || '', act: 'brokenExport', del: 'brokenDel' }))
+    .concat(failed.map((x) => ({ id: x.id, name: x.name, why: 'Werte lassen sich nicht berechnen: ' + x.why, act: 'exportOne', del: 'delChar' })));
+  if (!L.length) return '';
+  return '<section class="panel brokenp"><h2>Beschädigte Helden</h2><p class="hint">Diese Helden sind fehlerhaft gespeichert und werden nicht geöffnet. Sie bleiben unverändert erhalten. Exportiere sie zur Rettung oder entferne sie.</p><ul>' +
+    L.map((x) => '<li><b>' + esc(x.name) + '</b> <small>' + esc(x.why) + '</small> <button class="btn sm ghost" data-act="' + x.act + '" data-arg="' + esc(x.id) + '">Exportieren</button> <button class="btn sm ghost" data-act="' + x.del + '" data-arg="' + esc(x.id) + '"' + ' data-confirm="Beschädigten Helden «' + esc(x.name) + '» endgültig entfernen? Exportiere ihn vorher, wenn du ihn retten willst.">Entfernen</button></li>').join('') + '</ul></section>';
+}
+Object.assign(XA, {
+  brokenExport: (t, a) => { const b = S.broken.get(a); if (!b) return; doExport([b.c], 'Beschaedigt_' + fileName(nvPlain(b.c) ? b.c : {})); },
+  brokenDel: (t, a) => { if (!S.broken.has(a)) return; S.broken.delete(a); persist('c', a); render(); }
+});
 /* ---------- Start ---------- */
 (function boot() {
   const l = lsGet();
-  if (l && l.chars) { S.chars = l.chars; S.hb = l.hb || {}; S.cur = l.cur; Object.values(S.chars).forEach(normChar); }
+  if (l && l.chars) { S.chars = charsSafe(l.chars, 'Gerät'); S.hb = nvPlain(l.hb) ? l.hb : {}; S.cur = l.cur; }
+  if (S.broken.size || S.lsDefekt) setTimeout(() => bannerToast('Beschädigte Daten gefunden', S.lsDefekt === 'voll' ? 'Der gespeicherte Stand ist unlesbar und der Speicher voll. Bitte nichts ändern und Hilfe holen.' : S.broken.size ? S.broken.size + ' Held(en) sind beschädigt und werden nicht geöffnet. Sie bleiben gespeichert – unter «Helden» exportieren oder entfernen.' : 'Der gespeicherte Stand war unlesbar. Eine Kopie liegt unter «heldenbuch_defekt» im Browser.'), 600);
   if (!S.chars[S.cur]) S.cur = Object.keys(S.chars)[0] || null;
   try { const cp = JSON.parse(localStorage.getItem('heldenbuch_camp') || 'null'); if (cp) { S.camp = cp.code || ''; S.share = cp.share !== false; S.secret = !!cp.secret; } } catch (e) {}
   render();
