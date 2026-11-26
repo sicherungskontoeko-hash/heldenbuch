@@ -39,6 +39,21 @@ const X = '"><img src=x class=xssmark onerror="window.__xss=(window.__xss||0)+1"
     T('Fenster ' + n + ': sicher', !r.err && x.el === 0 && x.run === 0, { r, x });
     await p.evaluate(() => { S.modal = null; const m = document.getElementById('modal'); if (m) m.hidden = true; });
   }
+  /* GK-01: Schadtext in Zahlenfeldern und Kennungen des Kampfs, direkt gesetzt (Renderer dürfen sich nicht auf die Prüfung am Eingang verlassen) */
+  {
+    const r = await p.evaluate((X) => { window.__xss = 0; const now = Date.now(); const keepC = S.combat, keepM = S.meta;
+      S.combat = { id: 'k1', active: true, round: X, turn: 'n:' + X, npcs: [{ id: X, name: 'N', hp: X, hpMax: X, ac: X, v: X, dex: X, atkN: X, mid: 'goblin', cond: [] }], effects: [{ id: X, name: 'E', tgt: 'n:' + X, left: X, cond: '', save: { ab: 'wis', dc: X, when: 'end' } }], rem: [{ id: X, name: 'R', ab: 'con', dc: X, tgt: 'n:' + X, eff: X }], reqs: [{ id: X, by: 'B', ab: 'dex', dc: X, amount: X, to: ['ich'], t: now }], saveRes: [{ id: X, uid: 'ich', total: X, ok: true, t: now }], log: [] };
+      S.meta = Object.assign({}, keepM, { dm: 'ich', dmPlays: true }); S.sreqOpen = true; const out = {};
+      try { S.view = 'camp'; render(); paintCamp(); paintTurn(); turnCall(X); } catch (e) { out.err = e.message; }
+      try { npcModal(X); } catch (e) { out.err = (out.err || '') + ' npc: ' + e.message; } S.modal = null; document.getElementById('modal').hidden = true;
+      try { effForm(X); } catch (e) { out.err = (out.err || '') + ' eff: ' + e.message; } S.modal = null; document.getElementById('modal').hidden = true;
+      try { hitPrompt({ by: 'O', amount: X, atk: X, dtype: 'Hieb', t: now }); riderPrompt({ by: 'O', rider: { kind: 'save', ab: 'KON', dc: X, txt: 'T', conds: [] } }); } catch (e) { out.err = (out.err || '') + ' hit: ' + e.message; } orbPrompt(''); S.hitPend = null; S.riderPend = null;
+      out.el = document.querySelectorAll('.xssmark,img[src="x"]').length; out.run = window.__xss || 0; out.rejected = !validateCombatDoc(true, { id: 'k1', active: true, round: X }).ok && !validateCombatDoc(true, { id: 'k1', npcs: [{ id: 'n1', name: 'N', hp: X }] }).ok;
+      document.querySelectorAll('.turncall').forEach((e) => e.remove()); S.combat = keepC; S.meta = keepM; return out; }, X);
+    await p.waitForTimeout(150);
+    const x = await p.evaluate(() => ({ el: document.querySelectorAll('.xssmark,img[src="x"]').length, run: window.__xss || 0 }));
+    T('Kampf mit Schadtext in Zahlenfeldern und Kennungen: Renderer sicher, Eingang lehnt ab (GK-01)', !r.err && r.el === 0 && r.run === 0 && x.el === 0 && x.run === 0 && r.rejected, { r, x });
+  }
   /* Würfelanzeige mit fremdem Text */
   await p.evaluate((X) => { window.__xss = 0; document.querySelectorAll('.xssmark').forEach((e) => e.remove()); showToast({ label: X, total: 7, detail: X, sides: 20, nat: 7 }); bannerToast(X, X); }, X); await p.waitForTimeout(400);
   { const x = await p.evaluate(() => ({ el: document.querySelectorAll('.xssmark,img[src="x"]').length, run: window.__xss || 0 })); T('Würfelfenster und Meldung: sicher', x.el === 0 && x.run === 0, x); }
