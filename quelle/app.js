@@ -1488,7 +1488,7 @@ function checkMercy() {
   const m = $('#modal');
   if (q.length && (m.hidden || S.modal === 'mercy')) {
     const uid = q[0], p = S.table[uid]; S.modal = 'mercy';
-    m.innerHTML = '<div class="dlg mercy" role="alertdialog" aria-modal="true" aria-labelledby="mercyT">' + psig(p) + '<h2 id="mercyT">Show mercy?</h2><p><b>' + esc(p.char) + '</b> (' + esc(p.clsName) + ' ' + esc(p.level) + ') hat den dritten Todesrettungswurf verfehlt und ist gefallen.</p><p class="hint">Zeigst du Gnade, kehrt der Held mit 1 TP zurück. Sonst bleibt sein Bogen gesperrt – du kannst ihn später in der Gruppenübersicht trotzdem noch zurückholen.</p><div class="chips"><button class="btn ghost" data-act="doom" data-arg="' + esc(uid) + '">Der Tod ist endgültig</button><button class="btn big" data-act="mercy" data-arg="' + esc(uid) + '">Gnade zeigen</button></div></div>';
+    m.innerHTML = '<div class="dlg mercy" role="alertdialog" aria-modal="true" aria-labelledby="mercyT">' + psig(p) + '<h2 id="mercyT">Gnade zeigen?</h2><p><b>' + esc(p.char) + '</b> (' + esc(p.clsName) + ' ' + esc(p.level) + ') hat den dritten Todesrettungswurf verfehlt und ist gefallen.</p><p class="hint">Zeigst du Gnade, kehrt der Held mit 1 TP zurück. Sonst bleibt sein Bogen gesperrt – du kannst ihn später in der Gruppenübersicht trotzdem noch zurückholen.</p><div class="chips"><button class="btn ghost" data-act="doom" data-arg="' + esc(uid) + '">Der Tod ist endgültig</button><button class="btn big" data-act="mercy" data-arg="' + esc(uid) + '">Gnade zeigen</button></div></div>';
     m.hidden = false;
   } else if (!q.length && S.modal === 'mercy') { m.hidden = true; S.modal = null; }
 }
