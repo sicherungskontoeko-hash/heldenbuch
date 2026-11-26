@@ -1658,7 +1658,7 @@ function goWarn(c, w) {
 /* ---------- Render ---------- */
 let rendering = false;
 /* Reihenfolge: erst alles einfügen (Hilfe-Knöpfe), dann einmal messen (Seitenlayout) – so rechnet der Browser das Layout nur einmal */
-function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } }
+function render() { if (rendering) return; rendering = true; try { render0(); } finally { rendering = false; } { const fa = document.querySelector('.foot.srdattr'); if (fa) fa.hidden = S.view === 'help'; } /* Lizenztext nur einmal: in der Hilfe steht er schon */ if (typeof paintWarn === 'function') { try { paintWarn(); } catch (e) {} } if (typeof addHelp === 'function') { try { addHelp(); } catch (e) {} } if (S.view === 'sheet' && typeof layoutSheet === 'function') { try { layoutSheet(); } catch (e) {} } }
 /* Lange Listen (Zauber, Bestiarium) zeichnet der Browser nur, soweit sie sichtbar sind (content-visibility). Damit beim
    Neuzeichnen nichts springt, bekommen die neuen Einträge die Höhen der alten mit – die Seite liegt danach exakt gleich. */
 const cvKey = (el) => { const b = el.querySelector('summary b'); return b ? b.textContent : ''; };
