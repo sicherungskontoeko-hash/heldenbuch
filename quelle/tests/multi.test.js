@@ -62,10 +62,13 @@ const ROOT = path.resolve(__dirname, '..', 'app', 'www');
   T('Gleichzeitig: beide Gegner-Änderungen bleiben erhalten (10−5 / 10−3)', hp.every((h) => h === '5/7'), hp);
 
   /* P07: Zauber mit Zustand, Effekt, Konzentration */
+  /* Seit GK-04 wirkt man Aktionszauber nur im eigenen Zug: die SL gibt den Zug zuerst wieder an Ilva */
+  await SL.p.evaluate((u) => { for (let i = 0; i < 12 && S.combat.turn !== 'p:' + u; i++) nextTurn(); }, uid.B); await w(1500);
   await B.p.evaluate((id) => { orbPrompt(''); S.tgt = 'n:' + id; turnReset(cur()); castSpell(cur(), 'hold-person', 2, 'slot'); }, g[1]); await w(300);
   await B.p.evaluate(() => { const t = document.querySelector('#prompt [data-act="scRes"][data-arg="fail"]'); t.click(); }); await w(2000);
   T('Person festhalten: SL sieht Goblin 2 gelähmt (über den Effekt)', await SL.p.evaluate((id) => npcConds(S.combat.npcs.find((x) => x.id === id)).includes('paralyzed'), g[1]));
-  /* Gegnerangriff auf Ilva → Treffer → Schild */
+  /* Gegnerangriff auf Ilva im Zug des Gegners (eine Reaktion mit Platz ist dann erlaubt) → Treffer → Schild */
+  await SL.p.evaluate((u) => { nextTurn(); }, uid.B); await w(1500);
   await SL.p.evaluate((u) => { window.__q = [0.475]; const orig = Math.random; Math.random = () => (window.__q.length ? window.__q.shift() : orig()); S.npcA = { tgt: 'p:' + u }; const id = S.combat.npcs[0].id; const t = document.createElement('button'); t.dataset.act = 'npcAtk'; t.dataset.arg = id; t.dataset.j = '0'; document.body.appendChild(t); t.click(); t.remove(); }, uid.B);
   await w(400);
   const atk = await SL.p.evaluate(() => S.npcA.total);
