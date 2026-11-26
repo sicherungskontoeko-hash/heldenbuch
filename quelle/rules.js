@@ -216,6 +216,108 @@ function migrateChar(c) {
 }
 function backupOnce(raw) { try { if (!localStorage.getItem('heldenbuch_backup_v1') && raw) localStorage.setItem('heldenbuch_backup_v1', raw); } catch (e) {} }
 
+/* ---------- Vertrauensgrenze: Dokumente anderer Geräte am Tisch prüfen ----------
+   Wer den Raumcode kennt, kann beliebige Daten senden; die Verschlüsselung schützt nur vor Aussenstehenden.
+   Vor der Übernahme prüft ein Schema Typen, Aufzählungen, Kennungen, Verweise, Listen- und Textlängen.
+   Freitext über der Grenze wird gekürzt; jeder andere Verstoss verwirft das ganze Dokument (fail closed).
+   Unbekannte einfache Felder (Ja/Nein, Zahl, kurzer Text) mit sicherem Namen bleiben erhalten, damit neuere
+   App-Versionen am selben Tisch nichts verlieren; unbekannte Objekte und Listen werden nicht übernommen. */
+const NV_BAD = new Set(['__proto__', 'constructor', 'prototype']);
+const NV_FIELD = /^[A-Za-z][A-Za-z0-9_]{0,40}$/;
+const NV_ID = /^[A-Za-z0-9_-]{1,40}$/;
+const NV_UID = /^[A-Za-z0-9_.:@-]{1,80}$/;
+const NV_REF = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,80}$/; /* Monster, Zauber, Gegenstände */
+const NV_PART = /^[pn]:[A-Za-z0-9_.:@-]{1,80}$/; /* Teilnehmer im Kampf: p:<Gerät> oder n:<Gegner> */
+const NV_AB = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+class NvErr extends Error {}
+const nvFail = (p, why) => { throw new NvErr((p || 'Dokument') + ': ' + why); };
+const nvOwn = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);
+/* Namen, die jedes Objekt erbt (constructor, toString …): als Kennung oder Tabellenschlüssel gefährlich */
+const nvProto = (k) => NV_BAD.has(k) || k in Object.prototype;
+const nvPlain = (v) => v !== null && typeof v === 'object' && !Array.isArray(v) && [Object.prototype, null].includes(Object.getPrototypeOf(v));
+const NV = {
+  str: (max, re) => (v, p) => { if (typeof v !== 'string') nvFail(p, 'Text erwartet'); if (v.length > max || (re && !re.test(v))) nvFail(p, 'ungültiger Wert'); return v; },
+  key: (max, re) => (v, p) => { const k = NV.str(max, re)(v, p); if (nvProto(k)) nvFail(p, 'gefährlicher Wert'); return k; },
+  text: (max) => (v, p) => { if (typeof v !== 'string') nvFail(p, 'Text erwartet'); return v.length > max ? v.slice(0, max) : v; },
+  num: (lo, hi, int) => (v, p) => { if (typeof v !== 'number' || !Number.isFinite(v) || v < lo || v > hi || (int && !Number.isInteger(v))) nvFail(p, 'Zahl ungültig'); return v; },
+  bool: (v, p) => { if (typeof v !== 'boolean') nvFail(p, 'Ja/Nein erwartet'); return v; },
+  en: (list) => (v, p) => { if (!list.includes(v)) nvFail(p, 'unbekannter Wert'); return v; },
+  nul: (s) => (v, p) => (v === null ? null : s(v, p)),
+  arr: (s, max, idk) => (v, p) => {
+    if (!Array.isArray(v)) nvFail(p, 'Liste erwartet'); if (v.length > max) nvFail(p, 'zu viele Einträge (' + v.length + ' > ' + max + ')');
+    const out = [], ids = new Set();
+    for (let i = 0; i < v.length; i++) { const x = s(v[i], p + '[' + i + ']'); if (idk) { if (ids.has(x[idk])) nvFail(p + '[' + i + ']', 'doppelte Kennung'); ids.add(x[idk]); } out.push(x); }
+    return out;
+  },
+  /* fields: erlaubte Felder; req: Pflichtfelder; keep: unbekannte einfache Felder behalten */
+  obj: (fields, req, keep) => (v, p) => {
+    if (!nvPlain(v)) nvFail(p, 'Objekt erwartet'); const out = {};
+    for (const k of Object.keys(v)) {
+      if (NV_BAD.has(k)) nvFail(p + '.' + k, 'gefährlicher Schlüssel'); const x = v[k]; if (x === undefined) continue;
+      if (nvOwn(fields, k)) { const y = fields[k](x, p + '.' + k); if (y !== undefined) out[k] = y; continue; }
+      if (keep && NV_FIELD.test(k) && (x === null || typeof x === 'boolean' || (typeof x === 'number' && Number.isFinite(x)) || (typeof x === 'string' && x.length <= 200))) out[k] = x;
+    }
+    for (const k of req || []) if (out[k] === undefined) nvFail(p + '.' + k, 'fehlt');
+    return out;
+  },
+  rec: (keyRe, s, max) => (v, p) => {
+    if (!nvPlain(v)) nvFail(p, 'Objekt erwartet'); const ks = Object.keys(v); if (ks.length > max) nvFail(p, 'zu viele Einträge'); const out = {};
+    for (const k of ks) { if (nvProto(k) || !keyRe.test(k)) nvFail(p + '[' + k.slice(0, 40) + ']', 'ungültiger Schlüssel'); if (v[k] !== undefined) out[k] = s(v[k], p + '[' + k + ']'); }
+    return out;
+  }
+};
+const NV_T = NV.num(0, 1e14); /* Zeitstempel (ms) */
+const NV_N = (lo, hi, int) => NV.nul(NV.num(lo, hi, int));
+const NV_I = NV.key(40, NV_ID), NV_U = NV.key(80, NV_UID), NV_R = NV.key(81, NV_REF);
+/* Zustände: nur bekannte (eigene) Einträge aus COND; Unbekanntes fällt weg, Gefährliches wird abgewiesen */
+const nvConds = (v, p) => NV.arr(NV.str(40, NV_FIELD), 40)(v, p).filter((k) => typeof COND !== 'undefined' && nvOwn(COND, k) && !nvProto(k));
+const nvCond1 = (v, p) => { const k = NV.str(40, /^[A-Za-z0-9_]*$/)(v, p); return k && typeof COND !== 'undefined' && nvOwn(COND, k) ? k : ''; };
+const nvPart = NV.str(90, /^([pn]:[A-Za-z0-9_.:@-]{1,80})?$/); /* leer = ohne Ziel/Verursacher */
+const nvRider = NV.obj({ kind: NV.en(['grab', 'save']), ab: NV.en(['STÄ', 'GES', 'KON', 'INT', 'WEI', 'CHA']), dc: NV.num(0, 100), conds: nvConds, txt: NV.text(1000), fx: NV.text(500), charge: NV.bool }, ['kind'], false);
+const nvNpc = NV.obj({
+  id: NV_I, name: NV.text(200), mid: NV.nul(NV_R), v: NV_N(-1000, 1000), dex: NV_N(-100, 100), hp: NV_N(0, 1e6), hpMax: NV_N(0, 1e6), ac: NV_N(0, 100),
+  grp: NV.nul(NV_I), cond: nvConds, reserve: NV.nul(NV.bool), ally: NV.nul(NV.bool), note: NV.text(4000), atkN: NV_N(0, 1000, true), laU: NV_N(0, 100, true), lrU: NV_N(0, 100, true),
+  rech: NV.rec(/^[^\u0000-\u001f]{1,120}$/, NV.obj({ used: NV.bool, roll: NV_N(0, 20, true), back: NV.nul(NV_T) }, [], false), 40)
+}, ['id', 'name'], true);
+const nvEffect = NV.obj({
+  id: NV_I, name: NV.text(200), cond: nvCond1, conds: nvConds, src: nvPart, tgt: nvPart, left: NV_N(0, 100000, true), at: NV.en(['start', 'end']), conc: NV.bool, spell: NV.nul(NV_R),
+  save: NV.nul(NV.obj({ ab: NV.en(NV_AB), dc: NV.num(0, 100), when: NV.en(['start', 'end']) }, ['ab', 'dc'], false)), t: NV_T
+}, ['id'], true);
+const nvRem = NV.obj({ id: NV_I, eff: NV_I, tgt: nvPart, ab: NV.en(NV_AB), dc: NV.num(0, 100), name: NV.text(200) }, ['id', 'ab', 'dc'], true);
+const nvHit = NV.obj({ to: NV_U, by: NV.text(300), amount: NV.num(0, 1e6), dtype: NV.text(100), crit: NV.bool, atk: NV_N(-1000, 1000), nat: NV_N(0, 100, true), rider: NV.nul(nvRider), t: NV_T }, ['to', 'by', 'amount', 't'], true);
+const nvReq = NV.obj({ id: NV_I, by: NV.text(300), ab: NV.en(NV_AB), dc: NV.num(0, 100), amount: NV.num(0, 1e6), dtype: NV.text(100), half: NV.bool, to: NV.arr(NV_U, 100), t: NV_T, fx: NV.text(500), conds: nvConds }, ['id', 'ab', 'dc', 'to', 't'], true);
+const nvSaveRes = NV.obj({ id: NV_I, uid: NV_U, total: NV.num(-1000, 1000), ok: NV.bool, t: NV_T }, ['id', 'uid', 't'], true);
+const nvLog = NV.obj({ t: NV_T, x: NV.text(1000) }, ['t', 'x'], false);
+const nvCombat = NV.obj({
+  id: (v, p) => (v === '' ? '' : NV_I(v, p)), active: NV.bool, round: NV.num(0, 100000, true), turn: NV.nul(NV.str(90, NV_PART)),
+  turnAt: NV.nul(NV.obj({ v: NV_N(-1000, 1000), dex: NV_N(-100, 100), name: NV.text(200) }, [], false)),
+  rev: NV.num(0, 1e9, true), w: NV.nul(NV_U), t: NV_T,
+  npcs: NV.arr(nvNpc, 300, 'id'), effects: NV.arr(nvEffect, 300, 'id'), rem: NV.arr(nvRem, 300, 'id'),
+  hits: NV.arr(nvHit, 60), reqs: NV.arr(nvReq, 60, 'id'), saveRes: NV.arr(nvSaveRes, 100), log: NV.arr(nvLog, 100),
+  surp: NV.arr(NV_U, 100), inv: NV.nul(NV.arr(NV_U, 100))
+}, [], true);
+const nvMeta = NV.obj({
+  dm: NV.nul(NV_U), dmPlays: NV.bool,
+  mercy: NV.rec(NV_UID, NV.obj({ d: NV.en(['mercy', 'death']), deadAt: NV_T, t: NV_T, applied: NV.nul(NV_T) }, ['d', 'deadAt'], false), 200),
+  rules: NV.nul(NV.rec(NV_FIELD, NV.bool, 60)), rulesAt: NV_T,
+  rest: NV.nul(NV.obj({ id: NV_I, kind: NV.en(['short', 'long']), t: NV_T }, ['id', 'kind'], false)),
+  handouts: NV.arr(NV.obj({ id: NV_I, title: NV.text(300), text: NV.text(20000), t: NV_T }, ['id'], false), 60, 'id'),
+  gifts: NV.arr(NV.obj({ id: NV_I, to: NV_U, from: NV.nul(NV_U), xp: NV.num(-1e7, 1e7), gm: NV.num(-1e9, 1e9), item: (v, p) => (v === '' ? '' : NV_R(v, p)), text: NV.text(500), t: NV_T }, ['id', 'to'], false), 100, 'id'),
+  kb: NV.arr(NV.obj({ id: NV_I, typ: NV.en(['p', 'o', 'a']), n: NV.text(200), d: NV.text(400), st: NV.text(40) }, ['id', 'typ'], false), 200, 'id'),
+  theme: (v, p) => { const k = NV.str(40, /^[a-z][a-z0-9_-]{0,39}$/)(v, p); return typeof THEMES !== 'undefined' && !nvOwn(THEMES, k) ? undefined : k; }, /* unbekannte Stimmung: Feld entfällt */ ansSeen: NV.arr(NV_I, 500)
+}, [], true);
+/* Ergebnis: { ok: true, doc } gültig · { ok: true, doc: null, gone: true } gelöscht/nicht vorhanden · { ok: false, err } ungültig.
+   Seiteneffektfrei: das Eingangsobjekt bleibt unverändert, das Ergebnis ist eine neue Kopie. */
+function nvCheck(schema, exists, data, name) {
+  if (!exists) return { ok: true, doc: null, gone: true };
+  try { return { ok: true, doc: schema(data, name) }; } catch (e) { if (e instanceof NvErr || e instanceof RangeError) return { ok: false, err: String(e.message || e).slice(0, 200) }; throw e; }
+}
+const validateCombatDoc = (exists, data) => nvCheck(nvCombat, exists, data, 'Kampf');
+const validateMetaDoc = (exists, data) => nvCheck(nvMeta, exists, data, 'Runde');
+/* Meldung ohne Inhalt des Dokuments, höchstens alle 30 Sekunden je Art */
+const nvWarned = {};
+function nvWarn(kind) { const now = Date.now(); if (now - (nvWarned[kind] || 0) < 30000) return; nvWarned[kind] = now; if (typeof bannerToast === 'function') bannerToast('Ungültige Daten ignoriert', 'Ein Gerät am Tisch hat einen unlesbaren ' + kind + ' gesendet. Es gilt weiter der letzte gültige Stand.'); }
+
 /* ---------- Gemeinsamer Kampf: Dreiwege-Zusammenführung bei gleichzeitigen Änderungen ---------- */
 const J = (x) => JSON.stringify(x);
 /* Feldweise Zusammenführung einer Entität: geänderte Felder beider Seiten bleiben erhalten; Listen aus Text (z. B. Zustände) werden als Menge zusammengeführt */
@@ -383,7 +485,7 @@ function healPrompt(ch, amount, name, multi) {
   const tg = onlineFight() ? order().filter((x) => x.key !== 'p:' + UID && x.npc) : [];
   const pl = S.camp ? players().filter(([u]) => u !== UID) : [];
   orbPrompt('<div class="pr"><b>' + esc(name) + ': ' + amount + ' TP Heilung</b><p>Auf wen' + (multi ? ' (mehrere möglich)' : '') + '? Trefferpunkte steigen höchstens bis zum Maximum.</p><div class="chips"><button class="btn sm" data-act="healGo" data-arg="me">Auf mich</button>' +
-    tg.map((x) => '<button class="btn sm ghost" data-act="healGo" data-arg="' + esc(x.key) + '">' + esc(x.name) + (x.hpMax ? ' (' + x.hp + '/' + x.hpMax + ')' : '') + '</button>').join('') +
+    tg.map((x) => '<button class="btn sm ghost" data-act="healGo" data-arg="' + esc(x.key) + '">' + esc(x.name) + (x.hpMax ? ' (' + esc(x.hp) + '/' + esc(x.hpMax) + ')' : '') + '</button>').join('') +
     pl.map(([u, p]) => '<button class="btn sm ghost" data-act="healGo" data-arg="u:' + u + '">' + esc(p.char) + ' (meldet die Heilung)</button>').join('') +
     '<button class="btn sm ghost" data-act="healGo" data-arg="x">' + (multi ? 'Fertig' : 'Nur gewürfelt') + '</button></div></div>');
 }
@@ -419,7 +521,7 @@ for (const [id, f] of Object.entries(FOLLOW)) {
 function applyPrompt(tgt, amount, label, next, cb) {
   const t = order().find((x) => x.key === tgt); if (!t) { orbPrompt(next || ''); if (cb) cb(); return; }
   S.applyPend = { tgt, amount, next, cb };
-  orbPrompt('<div class="pr"><b>' + esc(label) + ': ' + amount + ' Schaden auf ' + esc(t.name) + (t.hpMax ? ' (' + t.hp + '/' + t.hpMax + ' TP)' : '') + '</b><p>Eintragen? Resistenzen kennt die Spielleitung. ' + slTag() + '</p><div class="chips end"><button class="btn ghost" data-act="applyDmg" data-arg="x">Nicht</button><button class="btn ghost" data-act="applyDmg" data-arg="0.5">Halb (' + Math.floor(amount / 2) + ')</button><button class="btn" data-act="applyDmg" data-arg="1">Voll (' + amount + ')</button></div></div>');
+  orbPrompt('<div class="pr"><b>' + esc(label) + ': ' + amount + ' Schaden auf ' + esc(t.name) + (t.hpMax ? ' (' + esc(t.hp) + '/' + esc(t.hpMax) + ' TP)' : '') + '</b><p>Eintragen? Resistenzen kennt die Spielleitung. ' + slTag() + '</p><div class="chips end"><button class="btn ghost" data-act="applyDmg" data-arg="x">Nicht</button><button class="btn ghost" data-act="applyDmg" data-arg="0.5">Halb (' + Math.floor(amount / 2) + ')</button><button class="btn" data-act="applyDmg" data-arg="1">Voll (' + amount + ')</button></div></div>');
 }
 XA.applyDmg = (t, a) => {
   const pd = S.applyPend; S.applyPend = null; if (!pd) return orbPrompt('');

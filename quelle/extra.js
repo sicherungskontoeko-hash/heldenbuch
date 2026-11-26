@@ -350,7 +350,7 @@ function applyMeta() {
     const got = [];
     if (+g.xp) { ch.xp = (+ch.xp || 0) + +g.xp; got.push(g.xp + ' EP'); }
     if (+g.gm) { const co = coinsOf(ch); co.gm = (+co.gm || 0) + +g.gm; got.push(g.gm + ' GM'); }
-    if (g.item && MAGIC_ITEMS[g.item]) { ch.items = ch.items || []; ch.items.push({ uid: uidX(), id: g.item, att: false, eq: true, qty: 1, w: '' }); got.push(MAGIC_ITEMS[g.item].name); }
+    if (g.item && ownKey(MAGIC_ITEMS, g.item)) { ch.items = ch.items || []; ch.items.push({ uid: uidX(), id: g.item, att: false, eq: true, qty: 1, w: '' }); got.push(MAGIC_ITEMS[g.item].name); }
     if (g.text) { ch.inv = ch.inv || []; ch.inv.push({ n: g.text, qty: 1, kg: 0 }); got.push(g.text); }
     if (got.length) { bannerToast('Beute erhalten', got.join(', ')); pushLog({ label: 'Von der Spielleitung', total: '✦', detail: got.join(', ') }); }
   }
