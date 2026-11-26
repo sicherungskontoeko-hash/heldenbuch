@@ -97,7 +97,7 @@ Object.assign(BESTIARY, {
 });
 
 /* ---- Typische Fundorte (erster = Hauptfundort) ---- */
-const HABITATS = { stadt: 'Stadt, Strasse & Lager', wald: 'Wald & Wildnis', gebirge: 'Gebirge & Hügel', hoehle: 'Höhlen & Unterreich', sumpf: 'Sumpf & Moor', gruft: 'Gruft, Ruine & Friedhof', kueste: 'Küste & Gewässer', wueste: 'Wüste & Ödland', eis: 'Eis & Hoher Norden', ebenen: 'Andere Ebenen', arkan: 'Magierturm & Verliese' };
+const HABITATS = { stadt: 'Stadt, Strasse und Lager', wald: 'Wald und Wildnis', gebirge: 'Gebirge und Hügel', hoehle: 'Höhlen und Unterreich', sumpf: 'Sumpf und Moor', gruft: 'Gruft, Ruine und Friedhof', kueste: 'Küste und Gewässer', wueste: 'Wüste und Ödland', eis: 'Eis und Hoher Norden', ebenen: 'Andere Ebenen', arkan: 'Magierturm und Verliese' };
 const MOB_HAB = {
  bandit: 'stadt wald', 'bandit-captain': 'stadt wald', cultist: 'stadt gruft', 'cult-fanatic': 'stadt gruft', guard: 'stadt', thug: 'stadt', veteran: 'stadt', knight: 'stadt', priest: 'stadt', mage: 'stadt arkan', assassin: 'stadt', commoner: 'stadt', noble: 'stadt', acolyte: 'stadt', scout: 'wald stadt', spy: 'stadt', berserker: 'gebirge eis', druid: 'wald', gladiator: 'stadt', 'tribal-warrior': 'wald wueste', mastiff: 'stadt', 'swarm-of-rats': 'stadt hoehle', wererat: 'stadt hoehle', doppelganger: 'stadt', archmage: 'arkan stadt',
  goblin: 'wald hoehle', 'goblin-boss': 'wald hoehle', hobgoblin: 'gebirge wald', kobold: 'hoehle gebirge', gnoll: 'wueste wald', bugbear: 'wald hoehle', orc: 'gebirge wald', ogre: 'gebirge wald', minotaur: 'hoehle gruft', troll: 'gebirge sumpf', 'hill-giant': 'gebirge', 'stone-giant': 'gebirge hoehle', 'frost-giant': 'eis gebirge', 'fire-giant': 'gebirge ebenen', ettin: 'gebirge hoehle', 'cloud-giant': 'gebirge',

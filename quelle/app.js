@@ -8,7 +8,7 @@ const cur = () => S.chars[S.cur];
 const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
 function setP(o, p, v) { const ks = p.split('.'); let t = o; ks.slice(0, -1).forEach((k) => { if (t[k] == null || typeof t[k] !== 'object') t[k] = {}; t = t[k]; }); t[ks[ks.length - 1]] = v; }
 const RESET_DE = { short: 'kurze Rast', long: 'lange Rast' };
-const STEPS = ['Klasse', 'Herkunft', 'Attribute', 'Fertigkeiten & Talente', 'Zauber', 'Ausrüstung', 'Abschluss'];
+const STEPS = ['Klasse', 'Herkunft', 'Attribute', 'Fertigkeiten und Talente', 'Zauber', 'Ausrüstung', 'Abschluss'];
 
 /* ---------- Speicherung ---------- */
 let DB = null, UID = null; const timers = {};
@@ -640,7 +640,7 @@ function openModal(kind, data) {
   S.modal = kind; const m = $('#modal');
   if (kind === 'export') m.innerHTML = '<div class="dlg" role="dialog" aria-modal="true" aria-label="Helden exportieren"><h2>Helden exportieren</h2><p class="hint">Der direkte Download ist hier nicht verfügbar. Kopiere den Text und speichere ihn als Datei (z. B. <b>held.json</b>) oder schick ihn dir selbst. Über „Text einfügen“ lädst du ihn später wieder.</p><textarea id="exText" readonly>' + esc(data) + '</textarea><div class="chips"><button class="btn ghost" data-act="closeModal">Schliessen</button><button class="btn" data-act="copyEx">Text kopieren</button></div></div>';
   if (kind === 'import') m.innerHTML = '<div class="dlg" role="dialog" aria-modal="true" aria-label="Helden laden"><h2>Helden aus Text laden</h2><p class="hint">Füge hier den exportierten Heldentext ein.</p><textarea id="imText" placeholder="{ &quot;heldenbuch&quot;: 1, … }"></textarea><p class="hint" id="imErr" hidden></p><div class="chips"><button class="btn ghost" data-act="closeModal">Abbrechen</button><button class="btn" data-act="doImport">Laden</button></div></div>';
-  if (kind === 'export' && typeof backupInfo === 'function') { const bi = backupInfo(); const dl = m.querySelector('.dlg'); if (bi && dl) dl.insertAdjacentHTML('beforeend', '<p class="hint">Automatische Sicherung vor dem letzten Datenformat-Update: ' + bi.n + ' Held(en). <button class="btn sm ghost" data-act="restoreBackup">Als Kopie wiederherstellen</button></p>'); }
+  if (kind === 'export' && typeof backupInfo === 'function') { const bi = backupInfo(); const dl = m.querySelector('.dlg'); if (bi && dl) dl.insertAdjacentHTML('beforeend', '<p class="hint">Automatische Sicherung vor der letzten Umstellung des Datenformats: ' + bi.n + ' Held(en). <button class="btn sm ghost" data-act="restoreBackup">Als Kopie wiederherstellen</button></p>'); }
   m.hidden = false; const ta = m.querySelector('textarea'); if (ta) ta.focus();
 }
 
@@ -710,7 +710,7 @@ function renderBuild(c) {
     }).join('') + '</div>';
     const lvls = c.asiSlots;
     if (lvls.length) {
-      body += '<h3>Attributswerterhöhungen & Talente</h3>';
+      body += '<h3>Attributswerterhöhungen und Talente</h3>';
       body += lvls.map((slot) => { const lv = slot.key;
         const a = ch.asi[lv] || {}; const fid = a.feat || (slot.al === 19 ? '' : 'asi'); const f = featById(fid, hb);
         let pl = '';
@@ -770,7 +770,7 @@ function renderBuild(c) {
         field('Bonus', num('weapons.' + i + '.bonus', w.bonus || 0, 'min="0" max="3"')) + field('Attribut', sel('weapons.' + i + '.ab', w.ab || 'auto', [['auto', 'Automatisch'], ['str', 'STÄ'], ['dex', 'GES'], ['cha', 'CHA'], ['wis', 'WEI'], ['int', 'INT']])) +
         (c.masteryN ? chip(w.mastery, 'Meisterschaft: ' + MASTERY[W[6]][0], 'data-act="flip" data-path="weapons.' + i + '.mastery" title="' + esc(MASTERY[W[6]][1]) + '"') : '') +
         '<button class="x" data-act="rmW" data-arg="' + esc(i) + '" aria-label="Entfernen">×</button></div>'; }).join('') + '</div>';
-    body += '<h2>Hausregeln & Gegenstände</h2>';
+    body += '<h2>Hausregeln und Gegenstände</h2>';
     const hbs = Object.values(S.hb).filter((h) => h.kind !== 'spell');
     body += hbs.length ? '<div class="opts">' + hbs.map((h) => '<button class="opt' + (ch.homebrew.includes(h.id) ? ' on' : '') + '" data-act="toggle" data-path="homebrew" data-val="' + esc(h.id) + '"><b>' + esc(h.name) + '</b><span>' + esc({ feature: 'Merkmal', item: 'Gegenstand', feat: 'Talent' }[h.kind] || '') + bonusText(h) + '</span></button>').join('') + '</div>' : '<p class="empty">Noch keine Hausregeln. Lege unter „Hausregeln“ eigene Merkmale oder Gegenstände an (z. B. deine Äthermaschine) und hake sie hier an.</p>';
     body += '<h3>Sonstige Boni</h3><div class="row misc">' + [['ac', 'RK'], ['save', 'Rettungswürfe'], ['dc', 'Zauber-SG'], ['atk', 'Angriff'], ['init', 'Initiative'], ['hp', 'TP-Maximum'], ['speed', 'Bewegung (m)']].map(([k, l]) => field(l, num('misc.' + k, ch.misc[k] || 0))).join('') + '</div>';
@@ -778,7 +778,7 @@ function renderBuild(c) {
   }
   if (st === 6) {
     body += '<h2>Abschluss</h2><p class="hint">Gib deinem Helden einen Namen und eine Geschichte. Danach kannst du ihn sichern und losspielen.</p><div class="row">' + field('Name', txt('name', ch.name === 'Neuer Held' ? '' : ch.name, 'z. B. Brakk Eisenfaust', 'autocomplete="off"')) + field('Spieler', txt('player', ch.player)) + '</div><h3>Porträt</h3>' + portraitPicker(ch) + (typeof diceRow === 'function' ? '<h3>Würfel-Set</h3>' + diceRow(ch) : '') + alignPicker(ch) + '<div class="row">' + field('Sprachen', txt('languages', ch.languages)) + '</div>' +
-      field('Aussehen & Persönlichkeit', area('appearance', ch.appearance, 'Aussehen, Ideale, Bindungen, Makel …')) + field('Notizen', area('notes', ch.notes, 'Hintergrundgeschichte, Kampagnennotizen …', 6));
+      field('Aussehen und Persönlichkeit', area('appearance', ch.appearance, 'Aussehen, Ideale, Bindungen, Makel …')) + field('Notizen', area('notes', ch.notes, 'Hintergrundgeschichte, Kampagnennotizen …', 6));
     body += '<div class="finish"><h3>' + (c.warn.length ? 'Fast geschafft' : 'Dein Held ist bereit') + '</h3><p class="hint" style="margin:0">' + (c.warn.length ? 'Es sind noch ' + c.warn.length + ' Auswahl(en) offen (⚠ antippen). Du kannst trotzdem schon sichern.' : 'Sichere ihn als Datei, damit du ihn jederzeit wieder laden oder weitergeben kannst.') + '</p><div class="chips"><button class="btn big" data-act="exportOne" data-arg="' + esc(ch.id) + '">Helden exportieren</button><button class="btn big ghost" data-act="view" data-arg="sheet">Zum Charakterbogen</button></div></div>';
   }
   const nav = '<div class="stepnav">' + (st > 0 ? '<button class="btn ghost" data-act="step" data-arg="' + (st - 1) + '">← ' + STEPS[st - 1] + '</button>' : '<span></span>') + (st < STEPS.length - 1 ? '<button class="btn" data-act="step" data-arg="' + (st + 1) + '">' + STEPS[st + 1] + ' →</button>' : '<button class="btn" data-act="view" data-arg="sheet">Losspielen →</button>') + '</div>';
@@ -902,7 +902,7 @@ function renderSheet(c) {
   h += condBlock(P);
   h += '<div class="cols"><div class="col">';
   h += statsBlock(c);
-  h += '<section class="blk" data-grp="werte"><h2>Attribute & Rettungswürfe</h2>' + hlTip('Oben antippen: Attributswurf. «RW» antippen: Rettungswurf, wenn du etwas abwehren musst. Hervorgehoben = geübt.', 'p') + '<div class="abil">' + AB.map((a) => '<div class="ab"><button class="abm" data-act="d20" data-kind="check:' + a + '" data-mod="' + c.mod[a] + '" data-label="' + AB_DE[a] + '-Wurf"><span>' + AB_K[a] + '</span><b>' + sgn(c.mod[a]) + '</b><small>' + c.abil[a] + '</small></button><button class="sv' + (c.saves[a].prof ? ' p' : '') + '" data-act="d20" data-kind="save:' + a + '" data-mod="' + c.saves[a].val + '" data-label="' + AB_DE[a] + '-Rettungswurf" title="' + esc(c.saves[a].parts.join(' + ')) + '">RW ' + sgn(c.saves[a].val) + '</button>' + xpl(c.breakdown[a]) + xpl(c.saves[a].parts) + '</div>').join('') + '</div></section>';
+  h += '<section class="blk" data-grp="werte"><h2>Attribute und Rettungswürfe</h2>' + hlTip('Oben antippen: Attributswurf. «RW» antippen: Rettungswurf, wenn du etwas abwehren musst. Hervorgehoben = geübt.', 'p') + '<div class="abil">' + AB.map((a) => '<div class="ab"><button class="abm" data-act="d20" data-kind="check:' + a + '" data-mod="' + c.mod[a] + '" data-label="' + AB_DE[a] + '-Wurf"><span>' + AB_K[a] + '</span><b>' + sgn(c.mod[a]) + '</b><small>' + c.abil[a] + '</small></button><button class="sv' + (c.saves[a].prof ? ' p' : '') + '" data-act="d20" data-kind="save:' + a + '" data-mod="' + c.saves[a].val + '" data-label="' + AB_DE[a] + '-Rettungswurf" title="' + esc(c.saves[a].parts.join(' + ')) + '">RW ' + sgn(c.saves[a].val) + '</button>' + xpl(c.breakdown[a]) + xpl(c.saves[a].parts) + '</div>').join('') + '</div></section>';
   h += '<section class="blk" data-grp="werte"><h2>Fertigkeiten</h2>' + hlTip('Die Spielleitung sagt, welche Fertigkeit gefragt ist. Antippen würfelt. Gefüllter Kreis = geübt.', 'p') + '<ul class="skills">' + ALL_SKILLS.map((s) => '<li><button data-act="d20" data-kind="check:' + SKILLS[s][1] + ':' + s + ':' + c.skills[s].prof + '" data-mod="' + c.skills[s].val + '" data-label="' + SKILLS[s][0] + '"><i class="pp p' + c.skills[s].prof + '" aria-label="' + (['ungeübt', 'geübt', 'Expertise'][c.skills[s].prof]) + '"></i><span>' + SKILLS[s][0] + ' <small>' + AB_K[SKILLS[s][1]] + '</small>' + xpl(c.skills[s].parts) + '</span><b>' + sgn(c.skills[s].val) + '</b></button></li>').join('') + '</ul></section>';
   h += '<section class="blk" data-grp="werte"><h2>Übungen</h2><dl class="dl"><dt>Rüstung</dt><dd>' + c.profText.armor + '</dd><dt>Waffen</dt><dd>' + c.profText.weapons + '</dd><dt>Werkzeuge</dt><dd>' + esc(c.profText.tools) + '</dd><dt>Sprachen</dt><dd>' + esc(ch.languages) + '</dd>' + (c.dv ? '<dt>Sinne</dt><dd>Dunkelsicht ' + fmtM(c.dv) + '</dd>' : '') + '</dl></section>';
   h += '</div><div class="col wide">';
@@ -925,7 +925,7 @@ function renderSheet(c) {
   }).join('') + '</div></section>';
   h += optBlock(c);
   h += compBlock(c);
-  h += '<section class="blk" data-grp="faehig"><h2>Merkmale & Talente</h2>' + featList(c.features) + '</section>';
+  h += '<section class="blk" data-grp="faehig"><h2>Merkmale und Talente</h2>' + featList(c.features) + '</section>';
   h += '<section class="blk gear" data-grp="gear">' + gearBlock(c) + '</section>';
   h += '<section class="blk" data-grp="notiz"><h2>Notizen</h2>' + area('notes', ch.notes, 'Notizen, Hintergrund, Kampagne …', 6) + '</section>';
   h += '</div></div><div class="logs" data-grp="notiz kampf">' + (S.camp ? '<section class="blk logblk"><h2>Am Tisch <small>' + esc(S.camp) + '</small></h2><div id="tableBox">' + tableBox(6) + '</div></section>' : '') + '<section class="blk logblk"><h2>Dein Verlauf <button class="link" data-act="histOpen">alle Würfe</button></h2><ul id="log" class="log">' + logHtml() + '</ul></section></div></div>';

@@ -159,7 +159,7 @@ function wildStat(c, size, speed, ab, an, at, tr) { const L = Math.max(3, c.lv('
 function compStat(c, x) { const T = COMPANIONS[x.t] || COMPANIONS.custom; return Object.assign({ name: x.name || T.name, type: T.name, from: T.from }, T.stat(c, x)); }
 function compBlock(c) {
   const ch = c.char; const list = ch.comps || [];
-  let h = '<section class="blk" id="compBlk" data-grp="begleiter"><h2>Begleiter & Reittiere</h2>';
+  let h = '<section class="blk" id="compBlk" data-grp="begleiter"><h2>Begleiter und Reittiere</h2>';
   h += list.length ? list.map((x, i) => {
     const s = compStat(c, x); if (x.hp == null || x.hp > s.hpMax) x.hp = s.hpMax; const pct = Math.max(0, Math.min(100, (x.hp / s.hpMax) * 100));
     const pic = typeof compPic === 'function' ? compPic(x.t) : '';
@@ -498,7 +498,7 @@ function bnavHtml() {
   const moreOn = ['spells', 'adv', 'mobs', 'hb', 'help'].includes(S.view);
   const btn = (k, l, act, on) => '<button class="' + (on ? 'on' : '') + '" data-act="' + esc(act) + '" data-arg="' + esc(k) + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + NAV_ICON[k] + '</svg><span>' + l + '</span>' + (k === 'camp' && S.combat && S.combat.active ? '<i class="dot"></i>' : '') + '</button>';
   return '<div class="bn">' + main.map(([k, l]) => btn(k, l, 'view', S.view === k)).join('') + btn('more', 'Mehr', 'more', moreOn || S.more) + '</div>' +
-    (S.more ? '<div class="bmore">' + [['spells', 'Zauberbuch'], ['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe & Anleitung']].map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + esc(k) + '">' + l + '</button>').join('') + '<button data-act="histOpen">Würfelverlauf</button><button data-act="chrOpen">📜 Chronik und Personen</button><button data-act="slOpen">✦ Claude fragen</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="stOpen">Stolperstein melden</button><button data-act="themeOpen">Stimmung: ' + THEMES[themeNow()].name + '</button></div>' : '');
+    (S.more ? '<div class="bmore">' + [['spells', 'Zauberbuch'], ['adv', 'Abenteuer'], ['mobs', 'Bestiarium'], ['hb', 'Hausregeln'], ['help', 'Hilfe und Anleitung']].map(([k, l]) => '<button class="' + (S.view === k ? 'on' : '') + '" data-act="view" data-arg="' + esc(k) + '">' + l + '</button>').join('') + '<button data-act="histOpen">Würfelverlauf</button><button data-act="chrOpen">📜 Chronik und Personen</button><button data-act="slOpen">✦ Claude fragen</button><button data-act="hlOpen">Hilfen: ' + hlLabel() + '</button><button data-act="stOpen">Stolperstein melden</button><button data-act="themeOpen">Stimmung: ' + THEMES[themeNow()].name + '</button></div>' : '');
 }
 XA.more = () => { S.more = !S.more; const bn = $('#bnav'); if (bn) bn.innerHTML = bnavHtml(); };
 

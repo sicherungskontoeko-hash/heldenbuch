@@ -10,7 +10,7 @@ const HELP = {
     'Vorbereiten: Du legst einen Auslöser in eigenen Worten fest. Tritt er ein, tippst du „Auslösen (R)“; das kostet deine Reaktion. Die Vorbereitung verfällt zu Beginn deines nächsten Zugs.',
     'Du willst deinen Zug lieber selbst führen? Unter Mehr → Hilfen die Stufe „Erfahren“ wählen oder nur die Zugleiste ausschalten. Dann zählt und sperrt die App nichts. Umgekehrt lässt sich die Zugleiste auch bei „Erfahren“ einschalten.',
     'Mit echten Würfeln spielen: Rast · ⋯ → Würfel-Set → „Eigene Würfel“. Dann trägst du im Feld „Wurf“ ein, was dein W20 zeigt (bei Vorteil oder Nachteil beide Werte, z. B. 17 9), beim Schaden die Augensumme, und tippst den Wurf an. Die App rechnet Boni und Zustände dazu.']],
-  werte: ['Attribute & Rettungswürfe', [
+  werte: ['Attribute und Rettungswürfe', [
     'Die sechs Attribute sind Stärke, Geschicklichkeit, Konstitution, Intelligenz, Weisheit und Charisma. Die grosse Zahl ist der Modifikator, der beim Würfeln zählt; die kleine ist der Attributswert.',
     'Attributswurf: Die Spielleitung verlangt z. B. einen Stärkewurf, um eine Tür aufzudrücken. Tippe auf das Attribut.',
     'Rettungswurf (RW): Du wehrst etwas ab, etwa Gift (KON), einen Feuerball (GES) oder eine Bezauberung (WEI). Hervorgehobene Rettungswürfe sind geübt, dort zählt dein Übungsbonus mit.']],
@@ -38,7 +38,7 @@ const HELP = {
     'Effekte sind laufende Zauber und Zustände mit Dauer, z. B. Segnen für 10 Runden. Die App zählt die Runden bei jedem „Nächster Zug“ herunter.',
     'Effekte aus Konzentrationszaubern enden automatisch, wenn deine Konzentration endet.',
     'Erinnerungen an Rettungswürfe („am Ende des Zuges wiederholen“) erscheinen genau dann, wenn die betroffene Kreatur dran ist.']],
-  kampf: ['Kampf & Initiative', [
+  kampf: ['Kampf und Initiative', [
     'Alle am Tisch sehen dieselbe Initiativeleiste. Die Spielleitung fügt Gegner mit „+ Gegner“ hinzu und klickt sich oben mit „Weiter ▸“ durch die Runde. Sie selbst kämpft nicht mit – ausser sie hakt „Ich spiele selbst mit“ an.',
     'Auf ein Monster tippen öffnet seine Karte: TP, Zustände, Angriffe und Notizen. Mehrere Monster kannst du auswählen und gemeinsam Schaden oder Rettungswürfe abhandeln.',
     'Der Begegnungsplaner berechnet die Schwierigkeit nach den SRD-5.2-Erfahrungsbudgets für deine Gruppe.',

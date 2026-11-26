@@ -398,7 +398,7 @@ XA.healGo = (t, a, p, ch) => {
 
 /* ---------- Andauernde Zauber mit Folgeaktion in späteren Zügen ---------- */
 const FOLLOW = {
-  'spiritual-weapon': { cost: 'b', n: 'Geistige Waffe: bewegen & angreifen', atk: true, expr: (L, m) => (1 + Math.max(0, L - 2)) + 'W8' + (m ? (m > 0 ? '+' : '-') + Math.abs(m) : '') },
+  'spiritual-weapon': { cost: 'b', n: 'Geistige Waffe: bewegen und angreifen', atk: true, expr: (L, m) => (1 + Math.max(0, L - 2)) + 'W8' + (m ? (m > 0 ? '+' : '-') + Math.abs(m) : '') },
   'call-lightning': { cost: 'a', n: 'Blitz herbeirufen: neuer Blitz', save: 'GES', expr: (L) => (3 + Math.max(0, L - 3)) + 'W10' },
   'heat-metal': { cost: 'b', n: 'Metall erhitzen: erneut Schaden', save: null, expr: (L) => (2 + Math.max(0, L - 2)) + 'W8' },
   'flaming-sphere': { cost: 'b', n: 'Flammende Kugel bewegen', save: 'GES', expr: (L) => (2 + Math.max(0, L - 2)) + 'W6' },

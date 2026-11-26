@@ -1,6 +1,6 @@
 /* ---------- Abenteuer: fertige Abenteuer am Tisch leiten ----------
    Kapitel und Szenen mit Vorlesetext, Hinweisen für die Spielleitung, Proben, Kämpfen und Beute.
-   Kampf starten, Vorlesetext als Handout teilen und Beute ins Formular „Beute & Erfahrung verteilen“ – je ein Knopf.
+   Kampf starten, Vorlesetext als Handout teilen und Beute ins Formular „Beute und Erfahrung verteilen“ – je ein Knopf.
    Eingebaut: „Die Machtader“ (adv-machtader.js) und „Das Wirtshaus zum letzten Krug“ (adv-krug.js). Weitere Abenteuer kommen per Datei (Feld extra.adv) dazu.
    Gespeichert in localStorage „hb_adv“: { list: [geladene Abenteuer], st: { <id>: { tab, ch, sc, flags, choice, cnt, on, t } }, last }
    Gegenstände eines Abenteuers (Feld items, Schlüssel „<id>-…“) stehen immer in MAGIC_ITEMS, damit Helden sie behalten.
@@ -276,7 +276,7 @@ function advOverview(A, st, X) {
   h += advBox('dm', '◆', 'So leitest du mit dem Heldenbuch', advItems([
     '- **Vorlesetext** liest du vor. Mit „Als Handout teilen“ landet er bei allen am Tisch.',
     '- **Kampf beginnen** setzt die Gegner mit Initiative in den Kampf am Tisch. Werte, Aufladung und legendäre Aktionen kennt das Heldenbuch.',
-    '- **Ins Beute-Formular** füllt „Beute & Erfahrung verteilen“ vor. Gold rechnet es auf die Helden am Tisch um.',
+    '- **Ins Beute-Formular** füllt „Beute und Erfahrung verteilen“ vor. Gold rechnet es auf die Helden am Tisch um.',
     '- Kämpfe und Handouts brauchen einen Tisch, an dem du die Spielleitung hast.',
   ]));
   if (A.srd) h += '<p class="hint advsrd">' + esc(A.srd) + '</p>';

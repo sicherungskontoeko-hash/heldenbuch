@@ -40,7 +40,7 @@ const lage = () => { const box = (s) => { const e = document.querySelector(s); i
     if (!nurMessen) {
       const r = await p.evaluate(async () => { const res = {}; const q = (s) => document.querySelector('#view ' + s); const wait = (t) => new Promise((x) => setTimeout(x, t || 60));
         res.bannerSchritt = /Schritt 1 von 7 · Klasse/.test(q('.hero-intro.banner').textContent);
-        q('.steps button[data-arg="3"]').click(); await wait(); res.schrittWechsel = S.step === 3 && /Schritt 4 von 7 · Fertigkeiten & Talente/.test(q('.hero-intro.banner').textContent) && q('.steps button.on').getAttribute('aria-current') === 'step';
+        q('.steps button[data-arg="3"]').click(); await wait(); res.schrittWechsel = S.step === 3 && /Schritt 4 von 7 · Fertigkeiten und Talente/.test(q('.hero-intro.banner').textContent) && q('.steps button.on').getAttribute('aria-current') === 'step';
         const nx = q('.stepnav .btn:not(.ghost)'); nx.click(); await wait(); res.weiter = S.step === 4;
         q('.steps button[data-arg="0"]').click(); await wait();
         const inp = q('.hname input'); inp.value = 'Mira Sturmklinge'; inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true })); await wait(800); res.name = cur().name === 'Mira Sturmklinge';
